@@ -7,6 +7,9 @@ public class NewClass {
 		dfsfdasdfd;
 		ghjgkj;
 		kjl;
+<<<<<<< HEAD
 		ravid shalev
+=======
+>>>>>>> branch1
 	}
 }
