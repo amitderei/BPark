@@ -2,7 +2,7 @@ package NewClass;
 
 public class NewClass {
 	void Hello() {
-		System.out.print("bvsj");
+		System.out.print("amit was here");
 		System.out.print("fsdfijklsadravid the kingk");
 	}
 }
