@@ -6,5 +6,6 @@ public class NewClass {
 		System.out.print("fsdfijklsadravid the kingk");
 		dfsfdasdfd;
 		ghjgkj;
+		kjl;
 	}
 }
