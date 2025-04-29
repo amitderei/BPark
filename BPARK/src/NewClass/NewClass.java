@@ -8,5 +8,7 @@ public class NewClass {
 		ghjgkj;
 		kjl;
 		ravid shalev
+        System.out.println("Hello from liron");
+
 	}
 }
