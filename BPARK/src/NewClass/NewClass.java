@@ -11,5 +11,6 @@ public class NewClass {
 		ravid shalev
 =======
 >>>>>>> branch1
+jghjhgj
 	}
 }
