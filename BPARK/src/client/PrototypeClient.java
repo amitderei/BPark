@@ -5,15 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * OCSF Client that connects to the server and sends/receives messages.
+ * PrototypeClient connects to the server and prints responses to console.
  */
 public class PrototypeClient extends AbstractClient {
 
-    private ClientController controller;
-
-    public PrototypeClient(String host, int port, ClientController controller) {
+    public PrototypeClient(String host, int port) {
         super(host, port);
-        this.controller = controller;
     }
 
     /**
@@ -22,34 +19,35 @@ public class PrototypeClient extends AbstractClient {
     @Override
     protected void handleMessageFromServer(Object msg) {
         if (msg instanceof String) {
-            controller.appendOutput((String) msg);
+            System.out.println("[SERVER] " + msg);
         } else if (msg instanceof ArrayList) {
-            controller.displayOrderList((ArrayList<String>) msg);
+            System.out.println("=== Orders ===");
+            ArrayList<String> orders = (ArrayList<String>) msg;
+            for (String order : orders) {
+                System.out.println(order);
+            }
         }
     }
 
     /**
-     * Sends a request to the server to fetch all orders.
+     * Request all orders from the server.
      */
     public void requestAllOrders() {
         try {
             sendToServer("getAllOrders");
         } catch (IOException e) {
-            controller.appendOutput("Failed to send request: " + e.getMessage());
+            System.out.println("Error sending request: " + e.getMessage());
         }
     }
 
     /**
-     * Sends an update request to the server.
-     * @param orderNumber the order to update
-     * @param field field to update ("parking_space" or "order_date")
-     * @param value new value to set
+     * Request to update a specific field in an order.
      */
-    public void updateOrder(int orderNumber, String field, String value) {
+    public void updateOrder(int orderNumber, String field, String newValue) {
         try {
-            sendToServer(new Object[] { "updateOrder", orderNumber, field, value });
+            sendToServer(new Object[]{"updateOrder", orderNumber, field, newValue});
         } catch (IOException e) {
-            controller.appendOutput("Failed to send update: " + e.getMessage());
+            System.out.println("Error sending update: " + e.getMessage());
         }
     }
 }

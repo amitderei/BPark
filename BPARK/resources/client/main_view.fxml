@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="client.ClientController"
+            prefWidth="600" prefHeight="400">
+
+    <children>
+        <TextArea fx:id="outputArea"
+                  layoutX="20" layoutY="20"
+                  prefWidth="560" prefHeight="200"
+                  editable="false"
+                  wrapText="true" />
+
+        <Label text="Order #" layoutX="20" layoutY="240"/>
+        <TextField fx:id="orderNumberField" layoutX="80" layoutY="236" prefWidth="80"/>
+
+        <Label text="Field" layoutX="180" layoutY="240"/>
+        <TextField fx:id="fieldField" layoutX="220" layoutY="236" prefWidth="120"/>
+
+        <Label text="New Value" layoutX="360" layoutY="240"/>
+        <TextField fx:id="newValueField" layoutX="430" layoutY="236" prefWidth="150"/>
+
+        <Button text="Refresh"
+                layoutX="150" layoutY="280"
+                prefWidth="100"
+                onAction="#onRefreshClicked"/>
+
+        <Button text="Update"
+                layoutX="350" layoutY="280"
+                prefWidth="100"
+                onAction="#onUpdateClicked"/>
+    </children>
+</AnchorPane>
