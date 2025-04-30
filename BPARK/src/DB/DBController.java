@@ -34,7 +34,10 @@ public class DBController {
             while (rs.next()) {
                 String row = "Order #" + rs.getInt("order_number")
                            + ", Parking: " + rs.getInt("parking_space")
-                           + ", Date: " + rs.getDate("order_date");
+                           + ", Order Date: " + rs.getDate("order_date")
+                           + ", Confirmation Code: " + rs.getInt("confirmation_code")
+                           + ", Subscriber ID: " + rs.getInt("subscriber_id")
+                           + ", Placing Date: " + rs.getDate("date_of_placing_an_order");
                 orders.add(row);
             }
         } catch (SQLException e) {
@@ -43,24 +46,38 @@ public class DBController {
         return orders;
     }
 
+
     /**
-     * Updates a specific field in the 'Order' table.
-     * @param orderNumber The order to update.
-     * @param field The column name (e.g., 'parking_space', 'order_date').
-     * @param newValue New value as String.
+     * Updates a specific field in the 'Order' table based on the order number.
+     *
+     * @param orderNumber The unique order ID to be updated.
+     * @param field The name of the column to update (e.g., 'parking_space', 'order_date').
+     * @param newValue The new value as a string. Should match the expected SQL type of the column.
+     * @return true if the update was successful, false otherwise.
      */
     public boolean updateOrderField(int orderNumber, String field, String newValue) {
         try {
             PreparedStatement ps = conn.prepareStatement(
                 "UPDATE `Order` SET " + field + " = ? WHERE order_number = ?");
-            ps.setString(1, newValue);
+
+            // handle types based on field name
+            if (field.equalsIgnoreCase("order_date") || field.equalsIgnoreCase("date_of_placing_an_order")) {
+                // convert string to SQL Date
+                ps.setDate(1, java.sql.Date.valueOf(newValue));
+            } else {
+                // use integer for parking_space or confirmation_code etc.
+                ps.setInt(1, Integer.parseInt(newValue));
+            }
+
             ps.setInt(2, orderNumber);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             System.out.println("Update failed: " + e.getMessage());
             return false;
         }
     }
+
 
     /**
      * Inserts a new order row into the table.
