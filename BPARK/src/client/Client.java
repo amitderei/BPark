@@ -5,6 +5,8 @@ public class Client {
 	int x;
 	
 	public void nisaionMain() {
+
 		
 	}
 }
+	
