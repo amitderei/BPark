@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import ocsf.client.AbstractClient;
+import common.Order;
 
 /**
  * Console-based client for testing the BPARK prototype without JavaFX.
@@ -18,11 +19,16 @@ public class ClientConsole extends AbstractClient {
     protected void handleMessageFromServer(Object msg) {
         if (msg instanceof String) {
             System.out.println("[SERVER] " + msg);
-        } else if (msg instanceof ArrayList) {
-            System.out.println("=== All Orders ===");
-            ArrayList<String> list = (ArrayList<String>) msg;
-            for (String line : list) {
-                System.out.println(line);
+        } else if (msg instanceof ArrayList<?>) {
+            ArrayList<?> list = (ArrayList<?>) msg;
+            if (!list.isEmpty() && list.get(0) instanceof Order) {
+                System.out.println("=== All Orders ===");
+                ArrayList<Order> orders = (ArrayList<Order>) msg;
+                for (Order order : orders) {
+                    System.out.println(order);
+                }
+            } else {
+                System.out.println("Received unexpected list from server.");
             }
         }
     }

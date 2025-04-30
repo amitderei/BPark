@@ -4,25 +4,47 @@ import ocsf.server.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import DB.DBController;
+import common.Order;
 
 /**
- * OCSF server that receives client requests and communicates with the database.
+ * Represents the server side of the BPARK prototype application.
+ * Inherits from AbstractServer provided by OCSF and handles incoming client messages,
+ * delegating database actions to DBController.
  */
-public class PrototypeServer extends AbstractServer {
+public class BparkServer extends AbstractServer {
 
     private DBController db;
 
-    public PrototypeServer(int port) {
+    /**
+     * Constructs the server with the specified port number.
+     * Initializes the database controller.
+     *
+     * @param port The port on which the server will listen.
+     */
+    public BparkServer(int port) {
         super(port);
         db = new DBController();
     }
 
+    /**
+     * This method is automatically called when the server starts listening for connections.
+     * It initializes the database connection and logs the server status.
+     */
     @Override
     protected void serverStarted() {
         db.connectToDB();
         System.out.println("Server started on port " + getPort());
     }
 
+    /**
+     * Handles incoming messages from clients.
+     * Supports two types of messages:
+     *   1. String command "getAllOrders" - returns all orders in the system.
+     *   2. Object[] for updating a specific field in an order.
+     *
+     * @param msg    The message sent by the client.
+     * @param client The connection instance representing the client.
+     */
     @Override
     protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
         try {
@@ -30,7 +52,7 @@ public class PrototypeServer extends AbstractServer {
                 String command = (String) msg;
 
                 if (command.equals("getAllOrders")) {
-                    ArrayList<String> orders = db.getAllOrders();
+                    ArrayList<Order> orders = db.getAllOrders();
                     client.sendToClient(orders);
                 }
 
@@ -51,4 +73,3 @@ public class PrototypeServer extends AbstractServer {
         }
     }
 }
-

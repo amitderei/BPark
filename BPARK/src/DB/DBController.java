@@ -2,15 +2,19 @@ package DB;
 
 import java.sql.*;
 import java.util.ArrayList;
+import common.Order;
 
 /**
- * Handles connection and operations on the 'Order' table.
+ * Handles all database operations related to the 'Order' table.
+ * This controller is responsible for connecting to the database,
+ * retrieving, inserting, and updating orders.
  */
 public class DBController {
-    private Connection conn; //dsfdsffs
+    private Connection conn;
 
     /**
-     * Connects to the MySQL 'bpark' database.
+     * Establishes a connection to the MySQL 'bpark' database.
+     * If the connection fails, an error message is printed to the console.
      */
     public void connectToDB() {
         try {
@@ -23,22 +27,27 @@ public class DBController {
     }
 
     /**
-     * Returns all rows from the 'Order' table as formatted strings.
+     * Retrieves all orders from the 'Order' table.
+     * Each row is converted into an Order object and added to a list.
+     *
+     * @return A list of all orders in the database.
      */
-    public ArrayList<String> getAllOrders() {
-        ArrayList<String> orders = new ArrayList<>();
+    public ArrayList<Order> getAllOrders() {
+        ArrayList<Order> orders = new ArrayList<>();
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM `Order`");
 
             while (rs.next()) {
-                String row = "Order #" + rs.getInt("order_number")
-                           + ", Parking: " + rs.getInt("parking_space")
-                           + ", Order Date: " + rs.getDate("order_date")
-                           + ", Confirmation Code: " + rs.getInt("confirmation_code")
-                           + ", Subscriber ID: " + rs.getInt("subscriber_id")
-                           + ", Placing Date: " + rs.getDate("date_of_placing_an_order");
-                orders.add(row);
+                Order o = new Order(
+                    rs.getInt("order_number"),
+                    rs.getInt("parking_space"),
+                    Date.valueOf(rs.getString("order_date")), // fixed for timezone accuracy
+                    rs.getInt("confirmation_code"),
+                    rs.getInt("subscriber_id"),
+                    rs.getDate("date_of_placing_an_order")
+                );
+                orders.add(o);
             }
         } catch (SQLException e) {
             System.out.println("Fetch error: " + e.getMessage());
@@ -46,26 +55,23 @@ public class DBController {
         return orders;
     }
 
-
     /**
-     * Updates a specific field in the 'Order' table based on the order number.
+     * Updates a specific field in an order identified by its order number.
+     * Supports both integer and date fields depending on the column.
      *
-     * @param orderNumber The unique order ID to be updated.
-     * @param field The name of the column to update (e.g., 'parking_space', 'order_date').
-     * @param newValue The new value as a string. Should match the expected SQL type of the column.
-     * @return true if the update was successful, false otherwise.
+     * @param orderNumber ID of the order to update.
+     * @param field Column name to be updated.
+     * @param newValue New value as a string, to be parsed accordingly.
+     * @return True if the update was successful, false otherwise.
      */
     public boolean updateOrderField(int orderNumber, String field, String newValue) {
         try {
             PreparedStatement ps = conn.prepareStatement(
                 "UPDATE `Order` SET " + field + " = ? WHERE order_number = ?");
 
-            // handle types based on field name
             if (field.equalsIgnoreCase("order_date") || field.equalsIgnoreCase("date_of_placing_an_order")) {
-                // convert string to SQL Date
                 ps.setDate(1, java.sql.Date.valueOf(newValue));
             } else {
-                // use integer for parking_space or confirmation_code etc.
                 ps.setInt(1, Integer.parseInt(newValue));
             }
 
@@ -78,9 +84,17 @@ public class DBController {
         }
     }
 
-
     /**
-     * Inserts a new order row into the table.
+     * Inserts a new order into the 'Order' table.
+     * Takes all required fields as parameters.
+     *
+     * @param parkingSpace The parking spot number.
+     * @param orderNumber The unique ID of the order.
+     * @param orderDate The date the order was made (as string).
+     * @param confirmationCode Confirmation code for validation.
+     * @param subscriberId The ID of the subscriber who placed the order.
+     * @param placingDate The actual date the order was placed (as string).
+     * @return True if insertion was successful, false otherwise.
      */
     public boolean insertNewOrder(int parkingSpace, int orderNumber, String orderDate,
                                   int confirmationCode, int subscriberId, String placingDate) {
@@ -100,30 +114,5 @@ public class DBController {
             System.out.println("Insert failed: " + e.getMessage());
             return false;
         }
-    }
-    
-    public static void main(String[] args) {
-        DBController db = new DBController();
-        db.connectToDB();
-
-        // Test fetching all orders
-        ArrayList<String> orders = db.getAllOrders();
-        System.out.println("=== Orders in Database ===");
-        for (String o : orders) {
-            System.out.println(o);
-        }
-
-        // Test updating a field (example: change parking_space of order 1001 to 99)
-        boolean updated = db.updateOrderField(1001, "parking_space", "99");
-        System.out.println(updated ? "Update succeeded." : "Update failed.");
-
-        // Re-fetch to verify the change
-        System.out.println("=== After Update ===");
-        ArrayList<String> updatedOrders = db.getAllOrders();
-        for (String o : updatedOrders) {
-            System.out.println(o);
-        }
-
-
     }
 }
