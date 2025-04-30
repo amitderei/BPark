@@ -84,4 +84,29 @@ public class DBController {
             return false;
         }
     }
+    
+    public static void main(String[] args) {
+        DBController db = new DBController();
+        db.connectToDB();
+
+        // Test fetching all orders
+        ArrayList<String> orders = db.getAllOrders();
+        System.out.println("=== Orders in Database ===");
+        for (String o : orders) {
+            System.out.println(o);
+        }
+
+        // Test updating a field (example: change parking_space of order 1001 to 99)
+        boolean updated = db.updateOrderField(1001, "parking_space", "99");
+        System.out.println(updated ? "Update succeeded." : "Update failed.");
+
+        // Re-fetch to verify the change
+        System.out.println("=== After Update ===");
+        ArrayList<String> updatedOrders = db.getAllOrders();
+        for (String o : updatedOrders) {
+            System.out.println(o);
+        }
+
+
+    }
 }
