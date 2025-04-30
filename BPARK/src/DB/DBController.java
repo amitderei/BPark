@@ -87,22 +87,31 @@ public class DBController {
 	 * 
 	 * @param con
 	 */
-	public static void getOrders(Connection con) {
+	public static ArrayList<String> getOrders(Connection con) {
 		String query = "SELECT * FROM `order`";
+		ArrayList<String> orders= new ArrayList<>();
 		try (PreparedStatement stmt = con.prepareStatement(query)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				System.out.println("parking space: " + rs.getInt("parking_space"));
-				System.out.println("order number: " + rs.getInt("order_number"));
-				System.out.println("order_date: " + rs.getDate("order_date"));
-				System.out.println("confirmation code: " + rs.getInt("confirmation_code"));
-				System.out.println("subscriber id: " + rs.getInt("subscriber_id"));
-				System.out.println("date of placing an order: " + rs.getDate("date_of_placing_an_order"));
-				System.out.println("");
+				StringBuilder newOrder=new StringBuilder();
+				newOrder.append("Order #");
+				newOrder.append(rs.getInt("order_number"));
+				newOrder.append(": Parking: ");
+				newOrder.append(rs.getInt("parking_space"));
+				newOrder.append(", Date: ");
+				newOrder.append(rs.getDate("order_date"));
+				newOrder.append(", Confirmation: ");
+				newOrder.append(rs.getInt("confirmation_code"));
+				newOrder.append(", Subscriber:");
+				newOrder.append(rs.getInt("subscriber_id"));
+				newOrder.append(", Placed:");
+				newOrder.append(rs.getDate("date_of_placing_an_order"));
+				orders.add(newOrder.toString());
 			}
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
 		}
+		return orders;
 	}
 
 	/**
