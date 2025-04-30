@@ -4,6 +4,7 @@ import ocsf.client.AbstractClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 /**
  * Prototype client using console interaction only.
@@ -104,6 +105,7 @@ public class PrototypeClient extends AbstractClient {
 
     public static void main(String[] args) {
         PrototypeClient client = new PrototypeClient("localhost", 5555);
+        System.out.println(TimeZone.getDefault());
         client.runConsole();
     }
 }

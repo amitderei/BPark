@@ -8,10 +8,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 public class DBController {
 
 	public static void main(String[] args) {
+		System.out.println(TimeZone.getDefault());
 		Connection conn = connectToDB();
 		if (conn != null) {
 			Scanner scanner = new Scanner(System.in);
@@ -135,7 +137,7 @@ public class DBController {
 	 * @param update_parking_space
 	 * @param order_number
 	 */
-	public static void updateParking_space(Connection conn, int update_parking_space, int order_number) {
+	public static boolean updateParking_space(Connection conn, int update_parking_space, int order_number) {
 		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, update_parking_space);
@@ -143,7 +145,9 @@ public class DBController {
 			stmt.executeUpdate();
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
+			return false;
 		}
+		return true;
 	}
 
 	
@@ -152,27 +156,19 @@ public class DBController {
 	 * @param con
 	 * @param order_number
 	 */
-	public static void updateOrderDateByOrderNumber(Connection con, int order_number) {
-		String query = "UPDATE order SET order_date = ? WHERE order_number = ?";
-		
+	public static boolean updateOrderDateByOrderNumber(Connection con, int order_number, String newValue) {
+		String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
 		try (PreparedStatement stmt = con.prepareStatement(query)) {
-			Scanner scanner = new Scanner(System.in);
-			System.out.print("Enter new date (yyyy-MM-dd): ");
-			String newDate = scanner.nextLine();
-			
-			stmt.setDate(1, Date.valueOf(newDate));
+			stmt.setDate(1, Date.valueOf(newValue));
 			stmt.setInt(2, order_number);
 			
-			int rows = stmt.executeUpdate();
-			if (rows > 0) {
-				System.out.println("Order updated successfully!");
-			} else {
-				System.out.println("No order found with number " + order_number);
-			}
+			stmt.executeUpdate();
 			
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
+			return false;
 		}
+		return true;
 	}
 }
 

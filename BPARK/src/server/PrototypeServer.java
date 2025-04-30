@@ -3,6 +3,8 @@ package server;
 import ocsf.server.*;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayList;
+
 import DB.DBController;
 
 /**
@@ -48,8 +50,8 @@ public class PrototypeServer extends AbstractServer {
                 String command = (String) msg;
 
                 if (command.equals("getAllOrders")) {
-                    System.out.println("Client requested all orders:");
-                    DBController.getOrders(conn); // outputs to console only
+                    ArrayList<String> orders = DBController.getOrders(conn);
+                    client.sendToClient(orders);
                 }
 
             } else if (msg instanceof Object[]) {
@@ -60,27 +62,22 @@ public class PrototypeServer extends AbstractServer {
                     String field = (String) data[2];
                     String newValue = (String) data[3];
 
-                    // Handle update based on field type
-                    if (field.equals("parking_space")) {
-                        int parking = Integer.parseInt(newValue);
-                        DBController.updateParking_space(conn, parking, orderNumber);
-                        client.sendToClient("Parking space updated.");
-                    } else if (field.equals("order_date")) {
-                        // Uses Scanner for input (as implemented in DBController)
-                        DBController.updateOrderDateByOrderNumber(conn, orderNumber);
-                        client.sendToClient("Order date update initiated (via console).");
-                    } else {
-                        client.sendToClient("Unsupported field: " + field);
+                    
+                    if (((String)field).equals("parking_space")) {
+                    	boolean success=DBController.updateParking_space(conn,Integer.parseInt(newValue) , orderNumber);
+                    	client.sendToClient(success ? "Order updated." : "Update failed.");
                     }
+                    else if (((String)field).equals("date")) {
+                    	boolean success=DBController.updateOrderDateByOrderNumber(conn, orderNumber, newValue);
+                    	client.sendToClient(success ? "Order updated." : "Update failed.");
+                    }
+                    
                 }
-
-            } else {
-                client.sendToClient("Unknown message format.");
             }
-
         } catch (IOException e) {
-            System.out.println("Communication error: " + e.getMessage());
-        } catch (Exception ex) {
+            System.out.println("Client communication error: " + e.getMessage());
+        }
+         catch (Exception ex) {
             System.out.println("General error: " + ex.getMessage());
         }
     }
