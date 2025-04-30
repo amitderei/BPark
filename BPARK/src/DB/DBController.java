@@ -6,11 +6,28 @@ import common.Order;
 
 /**
  * Handles all database operations related to the 'Order' table.
- * This controller is responsible for connecting to the database,
- * retrieving, inserting, and updating orders.
+ * Implements Singleton to ensure centralized and consistent access to the database.
  */
 public class DBController {
-    private Connection conn;
+
+    private static DBController instance; // Single static instance
+    private Connection conn; // Database connection object
+
+    /**
+     * Private constructor to prevent instantiation from outside.
+     */
+    private DBController() { }
+
+    /**
+     * Provides access to the single instance of DBController.
+     * @return the singleton instance
+     */
+    public static DBController getInstance() {
+        if (instance == null) {
+            instance = new DBController();
+        }
+        return instance;
+    }
 
     /**
      * Establishes a connection to the MySQL 'bpark' database.
@@ -84,35 +101,4 @@ public class DBController {
         }
     }
 
-    /**
-     * Inserts a new order into the 'Order' table.
-     * Takes all required fields as parameters.
-     *
-     * @param parkingSpace The parking spot number.
-     * @param orderNumber The unique ID of the order.
-     * @param orderDate The date the order was made (as string).
-     * @param confirmationCode Confirmation code for validation.
-     * @param subscriberId The ID of the subscriber who placed the order.
-     * @param placingDate The actual date the order was placed (as string).
-     * @return True if insertion was successful, false otherwise.
-     */
-    public boolean insertNewOrder(int parkingSpace, int orderNumber, String orderDate,
-                                  int confirmationCode, int subscriberId, String placingDate) {
-        try {
-            PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO `Order` (parking_space, order_number, order_date, confirmation_code, subscriber_id, date_of_placing_an_order) " +
-                "VALUES (?, ?, ?, ?, ?, ?)");
-            ps.setInt(1, parkingSpace);
-            ps.setInt(2, orderNumber);
-            ps.setString(3, orderDate);
-            ps.setInt(4, confirmationCode);
-            ps.setInt(5, subscriberId);
-            ps.setString(6, placingDate);
-            ps.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Insert failed: " + e.getMessage());
-            return false;
-        }
-    }
 }

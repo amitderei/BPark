@@ -9,7 +9,7 @@ import common.Order;
 /**
  * Represents the server side of the BPARK prototype application.
  * Inherits from AbstractServer provided by OCSF and handles incoming client messages,
- * delegating database actions to DBController.
+ * delegating database actions to DBController (Singleton).
  */
 public class BparkServer extends AbstractServer {
 
@@ -17,13 +17,13 @@ public class BparkServer extends AbstractServer {
 
     /**
      * Constructs the server with the specified port number.
-     * Initializes the database controller.
+     * Initializes the database controller using Singleton pattern.
      *
      * @param port The port on which the server will listen.
      */
     public BparkServer(int port) {
         super(port);
-        db = new DBController();
+        db = DBController.getInstance(); // Singleton: ensures single access point to DB
     }
 
     /**
@@ -32,7 +32,7 @@ public class BparkServer extends AbstractServer {
      */
     @Override
     protected void serverStarted() {
-        db.connectToDB();
+        db.connectToDB(); // One-time connection to MySQL database
         System.out.println("Server started on port " + getPort());
     }
 
@@ -52,8 +52,8 @@ public class BparkServer extends AbstractServer {
                 String command = (String) msg;
 
                 if (command.equals("getAllOrders")) {
-                    ArrayList<Order> orders = db.getAllOrders();
-                    client.sendToClient(orders);
+                    ArrayList<Order> orders = db.getAllOrders();       // Fetch from DB
+                    client.sendToClient(orders);                      // Send to client
                 }
 
             } else if (msg instanceof Object[]) {
@@ -73,3 +73,4 @@ public class BparkServer extends AbstractServer {
         }
     }
 }
+
