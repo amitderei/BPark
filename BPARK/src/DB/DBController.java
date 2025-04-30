@@ -8,12 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.TimeZone;
 
 public class DBController {
 
 	public static void main(String[] args) {
-		System.out.println(TimeZone.getDefault());
 		Connection conn = connectToDB();
 		if (conn != null) {
 			Scanner scanner = new Scanner(System.in);
@@ -101,13 +99,13 @@ public class DBController {
 				newOrder.append(": Parking: ");
 				newOrder.append(rs.getInt("parking_space"));
 				newOrder.append(", Date: ");
-				newOrder.append(rs.getDate("order_date"));
+				newOrder.append(rs.getString("order_date"));
 				newOrder.append(", Confirmation: ");
 				newOrder.append(rs.getInt("confirmation_code"));
 				newOrder.append(", Subscriber:");
 				newOrder.append(rs.getInt("subscriber_id"));
 				newOrder.append(", Placed:");
-				newOrder.append(rs.getDate("date_of_placing_an_order"));
+				newOrder.append(rs.getString("date_of_placing_an_order"));
 				orders.add(newOrder.toString());
 			}
 		} catch (Exception e) {
