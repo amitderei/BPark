@@ -1,112 +1,169 @@
 package DB;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
-/**
- * Handles connection and operations on the 'Order' table.
- */
 public class DBController {
-    private Connection conn; //dsfdsffs
 
-    /**
-     * Connects to the MySQL 'bpark' database.
-     */
-    public void connectToDB() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-            conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost/bpark?serverTimezone=IST", "root", "Aa123456");
-        } catch (Exception e) {
-            System.out.println("Database connection error: " + e.getMessage());
-        }
-    }
+	public static void main(String[] args) {
+		Connection conn = connectToDB();
+		if (conn != null) {
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("Enter order number: ");
+			//int order_num = scanner.nextInt();
+			System.out.print("Enter update parking space: ");
+			//int update_parking_space = scanner.nextInt();
+			//updateParking_space(conn, update_parking_space, order_num);
+			//getOrderByorder_number(conn, order_num);
+			getOrders(conn);
+			disconnectFromDB(conn);
+		}
+	}
 
-    /**
-     * Returns all rows from the 'Order' table as formatted strings.
-     */
-    public ArrayList<String> getAllOrders() {
-        ArrayList<String> orders = new ArrayList<>();
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM `Order`");
+	/**
+	 * This function connect to DB
+	 * 
+	 * @return conn(if the connection succeed) or null(if doesn't)
+	 */
+	public static Connection connectToDB() {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+			System.out.println("Driver definition succeed");
+		} catch (Exception ex) {
+			/* handle the error */
+			System.out.println("Driver definition failed");
+			return null;
+		}
 
-            while (rs.next()) {
-                String row = "Order #" + rs.getInt("order_number")
-                           + ", Parking: " + rs.getInt("parking_space")
-                           + ", Date: " + rs.getDate("order_date");
-                orders.add(row);
-            }
-        } catch (SQLException e) {
-            System.out.println("Fetch error: " + e.getMessage());
-        }
-        return orders;
-    }
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=IST", "root",
+					"Aa123456");
+			// Connection conn =
+			// DriverManager.getConnection("jdbc:mysql://192.168.3.68/test","root","Root");
+			System.out.println("SQL connection succeed");
+			return conn;
+		} catch (SQLException ex) {/* handle any errors */
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+			return null;
+		}
+	}
 
-    /**
-     * Updates a specific field in the 'Order' table.
-     * @param orderNumber The order to update.
-     * @param field The column name (e.g., 'parking_space', 'order_date').
-     * @param newValue New value as String.
-     */
-    public boolean updateOrderField(int orderNumber, String field, String newValue) {
-        try {
-            PreparedStatement ps = conn.prepareStatement(
-                "UPDATE `Order` SET " + field + " = ? WHERE order_number = ?");
-            ps.setString(1, newValue);
-            ps.setInt(2, orderNumber);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.out.println("Update failed: " + e.getMessage());
-            return false;
-        }
-    }
+	/**
+	 * This function print in console the order that its num is order_num
+	 * 
+	 * @param con
+	 * @param order_number
+	 */
+	public static void getOrderByorder_number(Connection con, int order_number) {
+		String query = "SELECT * FROM `order` WHERE order_number=?";
+		try (PreparedStatement stmt = con.prepareStatement(query)) {
+			stmt.setInt(1, order_number);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				System.out.println("parking space: " + rs.getInt("parking_space"));
+				System.out.println("order number: " + rs.getInt("order_number"));
+				System.out.println("order_date: " + rs.getDate("order_date"));
+				System.out.println("confirmation code: " + rs.getInt("confirmation_code"));
+				System.out.println("subscriber id: " + rs.getInt("subscriber_id"));
+				System.out.println("date of placing an order: " + rs.getDate("date_of_placing_an_order"));
+			} else {
+				System.out.println("no order with num " + order_number);
+			}
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 
-    /**
-     * Inserts a new order row into the table.
-     */
-    public boolean insertNewOrder(int parkingSpace, int orderNumber, String orderDate,
-                                  int confirmationCode, int subscriberId, String placingDate) {
-        try {
-            PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO `Order` (parking_space, order_number, order_date, confirmation_code, subscriber_id, date_of_placing_an_order) " +
-                "VALUES (?, ?, ?, ?, ?, ?)");
-            ps.setInt(1, parkingSpace);
-            ps.setInt(2, orderNumber);
-            ps.setString(3, orderDate);
-            ps.setInt(4, confirmationCode);
-            ps.setInt(5, subscriberId);
-            ps.setString(6, placingDate);
-            ps.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Insert failed: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    public static void main(String[] args) {
-        DBController db = new DBController();
-        db.connectToDB();
+	/**
+	 * print all orders
+	 * 
+	 * @param con
+	 */
+	public static void getOrders(Connection con) {
+		String query = "SELECT * FROM `order`";
+		try (PreparedStatement stmt = con.prepareStatement(query)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				System.out.println("parking space: " + rs.getInt("parking_space"));
+				System.out.println("order number: " + rs.getInt("order_number"));
+				System.out.println("order_date: " + rs.getDate("order_date"));
+				System.out.println("confirmation code: " + rs.getInt("confirmation_code"));
+				System.out.println("subscriber id: " + rs.getInt("subscriber_id"));
+				System.out.println("date of placing an order: " + rs.getDate("date_of_placing_an_order"));
+				System.out.println("");
+			}
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 
-        // Test fetching all orders
-        ArrayList<String> orders = db.getAllOrders();
-        System.out.println("=== Orders in Database ===");
-        for (String o : orders) {
-            System.out.println(o);
-        }
+	/**
+	 * This function disconnect from sql
+	 * 
+	 * @param conn
+	 */
+	public static void disconnectFromDB(Connection conn) {
+		try {
+			conn.close();
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 
-        // Test updating a field (example: change parking_space of order 1001 to 99)
-        boolean updated = db.updateOrderField(1001, "parking_space", "99");
-        System.out.println(updated ? "Update succeeded." : "Update failed.");
+	/**
+	 * This function update the parking space of order that its number is
+	 * order_number
+	 * 
+	 * @param conn
+	 * @param update_parking_space
+	 * @param order_number
+	 */
+	public static void updateParking_space(Connection conn, int update_parking_space, int order_number) {
+		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, update_parking_space);
+			stmt.setInt(2, order_number);
+			stmt.executeUpdate();
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 
-        // Re-fetch to verify the change
-        System.out.println("=== After Update ===");
-        ArrayList<String> updatedOrders = db.getAllOrders();
-        for (String o : updatedOrders) {
-            System.out.println(o);
-        }
-
-
-    }
+	
+	/**
+	 * This function update date by order number
+	 * @param con
+	 * @param order_number
+	 */
+	public static void updateOrderDateByOrderNumber(Connection con, int order_number) {
+		String query = "UPDATE order SET order_date = ? WHERE order_number = ?";
+		
+		try (PreparedStatement stmt = con.prepareStatement(query)) {
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("Enter new date (yyyy-MM-dd): ");
+			String newDate = scanner.nextLine();
+			
+			stmt.setDate(1, Date.valueOf(newDate));
+			stmt.setInt(2, order_number);
+			
+			int rows = stmt.executeUpdate();
+			if (rows > 0) {
+				System.out.println("Order updated successfully!");
+			} else {
+				System.out.println("No order found with number " + order_number);
+			}
+			
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 }
+

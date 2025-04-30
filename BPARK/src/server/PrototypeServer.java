@@ -2,27 +2,45 @@ package server;
 
 import ocsf.server.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.sql.Connection;
 import DB.DBController;
 
 /**
- * OCSF server that receives client requests and communicates with the database.
+ * OCSF server that receives client requests and delegates actions to DBController.
+ * Works with existing DBController logic including Scanner-based input.
  */
 public class PrototypeServer extends AbstractServer {
 
-    private DBController db;
+    private Connection conn;
 
     public PrototypeServer(int port) {
         super(port);
-        db = new DBController();
     }
 
+    /**
+     * Called when the server starts. Connects to the database.
+     */
     @Override
     protected void serverStarted() {
-        db.connectToDB();
+        conn = DBController.connectToDB();
         System.out.println("Server started on port " + getPort());
     }
 
+    /**
+     * Called when the server stops. Disconnects from the database.
+     */
+    @Override
+    protected void serverStopped() {
+        DBController.disconnectFromDB(conn);
+        System.out.println("Server stopped.");
+    }
+
+    /**
+     * Handles messages received from a client.
+     * Supported operations:
+     *   - "getAllOrders": prints all orders to console via DBController
+     *   - ["updateOrder", orderNumber, field, newValue]: updates specific field
+     */
     @Override
     protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
         try {
@@ -30,8 +48,8 @@ public class PrototypeServer extends AbstractServer {
                 String command = (String) msg;
 
                 if (command.equals("getAllOrders")) {
-                    ArrayList<String> orders = db.getAllOrders();
-                    client.sendToClient(orders);
+                    System.out.println("Client requested all orders:");
+                    DBController.getOrders(conn); // outputs to console only
                 }
 
             } else if (msg instanceof Object[]) {
@@ -42,12 +60,29 @@ public class PrototypeServer extends AbstractServer {
                     String field = (String) data[2];
                     String newValue = (String) data[3];
 
-                    boolean success = db.updateOrderField(orderNumber, field, newValue);
-                    client.sendToClient(success ? "Order updated." : "Update failed.");
+                    // Handle update based on field type
+                    if (field.equals("parking_space")) {
+                        int parking = Integer.parseInt(newValue);
+                        DBController.updateParking_space(conn, parking, orderNumber);
+                        client.sendToClient("Parking space updated.");
+                    } else if (field.equals("order_date")) {
+                        // Uses Scanner for input (as implemented in DBController)
+                        DBController.updateOrderDateByOrderNumber(conn, orderNumber);
+                        client.sendToClient("Order date update initiated (via console).");
+                    } else {
+                        client.sendToClient("Unsupported field: " + field);
+                    }
                 }
+
+            } else {
+                client.sendToClient("Unknown message format.");
             }
+
         } catch (IOException e) {
-            System.out.println("Client communication error: " + e.getMessage());
+            System.out.println("Communication error: " + e.getMessage());
+        } catch (Exception ex) {
+            System.out.println("General error: " + ex.getMessage());
         }
     }
 }
+
