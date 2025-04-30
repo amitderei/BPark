@@ -12,12 +12,12 @@ public class PrototypeServer extends AbstractServer {
 
     private DBController db;
 
+    
     public PrototypeServer(int port) {
         super(port);
         db = new DBController();
     }
 
-    @Override
     protected void serverStarted() {
         db.connectToDB();
         System.out.println("Server started on port " + getPort());
