@@ -83,8 +83,8 @@ public class BparkServer extends AbstractServer {
     @Override
     protected void clientConnected(ConnectionToClient client) {
         try {
-            String clientIP = client.getInetAddress().getHostAddress();   // IP address of the client
-            String clientHost = client.getInetAddress().getHostName();    // Host name (computer name)
+            String clientIP = client.getInetAddress().getHostAddress();   // Get the client's IP address
+            String clientHost = client.getInetAddress().getHostName();    // Get the client's hostname
             System.out.println("Client connected from: " + clientHost + " (" + clientIP + ")");
         } catch (Exception e) {
             System.out.println("Could not retrieve client info: " + e.getMessage());
