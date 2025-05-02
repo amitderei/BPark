@@ -7,33 +7,31 @@ import DB.DBController;
 import common.Order;
 
 /**
- * Represents the server side of the BPARK prototype application.
- * Inherits from AbstractServer provided by OCSF and handles incoming client messages,
- * delegating database actions to DBController (Singleton).
+ * Represents the server side of the BPARK prototype.
+ * Extends AbstractServer from OCSF to handle client communication.
  */
 public class BparkServer extends AbstractServer {
 
     private DBController db;
 
     /**
-     * Constructs the server with the specified port number.
-     * Initializes the database controller using Singleton pattern.
+     * Constructs the server with the specified port and initializes DBController (Singleton).
      *
-     * @param port The port on which the server will listen.
+     * @param port The port the server will listen on.
      */
     public BparkServer(int port) {
-        super(port);
-        db = DBController.getInstance(); // Singleton: ensures single access point to DB
+        super(port);                           // Initialize AbstractServer with port
+        db = DBController.getInstance();       // Get singleton DB controller instance
     }
 
     /**
-     * This method is automatically called when the server starts listening for connections.
-     * It initializes the database connection and logs the server status.
+     * Called automatically when the server starts listening.
+     * Initializes the DB connection and logs the startup.
      */
     @Override
     protected void serverStarted() {
-        db.connectToDB(); // One-time connection to MySQL database
-        System.out.println("Server started on port " + getPort());
+        db.connectToDB(); // Connect to the database once at startup
+        System.out.println("Server started on port " + getPort()); // Log server status
     }
 
     /**
@@ -48,14 +46,16 @@ public class BparkServer extends AbstractServer {
     @Override
     protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
         try {
+            // Case 1: Client requests all orders
             if (msg instanceof String) {
                 String command = (String) msg;
 
                 if (command.equals("getAllOrders")) {
-                    ArrayList<Order> orders = db.getAllOrders();       // Fetch from DB
-                    client.sendToClient(orders);                      // Send to client
+                    ArrayList<Order> orders = db.getAllOrders();  // Fetch from DB
+                    client.sendToClient(orders);                  // Return to client
                 }
 
+            // Case 2: Client requests to update an order
             } else if (msg instanceof Object[]) {
                 Object[] data = (Object[]) msg;
 
