@@ -71,13 +71,15 @@ public class BparkServer extends AbstractServer {
                     int success = db.updateOrderField(orderNumber, field, newValue);
                     switch (success) {
                     	case 1:
-                    		client.sendToClient(new ServerResponse(true, null, "Parking space was successfully changed for the order."));
+                    		ArrayList<Order> updateOrdersForParkingSpace = db.getAllOrders();
+                    		client.sendToClient(new ServerResponse(true, updateOrdersForParkingSpace, "Parking space was successfully changed for the order."));
                     		break;
                     	case 2:
                     		client.sendToClient(new ServerResponse(false, null, "Parking space was unsuccessfully changed for the order."));
                     		break;
                     	case 3:
-                    		client.sendToClient(new ServerResponse(true, null, "Order date was successfully changed for the order."));
+                    		ArrayList<Order> updateOrdersForOrderDate = db.getAllOrders();
+                    		client.sendToClient(new ServerResponse(true, updateOrdersForOrderDate, "Order date was successfully changed for the order."));
                     		break;
                     	case 4:
                     		client.sendToClient(new ServerResponse(false, null, "Order date was unsuccessfully changed for the order."));
