@@ -139,16 +139,29 @@ public class DBController {
 	 * @param newValue
 	 * @return true if succeed, else false
 	 */
-	public boolean updateOrderField(int orderNumber, String field, String newValue) {
+	public int updateOrderField(int orderNumber, String field, String newValue) {
 		boolean hasOrder = getOrderByorder_number(orderNumber);
 		if (hasOrder) {
 			if (field.equals("parking_space")) {
-				return updateParking_space(Integer.parseInt(newValue), orderNumber);
+				if (updateParking_space(Integer.parseInt(newValue), orderNumber)) {
+					return 1; //succeed
+				}
+				else {
+					return 2; //failed
+				}
 			} else if (field.equals("order_date")) {
-				return updateOrderDateByOrderNumber(orderNumber, newValue);
+				if (updateOrderDateByOrderNumber(orderNumber, newValue)) {
+					return 3; //succeed
+				}
+				else {
+					return 4;//failed
+				}
+			}
+			else {
+				return 5;//error in field
 			}
 		}
-		return false;
+		return 6; //no such order
 	}
 
 	/**

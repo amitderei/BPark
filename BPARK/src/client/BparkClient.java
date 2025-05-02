@@ -1,7 +1,6 @@
 package client;
 
-import common.Order;
-import common.ServerResponse;
+import common.*;
 import ocsf.client.AbstractClient;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

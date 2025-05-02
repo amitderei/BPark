@@ -1,6 +1,6 @@
 package client;
 
-import common.Order;
+import common.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

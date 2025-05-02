@@ -1,4 +1,4 @@
-/server/
-/DB/
-/common/
 /client/
+/common/
+/DB/
+/server/

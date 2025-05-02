@@ -68,8 +68,26 @@ public class BparkServer extends AbstractServer {
                     String field = (String) data[2];
                     String newValue = (String) data[3];
 
-                    boolean success = db.updateOrderField(orderNumber, field, newValue);
-                    client.sendToClient(success ? "Order updated." : "Update failed.");
+                    int success = db.updateOrderField(orderNumber, field, newValue);
+                    switch (success) {
+                    	case 1:
+                    		client.sendToClient(new ServerResponse(true, null, "Parking space was successfully changed for the order."));
+                    		break;
+                    	case 2:
+                    		client.sendToClient(new ServerResponse(false, null, "Parking space was unsuccessfully changed for the order."));
+                    		break;
+                    	case 3:
+                    		client.sendToClient(new ServerResponse(true, null, "Order date was successfully changed for the order."));
+                    		break;
+                    	case 4:
+                    		client.sendToClient(new ServerResponse(false, null, "Order date was unsuccessfully changed for the order."));
+                    		break;
+                    	case 5:
+                    		client.sendToClient(new ServerResponse(false, null, "The field entered is incorrect."));
+                    		break;
+                    	case 6:
+                    		client.sendToClient(new ServerResponse(false, null, "This order number does not exist in the system."));
+                    }
                 }
             }
         } catch (IOException e) {
