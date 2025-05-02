@@ -1,6 +1,7 @@
 package client;
 
 import common.Order;
+import common.ServerResponse;
 import ocsf.client.AbstractClient;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -52,25 +53,22 @@ public class BparkClient extends AbstractClient {
      */
     @Override
     protected void handleMessageFromServer(Object msg) {
-        if (msg instanceof String) {
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Server Message");
-                alert.setHeaderText(null);
-                alert.setContentText(String.valueOf(msg));
-                alert.showAndWait();
-            });
-        } else if (msg instanceof ArrayList<?>) {
-            ArrayList<?> list = (ArrayList<?>) msg;
-            if (!list.isEmpty() && list.get(0) instanceof Order) {
-                ArrayList<Order> orders = (ArrayList<Order>) msg;
-                Platform.runLater(() -> {
-                    if (controller != null) {
-                        controller.displayOrders(orders);
-                    }
-                });
-            }
-        }
+        ServerResponse response=(ServerResponse) msg;
+        Platform.runLater(() ->{
+        	Alert alert=new Alert(response.isSucceed()? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+        	alert.setTitle("System Message");
+        	alert.setContentText(response.getMsg());
+        	alert.showAndWait();
+        	if(response.isSucceed() && response.getData() instanceof ArrayList<?>) {
+        		ArrayList<?> data=(ArrayList<?>) response.getData();
+        		if((!data.isEmpty()) && data.get(0) instanceof Order) {
+        			ArrayList<Order> orders=(ArrayList<Order>) data;
+        			if (controller!=null) {
+        				controller.displayOrders(orders);
+        			}
+        		}
+        	}
+        });
     }
 
     /**

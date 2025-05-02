@@ -9,21 +9,22 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class DBController {
+import common.Order;
 
-	public static void main(String[] args) {
-		Connection conn = connectToDB();
-		if (conn != null) {
-			Scanner scanner = new Scanner(System.in);
-			System.out.print("Enter order number: ");
-			//int order_num = scanner.nextInt();
-			System.out.print("Enter update parking space: ");
-			//int update_parking_space = scanner.nextInt();
-			//updateParking_space(conn, update_parking_space, order_num);
-			//getOrderByorder_number(conn, order_num);
-			getOrders(conn);
-			disconnectFromDB(conn);
+public class DBController {
+	public static DBController instance = null;
+	private Connection conn;
+
+	/**
+	 * create instance of DBController (according singletone- design pattern)
+	 * 
+	 * @return
+	 */
+	public static DBController getInstance() {
+		if (instance == null) {
+			instance = new DBController();
 		}
+		return instance;
 	}
 
 	/**
@@ -31,28 +32,25 @@ public class DBController {
 	 * 
 	 * @return conn(if the connection succeed) or null(if doesn't)
 	 */
-	public static Connection connectToDB() {
+	public void connectToDB() {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 			System.out.println("Driver definition succeed");
 		} catch (Exception ex) {
 			/* handle the error */
 			System.out.println("Driver definition failed");
-			return null;
 		}
 
 		try {
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=IST", "root",
+			this.conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=IST", "root",
 					"Aa123456");
 			// Connection conn =
 			// DriverManager.getConnection("jdbc:mysql://192.168.3.68/test","root","Root");
 			System.out.println("SQL connection succeed");
-			return conn;
 		} catch (SQLException ex) {/* handle any errors */
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-			return null;
 		}
 	}
 
@@ -62,51 +60,36 @@ public class DBController {
 	 * @param con
 	 * @param order_number
 	 */
-	public static void getOrderByorder_number(Connection con, int order_number) {
+	public boolean getOrderByorder_number(int order_number) {
 		String query = "SELECT * FROM `order` WHERE order_number=?";
-		try (PreparedStatement stmt = con.prepareStatement(query)) {
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, order_number);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				System.out.println("parking space: " + rs.getInt("parking_space"));
-				System.out.println("order number: " + rs.getInt("order_number"));
-				System.out.println("order_date: " + rs.getDate("order_date"));
-				System.out.println("confirmation code: " + rs.getInt("confirmation_code"));
-				System.out.println("subscriber id: " + rs.getInt("subscriber_id"));
-				System.out.println("date of placing an order: " + rs.getDate("date_of_placing_an_order"));
-			} else {
-				System.out.println("no order with num " + order_number);
+				return true;
 			}
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
 		}
+		return false;
 	}
 
 	/**
-	 * print all orders
+	 * this function collects all orders and return them
 	 * 
 	 * @param con
+	 * @return arrayList of all orders
 	 */
-	public static ArrayList<String> getOrders(Connection con) {
+	public ArrayList<Order> getAllOrders() {
 		String query = "SELECT * FROM `order`";
-		ArrayList<String> orders= new ArrayList<>();
-		try (PreparedStatement stmt = con.prepareStatement(query)) {
+		ArrayList<Order> orders = new ArrayList<>();
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				StringBuilder newOrder=new StringBuilder();
-				newOrder.append("Order #");
-				newOrder.append(rs.getInt("order_number"));
-				newOrder.append(": Parking: ");
-				newOrder.append(rs.getInt("parking_space"));
-				newOrder.append(", Date: ");
-				newOrder.append(rs.getString("order_date"));
-				newOrder.append(", Confirmation: ");
-				newOrder.append(rs.getInt("confirmation_code"));
-				newOrder.append(", Subscriber:");
-				newOrder.append(rs.getInt("subscriber_id"));
-				newOrder.append(", Placed:");
-				newOrder.append(rs.getString("date_of_placing_an_order"));
-				orders.add(newOrder.toString());
+				Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
+						rs.getDate("order_date"), rs.getInt("confirmation_code"), rs.getInt("subscriber_id"),
+						rs.getDate("date_of_placing_an_order"));
+				orders.add(newOrder);
 			}
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
@@ -119,7 +102,7 @@ public class DBController {
 	 * 
 	 * @param conn
 	 */
-	public static void disconnectFromDB(Connection conn) {
+	public void disconnectFromDB() {
 		try {
 			conn.close();
 		} catch (Exception e) {
@@ -135,7 +118,7 @@ public class DBController {
 	 * @param update_parking_space
 	 * @param order_number
 	 */
-	public static boolean updateParking_space(Connection conn, int update_parking_space, int order_number) {
+	public boolean updateParking_space(int update_parking_space, int order_number) {
 		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, update_parking_space);
@@ -148,20 +131,40 @@ public class DBController {
 		return true;
 	}
 
-	
+	/**
+	 * nevigate the update according the field
+	 * 
+	 * @param orderNumber
+	 * @param field
+	 * @param newValue
+	 * @return true if succeed, else false
+	 */
+	public boolean updateOrderField(int orderNumber, String field, String newValue) {
+		boolean hasOrder = getOrderByorder_number(orderNumber);
+		if (hasOrder) {
+			if (field.equals("parking_space")) {
+				return updateParking_space(Integer.parseInt(newValue), orderNumber);
+			} else if (field.equals("order_date")) {
+				return updateOrderDateByOrderNumber(orderNumber, newValue);
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * This function update date by order number
+	 * 
 	 * @param con
 	 * @param order_number
 	 */
-	public static boolean updateOrderDateByOrderNumber(Connection con, int order_number, String newValue) {
+	public boolean updateOrderDateByOrderNumber(int order_number, String newValue) {
 		String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
-		try (PreparedStatement stmt = con.prepareStatement(query)) {
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setDate(1, Date.valueOf(newValue));
 			stmt.setInt(2, order_number);
-			
+
 			stmt.executeUpdate();
-			
+
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
 			return false;
@@ -169,4 +172,3 @@ public class DBController {
 		return true;
 	}
 }
-

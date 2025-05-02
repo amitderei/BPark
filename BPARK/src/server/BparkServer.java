@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import DB.DBController;
 import common.Order;
+import common.ServerResponse;
 
 /**
  * Represents the server side of the BPARK prototype.
@@ -49,10 +50,13 @@ public class BparkServer extends AbstractServer {
             // Case 1: Client requests all orders
             if (msg instanceof String) {
                 String command = (String) msg;
-
+                //check if client ask for all orders- if there is no orders return msg, else return orders
                 if (command.equals("getAllOrders")) {
-                    ArrayList<Order> orders = db.getOrders();  // Fetch from DB
-                    client.sendToClient(orders);                  // Return to client
+                    ArrayList<Order> orders = db.getAllOrders();
+                    if (orders.isEmpty()) {
+                    	client.sendToClient(new ServerResponse(false, null, "There are no orders in the system"));
+                    }
+                    client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));                  
                 }
 
             // Case 2: Client requests to update an order
