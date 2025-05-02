@@ -35,61 +35,83 @@ public class DBController {
      */
     public void connectToDB() {
         try {
+            // Load MySQL JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+
+            // Connect to 'bpark' DB on localhost with timezone setting
             conn = DriverManager.getConnection(
                 "jdbc:mysql://localhost/bpark?serverTimezone=IST", "root", "Aa123456");
+
         } catch (Exception e) {
+            // Print error if connection fails
             System.out.println("Database connection error: " + e.getMessage());
         }
     }
 
     /**
      * Retrieves all orders from the 'Order' table.
-     * Each row is converted into an Order object and added to a list.
+     * Converts each row into an Order object and adds it to a list.
      *
-     * @return A list of all orders in the database.
+     * @return List of all orders in the database.
      */
     public ArrayList<Order> getAllOrders() {
         ArrayList<Order> orders = new ArrayList<>();
+
         try {
+            // Create SQL statement
             Statement stmt = conn.createStatement();
+
+            // Execute query to select all rows from the 'Order' table
             ResultSet rs = stmt.executeQuery("SELECT * FROM `Order`");
 
+            // Loop through each result row
             while (rs.next()) {
+                // Create Order object from current row
                 Order o = new Order(
                     rs.getInt("order_number"),
                     rs.getInt("parking_space"),
-                    Date.valueOf(rs.getString("order_date")), // fixed for timezone accuracy
+                    Date.valueOf(rs.getString("order_date")), // ensures correct date format
                     rs.getInt("confirmation_code"),
                     rs.getInt("subscriber_id"),
                     rs.getDate("date_of_placing_an_order")
                 );
+                // Add order to the list
                 orders.add(o);
             }
+
         } catch (SQLException e) {
+            // Print error if query fails
             System.out.println("Fetch error: " + e.getMessage());
         }
+
         return orders;
     }
 
+
     /**
-     * Updates a specific field in an order identified by its order number.
-     * Supports both integer and date fields depending on the column.
+     * Updates only 'order_date' or 'parking_space' in an order.
      *
-     * @param orderNumber ID of the order to update.
-     * @param field Column name to be updated.
-     * @param newValue New value as a string, to be parsed accordingly.
-     * @return True if the update was successful, false otherwise.
+     * @param orderNumber The ID of the order to update.
+     * @param field The column to update (must be 'order_date' or 'parking_space').
+     * @param newValue The new value as a string.
+     * @return true if the update succeeded, false otherwise.
      */
     public boolean updateOrderField(int orderNumber, String field, String newValue) {
+        // Only allow specific fields to be updated
+        if (!field.equalsIgnoreCase("order_date") && !field.equalsIgnoreCase("parking_space")) {
+            System.out.println("Update failed: field not allowed.");
+            return false;
+        }
+
         try {
             PreparedStatement ps = conn.prepareStatement(
                 "UPDATE `Order` SET " + field + " = ? WHERE order_number = ?");
 
-            if (field.equalsIgnoreCase("order_date") || field.equalsIgnoreCase("date_of_placing_an_order")) {
+            // Handle date or integer based on field name
+            if (field.equalsIgnoreCase("order_date")) {
                 ps.setDate(1, java.sql.Date.valueOf(newValue));
             } else {
-                ps.setInt(1, Integer.parseInt(newValue));
+                ps.setInt(1, Integer.parseInt(newValue)); // parking_space is an int
             }
 
             ps.setInt(2, orderNumber);
@@ -100,5 +122,6 @@ public class DBController {
             return false;
         }
     }
+
 
 }
