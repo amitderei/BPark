@@ -51,7 +51,7 @@ public class BparkServer extends AbstractServer {
                 String command = (String) msg;
 
                 if (command.equals("getAllOrders")) {
-                    ArrayList<Order> orders = db.getAllOrders();  // Fetch from DB
+                    ArrayList<Order> orders = db.getOrders();  // Fetch from DB
                     client.sendToClient(orders);                  // Return to client
                 }
 

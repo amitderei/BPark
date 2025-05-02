@@ -1,127 +1,172 @@
 package DB;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import common.Order;
+import java.util.Scanner;
 
-/**
- * Handles all database operations related to the 'Order' table.
- * Implements Singleton to ensure centralized and consistent access to the database.
- */
 public class DBController {
 
-    private static DBController instance; // Single static instance
-    private Connection conn; // Database connection object
+	public static void main(String[] args) {
+		Connection conn = connectToDB();
+		if (conn != null) {
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("Enter order number: ");
+			//int order_num = scanner.nextInt();
+			System.out.print("Enter update parking space: ");
+			//int update_parking_space = scanner.nextInt();
+			//updateParking_space(conn, update_parking_space, order_num);
+			//getOrderByorder_number(conn, order_num);
+			getOrders(conn);
+			disconnectFromDB(conn);
+		}
+	}
 
-    /**
-     * Private constructor to prevent instantiation from outside.
-     */
-    private DBController() { }
+	/**
+	 * This function connect to DB
+	 * 
+	 * @return conn(if the connection succeed) or null(if doesn't)
+	 */
+	public static Connection connectToDB() {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+			System.out.println("Driver definition succeed");
+		} catch (Exception ex) {
+			/* handle the error */
+			System.out.println("Driver definition failed");
+			return null;
+		}
 
-    /**
-     * Provides access to the single instance of DBController.
-     * @return the singleton instance
-     */
-    public static DBController getInstance() {
-        if (instance == null) {
-            instance = new DBController();
-        }
-        return instance;
-    }
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=IST", "root",
+					"Aa123456");
+			// Connection conn =
+			// DriverManager.getConnection("jdbc:mysql://192.168.3.68/test","root","Root");
+			System.out.println("SQL connection succeed");
+			return conn;
+		} catch (SQLException ex) {/* handle any errors */
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+			return null;
+		}
+	}
 
-    /**
-     * Establishes a connection to the MySQL 'bpark' database.
-     * If the connection fails, an error message is printed to the console.
-     */
-    public void connectToDB() {
-        try {
-            // Load MySQL JDBC driver
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+	/**
+	 * This function print in console the order that its num is order_num
+	 * 
+	 * @param con
+	 * @param order_number
+	 */
+	public static void getOrderByorder_number(Connection con, int order_number) {
+		String query = "SELECT * FROM `order` WHERE order_number=?";
+		try (PreparedStatement stmt = con.prepareStatement(query)) {
+			stmt.setInt(1, order_number);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				System.out.println("parking space: " + rs.getInt("parking_space"));
+				System.out.println("order number: " + rs.getInt("order_number"));
+				System.out.println("order_date: " + rs.getDate("order_date"));
+				System.out.println("confirmation code: " + rs.getInt("confirmation_code"));
+				System.out.println("subscriber id: " + rs.getInt("subscriber_id"));
+				System.out.println("date of placing an order: " + rs.getDate("date_of_placing_an_order"));
+			} else {
+				System.out.println("no order with num " + order_number);
+			}
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 
-            // Connect to 'bpark' DB on localhost with timezone setting
-            conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost/bpark?serverTimezone=IST", "root", "Aa123456");
+	/**
+	 * print all orders
+	 * 
+	 * @param con
+	 */
+	public static ArrayList<String> getOrders(Connection con) {
+		String query = "SELECT * FROM `order`";
+		ArrayList<String> orders= new ArrayList<>();
+		try (PreparedStatement stmt = con.prepareStatement(query)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				StringBuilder newOrder=new StringBuilder();
+				newOrder.append("Order #");
+				newOrder.append(rs.getInt("order_number"));
+				newOrder.append(": Parking: ");
+				newOrder.append(rs.getInt("parking_space"));
+				newOrder.append(", Date: ");
+				newOrder.append(rs.getString("order_date"));
+				newOrder.append(", Confirmation: ");
+				newOrder.append(rs.getInt("confirmation_code"));
+				newOrder.append(", Subscriber:");
+				newOrder.append(rs.getInt("subscriber_id"));
+				newOrder.append(", Placed:");
+				newOrder.append(rs.getString("date_of_placing_an_order"));
+				orders.add(newOrder.toString());
+			}
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+		return orders;
+	}
 
-        } catch (Exception e) {
-            // Print error if connection fails
-            System.out.println("Database connection error: " + e.getMessage());
-        }
-    }
+	/**
+	 * This function disconnect from sql
+	 * 
+	 * @param conn
+	 */
+	public static void disconnectFromDB(Connection conn) {
+		try {
+			conn.close();
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 
-    /**
-     * Retrieves all orders from the 'Order' table.
-     * Converts each row into an Order object and adds it to a list.
-     *
-     * @return List of all orders in the database.
-     */
-    public ArrayList<Order> getAllOrders() {
-        ArrayList<Order> orders = new ArrayList<>();
+	/**
+	 * This function update the parking space of order that its number is
+	 * order_number
+	 * 
+	 * @param conn
+	 * @param update_parking_space
+	 * @param order_number
+	 */
+	public static boolean updateParking_space(Connection conn, int update_parking_space, int order_number) {
+		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, update_parking_space);
+			stmt.setInt(2, order_number);
+			stmt.executeUpdate();
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+			return false;
+		}
+		return true;
+	}
 
-        try {
-            // Create SQL statement
-            Statement stmt = conn.createStatement();
-
-            // Execute query to select all rows from the 'Order' table
-            ResultSet rs = stmt.executeQuery("SELECT * FROM `Order`");
-
-            // Loop through each result row
-            while (rs.next()) {
-                // Create Order object from current row
-                Order o = new Order(
-                    rs.getInt("order_number"),
-                    rs.getInt("parking_space"),
-                    Date.valueOf(rs.getString("order_date")), // ensures correct date format
-                    rs.getInt("confirmation_code"),
-                    rs.getInt("subscriber_id"),
-                    rs.getDate("date_of_placing_an_order")
-                );
-                // Add order to the list
-                orders.add(o);
-            }
-
-        } catch (SQLException e) {
-            // Print error if query fails
-            System.out.println("Fetch error: " + e.getMessage());
-        }
-
-        return orders;
-    }
-
-
-    /**
-     * Updates only 'order_date' or 'parking_space' in an order.
-     *
-     * @param orderNumber The ID of the order to update.
-     * @param field The column to update (must be 'order_date' or 'parking_space').
-     * @param newValue The new value as a string.
-     * @return true if the update succeeded, false otherwise.
-     */
-    public boolean updateOrderField(int orderNumber, String field, String newValue) {
-        // Only allow specific fields to be updated
-        if (!field.equalsIgnoreCase("order_date") && !field.equalsIgnoreCase("parking_space")) {
-            System.out.println("Update failed: field not allowed.");
-            return false;
-        }
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(
-                "UPDATE `Order` SET " + field + " = ? WHERE order_number = ?");
-
-            // Handle date or integer based on field name
-            if (field.equalsIgnoreCase("order_date")) {
-                ps.setDate(1, java.sql.Date.valueOf(newValue));
-            } else {
-                ps.setInt(1, Integer.parseInt(newValue)); // parking_space is an int
-            }
-
-            ps.setInt(2, orderNumber);
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            System.out.println("Update failed: " + e.getMessage());
-            return false;
-        }
-    }
-
-
+	
+	/**
+	 * This function update date by order number
+	 * @param con
+	 * @param order_number
+	 */
+	public static boolean updateOrderDateByOrderNumber(Connection con, int order_number, String newValue) {
+		String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
+		try (PreparedStatement stmt = con.prepareStatement(query)) {
+			stmt.setDate(1, Date.valueOf(newValue));
+			stmt.setInt(2, order_number);
+			
+			stmt.executeUpdate();
+			
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+			return false;
+		}
+		return true;
+	}
 }
+
