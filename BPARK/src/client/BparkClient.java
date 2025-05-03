@@ -52,23 +52,44 @@ public class BparkClient extends AbstractClient {
      */
     @Override
     protected void handleMessageFromServer(Object msg) {
-        ServerResponse response=(ServerResponse) msg;
-        Platform.runLater(() ->{
-        	Alert alert=new Alert(response.isSucceed()? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
-        	alert.setTitle("System Message");
-        	alert.setContentText(response.getMsg());
-        	alert.showAndWait();
-        	if(response.isSucceed() && response.getData() instanceof ArrayList<?>) {
-        		ArrayList<?> data=(ArrayList<?>) response.getData();
-        		if((!data.isEmpty()) && data.get(0) instanceof Order) {
-        			ArrayList<Order> orders=(ArrayList<Order>) data;
-        			if (controller!=null) {
-        				controller.displayOrders(orders);
-        			}
-        		}
-        	}
+        // Cast the received object from the server to a ServerResponse
+        ServerResponse response = (ServerResponse) msg;
+
+        // Run UI updates on the JavaFX Application Thread
+        Platform.runLater(() -> {
+
+            // Create an alert box: use INFORMATION if succeed == true, else ERROR
+            Alert alert = new Alert(
+                response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
+            );
+
+            // Set the alert box title
+            alert.setTitle("System Message");
+
+            // Set the content of the alert from the server message
+            alert.setContentText(response.getMsg());
+
+            // Display the alert and wait for user to close it
+            alert.showAndWait();
+
+            // Only process data if the response succeeded and the data is an ArrayList
+            if (response.isSucceed() && response.getData() instanceof ArrayList<?>) {
+                ArrayList<?> data = (ArrayList<?>) response.getData();
+
+                // Check if the list is not empty and contains Order objects
+                if (!data.isEmpty() && data.get(0) instanceof Order) {
+                    ArrayList<Order> orders = (ArrayList<Order>) data;
+
+                    // If controller exists, update the GUI with the orders
+                    if (controller != null) {
+                        controller.displayOrders(orders);
+                    }
+                }
+            }
         });
     }
+
+    
 
     /**
      * Sends a request to the server to fetch all orders.
