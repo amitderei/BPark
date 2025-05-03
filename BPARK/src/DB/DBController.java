@@ -42,7 +42,7 @@ public class DBController {
 		}
 
 		try {
-			this.conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=IST", "root",
+			this.conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=UTC", "root",
 					"Aa123456");
 			// Connection conn =
 			// DriverManager.getConnection("jdbc:mysql://192.168.3.68/test","root","Root");
