@@ -60,7 +60,7 @@ public class DBController {
 	 * @param con
 	 * @param order_number
 	 */
-	public boolean getOrderByorder_number(int order_number) {
+	public boolean getOrderByOrderNumber(int order_number) {
 		String query = "SELECT * FROM `order` WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, order_number);
@@ -118,7 +118,7 @@ public class DBController {
 	 * @param update_parking_space
 	 * @param order_number
 	 */
-	public boolean updateParking_space(int update_parking_space, int order_number) {
+	public boolean updateParkingSpace(int update_parking_space, int order_number) {
 		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, update_parking_space);
