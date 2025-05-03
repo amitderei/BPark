@@ -18,7 +18,7 @@ public class DBController {
 	/**
 	 * create instance of DBController (according singletone- design pattern)
 	 * 
-	 * @return
+	 * @return instance
 	 */
 	public static DBController getInstance() {
 		if (instance == null) {
@@ -43,7 +43,7 @@ public class DBController {
 
 		try {
 			this.conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=UTC", "root",
-					"Aa123456");
+					"Aa123456"); //time zone is UTC
 			// Connection conn =
 			// DriverManager.getConnection("jdbc:mysql://192.168.3.68/test","root","Root");
 			System.out.println("SQL connection succeed");
@@ -63,7 +63,7 @@ public class DBController {
 	public boolean getOrderByOrderNumber(int order_number) {
 		String query = "SELECT * FROM `order` WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, order_number);
+			stmt.setInt(1, order_number); //replace '?' in query
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				return true;
@@ -88,7 +88,7 @@ public class DBController {
 			while (rs.next()) {
 				Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
 						rs.getDate("order_date"), rs.getInt("confirmation_code"), rs.getInt("subscriber_id"),
-						rs.getDate("date_of_placing_an_order"));
+						rs.getDate("date_of_placing_an_order")); //create new order from order in sql table
 				orders.add(newOrder);
 			}
 		} catch (Exception e) {
@@ -121,8 +121,8 @@ public class DBController {
 	public boolean updateParkingSpace(int update_parking_space, int order_number) {
 		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, update_parking_space);
-			stmt.setInt(2, order_number);
+			stmt.setInt(1, update_parking_space); //replace first '?'
+			stmt.setInt(2, order_number); //replace second '?'
 			stmt.executeUpdate();
 		} catch (Exception e) {
 			System.out.println("Error! " + e.getMessage());
@@ -161,7 +161,7 @@ public class DBController {
 				return 5;//error in field
 			}
 		}
-		return 6; //no such order
+		return 6; //no such order num in sql table
 	}
 
 	/**
@@ -173,8 +173,8 @@ public class DBController {
 	public boolean updateOrderDateByOrderNumber(int order_number, String newValue) {
 		String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setDate(1, Date.valueOf(newValue));
-			stmt.setInt(2, order_number);
+			stmt.setDate(1, Date.valueOf(newValue)); //replace first '?'
+			stmt.setInt(2, order_number); //replace second '?' in query
 
 			stmt.executeUpdate();
 
