@@ -77,8 +77,15 @@ public class BparkClientController {
             String field = updateField.getText().trim();
             String value = updateValue.getText().trim();
 
-            if (field.isEmpty() || value.isEmpty()) {
-                showAlert("Field and value cannot be empty.", Alert.AlertType.WARNING);
+            // Validate that both field and value are not empty (individually)
+            if (field.isEmpty() && value.isEmpty()) {
+                showAlert("Please fill in both 'Field to Update' and 'New Value'.", Alert.AlertType.WARNING);
+                return;
+            } else if (field.isEmpty()) {
+                showAlert("Please fill in the 'Field to Update'.", Alert.AlertType.WARNING);
+                return;
+            } else if (value.isEmpty()) {
+                showAlert("Please fill in the 'New Value'.", Alert.AlertType.WARNING);
                 return;
             }
 
