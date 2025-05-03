@@ -51,7 +51,7 @@ public class DBController {
         try {
             // Connects to the local MySQL server (replace credentials as needed)
             this.conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost/bpark?serverTimezone=IST", "root", "Aa123456");
+                "jdbc:mysql://localhost/bpark?serverTimezone=Asia/Jerusalem", "root", "Aa123456");
             System.out.println("SQL connection succeed");
         } catch (SQLException ex) {
             // Prints SQL error information if connection fails
@@ -62,52 +62,83 @@ public class DBController {
     }
 
     /**
-     * Checks if an order with the specified number exists in the database.
+     * Checks whether an order with the specified order number exists in the database.
+     * Executes a SELECT query using a prepared statement to prevent SQL injection.
      *
-     * @param order_number the order number to search for
-     * @return true if found, false otherwise
+     * @param order_number The unique order number to look for.
+     * @return true if the order exists, false otherwise.
      */
-    public boolean getOrderByorder_number(int order_number) {
+    public boolean getOrderByOrderName(int order_number) {
+        // SQL query to retrieve a specific order by its primary key
         String query = "SELECT * FROM `order` WHERE order_number=?";
+
+        // Try-with-resources ensures that stmt and rs are closed automatically
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, order_number); // injects order_number into SQL query
-            ResultSet rs = stmt.executeQuery(); // executes the query
-            if (rs.next()) { // if a row is found
+
+            // Inject the provided order number into the query's first parameter
+            stmt.setInt(1, order_number);
+
+            // Execute the query and store the result in a ResultSet
+            ResultSet rs = stmt.executeQuery();
+
+            // If a record is found, the order exists
+            if (rs.next()) {
                 return true;
             }
+
         } catch (Exception e) {
-            System.out.println("Error! " + e.getMessage()); // log the error
+            // Log any exception that occurs during the query execution
+            System.out.println("Error! " + e.getMessage());
         }
-        return false; // order not found
+
+        // If no result was found or an error occurred, return false
+        return false;
     }
+
 
     /**
      * Retrieves all orders from the database into a list.
+     * This method executes a SELECT * query on the 'order' table and 
+     * maps each row to an Order object.
      *
-     * @return ArrayList containing all orders
+     * @return ArrayList<Order> containing all orders from the DB
      */
     public ArrayList<Order> getAllOrders() {
+        // Define SQL query to fetch all orders
         String query = "SELECT * FROM `order`";
-        ArrayList<Order> orders = new ArrayList<>(); // initialize list
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery(); // run SELECT query
+
+        // Initialize list to hold order objects
+        ArrayList<Order> orders = new ArrayList<>();
+
+        // Prepare and execute the SQL query
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            // Iterate over each row in the result set
             while (rs.next()) {
-                // Create Order object from each row in the ResultSet
+                // Extract values from the current row and construct an Order object
                 Order newOrder = new Order(
-                    rs.getInt("order_number"),
-                    rs.getInt("parking_space"),
-                    rs.getDate("order_date"),
-                    rs.getInt("confirmation_code"),
-                    rs.getInt("subscriber_id"),
-                    rs.getDate("date_of_placing_an_order")
+                    rs.getInt("order_number"),                // primary key
+                    rs.getInt("parking_space"),               // assigned parking spot
+                    rs.getDate("order_date"),                 // date order created
+                    rs.getInt("confirmation_code"),           // confirmation code
+                    rs.getInt("subscriber_id"),               // ID of the subscriber
+                    rs.getDate("date_of_placing_an_order")    // actual placing date
                 );
-                orders.add(newOrder); // add to list
+
+                // Add the order to the result list
+                orders.add(newOrder);
             }
+
         } catch (Exception e) {
-            System.out.println("Error! " + e.getMessage()); // error fetching data
+            // Log exception details for debugging
+            System.out.println("Error! " + e.getMessage());
         }
+
+        // Return the list of retrieved orders
         return orders;
     }
+
 
     /**
      * Closes the connection to the database.
@@ -121,72 +152,124 @@ public class DBController {
     }
 
     /**
-     * Updates the parking space value for an order.
+     * Updates the parking space assigned to a specific order.
+     * Executes an UPDATE query on the 'order' table using a prepared statement.
      *
-     * @param update_parking_space new parking space number
-     * @param order_number         ID of the order to update
-     * @return true if update succeeded, false otherwise
+     * @param update_parking_space The new parking space number to assign.
+     * @param order_number The unique identifier of the order to update.
+     * @return true if the update was successful, false if an error occurred.
      */
-    public boolean updateParking_space(int update_parking_space, int order_number) {
+    public boolean updateParkingSpace(int update_parking_space, int order_number) {
+        // SQL query to update the parking_space field of a specific order
         String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
+
+        // Try-with-resources ensures statement is closed automatically
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, update_parking_space); // new parking space
-            stmt.setInt(2, order_number); // target order
-            stmt.executeUpdate(); // execute update
+
+            // Set the new parking space value as the first parameter in the query
+            stmt.setInt(1, update_parking_space);
+
+            // Set the order number to identify which record to update
+            stmt.setInt(2, order_number);
+
+            // Execute the update command; affects one or more rows in the table
+            stmt.executeUpdate();
+
         } catch (Exception e) {
-            System.out.println("Error! " + e.getMessage()); // log SQL error
+            // Print the exception message if the update fails
+            System.out.println("Error! " + e.getMessage());
             return false;
         }
+
+        // Return true if the update was executed without exceptions
         return true;
     }
 
+
     /**
-     * Routes the update command to the appropriate method based on the field name.
+     * Routes an update command to the correct update method based on the field name.
+     * Validates the existence of the order and the field name before attempting the update.
      *
-     * @param orderNumber order to update
-     * @param field       name of the field ("parking_space", "order_date")
-     * @param newValue    new value to apply
-     * @return status code (1–6) indicating result
+     * Supported fields: "parking_space", "order_date"
+     *
+     * @param orderNumber The ID of the order to be updated.
+     * @param field The name of the field to update (e.g., "parking_space", "order_date").
+     * @param newValue The new value to apply to the specified field.
+     * @return int status code indicating the result:
+     *         1 - Parking space updated successfully
+     *         2 - Parking space update failed
+     *         3 - Order date updated successfully
+     *         4 - Order date update failed
+     *         5 - Invalid field name provided
+     *         6 - Order with given ID does not exist
      */
     public int updateOrderField(int orderNumber, String field, String newValue) {
-        boolean hasOrder = getOrderByorder_number(orderNumber);
+        // First, check if the order exists in the database
+        boolean hasOrder = getOrderByOrderName(orderNumber);
+
         if (hasOrder) {
+            // Handle update for parking space
             if (field.equals("parking_space")) {
-                if (updateParking_space(Integer.parseInt(newValue), orderNumber)) {
-                    return 1; // parking space updated successfully
+                // Convert newValue to int and perform the update
+                if (updateParkingSpace(Integer.parseInt(newValue), orderNumber)) {
+                    return 1; // Success
                 } else {
-                    return 2; // update failed
+                    return 2; // Failure to update parking space
                 }
-            } else if (field.equals("order_date")) {
+            }
+
+            // Handle update for order date
+            else if (field.equals("order_date")) {
                 if (updateOrderDateByOrderNumber(orderNumber, newValue)) {
-                    return 3; // order date updated
+                    return 3; // Success
                 } else {
-                    return 4; // update failed
+                    return 4; // Failure to update date
                 }
-            } else {
-                return 5; // invalid field name
+            }
+
+            // Field name is not recognized
+            else {
+                return 5; // Invalid field
             }
         }
-        return 6; // order does not exist
+
+        // No order found with the provided order number
+        return 6;
     }
 
+
     /**
-     * Updates the order date of a specific order.
+     * Updates the order_date field of a specific order in the database.
+     * Converts the provided string into a java.sql.Date and applies it to the matching order record.
      *
-     * @param order_number the order number to update
-     * @param newValue     new date in format "YYYY-MM-DD"
-     * @return true if update succeeded, false otherwise
+     * @param order_number The unique identifier of the order to be updated.
+     * @param newValue A date string in the format "YYYY-MM-DD" representing the new order date.
+     * @return true if the update was executed successfully, false otherwise.
      */
     public boolean updateOrderDateByOrderNumber(int order_number, String newValue) {
+        // SQL query to update the order_date field for a specific order
         String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
+
+        // Try-with-resources ensures that stmt is closed automatically
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setDate(1, Date.valueOf(newValue)); // convert String to SQL Date
-            stmt.setInt(2, order_number); // order ID to update
-            stmt.executeUpdate(); // perform the update
+
+            // Convert the input string to a java.sql.Date and set as the first parameter
+            stmt.setDate(1, Date.valueOf(newValue));
+
+            // Set the second parameter: the order number to identify which record to update
+            stmt.setInt(2, order_number);
+
+            // Execute the update command on the database
+            stmt.executeUpdate();
+
         } catch (Exception e) {
-            System.out.println("Error! " + e.getMessage()); // log error
+            // Print the error message if an exception occurs during the update
+            System.out.println("Error! " + e.getMessage());
             return false;
         }
+
+        // Return true if the update completed without exceptions
         return true;
     }
+
 }
