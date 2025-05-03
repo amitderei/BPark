@@ -140,10 +140,10 @@ public class DBController {
 	 * @return true if succeed, else false
 	 */
 	public int updateOrderField(int orderNumber, String field, String newValue) {
-		boolean hasOrder = getOrderByorder_number(orderNumber);
+		boolean hasOrder = getOrderByOrderNumber(orderNumber);
 		if (hasOrder) {
 			if (field.equals("parking_space")) {
-				if (updateParking_space(Integer.parseInt(newValue), orderNumber)) {
+				if (updateParkingSpace(Integer.parseInt(newValue), orderNumber)) {
 					return 1; //succeed
 				}
 				else {
