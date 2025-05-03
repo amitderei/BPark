@@ -110,22 +110,33 @@ public class BparkServer extends AbstractServer {
     }
     
     /**
-     * This method is automatically called when a client successfully connects to the server.
-     * It retrieves and prints the client's hostname and IP address for logging purposes.
-     * This is used to fulfill the assignment requirement of displaying client network information.
+     * Called automatically by the OCSF framework when a new client connects to the server.
+     * This method retrieves the client's IP address and hostname, and logs the connection details
+     * to the server console for monitoring and debugging purposes.
+     *
+     * This implementation is primarily used to fulfill the project requirement of displaying
+     * network information about connected clients.
      *
      * @param client The client that just connected to the server.
      */
     @Override
     protected void clientConnected(ConnectionToClient client) {
         try {
-            String clientIP = client.getInetAddress().getHostAddress();   // Get the client's IP address
-            String clientHost = client.getInetAddress().getHostName();    // Get the client's hostname
+            // Retrieve the IP address of the connected client
+            String clientIP = client.getInetAddress().getHostAddress();
+
+            // Retrieve the hostname of the connected client
+            String clientHost = client.getInetAddress().getHostName();
+
+            // Log the client's connection details to the server console
             System.out.println("Client connected from: " + clientHost + " (" + clientIP + ")");
+            
         } catch (Exception e) {
+            // Handle case where client info cannot be retrieved (e.g., network issue)
             System.out.println("Could not retrieve client info: " + e.getMessage());
         }
     }
+
 
 }
 

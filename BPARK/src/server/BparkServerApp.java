@@ -1,22 +1,27 @@
 package server;
 
 /**
- * Entry point for launching the server-side application of the BPARK system.
- * Initializes the server on a specified port and starts listening for client connections.
+ * Entry point for launching the BPARK server application.
+ * This class is responsible for starting the server, binding it to a port,
+ * and initializing the listening process using the OCSF framework.
  */
 public class BparkServerApp {
 
     /**
-     * Main method that starts the server.
-     * Creates an instance of PrototypeServer and begins listening for clients on port 5555.
+     * Main method – the starting point of the server application.
+     * Creates an instance of BparkServer bound to port 5555 and starts listening for client connections.
      *
-     * @param args Command-line arguments (not used).
+     * @param args Command-line arguments (not used in this application).
      */
     public static void main(String[] args) {
+        // Create a new server instance bound to port 5555
         BparkServer server = new BparkServer(5555);
+
         try {
-            server.listen(); // Starts the OCSF server listening on the specified port
+            // Start the OCSF server to begin listening for incoming client connections
+            server.listen();
         } catch (Exception e) {
+            // Print an error message if the server fails to start
             System.out.println("Server error: " + e.getMessage());
         }
     }

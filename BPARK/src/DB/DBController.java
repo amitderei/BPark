@@ -68,7 +68,7 @@ public class DBController {
      * @param order_number The unique order number to look for.
      * @return true if the order exists, false otherwise.
      */
-    public boolean getOrderByOrderName(int order_number) {
+    public boolean getOrderByOrderNumber(int order_number) {
         // SQL query to retrieve a specific order by its primary key
         String query = "SELECT * FROM `order` WHERE order_number=?";
 
@@ -205,7 +205,7 @@ public class DBController {
      */
     public int updateOrderField(int orderNumber, String field, String newValue) {
         // First, check if the order exists in the database
-        boolean hasOrder = getOrderByOrderName(orderNumber);
+        boolean hasOrder = getOrderByOrderNumber(orderNumber);
 
         if (hasOrder) {
             // Handle update for parking space
