@@ -17,7 +17,7 @@ import common.Order;
 public class DBController {
 
     // Singleton instance (static so it's shared among all classes using this)
-    public static DBController instance = null;
+    private static DBController instance = null;
 
     // JDBC connection object
     private Connection conn;
