@@ -27,7 +27,7 @@ public class BparkClientController {
 
     // Input fields for updating orders
     @FXML private TextField updateOrderId;
-    @FXML private TextField updateField;
+    @FXML private ComboBox<String> fieldComboBox; // changed from TextField to ComboBox
     @FXML private TextField updateValue;
 
     // Label for displaying network connection information
@@ -77,20 +77,18 @@ public class BparkClientController {
             // Parse order ID from the text field (must be a number)
             int orderId = Integer.parseInt(updateOrderId.getText().trim());
 
-            // Read the field to update (e.g., "parking_space" or "order_date")
-            String field = updateField.getText().trim();
+            // Read the field to update from the ComboBox
+            String field = fieldComboBox.getValue();
 
             // Read the new value the user wants to apply
             String value = updateValue.getText().trim();
 
-            // Validate that both field and value are not empty (individually)
-            if (field.isEmpty() && value.isEmpty()) {
-                showAlert("Please fill in both 'Field to Update' and 'New Value'.", Alert.AlertType.WARNING);
+            // Validate that both field and value are not empty
+            if (field == null || field.isEmpty()) {
+                showAlert("Please select a field to update.", Alert.AlertType.WARNING);
                 return;
-            } else if (field.isEmpty()) {
-                showAlert("Please fill in the 'Field to Update'.", Alert.AlertType.WARNING);
-                return;
-            } else if (value.isEmpty()) {
+            }
+            if (value.isEmpty()) {
                 showAlert("Please fill in the 'New Value'.", Alert.AlertType.WARNING);
                 return;
             }
@@ -109,7 +107,6 @@ public class BparkClientController {
         }
     }
 
-
     /**
      * Updates the TableView UI with the list of orders received from the server.
      *
@@ -122,7 +119,6 @@ public class BparkClientController {
         // Load the data into the TableView, replacing any previous content
         orderTable.setItems(data);
     }
-
 
     /**
      * Utility method for displaying pop-up alerts (message boxes) in the GUI.
@@ -146,7 +142,6 @@ public class BparkClientController {
         // Display the alert window and wait until user closes it
         alert.show();
     }
-
 
     /**
      * Called automatically by JavaFX after the FXML file has been loaded.
@@ -179,7 +174,11 @@ public class BparkClientController {
         // Bind the 'placing date' column to the string of 'getDateOfPlacingAnOrder()'
         placingDateCol.setCellValueFactory(cell ->
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getDateOfPlacingAnOrder().toString()));
-    }
 
+        // Initialize ComboBox with allowed fields
+        ObservableList<String> allowedFields = FXCollections.observableArrayList("parking_space", "order_date");
+        fieldComboBox.setItems(allowedFields);
+        fieldComboBox.setValue("parking_space"); // Default value
+    }
 }
 

@@ -46,68 +46,75 @@ public class BparkServer extends AbstractServer {
      */
     @Override
     protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
-    	try {
-    	    // Case 1: Message is a String command
-    	    if (msg instanceof String) {
-    	        String command = (String) msg;
+        try {
+            // Case 1: Message is a String command
+            if (msg instanceof String) {
+                String command = (String) msg;
 
-    	        // If command is to get all orders
-    	        if (command.equals("getAllOrders")) {
-    	            ArrayList<Order> orders = db.getAllOrders();
+                // If command is to get all orders
+                if (command.equals("getAllOrders")) {
+                    ArrayList<Order> orders = db.getAllOrders();
 
-    	            if (orders.isEmpty()) {
-    	                // No orders found – return failure message
-    	                client.sendToClient(new ServerResponse(false, null, "There are no orders in the system"));
-    	            } else {
-    	                // Orders found – return them to client
-    	                client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));
-    	            }
-    	        }
+                    if (orders.isEmpty()) {
+                        // No orders found – return failure message
+                        client.sendToClient(new ServerResponse(false, null, "There are no orders in the system"));
+                    } else {
+                        // Orders found – return them to client
+                        client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));
+                    }
+                }
 
-    	    // Case 2: Message is an Object[] indicating an update request
-    	    } else if (msg instanceof Object[]) {
-    	        Object[] data = (Object[]) msg;
+            // Case 2: Message is an Object[] indicating an update request
+            } else if (msg instanceof Object[]) {
+                Object[] data = (Object[]) msg;
 
-    	        // Expected format: {"updateOrder", orderNumber, field, newValue}
-    	        if (data.length == 4 && "updateOrder".equals(data[0])) {
-    	            int orderNumber = (int) data[1];
-    	            String field = (String) data[2];
-    	            String newValue = (String) data[3];
+                // Expected format: {"updateOrder", orderNumber, field, newValue}
+                if (data.length == 4 && "updateOrder".equals(data[0])) {
+                    int orderNumber = (int) data[1];
+                    String field = (String) data[2];
+                    String newValue = (String) data[3];
 
-    	            // Perform the update via DBController
-    	            int success = db.updateOrderField(orderNumber, field, newValue);
+                    int success;
 
-    	            // Respond based on result code from update
-    	            switch (success) {
-    	                case 1:
-    	                    // Parking space updated
-    	                    client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Parking space was successfully changed for the order."));
-    	                    break;
-    	                case 2:
-    	                    client.sendToClient(new ServerResponse(false, null, "Parking space was unsuccessfully changed for the order."));
-    	                    break;
-    	                case 3:
-    	                    // Order date updated
-    	                    client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Order date was successfully changed for the order."));
-    	                    break;
-    	                case 4:
-    	                    client.sendToClient(new ServerResponse(false, null, "Order date was unsuccessfully changed for the order."));
-    	                    break;
-    	                case 5:
-    	                    client.sendToClient(new ServerResponse(false, null, "The field entered is incorrect."));
-    	                    break;
-    	                case 6:
-    	                    client.sendToClient(new ServerResponse(false, null, "This order number does not exist in the system."));
-    	                    break;
-    	            }
-    	        }
-    	    }
-    	} catch (IOException e) {
-    	    // Handle unexpected client communication failure
-    	    System.out.println("Client communication error: " + e.getMessage());
-    	}
+                    try {
+                        // Perform the update via DBController
+                        success = db.updateOrderField(orderNumber, field, newValue);
+                    } catch (Exception ex) {
+                        client.sendToClient(new ServerResponse(false, null, "Update failed: " + ex.getMessage()));
+                        return;
+                    }
 
+                    // Respond based on result code from update
+                    switch (success) {
+                        case 1:
+                            // Parking space updated
+                            client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Parking space was successfully changed for the order."));
+                            break;
+                        case 2:
+                            client.sendToClient(new ServerResponse(false, null, "Parking space was unsuccessfully changed for the order."));
+                            break;
+                        case 3:
+                            // Order date updated
+                            client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Order date was successfully changed for the order."));
+                            break;
+                        case 4:
+                            client.sendToClient(new ServerResponse(false, null, "Order date was unsuccessfully changed for the order."));
+                            break;
+                        case 5:
+                            client.sendToClient(new ServerResponse(false, null, "The field entered is incorrect."));
+                            break;
+                        case 6:
+                            client.sendToClient(new ServerResponse(false, null, "This order number does not exist in the system."));
+                            break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            // Handle unexpected client communication failure
+            System.out.println("Client communication error: " + e.getMessage());
+        }
     }
+
     
     /**
      * Called automatically by the OCSF framework when a new client connects to the server.
