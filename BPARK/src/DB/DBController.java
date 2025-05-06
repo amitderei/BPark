@@ -250,6 +250,29 @@ public class DBController {
         // SQL query to update the order_date field for a specific order
         String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
 
+        // Check current placing date for validation
+        String checkQuery = "SELECT date_of_placing_an_order FROM `order` WHERE order_number = ?";
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+            checkStmt.setInt(1, order_number);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                Date placingDate = rs.getDate("date_of_placing_an_order");
+                Date newOrderDate = Date.valueOf(newValue);
+
+                // Validate that the new order date is not before placing date
+                if (newOrderDate.before(placingDate)) {
+                    System.out.println("Error! order_date cannot be before date_of_placing_an_order.");
+                    return false;
+                }
+            } else {
+                System.out.println("Error! Order not found.");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("Validation failed: " + e.getMessage());
+            return false;
+        }
+
         // Try-with-resources ensures that stmt is closed automatically
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -271,5 +294,6 @@ public class DBController {
         // Return true if the update completed without exceptions
         return true;
     }
+
 
 }
