@@ -220,19 +220,18 @@ public class DBController {
 
             // Handle update for order date
             else if (field.equals("order_date")) {
-                if (updateOrderDateByOrderNumber(orderNumber, newValue)) {
-                    return 3; // Success
-                } else {
-                    return 4; // Failure to update date
+            	int status=updateOrderDateByOrderNumber(orderNumber, newValue);
+                switch (status) {
+                case 5:
+                	return 3;
+				case 1:
+                	return 4;
+				default:
+                	return 5;
                 }
-            }
-
-            // Field name is not recognized
-            else {
-                return 5; // Invalid field
+                
             }
         }
-
         // No order found with the provided order number
         return 6;
     }
@@ -246,7 +245,7 @@ public class DBController {
      * @param newValue A date string in the format "YYYY-MM-DD" representing the new order date.
      * @return true if the update was executed successfully, false otherwise.
      */
-    public boolean updateOrderDateByOrderNumber(int order_number, String newValue) {
+    public int updateOrderDateByOrderNumber(int order_number, String newValue) {
         // SQL query to update the order_date field for a specific order
         String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
 
@@ -262,15 +261,15 @@ public class DBController {
                 // Validate that the new order date is not before placing date
                 if (newOrderDate.before(placingDate)) {
                     System.out.println("Error! order_date cannot be before date_of_placing_an_order.");
-                    return false;
+                    return 1;
                 }
-            } else {
+            } else { //this else never act!!!!!
                 System.out.println("Error! Order not found.");
-                return false;
+                return 2;
             }
         } catch (Exception e) {
             System.out.println("Validation failed: " + e.getMessage());
-            return false;
+            return 3;
         }
 
         // Try-with-resources ensures that stmt is closed automatically
@@ -288,11 +287,11 @@ public class DBController {
         } catch (Exception e) {
             // Print the error message if an exception occurs during the update
             System.out.println("Error! " + e.getMessage());
-            return false;
+            return 4;
         }
 
         // Return true if the update completed without exceptions
-        return true;
+        return 5;
     }
 
 

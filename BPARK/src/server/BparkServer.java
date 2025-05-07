@@ -98,10 +98,10 @@ public class BparkServer extends AbstractServer {
                             client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Order date was successfully changed for the order."));
                             break;
                         case 4:
-                            client.sendToClient(new ServerResponse(false, null, "Order date was unsuccessfully changed for the order."));
+                            client.sendToClient(new ServerResponse(false, null, "order_date cannot be before date_of_placing_an_order."));
                             break;
                         case 5:
-                            client.sendToClient(new ServerResponse(false, null, "The field entered is incorrect."));
+                            client.sendToClient(new ServerResponse(false, null, "Order date was unsuccessfully changed for the order."));
                             break;
                         case 6:
                             client.sendToClient(new ServerResponse(false, null, "This order number does not exist in the system."));
