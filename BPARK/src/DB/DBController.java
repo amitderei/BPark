@@ -202,6 +202,7 @@ public class DBController {
      *         4 - Order date update failed
      *         5 - Invalid field name provided
      *         6 - Order with given ID does not exist
+     *         7 - Order date is in the past and not allowed
      */
     public int updateOrderField(int orderNumber, String field, String newValue) {
         // First, check if the order exists in the database
