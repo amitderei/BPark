@@ -106,6 +106,9 @@ public class BparkServer extends AbstractServer {
                         case 6:
                             client.sendToClient(new ServerResponse(false, null, "This order number does not exist in the system."));
                             break;
+                        case 7:
+                            client.sendToClient(new ServerResponse(false, null, "order_date cannot be in the past."));
+                            break;
                     }
                 }
             }

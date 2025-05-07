@@ -226,6 +226,8 @@ public class DBController {
                 	return 3;
 				case 1:
                 	return 4;
+                case 6:
+                    return 7;
 				default:
                 	return 5;
                 }
@@ -263,6 +265,14 @@ public class DBController {
                     System.out.println("Error! order_date cannot be before date_of_placing_an_order.");
                     return 1;
                 }
+                
+                // Validate that the new order date is not in the past
+                Date today = new Date(System.currentTimeMillis());
+                if (newOrderDate.before(today)) {
+                    System.out.println("Error! order_date cannot be in the past.");
+                    return 6;
+                }
+                
             } else { //this else never act!!!!!
                 System.out.println("Error! Order not found.");
                 return 2;
