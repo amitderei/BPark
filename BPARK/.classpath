@@ -7,12 +7,12 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="resources"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-8.0.13.jar">
+	<classpathentry kind="lib" path="C:/Users/Owner_5_23/Downloads/Ex-03-WorkbenchJDBC (3)/Ex-03-Workbench&amp;JDBC/mysql-connector-java-8.0.13.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/OCSF"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/BParkServer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/BPark_Server"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
