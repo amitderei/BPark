@@ -19,19 +19,6 @@ public class BparkServerApp extends Application {
      *
      * @param args Command-line arguments (not used in this application).
      */
-   /* public static void main(String[] args) {
-        // Create a new server instance bound to port 5555
-        BparkServer server = new BparkServer(5555);
-
-        try {
-            // Start the OCSF server to begin listening for incoming client connections
-            server.listen();
-        } catch (Exception e) {
-            // Print an error message if the server fails to start
-            System.out.println("Server error: " + e.getMessage());
-        }
-               
-    }*/
 	
 	public static void main( String args[] ) throws Exception
 	   {   
@@ -65,7 +52,7 @@ public class BparkServerApp extends Application {
 	}
 	
 	public void start(Stage primaryStage) throws Exception {	
-		System.out.println(getClass().getResource("/server/ConnectionToServerView.fxml"));
+	//	System.out.println(getClass().getResource("/server/ConnectionToServerView.fxml")); //check if file exists
 		Parent root = FXMLLoader.load(getClass().getResource("/server/ConnectionToServerView.fxml"));
 				
 		Scene scene = new Scene(root);
