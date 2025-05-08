@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/BPARK"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/OCSF"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Owner_5_23/Downloads/Ex-03-WorkbenchJDBC (3)/Ex-03-Workbench&amp;JDBC/mysql-connector-java-8.0.13.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
