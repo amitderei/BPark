@@ -13,5 +13,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/OCSF"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/BParkServer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
