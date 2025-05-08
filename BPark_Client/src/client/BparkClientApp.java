@@ -24,21 +24,27 @@ public class BparkClientApp extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // 1. Create a new BparkClient instance pointing to localhost:5555
-        client = new BparkClient("localhost", 5555);
 
-        // 2. Establish connection to the server
-        client.openConnection();
-
-        // 3. Load the GUI layout from the FXML file (orders_view.fxml)
+        // 1. Load the GUI layout from the FXML file (orders_view.fxml)
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/orders_view.fxml"));
         Parent root = loader.load(); // Load the full UI hierarchy
-
-        // 4. Get the controller associated with the FXML and connect it to the client
+        
+     
+        // 2. Get the controller associated with the FXML and connect it to the client
         BparkClientController controller = loader.getController();
-        controller.setClient(client);           // Controller knows the client
-        client.setController(controller);       // Client knows the controller
 
+        //3. Try to connect to port
+        try {
+	        client = new BparkClient("localhost", 5555);
+	        client.openConnection();
+	        controller.setClient(client); //controller know client
+	        client.setController(controller); //client know controller
+	    } catch (Exception e) {
+	        controller.setClient(null);  
+	        System.out.println("Could not connect to server: " + e.getMessage());
+	    }
+        
+        
         // 5. Setup and show the JavaFX window (stage)
         primaryStage.setTitle("BPARK Client");           // Set window title
         primaryStage.setScene(new Scene(root));          // Set the GUI layout

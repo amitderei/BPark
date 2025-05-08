@@ -54,7 +54,12 @@ public class BparkClientController {
 	 * @param client The active client instance used for communication.
 	 */
 	public void setClient(BparkClient client) {
+		  
 		this.client = client;
+		if (client==null) {
+			showAlert("No connection", Alert.AlertType.WARNING);
+			return;
+		}
 		try {
 			String host = InetAddress.getLocalHost().getHostName();
 			String ip = InetAddress.getLocalHost().getHostAddress();
