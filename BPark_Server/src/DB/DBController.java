@@ -152,38 +152,30 @@ public class DBController {
     }
 
     /**
-     * Updates the parking space assigned to a specific order.
-     * Executes an UPDATE query on the 'order' table using a prepared statement.
+     * Updates the parking space assigned to a specific order in the database.
      *
-     * @param update_parking_space The new parking space number to assign.
-     * @param order_number The unique identifier of the order to update.
-     * @return true if the update was successful, false if an error occurred.
+     * @param newParkingSpace The new parking space number to assign.
+     * @param orderNumber The unique identifier of the order to update.
+     * @return true if the order was found and updated, false otherwise.
      */
-    public boolean updateParkingSpace(int update_parking_space, int order_number) {
-        // SQL query to update the parking_space field of a specific order
+    public boolean updateParkingSpace(int newParkingSpace, int orderNumber) {
         String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 
-        // Try-with-resources ensures statement is closed automatically
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, newParkingSpace);
+            stmt.setInt(2, orderNumber);
 
-            // Set the new parking space value as the first parameter in the query
-            stmt.setInt(1, update_parking_space);
-
-            // Set the order number to identify which record to update
-            stmt.setInt(2, order_number);
-
-            // Execute the update command; affects one or more rows in the table
-            stmt.executeUpdate();
+            // Execute update and check if exactly one row was updated
+            int updatedRows = stmt.executeUpdate();
+            return updatedRows == 1;
 
         } catch (Exception e) {
-            // Print the exception message if the update fails
-            System.out.println("Error! " + e.getMessage());
+            // Log error details
+            e.printStackTrace();
             return false;
         }
-
-        // Return true if the update was executed without exceptions
-        return true;
     }
+
 
 
     /**
