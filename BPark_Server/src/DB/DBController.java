@@ -81,7 +81,7 @@ public class DBController {
             // Execute the query and store the result in a ResultSet
             ResultSet rs = stmt.executeQuery();
 
-            // If a record is found, the order exists
+            // If a record is found, the order exists. (it checks if we found at least one tuple)
             if (rs.next()) {
                 return true;
             }
@@ -118,12 +118,12 @@ public class DBController {
             while (rs.next()) {
                 // Extract values from the current row and construct an Order object
                 Order newOrder = new Order(
-                    rs.getInt("order_number"),                // primary key
-                    rs.getInt("parking_space"),               // assigned parking spot
-                    rs.getDate("order_date"),                 // date order created
-                    rs.getInt("confirmation_code"),           // confirmation code
-                    rs.getInt("subscriber_id"),               // ID of the subscriber
-                    rs.getDate("date_of_placing_an_order")    // actual placing date
+                    rs.getInt("order_number"),                
+                    rs.getInt("parking_space"),               
+                    rs.getDate("order_date"),                 
+                    rs.getInt("confirmation_code"),          
+                    rs.getInt("subscriber_id"),               
+                    rs.getDate("date_of_placing_an_order")    
                 );
 
                 // Add the order to the result list
