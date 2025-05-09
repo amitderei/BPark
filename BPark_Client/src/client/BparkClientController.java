@@ -68,6 +68,36 @@ public class BparkClientController {
 			showAlert("Could not retrieve network information", Alert.AlertType.WARNING);
 		}
 	}
+	
+    /**
+     * Called when the "Connect to Server" button is clicked.
+     * Tries to open a connection to the server on localhost:5555.
+     */
+    @FXML
+    public void connectToServer() {
+        try {
+            // Create and open a new client connection
+            BparkClient newClient = new BparkClient("localhost", 5555);
+            newClient.openConnection();
+
+            // Store the client in both the controller and the application-wide reference
+            this.client = newClient;
+            BparkClientApp.client = newClient;
+
+            // Link the controller to the client
+            newClient.setController(this);
+
+            // Update the UI with connection info
+            setClient(newClient);
+
+            // Show success message
+            showAlert("Connected successfully to server.", Alert.AlertType.INFORMATION);
+
+        } catch (Exception e) {
+            // Show error if connection fails
+            showAlert("Could not connect to server: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
 
 	/**
 	 * Called when the "Load Orders" button is clicked. Sends a request to the

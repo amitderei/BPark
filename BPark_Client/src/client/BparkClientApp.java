@@ -15,12 +15,13 @@ public class BparkClientApp extends Application {
     // Shared instance of the PrototypeClient used for communication with the server
     public static BparkClient client;
 
+
     /**
      * Called when the JavaFX application is launched.
-     * Initializes the network client, loads the FXML-based GUI, and binds the controller.
+     * Loads the FXML-based GUI without connecting to the server automatically.
      *
      * @param primaryStage the primary window of the JavaFX application.
-     * @throws Exception if loading FXML or connecting to server fails.
+     * @throws Exception if loading FXML fails.
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -28,24 +29,11 @@ public class BparkClientApp extends Application {
         // 1. Load the GUI layout from the FXML file (orders_view.fxml)
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/orders_view.fxml"));
         Parent root = loader.load(); // Load the full UI hierarchy
-        
-     
-        // 2. Get the controller associated with the FXML and connect it to the client
+
+        // 2. Get the controller associated with the FXML (no client binding here)
         BparkClientController controller = loader.getController();
 
-        //3. Try to connect to port
-        try {
-	        client = new BparkClient("localhost", 5555);
-	        client.openConnection();
-	        controller.setClient(client); //controller know client
-	        client.setController(controller); //client know controller
-	    } catch (Exception e) {
-	        controller.setClient(null);  
-	        System.out.println("Could not connect to server: " + e.getMessage());
-	    }
-        
-        
-        // 5. Setup and show the JavaFX window (stage)
+        // 3. Show the GUI without automatic connection to the server
         primaryStage.setTitle("BPARK Client");           // Set window title
         primaryStage.setScene(new Scene(root));          // Set the GUI layout
         primaryStage.show();                             // Show the window
