@@ -62,38 +62,36 @@ public class DBController {
     }
 
     /**
-     * Checks whether an order with the specified order number exists in the database.
-     * Executes a SELECT query using a prepared statement to prevent SQL injection.
+     * Checks if an order with the specified order number exists in the database.
+     * Executes a SELECT query using a prepared statement to safely check for existence.
      *
-     * @param order_number The unique order number to look for.
+     * @param orderNumber The unique order number to check.
      * @return true if the order exists, false otherwise.
      */
-    public boolean getOrderByOrderNumber(int order_number) {
-        // SQL query to retrieve a specific order by its primary key
+    public boolean orderExists(int orderNumber) {
+        // SQL query to check if an order with the given number exists
         String query = "SELECT * FROM `order` WHERE order_number=?";
 
-        // Try-with-resources ensures that stmt and rs are closed automatically
+        // Use try-with-resources to ensure the PreparedStatement is closed automatically
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            // Set the order number parameter in the query
+            stmt.setInt(1, orderNumber);
 
-            // Inject the provided order number into the query's first parameter
-            stmt.setInt(1, order_number);
-
-            // Execute the query and store the result in a ResultSet
-            ResultSet rs = stmt.executeQuery();
-
-            // If a record is found, the order exists. (it checks if we found at least one tuple)
-            if (rs.next()) {
-                return true;
+            // Use try-with-resources to ensure the ResultSet is closed automatically
+            try (ResultSet rs = stmt.executeQuery()) {
+                // Return true if a record exists in the result set
+                return rs.next();
             }
 
-        } catch (Exception e) {
-            // Log any exception that occurs during the query execution
-            System.out.println("Error! " + e.getMessage());
+        } catch (SQLException e) {
+            // Log the error details for debugging purposes
+            System.err.println("Error checking if order exists: " + e.getMessage());
         }
 
-        // If no result was found or an error occurred, return false
+        // Return false if no record is found or if an error occurs
         return false;
     }
+
 
 
     /**
@@ -190,7 +188,7 @@ public class DBController {
      */
     public int updateOrderField(int orderNumber, String field, String newValue) {
         // First, check if the order exists in the database
-        boolean hasOrder = getOrderByOrderNumber(orderNumber);
+        boolean hasOrder = orderExists(orderNumber);
 
         if (hasOrder) {
             // Handle update for parking space
