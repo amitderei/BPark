@@ -155,16 +155,16 @@ public class DBController {
             stmt.setInt(1, newParkingSpace);
             stmt.setInt(2, orderNumber);
 
-            // Execute update and check if exactly one row was updated
+            // Execute the update and check if exactly one row was affected
             int updatedRows = stmt.executeUpdate();
             return updatedRows == 1;
 
-        } catch (Exception e) {
-            // Log error details
-            e.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Error updating parking space for order " + orderNumber + ": " + e.getMessage());
             return false;
         }
     }
+
 
 
 
@@ -223,69 +223,77 @@ public class DBController {
 
 
     /**
-     * Updates the order_date field of a specific order in the database.
-     * Converts the provided string into a java.sql.Date and applies it to the matching order record.
+     * Updates the 'order_date' of an order after performing validation checks.
+     * 
+     * Validations performed:
+     * - The order must exist in the database.
+     * - The new date must not be earlier than the placing date.
+     * - The new date must not be in the past.
      *
-     * @param order_number The unique identifier of the order to be updated.
-     * @param newValue A date string in the format "YYYY-MM-DD" representing the new order date.
-     * @return true if the update was executed successfully, false otherwise.
+     * @param orderNumber The unique identifier of the order to update.
+     * @param newValue    The new date to set (format: "YYYY-MM-DD").
+     * @return Status code:
+     *         1 - New date is before placing date (invalid)
+     *         2 - Order not found
+     *         3 - Error during validation check
+     *         4 - Error during update execution
+     *         5 - Update successful
+     *         6 - New date is in the past (invalid)
      */
-    public int updateOrderDateByOrderNumber(int order_number, String newValue) {
-        // SQL query to update the order_date field for a specific order
+    public int updateOrderDateByOrderNumber(int orderNumber, String newValue) {
         String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
-
-        // Check current placing date for validation
         String checkQuery = "SELECT date_of_placing_an_order FROM `order` WHERE order_number = ?";
+
         try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
-            checkStmt.setInt(1, order_number);
+            // Set the order number for the validation query
+            checkStmt.setInt(1, orderNumber);
             ResultSet rs = checkStmt.executeQuery();
+
             if (rs.next()) {
+                // Extract placing date from the database
                 Date placingDate = rs.getDate("date_of_placing_an_order");
                 Date newOrderDate = Date.valueOf(newValue);
 
-                // Validate that the new order date is not before placing date
+                // Check if the new date is before the placing date
                 if (newOrderDate.before(placingDate)) {
                     System.out.println("Error! order_date cannot be before date_of_placing_an_order.");
                     return 1;
                 }
-                
-                // Validate that the new order date is not in the past
+
+                // Check if the new date is in the past
                 Date today = new Date(System.currentTimeMillis());
                 if (newOrderDate.before(today)) {
                     System.out.println("Error! order_date cannot be in the past.");
                     return 6;
                 }
-                
-            } else { //this else never act!!!!!
+
+            } else {
+                // No matching order found
                 System.out.println("Error! Order not found.");
                 return 2;
             }
+
         } catch (Exception e) {
+            // Error during validation query
             System.out.println("Validation failed: " + e.getMessage());
             return 3;
         }
 
-        // Try-with-resources ensures that stmt is closed automatically
+        // Perform the update if validations passed
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            // Convert the input string to a java.sql.Date and set as the first parameter
-            stmt.setDate(1, Date.valueOf(newValue));
-
-            // Set the second parameter: the order number to identify which record to update
-            stmt.setInt(2, order_number);
-
-            // Execute the update command on the database
-            stmt.executeUpdate();
-
+            stmt.setDate(1, Date.valueOf(newValue)); // Set new date
+            stmt.setInt(2, orderNumber);             // Set order number
+            stmt.executeUpdate();                    // Execute update
         } catch (Exception e) {
-            // Print the error message if an exception occurs during the update
+            // Error during update execution
             System.out.println("Error! " + e.getMessage());
             return 4;
         }
 
-        // Return true if the update completed without exceptions
+        // Update completed successfully
         return 5;
     }
+
 
 
 }
