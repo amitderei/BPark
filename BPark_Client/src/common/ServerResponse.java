@@ -9,7 +9,11 @@ import java.io.Serializable;
  */
 public class ServerResponse implements Serializable {
 
-    private boolean succeed; // Indicates whether the operation succeeded
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private boolean succeed; // Indicates whether the operation succeeded
     private Object data;     // Data returned by the server 
     private String msg;      // Message to display to the user (success or error message)
 
