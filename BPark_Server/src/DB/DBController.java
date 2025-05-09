@@ -97,47 +97,39 @@ public class DBController {
 
 
     /**
-     * Retrieves all orders from the database into a list.
-     * This method executes a SELECT * query on the 'order' table and 
-     * maps each row to an Order object.
+     * Retrieves all orders from the database and returns them as a list.
+     * Executes a SELECT * query on the 'order' table and maps each row to an Order object.
      *
-     * @return ArrayList<Order> containing all orders from the DB
+     * @return List of all orders from the database.
      */
     public ArrayList<Order> getAllOrders() {
-        // Define SQL query to fetch all orders
+        // Define the SQL query to fetch all columns from the 'order' table
         String query = "SELECT * FROM `order`";
-
-        // Initialize list to hold order objects
         ArrayList<Order> orders = new ArrayList<>();
 
-        // Prepare and execute the SQL query
         try (PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
-            // Iterate over each row in the result set
+            // Go through each row and create an Order object
             while (rs.next()) {
-                // Extract values from the current row and construct an Order object
                 Order newOrder = new Order(
-                    rs.getInt("order_number"),                
-                    rs.getInt("parking_space"),               
-                    rs.getDate("order_date"),                 
-                    rs.getInt("confirmation_code"),          
-                    rs.getInt("subscriber_id"),               
-                    rs.getDate("date_of_placing_an_order")    
+                    rs.getInt("order_number"),
+                    rs.getInt("parking_space"),
+                    rs.getDate("order_date"),
+                    rs.getInt("confirmation_code"),
+                    rs.getInt("subscriber_id"),
+                    rs.getDate("date_of_placing_an_order")
                 );
-
-                // Add the order to the result list
                 orders.add(newOrder);
             }
 
-        } catch (Exception e) {
-            // Log exception details for debugging
-            System.out.println("Error! " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error retrieving orders: " + e.getMessage());
         }
 
-        // Return the list of retrieved orders
         return orders;
     }
+
 
 
     /**
