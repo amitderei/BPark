@@ -120,32 +120,21 @@ public class Server extends AbstractServer {
 
     
     /**
-     * Called automatically by the OCSF framework when a new client connects to the server.
-     * This method retrieves the client's IP address and hostname, and logs the connection details
-     * to the server console for monitoring and debugging purposes.
+     * Logs the IP address and hostname of a newly connected client.
      *
-     * This implementation is primarily used to fulfill the project requirement of displaying
-     * network information about connected clients.
-     *
-     * @param client The client that just connected to the server.
+     * @param client The client that connected.
      */
     @Override
     protected void clientConnected(ConnectionToClient client) {
         try {
-            // Retrieve the IP address of the connected client
             String clientIP = client.getInetAddress().getHostAddress();
-
-            // Retrieve the hostname of the connected client
             String clientHost = client.getInetAddress().getHostName();
-
-            // Log the client's connection details to the server console
             System.out.println("Client connected from: " + clientHost + " (" + clientIP + ")");
-            
         } catch (Exception e) {
-            // Handle case where client info cannot be retrieved (e.g., network issue)
             System.out.println("Could not retrieve client info: " + e.getMessage());
         }
     }
+
 
 
 }
