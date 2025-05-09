@@ -31,8 +31,8 @@
                 <TextField fx:id="updateOrderId" promptText="Order Number" />
                 <ComboBox fx:id="fieldComboBox" promptText="Field to Update" />
                 <TextField fx:id="updateValue" promptText="New Value" />
-                <Button onAction="#updateOrder" text="Update" />
-                <Button onAction="#loadOrders" text="Load Orders" />
+                <Button fx:id="updateButton" onAction="#updateOrder" text="Update" disable="true" />
+                <Button fx:id="loadButton" onAction="#loadOrders" text="Load Orders" disable="true" />
             </HBox>
         </VBox>
     </bottom>

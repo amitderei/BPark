@@ -47,7 +47,9 @@ public class BparkClientApp extends Application {
      */
     @Override
     public void stop() throws Exception {
-        client.closeConnection();
+        if (client != null) {
+            client.closeConnection();
+        }
     }
 
     /**

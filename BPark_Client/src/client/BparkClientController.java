@@ -16,6 +16,12 @@ import java.util.ArrayList;
  */
 public class BparkClientController {
 
+	@FXML
+	private Button updateButton;
+
+	@FXML
+	private Button loadButton;
+	
 	// TableView and column bindings for displaying Order data
 	@FXML
 	private TableView<Order> orderTable;
@@ -54,20 +60,37 @@ public class BparkClientController {
 	 * @param client The active client instance used for communication.
 	 */
 	public void setClient(BparkClient client) {
-		  
-		this.client = client;
-		if (client==null) {
-			showAlert("No connection", Alert.AlertType.WARNING);
-			return;
-		}
-		try {
-			String host = InetAddress.getLocalHost().getHostName();
-			String ip = InetAddress.getLocalHost().getHostAddress();
-			connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
-		} catch (Exception e) {
-			showAlert("Could not retrieve network information", Alert.AlertType.WARNING);
-		}
+	    this.client = client;
+
+	    // Check if connection failed
+	    if (client == null) {
+	        showAlert("No connection", Alert.AlertType.WARNING);
+	        // Keep action buttons disabled when there is no connection
+	        updateButton.setDisable(true);
+	        loadButton.setDisable(true);
+	        return;
+	    }
+
+	    try {
+	        // Get local host information
+	        String host = InetAddress.getLocalHost().getHostName();
+	        String ip = InetAddress.getLocalHost().getHostAddress();
+
+	        // Update connection status label
+	        connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
+
+	        // Enable action buttons after successful connection
+	        updateButton.setDisable(false);
+	        loadButton.setDisable(false);
+
+	    } catch (Exception e) {
+	        showAlert("Could not retrieve network information", Alert.AlertType.WARNING);
+	        // Keep action buttons disabled if network info retrieval fails
+	        updateButton.setDisable(true);
+	        loadButton.setDisable(true);
+	    }
 	}
+
 	
     /**
      * Called when the "Connect to Server" button is clicked.
