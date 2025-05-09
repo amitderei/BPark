@@ -13,9 +13,9 @@ import java.util.ArrayList;
  * Extends AbstractClient from the OCSF framework to communicate with the server,
  * and passes data to the JavaFX GUI controller.
  */
-public class BparkClient extends AbstractClient {
+public class Client extends AbstractClient {
 
-    private BparkClientController controller;
+    private ClientController controller;
 
     /**
      * Constructs a new PrototypeClient instance with specified host and port.
@@ -23,7 +23,7 @@ public class BparkClient extends AbstractClient {
      * @param host the IP or hostname of the server.
      * @param port the server's listening port.
      */
-    public BparkClient(String host, int port) {
+    public Client(String host, int port) {
         super(host, port);
     }
 
@@ -32,14 +32,14 @@ public class BparkClient extends AbstractClient {
      *
      * @param controller the JavaFX controller for updating the interface.
      */
-    public void setController(BparkClientController controller) {
+    public void setController(ClientController controller) {
         this.controller = controller;
     }
 
     /**
      * @return the currently assigned GUI controller.
      */
-    public BparkClientController getController() {
+    public ClientController getController() {
         return controller;
     }
 

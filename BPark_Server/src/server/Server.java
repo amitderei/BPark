@@ -11,7 +11,7 @@ import common.ServerResponse;
  * Represents the server side of the BPARK prototype.
  * Extends AbstractServer from OCSF to handle client communication.
  */
-public class BparkServer extends AbstractServer {
+public class Server extends AbstractServer {
 
     private DBController db;
 
@@ -20,7 +20,7 @@ public class BparkServer extends AbstractServer {
      *
      * @param port The port the server will listen on.
      */
-    public BparkServer(int port) {
+    public Server(int port) {
         super(port);                           // Initialize AbstractServer with port
         db = DBController.getInstance();       // Get singleton DB controller instance
     }

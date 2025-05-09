@@ -1,7 +1,7 @@
 package server;
 
 
-import client.BparkClientController;
+import client.ClientController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,7 +13,7 @@ import javafx.stage.Stage;
  * This class is responsible for starting the server, binding it to a port,
  * and initializing the listening process using the OCSF framework.
  */
-public class BparkServerApp extends Application {
+public class ServerApp extends Application {
 	
     /**
      * Main method – the starting point of the server application.
@@ -41,7 +41,7 @@ public class BparkServerApp extends Application {
 	        	System.out.println("ERROR - Could not connect!");
 	        }
 	    	
-	        BparkServer sv = new BparkServer(port);
+	        Server sv = new Server(port);
 	        
 	        try 
 	        {
@@ -57,7 +57,7 @@ public class BparkServerApp extends Application {
 	//	System.out.println(getClass().getResource("/server/ConnectionToServerView.fxml")); //check if file exists
 	    FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/orders_view.fxml"));
 		Parent root = FXMLLoader.load(getClass().getResource("/server/ConnectionToServerView.fxml"));
-		BparkClientController controller = loader.getController();		
+		ClientController controller = loader.getController();		
 		Scene scene = new Scene(root);
 		
 		

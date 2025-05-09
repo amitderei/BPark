@@ -59,7 +59,7 @@ public class ServerController {
             // Prepare the server with the specified port
             Stage primaryStage = new Stage();
             FXMLLoader loader = new FXMLLoader();
-            BparkServerApp.runServer(p);
+            ServerApp.runServer(p);
         }
     }
 }

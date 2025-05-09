@@ -10,10 +10,10 @@ import javafx.stage.Stage;
  * Entry point for launching the client-side application of BPARK.
  * This class sets up the JavaFX UI and initializes the client-server connection.
  */
-public class BparkClientApp extends Application {
+public class ClientApp extends Application {
 
     // Shared instance of the PrototypeClient used for communication with the server
-    public static BparkClient client;
+    public static Client client;
 
 
     /**
@@ -31,7 +31,7 @@ public class BparkClientApp extends Application {
         Parent root = loader.load(); // Load the full UI hierarchy
 
         // 2. Get the controller associated with the FXML (no client binding here)
-        BparkClientController controller = loader.getController();
+        ClientController controller = loader.getController();
 
         // 3. Show the GUI without automatic connection to the server
         primaryStage.setTitle("BPARK Client");           // Set window title

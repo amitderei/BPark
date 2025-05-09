@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * user interactions, updating the UI, and communicating with the
  * PrototypeClient (which handles the network logic).
  */
-public class BparkClientController {
+public class ClientController {
 
 	@FXML
 	private Button updateButton;
@@ -51,7 +51,7 @@ public class BparkClientController {
 	private Label connectionLabel;
 
 	// Reference to the client logic (OCSF communication)
-	private BparkClient client;
+	private Client client;
 
 	/**
 	 * Initializes the controller with a reference to the connected client, and
@@ -59,7 +59,7 @@ public class BparkClientController {
 	 *
 	 * @param client The active client instance used for communication.
 	 */
-	public void setClient(BparkClient client) {
+	public void setClient(Client client) {
 	    this.client = client;
 
 	    // Check if connection failed
@@ -100,12 +100,12 @@ public class BparkClientController {
     public void connectToServer() {
         try {
             // Create and open a new client connection
-            BparkClient newClient = new BparkClient("localhost", 5555);
+            Client newClient = new Client("localhost", 5555);
             newClient.openConnection();
 
             // Store the client in both the controller and the application-wide reference
             this.client = newClient;
-            BparkClientApp.client = newClient;
+            ClientApp.client = newClient;
 
             // Link the controller to the client
             newClient.setController(this);
