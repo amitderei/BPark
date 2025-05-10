@@ -184,6 +184,9 @@ public class ClientController {
 			// Send update request to the server
 			// Format: ["updateOrder", orderId, field, value]
 			client.updateOrder(orderId, field, value);
+			updateOrderId.clear();
+			updateValue.clear();
+			
 
         } catch (NumberFormatException e) {
             // Show warning if the order number is not a valid integer
@@ -212,7 +215,11 @@ public class ClientController {
         // Set the new data in the TableView (overwrites previous data)
         orderTable.setItems(data);
         
-        showStatus("Orders loaded successfully.",true);
+        //showStatus("Orders loaded successfully.",true);
+    }
+    
+    public void displayTrueMsg(String str) {
+    	showStatus(str ,true);
     }
 
 

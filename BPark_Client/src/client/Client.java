@@ -85,6 +85,7 @@ public class Client extends AbstractClient {
                 if (dataList.get(0) instanceof Order) {
                     @SuppressWarnings("unchecked")
                     ArrayList<Order> orders = (ArrayList<Order>) dataList;
+                    controller.displayTrueMsg(response.getMsg());
 
                     // Update the GUI table if a controller is linked to this client
                     if (controller != null) {
@@ -107,6 +108,7 @@ public class Client extends AbstractClient {
         try {
             // Send a command to the server requesting all orders
             sendToServer("getAllOrders");
+            controller.displayTrueMsg("Orders loaded successfully");
         } catch (IOException e) {
             // Log the error if the message could not be sent to the server
             System.err.println("Failed to send 'getAllOrders' request to server: " + e.getMessage());
