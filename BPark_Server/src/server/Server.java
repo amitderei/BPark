@@ -3,9 +3,10 @@ package server;
 import ocsf.server.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import DB.DBController;
+
 import common.Order;
 import common.ServerResponse;
+import db.DBController;
 
 /**
  * Represents the server side of the BPARK prototype.
