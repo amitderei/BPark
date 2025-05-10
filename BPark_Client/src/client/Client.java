@@ -15,17 +15,19 @@ import java.util.ArrayList;
  */
 public class Client extends AbstractClient {
 
-    private ClientController controller;
+	private ClientController controller;  // Reference to the client's GUI controller
 
-    /**
-     * Constructs a new PrototypeClient instance with specified host and port.
-     *
-     * @param host the IP or hostname of the server.
-     * @param port the server's listening port.
-     */
-    public Client(String host, int port) {
-        super(host, port);
-    }
+	/**
+	 * Constructs a new Client instance with the specified server address and port.
+	 * Initializes the connection parameters but does not open the connection yet.
+	 *
+	 * @param host the server's hostname or IP address
+	 * @param port the server's listening port
+	 */
+	public Client(String host, int port) {
+	    super(host, port);  // Passes host and port to the parent class (AbstractClient)
+	}
+
 
     /**
      * Links this client with the GUI controller to allow GUI updates.
@@ -44,43 +46,44 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * Handles messages received from the server.
-     * - If the message is a String, it is shown as a pop-up alert.
-     * - If the message is a list of Order objects, they are passed to the controller for display.
+     * Processes a response received from the server.
+     * - Shows a pop-up message to the user indicating success or failure.
+     * - If the response contains a list of Order objects, updates the orders table in the GUI.
+     * - If the response is invalid or does not contain relevant data, no table update occurs.
      *
-     * @param msg the object received from the server.
+     * @param msg the server response, expected to be of type ServerResponse
      */
     @Override
     protected void handleMessageFromServer(Object msg) {
-        // Cast the received object from the server to a ServerResponse
+        // Validate that the received message is indeed a ServerResponse
+        if (!(msg instanceof ServerResponse)) {
+            System.err.println("Received unexpected message type from server: " + msg.getClass());
+            return; // Exit early if message is not as expected
+        }
+
+        // Safely cast the message to ServerResponse
         ServerResponse response = (ServerResponse) msg;
 
-        // Run UI updates on the JavaFX Application Thread
+        // Ensure that all GUI updates are executed on the JavaFX Application Thread
         Platform.runLater(() -> {
+            // Determine alert type based on response success status
+            Alert.AlertType alertType = response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
 
-            // Create an alert box: use INFORMATION if succeed == true, else ERROR
-            Alert alert = new Alert(
-                response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
-            );
-
-            // Set the alert box title
+            // Create and configure the alert with title and message content
+            Alert alert = new Alert(alertType);
             alert.setTitle("System Message");
-
-            // Set the content of the alert from the server message
             alert.setContentText(response.getMsg());
+            alert.showAndWait(); // Display the alert and wait for user confirmation
 
-            // Display the alert and wait for user to close it
-            alert.showAndWait();
+            // Proceed to update the table only if the response is successful and contains data
+            if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()) {
 
-            // Only process data if the response succeeded and the data is an ArrayList
-            if (response.isSucceed() && response.getData() instanceof ArrayList<?>) {
-                ArrayList<?> data = (ArrayList<?>) response.getData();
+                // Check if the first element is an Order (basic type-safety validation)
+                if (dataList.get(0) instanceof Order) {
+                    @SuppressWarnings("unchecked")
+                    ArrayList<Order> orders = (ArrayList<Order>) dataList;
 
-                // Check if the list is not empty and contains Order objects
-                if (!data.isEmpty() && data.get(0) instanceof Order) {
-                    ArrayList<Order> orders = (ArrayList<Order>) data;
-
-                    // If controller exists, update the GUI with the orders
+                    // Update the GUI table if a controller is linked to this client
                     if (controller != null) {
                         controller.displayOrders(orders);
                     }
@@ -89,32 +92,41 @@ public class Client extends AbstractClient {
         });
     }
 
+
     
 
     /**
-     * Sends a request to the server to fetch all orders.
+     * Sends a request to the server asking for all existing orders.
+     * Sends the command "getAllOrders" to trigger data retrieval on the server side.
      */
     public void requestAllOrders() {
         try {
+            // Send a command to the server requesting all orders
             sendToServer("getAllOrders");
         } catch (IOException e) {
-            System.out.println("Error sending request: " + e.getMessage());
+            // Log the error if the message could not be sent to the server
+            System.err.println("Failed to send 'getAllOrders' request to server: " + e.getMessage());
         }
     }
 
+
     /**
      * Sends a request to the server to update a specific field in an order.
+     * The server is expected to process the update and return a confirmation or error message.
      *
-     * @param orderNumber the ID of the order to update.
-     * @param field the name of the field to update.
-     * @param newValue the new value to set.
+     * @param orderNumber the ID of the order to update
+     * @param field the name of the field to update (e.g., "order_date", "parking_space")
+     * @param newValue the new value to set for the specified field
      */
     public void updateOrder(int orderNumber, String field, String newValue) {
         try {
+            // Prepare the update command as an object array and send to server
             sendToServer(new Object[]{"updateOrder", orderNumber, field, newValue});
         } catch (IOException e) {
-            System.out.println("Error sending update: " + e.getMessage());
+            // Log the error if the update request fails to send
+            System.err.println("Failed to send 'updateOrder' request to server: " + e.getMessage());
         }
     }
+
 }
 
