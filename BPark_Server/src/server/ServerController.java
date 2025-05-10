@@ -48,7 +48,7 @@ public class ServerController {
 
         // Validate that the port field is not empty
         if (p.isEmpty()) {
-            showAlert("Connection Error", "You must enter a port number");
+            showAlert(Alert.AlertType.WARNING, "Connection Error", "You must enter a port number");
             return;
         }
 
@@ -58,13 +58,13 @@ public class ServerController {
         try {
             port = Integer.parseInt(p);
         } catch (NumberFormatException e) {
-            showAlert("Connection Error", "Port must be a number");
+            showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be a number");
             return;
         }
 
         // Validate that the port number is in the valid range (1024–65535)
         if (port < 1024 || port > 65535) {
-            showAlert("Connection Error", "Port must be between 1024 and 65535");
+            showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be between 1024 and 65535");
             return;
         }
 
@@ -76,17 +76,19 @@ public class ServerController {
     }
 
     /**
-     * Utility method to display a warning popup with a customizable title and message.
+     * Utility method to display a customizable alert popup.
      *
+     * @param type    The type of alert (e.g., INFORMATION, WARNING, ERROR).
      * @param title   The title of the popup window.
      * @param message The message to display in the popup.
      */
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);      // Set the popup title
-        alert.setHeaderText(null);  // No header text for cleaner look
-        alert.setContentText(message); // Set the actual message content
-        alert.showAndWait();        // Display the popup and wait for user to close it
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);              // Set the alert title dynamically
+        alert.setHeaderText(null);          // No header text for cleaner appearance
+        alert.setContentText(message);      // Set the actual message content
+        alert.showAndWait();                // Display the alert and wait for user action
     }
+
 }
 
