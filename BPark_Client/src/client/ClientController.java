@@ -52,6 +52,9 @@ public class ClientController {
 
 	// Reference to the client logic (OCSF communication)
 	private Client client;
+	
+	@FXML
+	private Label statusLabel;
 
 	/**
 	 * Initializes the controller with a reference to the connected client,
@@ -64,6 +67,8 @@ public class ClientController {
 
 	    // Check if connection failed
 	    if (client == null) {
+	    	showStatus("No connection to server. Please connect first.",false);
+            showAlert("No connection to server. Please connect first.", Alert.AlertType.WARNING);
 	        showAlert("No connection to server. Please connect first.", Alert.AlertType.WARNING);
 	        System.err.println("Client is null. Cannot establish connection.");
 	        updateButton.setDisable(true);
@@ -85,6 +90,7 @@ public class ClientController {
 
 	    } catch (Exception e) {
 	        // Show warning if host info cannot be retrieved
+	    	showStatus("Could not retrieve network information.",false);
 	        showAlert("Could not retrieve network information: " + e.getMessage(), Alert.AlertType.WARNING);
 	        System.err.println("Error retrieving network information: " + e.getMessage());
 	        updateButton.setDisable(true);
@@ -119,10 +125,12 @@ public class ClientController {
 	        setClient(newClient);
 
 	        // Show success message
+	        showStatus("Connected successfully to server.",true);
 	        showAlert("Connected successfully to server.", Alert.AlertType.INFORMATION);
 
 	    } catch (Exception e) {
 	        // Show error if connection fails and log to console
+	    	showStatus("Failed to connect to server.",false);
 	        showAlert("Could not connect to server: " + e.getMessage(), Alert.AlertType.ERROR);
 	        System.err.println("Failed to connect to server: " + e.getMessage());
 	    }
@@ -137,8 +145,10 @@ public class ClientController {
     public void loadOrders() {
         try {
             client.requestAllOrders();
+            showStatus("Requested all orders from server.",true);
         } catch (Exception e) {
             // Show error to user and log the technical details to console
+        	showStatus("Failed to request orders.",false);
             showAlert("Failed to request orders: " + e.getMessage(), Alert.AlertType.ERROR);
             System.err.println("Failed to request orders: " + e.getMessage());
         }
@@ -164,10 +174,12 @@ public class ClientController {
 
 			// Validate that both field and value are not empty
 			if (field == null || field.isEmpty()) {
+				showStatus("Please select a field to update.",false);
 				showAlert("Please select a field to update.", Alert.AlertType.WARNING);
 				return;
 			}
 			if (value.isEmpty()) {
+				showStatus("Please fill in the 'New Value'.",false);
 				showAlert("Please fill in the 'New Value'.", Alert.AlertType.WARNING);
 				return;
 			}
@@ -178,11 +190,13 @@ public class ClientController {
 
         } catch (NumberFormatException e) {
             // Show warning if the order number is not a valid integer
+        	showStatus("Order number must be a valid integer.",false);
             showAlert("Order number must be a valid integer.", Alert.AlertType.WARNING);
             System.err.println("Invalid order number input: " + e.getMessage());
 
         } catch (Exception e) {
             // Show error and log unexpected issues
+        	showStatus("Update failed.",false);
             showAlert("Update failed: " + e.getMessage(), Alert.AlertType.ERROR);
             System.err.println("Unexpected error during update: " + e.getMessage());
         }
@@ -200,6 +214,8 @@ public class ClientController {
 
         // Set the new data in the TableView (overwrites previous data)
         orderTable.setItems(data);
+        
+        showStatus("Orders loaded successfully.",true);
     }
 
 
@@ -265,4 +281,20 @@ public class ClientController {
 		fieldComboBox.setItems(allowedFields);
 		fieldComboBox.setValue("parking_space"); // Default value
 	}
+	
+	/**
+	 * Displays a status message in the status label with appropriate color.
+	 * @param message The status message to display.
+	 * @param isSuccess True for success (green), False for error/warning (red).
+	 */
+	public void showStatus(String message, boolean isSuccess) {
+	    statusLabel.setText(message);
+	    if (isSuccess) {
+	        statusLabel.setStyle("-fx-text-fill: green;");
+	    } else {
+	        statusLabel.setStyle("-fx-text-fill: red;");
+	    }
+	}
+
+
 }

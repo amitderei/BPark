@@ -34,6 +34,7 @@
                 <Button fx:id="updateButton" onAction="#updateOrder" text="Update" disable="true" />
                 <Button fx:id="loadButton" onAction="#loadOrders" text="Load Orders" disable="true" />
             </HBox>
+            <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;" />
         </VBox>
     </bottom>
 
