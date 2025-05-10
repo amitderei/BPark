@@ -261,7 +261,7 @@ public class DBController {
                 }
 
                 // Check if the new date is in the past
-                Date today = new Date(System.currentTimeMillis());
+                Date today = Date.valueOf(java.time.LocalDate.now());
                 if (newOrderDate.before(today)) {
                     System.out.println("Error! order_date cannot be in the past.");
                     return 6;

@@ -31,6 +31,7 @@
                 <TextField fx:id="updateOrderId" promptText="Order Number" />
                 <ComboBox fx:id="fieldComboBox" promptText="Field to Update" />
                 <TextField fx:id="updateValue" promptText="New Value" />
+                <DatePicker fx:id="updateDatePicker" promptText="New Date" visible="false" managed="false" />
                 <Button fx:id="updateButton" onAction="#updateOrder" text="Update" disable="true" />
                 <Button fx:id="loadButton" onAction="#loadOrders" text="Load Orders" disable="true" />
             </HBox>

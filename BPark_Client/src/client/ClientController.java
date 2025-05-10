@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.net.InetAddress;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -45,6 +46,9 @@ public class ClientController {
 	private ComboBox<String> fieldComboBox; // changed from TextField to ComboBox
 	@FXML
 	private TextField updateValue;
+	
+	@FXML
+	private DatePicker updateDatePicker;
 
 	// Label for displaying network connection information
 	@FXML
@@ -167,40 +171,55 @@ public class ClientController {
 			String field = fieldComboBox.getValue();
 
 			// Read the new value the user wants to apply
-			String value = updateValue.getText().trim();
+			String value;
 
-			// Validate that both field and value are not empty
-			if (field == null || field.isEmpty()) {
-				showStatus("Please select a field to update.",false);
-				showAlert("Please select a field to update.", Alert.AlertType.WARNING);
-				return;
+			// Check if the selected field is "order_date" and use DatePicker instead of TextField
+			if ("order_date".equals(field)) {
+				if (updateDatePicker.getValue() == null) {
+					showStatus("Please select a date.", false);
+					showAlert("Please select a date.", Alert.AlertType.WARNING);
+					return;
+				}
+				value = updateDatePicker.getValue().toString(); // Convert LocalDate to String
+			} else {
+				value = updateValue.getText().trim();
+
+				// Validate that the value is not empty
+				if (value.isEmpty()) {
+					showStatus("Please fill in the 'New Value'.", false);
+					showAlert("Please fill in the 'New Value'.", Alert.AlertType.WARNING);
+					return;
+				}
 			}
-			if (value.isEmpty()) {
-				showStatus("Please fill in the 'New Value'.",false);
-				showAlert("Please fill in the 'New Value'.", Alert.AlertType.WARNING);
+
+			// Validate that the field is not empty
+			if (field == null || field.isEmpty()) {
+				showStatus("Please select a field to update.", false);
+				showAlert("Please select a field to update.", Alert.AlertType.WARNING);
 				return;
 			}
 
 			// Send update request to the server
 			// Format: ["updateOrder", orderId, field, value]
 			client.updateOrder(orderId, field, value);
+
+			// Clear the input fields after sending the request
 			updateOrderId.clear();
 			updateValue.clear();
-			
+			updateDatePicker.setValue(null);
 
-        } catch (NumberFormatException e) {
-            // Show warning if the order number is not a valid integer
-        	showStatus("Order number must be a valid integer.",false);
-            showAlert("Order number must be a valid integer.", Alert.AlertType.WARNING);
-            System.err.println("Invalid order number input: " + e.getMessage());
+		} catch (NumberFormatException e) {
+			// If orderId is not a valid integer (e.g., user typed text), show warning
+			showStatus("Order number must be a valid integer.", false);
+			showAlert("Order number must be a valid integer.", Alert.AlertType.WARNING);
 
-        } catch (Exception e) {
-            // Show error and log unexpected issues
-        	showStatus("Update failed.",false);
-            showAlert("Update failed: " + e.getMessage(), Alert.AlertType.ERROR);
-            System.err.println("Unexpected error during update: " + e.getMessage());
-        }
+		} catch (Exception e) {
+			// Catch-all for unexpected errors – show error popup
+			showStatus("Update failed.", false);
+			showAlert("Update failed: " + e.getMessage(), Alert.AlertType.ERROR);
+		}
 	}
+
 
     /**
      * Replaces the current TableView content with the list of orders received from the server.
@@ -242,44 +261,75 @@ public class ClientController {
 	}
 
 	/**
-	 * Called automatically by JavaFX after the FXML file has been loaded. Binds
-	 * each TableColumn to the corresponding property of the Order object. This
-	 * ensures that when an Order is displayed in the TableView, the correct values
-	 * appear in each column.
+	 * Called automatically by JavaFX after the FXML file has been loaded. 
+	 * Binds each TableColumn to the corresponding property of the Order object.
+	 * Also initializes the field selection ComboBox and configures the DatePicker behavior.
 	 */
 	@FXML
 	public void initialize() {
-		// Bind the 'orderNumber' column to the 'getOrderNumber()' property of the Order
-		// object
-		orderNumberCol.setCellValueFactory(
-				cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getOrderNumber()).asObject());
+	    // Bind the 'orderNumber' column to the 'getOrderNumber()' property of the Order object
+	    orderNumberCol.setCellValueFactory(
+	        cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getOrderNumber()).asObject()
+	    );
 
-		// Bind the 'parking' column to the 'getParkingSpace()' property
-		parkingCol.setCellValueFactory(
-				cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getParkingSpace()).asObject());
+	    // Bind the 'parking' column to the 'getParkingSpace()' property
+	    parkingCol.setCellValueFactory(
+	        cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getParkingSpace()).asObject()
+	    );
 
-		// Bind the 'orderDate' column to the string representation of the order date
-		orderDateCol.setCellValueFactory(
-				cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getOrderDate().toString()));
+	    // Bind the 'orderDate' column to the string representation of the order date
+	    orderDateCol.setCellValueFactory(
+	        cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getOrderDate().toString())
+	    );
 
-		// Bind the 'confirmation code' column to the 'getConfirmationCode()' property
-		confirmCol.setCellValueFactory(
-				cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getConfirmationCode())
-						.asObject());
+	    // Bind the 'confirmation code' column to the 'getConfirmationCode()' property
+	    confirmCol.setCellValueFactory(
+	        cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getConfirmationCode()).asObject()
+	    );
 
-		// Bind the 'subscriber ID' column to the 'getSubscriberId()' property
-		subscriberCol.setCellValueFactory(
-				cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getSubscriberId()).asObject());
+	    // Bind the 'subscriber ID' column to the 'getSubscriberId()' property
+	    subscriberCol.setCellValueFactory(
+	        cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getSubscriberId()).asObject()
+	    );
 
-		// Bind the 'placing date' column to the string of 'getDateOfPlacingAnOrder()'
-		placingDateCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-				cell.getValue().getDateOfPlacingAnOrder().toString()));
+	    // Bind the 'placing date' column to the string of 'getDateOfPlacingAnOrder()'
+	    placingDateCol.setCellValueFactory(
+	        cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getDateOfPlacingAnOrder().toString())
+	    );
 
-		// Initialize ComboBox with allowed fields
-		ObservableList<String> allowedFields = FXCollections.observableArrayList("parking_space", "order_date");
-		fieldComboBox.setItems(allowedFields);
-		fieldComboBox.setValue("parking_space"); // Default value
+	    // Initialize ComboBox with allowed fields ("parking_space", "order_date")
+	    ObservableList<String> allowedFields = FXCollections.observableArrayList("parking_space", "order_date");
+	    fieldComboBox.setItems(allowedFields);
+	    fieldComboBox.setValue("parking_space"); // Set default selection
+
+	    // Listener to switch between TextField and DatePicker based on selected field
+	    fieldComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+	        // Check if the selected field is "order_date"
+	        boolean isDateField = "order_date".equals(newValue);
+
+	        // Show DatePicker if "order_date" is selected
+	        updateDatePicker.setVisible(isDateField);
+	        updateDatePicker.setManaged(isDateField);
+
+	        // Show TextField for other fields
+	        updateValue.setVisible(!isDateField);
+	        updateValue.setManaged(!isDateField);
+	    });
+
+	    // Prevent selecting past dates in the DatePicker
+	    updateDatePicker.setDayCellFactory(picker -> new DateCell() {
+	        @Override
+	        public void updateItem(LocalDate date, boolean empty) {
+	            super.updateItem(date, empty);
+	            // Disable dates before today
+	            if (date.isBefore(LocalDate.now())) {
+	                setDisable(true);
+	            }
+	        }
+	    });
 	}
+
+
 	
 	/**
 	 * Displays a status message in the status label with appropriate color.
