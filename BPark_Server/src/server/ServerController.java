@@ -53,6 +53,14 @@ public class ServerController {
         if (p.isEmpty()) {
             System.out.println("You must enter a port number");
             lblEx.setText("You must enter a port number");
+
+            // Show pop-up
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Connection Error");
+            alert.setHeaderText(null);
+            alert.setContentText("You must enter a port number");
+            alert.showAndWait();
+
             return;
         }
 
@@ -64,6 +72,14 @@ public class ServerController {
         } catch (NumberFormatException e) {
             System.out.println("Port must be a number");
             lblEx.setText("Port must be a number");
+
+            // Show pop-up
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Connection Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Port must be a number");
+            alert.showAndWait();
+
             return;
         }
 
@@ -71,6 +87,14 @@ public class ServerController {
         if (port < 1024 || port > 65535) {
             System.out.println("Port must be between 1024 and 65535");
             lblEx.setText("Port must be between 1024 and 65535");
+
+            // Show pop-up
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Connection Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Port must be between 1024 and 65535");
+            alert.showAndWait();
+
             return;
         }
 
@@ -80,6 +104,7 @@ public class ServerController {
         // Start the server with the validated port
         ServerApp.runServer(String.valueOf(port));
     }
+
 
 
 }

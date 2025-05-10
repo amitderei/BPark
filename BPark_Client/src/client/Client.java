@@ -66,18 +66,21 @@ public class Client extends AbstractClient {
 
         // Ensure that all GUI updates are executed on the JavaFX Application Thread
         Platform.runLater(() -> {
-            // Determine alert type based on response success status
-            Alert.AlertType alertType = response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
+            // Update the status label in all cases
+            if (controller != null) {
+                controller.showStatus(response.getMsg(), response.isSucceed());
+            }
 
-            // Create and configure the alert with title and message content
-            Alert alert = new Alert(alertType);
-            alert.setTitle("System Message");
-            alert.setContentText(response.getMsg());
-            alert.showAndWait(); // Display the alert and wait for user confirmation
+            // Show pop-up only if the response is a failure
+            if (!response.isSucceed()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("System Message");
+                alert.setContentText(response.getMsg());
+                alert.showAndWait();
+            }
 
             // Proceed to update the table only if the response is successful and contains data
             if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()) {
-
                 // Check if the first element is an Order (basic type-safety validation)
                 if (dataList.get(0) instanceof Order) {
                     @SuppressWarnings("unchecked")
@@ -91,6 +94,7 @@ public class Client extends AbstractClient {
             }
         });
     }
+
 
 
     

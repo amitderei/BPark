@@ -126,7 +126,6 @@ public class ClientController {
 
 	        // Show success message
 	        showStatus("Connected successfully to server.",true);
-	        showAlert("Connected successfully to server.", Alert.AlertType.INFORMATION);
 
 	    } catch (Exception e) {
 	        // Show error if connection fails and log to console
