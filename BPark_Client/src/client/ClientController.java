@@ -217,11 +217,6 @@ public class ClientController {
         
         //showStatus("Orders loaded successfully.",true);
     }
-    
-    public void displayTrueMsg(String str) {
-    	showStatus(str ,true);
-    }
-
 
 	/**
 	 * Utility method for displaying pop-up alerts (message boxes) in the GUI.
