@@ -69,7 +69,6 @@ public class ClientController {
 	    if (client == null) {
 	    	showStatus("No connection to server. Please connect first.",false);
             showAlert("No connection to server. Please connect first.", Alert.AlertType.WARNING);
-	        showAlert("No connection to server. Please connect first.", Alert.AlertType.WARNING);
 	        System.err.println("Client is null. Cannot establish connection.");
 	        updateButton.setDisable(true);
 	        loadButton.setDisable(true);
@@ -116,7 +115,6 @@ public class ClientController {
 
 	        // Store the client in both the controller and the application-wide reference
 	        this.client = newClient;
-	        ClientApp.client = newClient;
 
 	        // Link the controller to the client
 	        newClient.setController(this);

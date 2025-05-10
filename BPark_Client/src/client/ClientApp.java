@@ -12,16 +12,15 @@ import javafx.stage.Stage;
  */
 public class ClientApp extends Application {
 
-    // Shared instance of the PrototypeClient used for communication with the server
-    public static Client client;
-
+    // Instance-level client used for communication with the server
+    private Client client;
 
     /**
-     * Called when the JavaFX application is launched.
-     * Loads the FXML-based GUI without connecting to the server automatically.
+     * Called when the JavaFX application starts.
+     * Loads the client UI and waits for the user to initiate the server connection.
      *
      * @param primaryStage the primary window of the JavaFX application.
-     * @throws Exception if loading FXML fails.
+     * @throws Exception if loading the FXML file fails.
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -30,10 +29,7 @@ public class ClientApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/orders_view.fxml"));
         Parent root = loader.load(); // Load the full UI hierarchy
 
-        // 2. Get the controller associated with the FXML (no client binding here)
-        ClientController controller = loader.getController();
-
-        // 3. Show the GUI without automatic connection to the server
+        // 2. Display the GUI and wait for user to connect to the server
         primaryStage.setTitle("BPARK Client");           // Set window title
         primaryStage.setScene(new Scene(root));          // Set the GUI layout
         primaryStage.show();                             // Show the window
@@ -41,24 +37,35 @@ public class ClientApp extends Application {
 
     /**
      * Called automatically when the JavaFX application exits.
-     * Closes the connection to the server gracefully.
-     *
-     * @throws Exception if closing the client connection fails.
+     * Closes the connection to the server gracefully if it was opened.
      */
     @Override
-    public void stop() throws Exception {
-        if (client != null) {
-            client.closeConnection();
+    public void stop() {
+        if (client != null) { // Check if client is connected
+            try {
+                client.closeConnection();
+                System.out.println("Connection to server closed.");
+            } catch (Exception e) {
+                System.err.println("Failed to close connection: " + e.getMessage());
+            }
         }
     }
 
     /**
-     * Main method to launch the JavaFX application.
-     * Triggers the JavaFX runtime to call the start() method.
+     * Main entry point of the application.
+     * Starts the JavaFX application by calling the start() method.
      *
-     * @param args command-line arguments (not used).
+     * @param args command-line arguments (not used in this application).
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    /**
+     * Allows setting the client instance, for example from a controller.
+     * This enables dynamic client management without relying on static state.
+     */
+    public void setClient(Client client) {
+        this.client = client;
     }
 }
