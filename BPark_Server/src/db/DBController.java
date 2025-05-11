@@ -203,7 +203,7 @@ public class DBController {
 
             // Handle update for order date
             else if (field.equals("order_date")) {
-            	int status=updateOrderDateByOrderNumber(orderNumber, newValue);
+            	int status=updateOrderDate(orderNumber, newValue);
                 switch (status) {
                 case 5:
                 	return 3;
@@ -240,7 +240,7 @@ public class DBController {
      *         5 - Update successful
      *         6 - New date is in the past (invalid)
      */
-    public int updateOrderDateByOrderNumber(int orderNumber, String newValue) {
+    public int updateOrderDate(int orderNumber, String newValue) {
         String query = "UPDATE `order` SET order_date = ? WHERE order_number = ?";
         String checkQuery = "SELECT date_of_placing_an_order FROM `order` WHERE order_number = ?";
 
