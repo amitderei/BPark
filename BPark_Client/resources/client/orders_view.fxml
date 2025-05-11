@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.ClientController">
+
+    <top>
+        <HBox spacing="10" style="-fx-padding: 10" alignment="CENTER_LEFT">
+            <Label fx:id="connectionLabel" text="Checking connection..." />
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Connect to Server" onAction="#connectToServer" />
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="orderTable">
+            <columns>
+                <TableColumn fx:id="orderNumberCol" prefWidth="120" text="order_number" />
+                <TableColumn fx:id="parkingCol" prefWidth="120" text="parking_space" />
+                <TableColumn fx:id="orderDateCol" prefWidth="140" text="order_date" />
+                <TableColumn fx:id="confirmCol" prefWidth="160" text="confirmation_code" />
+                <TableColumn fx:id="subscriberCol" prefWidth="140" text="subscriber_id" />
+                <TableColumn fx:id="placingDateCol" prefWidth="180" text="date_of_placing_an_order" />
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <VBox spacing="5" style="-fx-padding: 10">
+            <HBox spacing="5">
+                <TextField fx:id="updateOrderId" promptText="Order Number" />
+                <ComboBox fx:id="fieldComboBox" promptText="Field to Update" />
+                <TextField fx:id="updateValue" promptText="New Value" />
+                <DatePicker fx:id="updateDatePicker" promptText="New Date" visible="false" managed="false" />
+                <Button fx:id="updateButton" onAction="#updateOrder" text="Update" disable="true" />
+                <Button fx:id="loadButton" onAction="#loadOrders" text="Load Orders" disable="true" />
+            </HBox>
+            <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;" />
+        </VBox>
+    </bottom>
+
+</BorderPane>
+
