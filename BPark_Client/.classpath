@@ -6,7 +6,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/OCSF"/>
 	<classpathentry kind="src" path="resources"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/OCSF"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/BPark_Server"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
