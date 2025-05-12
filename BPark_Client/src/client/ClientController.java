@@ -43,26 +43,20 @@ public class ClientController {
 	@FXML
 	private TextField updateOrderId;
 	@FXML
-	private ComboBox<String> fieldComboBox; // changed from TextField to ComboBox
+	private ComboBox<String> fieldComboBox; // ComboBox for selecting the field to update
 	@FXML
-	private TextField updateValue;
-	
+	private TextField updateValue; // TextField for entering the new value
 	@FXML
-	private DatePicker updateDatePicker;
+	private DatePicker updateDatePicker; // DatePicker for selecting a new date
 
-	// Label for displaying network connection information
 	@FXML
-	private Label connectionLabel;
+	private Label connectionLabel; // Label for displaying network connection information
+    @FXML
+    private Label statusLabel; // Label for displaying status messages (success/error)
+	@FXML
+	private Button connectButton; // Button for connecting to the server
 
-	// Reference to the client logic (OCSF communication)
-	private Client client;
-	
-	@FXML
-	private Label statusLabel; // status notifaction
-	
-	@FXML
-	private Button connectButton; // server connect
-
+	private Client client; 	// Reference to the client logic (OCSF communication)
 
 	/**
 	 * Initializes the controller with a reference to the connected client,
@@ -133,7 +127,7 @@ public class ClientController {
 	        // Show success message
 	        showStatus("Connected successfully to server.",true);
 	        
-	        connectButton.setText("Connected");
+	        connectButton.setText("Connected"); 
 	        connectButton.setDisable(true);
 
 	    } catch (Exception e) {
