@@ -9,7 +9,11 @@ import java.sql.Date;
  * Implements Serializable to support object transmission over network (OCSF).
  */
 public class Order implements Serializable {
-    private int orderNumber;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int orderNumber;
     private int parkingSpace;
     private Date orderDate;
     private int confirmationCode;
