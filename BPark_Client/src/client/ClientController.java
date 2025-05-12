@@ -58,7 +58,11 @@ public class ClientController {
 	private Client client;
 	
 	@FXML
-	private Label statusLabel;
+	private Label statusLabel; // status notifaction
+	
+	@FXML
+	private Button connectButton; // server connect
+
 
 	/**
 	 * Initializes the controller with a reference to the connected client,
@@ -128,6 +132,9 @@ public class ClientController {
 
 	        // Show success message
 	        showStatus("Connected successfully to server.",true);
+	        
+	        connectButton.setText("Connected");
+	        connectButton.setDisable(true);
 
 	    } catch (Exception e) {
 	        // Show error if connection fails and log to console

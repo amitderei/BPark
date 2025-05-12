@@ -8,7 +8,7 @@
         <HBox spacing="10" style="-fx-padding: 10" alignment="CENTER_LEFT">
             <Label fx:id="connectionLabel" text="Checking connection..." />
             <Pane HBox.hgrow="ALWAYS"/>
-            <Button text="Connect to Server" onAction="#connectToServer" />
+            <Button fx:id="connectButton" text="Connect to Server" onAction="#connectToServer" />
         </HBox>
     </top>
 
