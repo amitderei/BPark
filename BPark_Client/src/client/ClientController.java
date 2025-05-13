@@ -70,6 +70,10 @@ public class ClientController {
 
 	@FXML
 	private Button searchOrder; // Button for search specific orders by order number
+	
+	@FXML
+	private Button exitButton; // Button to exit the client application
+
 
 	private Client client; // Reference to the client logic (OCSF communication)
 
@@ -275,6 +279,31 @@ public class ClientController {
 
 		// showStatus("Orders loaded successfully.",true);
 	}
+	
+	/**
+	 * Triggered when the "Exit" button is clicked.
+	 * Sends disconnect notification to server, closes connection, and exits.
+	 */
+	@FXML
+	public void exitApplication() {
+	    try {
+	        if (client != null && client.isConnected()) {
+	            // Notify the server before closing
+	            client.sendToServer("disconnect");
+
+	            // Close the client connection
+	            client.closeConnection();
+	            System.out.println("Client disconnected successfully.");
+	        }
+	    } catch (Exception e) {
+	        System.err.println("Failed to disconnect client: " + e.getMessage());
+	    }
+
+	    // Exit the application
+	    System.exit(0);
+	}
+
+
 
 	/**
 	 * Utility method for displaying pop-up alerts (message boxes) in the GUI.

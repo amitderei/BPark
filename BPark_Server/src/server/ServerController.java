@@ -34,6 +34,9 @@ public class ServerController {
 
     @FXML
     private TextArea txtConnectedClients; // TextArea to display connected clients
+    
+    @FXML
+    private Button btnExit; // Button to exit the server application
 
     // Instance of the server (to access connected clients)
     private Server serverInstance;
@@ -59,42 +62,48 @@ public class ServerController {
 		return txtPort.getText();
 	}
 
-	/**
-	 * Triggered when the "Connect" button is clicked. Validates the port input,
-	 * starts the server if valid, or shows appropriate warnings if invalid.
-	 *
-	 * @param event The button click event.
-	 * @throws Exception if server startup fails.
-	 */
-	public void connect(ActionEvent event) throws Exception {
-		String p = getport().trim();
+    /**
+     * Triggered when the "Connect" button is clicked.
+     * Validates the port input, starts the server if valid,
+     * and updates the UI to reflect that the server is running.
+     *
+     * @param event The button click event.
+     * @throws Exception if server startup fails.
+     */
+    public void connect(ActionEvent event) throws Exception {
+        String p = getport().trim();
 
-		// Validate that the port field is not empty
-		if (p.isEmpty()) {
-			showAlert(Alert.AlertType.WARNING, "Connection Error", "You must enter a port number");
-			return;
-		}
+        // Validate that the port field is not empty
+        if (p.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Connection Error", "You must enter a port number");
+            return;
+        }
 
-		int port;
+        int port;
 
-		// Validate that the port is a valid number
-		try {
-			port = Integer.parseInt(p);
-		} catch (NumberFormatException e) {
-			showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be a number");
-			return;
-		}
+        // Validate that the port is a valid number
+        try {
+            port = Integer.parseInt(p);
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be a number");
+            return;
+        }
 
-		// Validate that the port number is in the valid range (1024–65535)
-		if (port < 1024 || port > 65535) {
-			showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be between 1024 and 65535");
-			return;
-		}
-
+        // Validate that the port number is in the valid range (1024–65535)
+        if (port < 1024 || port > 65535) {
+            showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be between 1024 and 65535");
+            return;
+        }
 
         // Start the server with the validated port and store the instance for later use
         serverInstance = app.runServer(String.valueOf(port));
-	}
+
+        // UI feedback after successful server start
+        lblConnection.setText("Server is running on port " + port); // Update the connection label
+        txtPort.setDisable(true); // Disable the port input field
+        btnSend.setDisable(true); // Disable the connect button
+    }
+
 	
 	/**
      * Triggered when the "Show Connected Clients" button is clicked.
@@ -121,6 +130,27 @@ public class ServerController {
             txtConnectedClients.setText(builder.toString());
         }
     }
+    
+    /**
+     * Triggered when the "Exit" button is clicked.
+     * Safely closes the server if running and exits the application.
+     */
+    @FXML
+    public void exitApplication() {
+        try {
+            if (serverInstance != null) {
+                // Close server if it was started
+                serverInstance.close();
+                System.out.println("Server stopped successfully.");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to stop server: " + e.getMessage());
+        }
+
+        // Exit the application
+        System.exit(0);
+    }
+
 
 	/**
 	 * Utility method to display a customizable alert popup.

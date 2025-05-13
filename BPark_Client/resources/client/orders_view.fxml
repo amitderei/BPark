@@ -47,6 +47,7 @@
                 <Button fx:id="loadButton" disable="true" onAction="#loadOrders" text="Load All Orders" />
             </HBox>
             <Label fx:id="statusLabel" style="-fx-text-fill: green;" text="" />
+            <Button fx:id="exitButton" onAction="#exitApplication" text="Exit" />
         </VBox>
     </bottom>
 

@@ -51,6 +51,18 @@ public class Server extends AbstractServer {
 			// Case 1: Message is a String command
 			if (msg instanceof String) {
 				String command = (String) msg;
+				
+	            // Handle client disconnect request
+	            if (command.equals("disconnect")) {
+	                try {
+	                    String clientIP = client.getInetAddress().getHostAddress();
+	                    String clientHost = client.getInetAddress().getHostName();
+	                    System.out.println("Client requested disconnect from: " + clientHost + " (" + clientIP + ")");
+	                } catch (Exception e) {
+	                    System.out.println("Client requested disconnect, but could not retrieve client info.");
+	                }
+	                return; // Stop processing further
+	            }
 
 				// If command is to get all orders
 				if (command.equals("getAllOrders")) {
@@ -158,20 +170,39 @@ public class Server extends AbstractServer {
 	}
 	
 	/**
-	 * Returns a list of all currently connected clients by IP address.
+	 * Called automatically when a client disconnects from the server.
+	 *
+	 * @param client The client that disconnected.
+	 */
+	@Override
+	protected void clientDisconnected(ConnectionToClient client) {
+	    try {
+	        String clientIP = client.getInetAddress().getHostAddress();
+	        String clientHost = client.getInetAddress().getHostName();
+	        System.out.println("Client disconnected from: " + clientHost + " (" + clientIP + ")");
+	    } catch (Exception e) {
+	        System.out.println("Could not retrieve disconnected client info: " + e.getMessage());
+	    }
+	}
+
+
+	
+	/**
+	 * Returns a list of all currently connected clients with host and IP address.
 	 * Iterates over the client connections, casting each to ConnectionToClient.
 	 *
-	 * @return A list of strings representing each connected client's IP.
+	 * @return A list of strings representing each connected client's host and IP.
 	 */
 	public ArrayList<String> getConnectedClientInfoList() {
 	    ArrayList<String> connectedClients = new ArrayList<>();
 
 	    // Iterate over all client threads and cast them to ConnectionToClient
 	    for (Thread t : this.getClientConnections()) {
-	        if (t instanceof ConnectionToClient client) {  // Safe casting 
+	        if (t instanceof ConnectionToClient client) {
 	            try {
 	                String clientIP = client.getInetAddress().getHostAddress();
-	                connectedClients.add(clientIP);
+	                String clientHost = client.getInetAddress().getHostName();
+	                connectedClients.add("Host: " + clientHost + " (" + clientIP + ")");
 	            } catch (Exception e) {
 	                connectedClients.add("Unknown client");
 	            }
@@ -182,6 +213,7 @@ public class Server extends AbstractServer {
 
 	    return connectedClients;
 	}
+
 	
 	
 
