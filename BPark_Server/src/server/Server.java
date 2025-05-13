@@ -156,5 +156,33 @@ public class Server extends AbstractServer {
 			System.out.println("Could not retrieve client info: " + e.getMessage());
 		}
 	}
+	
+	/**
+	 * Returns a list of all currently connected clients by IP address.
+	 * Iterates over the client connections, casting each to ConnectionToClient.
+	 *
+	 * @return A list of strings representing each connected client's IP.
+	 */
+	public ArrayList<String> getConnectedClientInfoList() {
+	    ArrayList<String> connectedClients = new ArrayList<>();
+
+	    // Iterate over all client threads and cast them to ConnectionToClient
+	    for (Thread t : this.getClientConnections()) {
+	        if (t instanceof ConnectionToClient client) {  // Safe casting 
+	            try {
+	                String clientIP = client.getInetAddress().getHostAddress();
+	                connectedClients.add(clientIP);
+	            } catch (Exception e) {
+	                connectedClients.add("Unknown client");
+	            }
+	        } else {
+	            connectedClients.add("Unknown connection type");
+	        }
+	    }
+
+	    return connectedClients;
+	}
+	
+	
 
 }

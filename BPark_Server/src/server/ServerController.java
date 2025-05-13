@@ -1,11 +1,14 @@
 package server;
 
+import java.util.ArrayList;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 /**
@@ -25,6 +28,27 @@ public class ServerController {
 
 	@FXML
 	private Label lblEx; // Label for displaying static instructions
+	
+    @FXML
+    private Button btnRefreshClients; // Button to show connected clients
+
+    @FXML
+    private TextArea txtConnectedClients; // TextArea to display connected clients
+
+    // Instance of the server (to access connected clients)
+    private Server serverInstance;
+
+    // Reference to the ServerApp instance to control server startup
+    private ServerApp app;
+
+    /**
+     * Sets the ServerApp instance to allow calling its methods from the controller.
+     *
+     * @param app the ServerApp instance to link with this controller
+     */
+    public void setApp(ServerApp app) {
+        this.app = app;
+    }
 
 	/**
 	 * Retrieves the port number entered by the user.
@@ -67,12 +91,36 @@ public class ServerController {
 			return;
 		}
 
-		// Hide the connection window after successful validation
-		((Node) event.getSource()).getScene().getWindow().hide();
 
-		// Start the server with the validated port
-		ServerApp.runServer(String.valueOf(port));
+        // Start the server with the validated port and store the instance for later use
+        serverInstance = app.runServer(String.valueOf(port));
 	}
+	
+	/**
+     * Triggered when the "Show Connected Clients" button is clicked.
+     * Fetches the list of connected clients and displays them in the TextArea.
+     */
+    @FXML
+    public void showConnectedClients() {
+        if (serverInstance == null) {
+            showAlert(Alert.AlertType.WARNING, "Server Not Running", "Please start the server first.");
+            return;
+        }
+
+        // Get the list of connected client addresses
+        ArrayList<String> clients = serverInstance.getConnectedClientInfoList();
+
+        // Build the display text
+        if (clients.isEmpty()) {
+            txtConnectedClients.setText("No clients connected.");
+        } else {
+            StringBuilder builder = new StringBuilder();
+            for (String clientInfo : clients) {
+                builder.append(clientInfo).append("\n");
+            }
+            txtConnectedClients.setText(builder.toString());
+        }
+    }
 
 	/**
 	 * Utility method to display a customizable alert popup.
