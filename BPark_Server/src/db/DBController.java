@@ -184,7 +184,7 @@ public class DBController {
 	public int updateOrderField(int orderNumber, String field, String newValue) {
 		// First, check if the order exists in the database
 		boolean hasOrder = true;
-		if (orderExists(orderNumber).equals(null)) {
+		if (orderExists(orderNumber).isEmpty()) {
 			hasOrder = false;
 		}
 
