@@ -54,6 +54,19 @@ public class Client extends AbstractClient {
 	 */
 	@Override
 	protected void handleMessageFromServer(Object msg) {
+		// Handle server shutdown notification
+		if (msg instanceof String && msg.equals("server_shutdown")) {
+		    Platform.runLater(() -> {
+		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		        alert.setTitle("Server Shutdown");
+		        alert.setHeaderText("The server is shutting down.");
+		        alert.setContentText("The application will now close.");
+		        alert.showAndWait();
+		        System.exit(0);
+		    });
+		    return;
+		}
+		
 		// Validate that the received message is indeed a ServerResponse
 		if (!(msg instanceof ServerResponse)) {
 			System.err.println("Received unexpected message type from server: " + msg.getClass());
