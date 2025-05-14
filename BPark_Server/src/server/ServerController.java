@@ -33,9 +33,6 @@ public class ServerController {
 	private Label lblEx; // Label for displaying static instructions
 	
     @FXML
-    private Button btnRefreshClients; // Button to show connected clients
-
-    @FXML
     private TextArea txtConnectedClients; // TextArea to display connected clients
     
     @FXML
