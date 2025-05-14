@@ -137,13 +137,16 @@ public class ServerController {
     
     /**
      * Triggered when the "Exit" button is clicked.
-     * Safely closes the server if running and exits the application.
+     * Safely notifies clients, closes the server, and exits the application.
      */
     @FXML
     public void exitApplication() {
         try {
             if (serverInstance != null) {
-                // Close server if it was started
+                // Notify all clients that the server is shutting down
+                serverInstance.sendToAllClients("server_shutdown");
+                
+                // Close server after notifying clients
                 serverInstance.close();
                 System.out.println("Server stopped successfully.");
             }
