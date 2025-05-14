@@ -2,6 +2,8 @@ package server;
 
 import java.util.ArrayList;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.util.Duration;
 
 /**
  * Controller for the server connection screen of BPARK. Handles user input for
@@ -43,6 +46,9 @@ public class ServerController {
 
     // Reference to the ServerApp instance to control server startup
     private ServerApp app;
+
+
+    private Timeline clientUpdateTimeline;
 
     /**
      * Sets the ServerApp instance to allow calling its methods from the controller.
@@ -102,6 +108,7 @@ public class ServerController {
         lblConnection.setText("Server is running on port " + port); // Update the connection label
         txtPort.setDisable(true); // Disable the port input field
         btnSend.setDisable(true); // Disable the connect button
+        startAutoClientListUpdater();
     }
 
 	
@@ -165,6 +172,12 @@ public class ServerController {
 		alert.setHeaderText(null); // No header text for cleaner appearance
 		alert.setContentText(message); // Set the actual message content
 		alert.showAndWait(); // Display the alert and wait for user action
+	}
+	
+	private void startAutoClientListUpdater() {
+		clientUpdateTimeline=new Timeline(new KeyFrame(Duration.seconds(5), e->showConnectedClients()));
+		clientUpdateTimeline.setCycleCount(Timeline.INDEFINITE);
+		clientUpdateTimeline.play();
 	}
 
 }
