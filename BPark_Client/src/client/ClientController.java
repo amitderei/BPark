@@ -76,6 +76,10 @@ public class ClientController {
 
 
 	private Client client; // Reference to the client logic (OCSF communication)
+	
+	// Input field for entering server IP address 
+	@FXML
+	private TextField ipTextField;
 
 	/**
 	 * Initializes the controller with a reference to the connected client, displays
