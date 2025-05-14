@@ -107,8 +107,8 @@ public class ClientController {
 			String host = InetAddress.getLocalHost().getHostName();
 			String ip = InetAddress.getLocalHost().getHostAddress();
 
-			// Update connection status label
-			connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
+		    // Update connection status label
+		    connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
 
 			// Enable action buttons after successful connection
 			updateButton.setDisable(false);
@@ -126,40 +126,50 @@ public class ClientController {
 	}
 
 	/**
-	 * Handles the "Connect to Server" button action. Attempts to connect to the
-	 * server at localhost on port 5555, updates the controller and application
-	 * state, and shows the connection status.
+	 * Handles the "Connect to Server" button action.
+	 * Requires the user to provide a valid IP address in the text field.
+	 * Attempts to connect to the server on port 5555.
 	 */
 	@FXML
 	public void connectToServer() {
-		try {
-			// Create and open a new client connection
-			Client newClient = new Client("localhost", 5555);
-			// Attempt to open the connection to the server (establishes socket
-			// communication)
-			newClient.openConnection();
+	    try {
+	        // Require IP input from user
+	        if (ipTextField == null || ipTextField.getText().trim().isEmpty()) {
+	            showStatus("Please enter the server IP address.", false);
+	            showAlert("Please enter the server IP address.", Alert.AlertType.WARNING);
+	            return; // Exit without attempting to connect
+	        }
 
-			// Store the client in both the controller and the application-wide reference
-			this.client = newClient;
+	        String ip = ipTextField.getText().trim();
 
-			// Link the controller to the client
-			newClient.setController(this);
+	        // Create a new client instance with the provided IP and port 5555
+	        Client newClient = new Client(ip, 5555);
 
-			// Update the UI with connection info
-			setClient(newClient);
+	        // Attempt to establish the connection to the server
+	        newClient.openConnection();
 
-			// Show success message
-			showStatus("Connected successfully to server.", true);
+	        // Store the connected client instance for future interactions
+	        this.client = newClient;
 
-			connectButton.setText("Connected");
-			connectButton.setDisable(true);
+	        // Link the controller to the connected client instance
+	        newClient.setController(this);
 
-		} catch (Exception e) {
-			// Show error if connection fails and log to console
-			showStatus("Failed to connect to server.", false);
-			showAlert("Could not connect to server: " + e.getMessage(), Alert.AlertType.ERROR);
-			System.err.println("Failed to connect to server: " + e.getMessage());
-		}
+	        // Update the UI with connection information
+	        setClient(newClient);
+
+	        // Display a success message showing the IP used for the connection
+	        showStatus("Connected successfully to server at " + ip + ":5555", true);
+
+	        // Update the UI: disable the connect button and change its label
+	        connectButton.setText("Connected");
+	        connectButton.setDisable(true);
+
+	    } catch (Exception e) {
+	        // Handle connection failure
+	        showStatus("Failed to connect to server.", false);
+	        showAlert("Could not connect to server: " + e.getMessage(), Alert.AlertType.ERROR);
+	        System.err.println("Failed to connect to server: " + e.getMessage());
+	    }
 	}
 
 	/**
