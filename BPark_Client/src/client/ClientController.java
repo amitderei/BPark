@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import java.net.InetAddress;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JavaFX controller class for the BPARK client UI. Responsible for handling
@@ -303,7 +304,7 @@ public class ClientController {
 	    try {
 	        if (client != null && client.isConnected()) {
 	            // Notify the server before closing
-	            client.sendToServer("disconnect");
+	            client.sendToServer(new Object[] {"disconnect"});
 
 	            // Close the client connection
 	            client.closeConnection();

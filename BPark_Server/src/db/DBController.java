@@ -1,6 +1,7 @@
 package db;
 
 import java.sql.Connection;
+
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -109,6 +110,7 @@ public class DBController {
 	 */
 	public ArrayList<Order> getAllOrders() {
 		// Define the SQL query to fetch all columns from the 'order' table
+		System.out.println("DB");
 		String query = "SELECT * FROM `order`";
 		ArrayList<Order> orders = new ArrayList<>();
 

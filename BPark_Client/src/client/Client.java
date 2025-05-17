@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the client-side network handler of the BPARK system. Extends
@@ -116,7 +117,7 @@ public class Client extends AbstractClient {
 	public void requestAllOrders() {
 		try {
 			// Send a command to the server requesting all orders
-			sendToServer("getAllOrders");
+			sendToServer(new Object[] {"getAllOrders"});
 			controller.showStatus("Orders loaded successfully", true);
 		} catch (IOException e) {
 			// Log the error if the message could not be sent to the server
@@ -159,5 +160,6 @@ public class Client extends AbstractClient {
 			System.err.println("Failed to send 'updateOrder' request to server: " + e.getMessage());
 		}
 	}
+	
 
 }

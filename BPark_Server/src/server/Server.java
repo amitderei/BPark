@@ -48,24 +48,25 @@ public class Server extends AbstractServer {
 	@Override
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		try {
-			// Case 1: Message is a String command
-			if (msg instanceof String) {
-				String command = (String) msg;
-				
-	            // Handle client disconnect request
-	            if (command.equals("disconnect")) {
-	                try {
-	                    String clientIP = client.getInetAddress().getHostAddress();
-	                    String clientHost = client.getInetAddress().getHostName();
-	                    System.out.println("Client requested disconnect from: " + clientHost + " (" + clientIP + ")");
-	                } catch (Exception e) {
-	                    System.out.println("Client requested disconnect, but could not retrieve client info.");
-	                }
-	                return; // Stop processing further
-	            }
+			// Message is an Object[] indicating an update\watch specific order
+			// request
+			System.out.println("server1");
+			if (msg instanceof Object[]) {
+				Object[] data = (Object[]) msg;
+				if (data.length == 1 && "disconnect".equals(data[0])) {
+					try {
+						String clientIP = client.getInetAddress().getHostAddress();
+						String clientHost = client.getInetAddress().getHostName();
+						System.out.println("Client requested disconnect from: " + clientHost + " (" + clientIP + ")");
+					} catch (Exception e) {
+						System.out.println("Client requested disconnect, but could not retrieve client info.");
+					}
+					return; // Stop processing further
+				}
 
 				// If command is to get all orders
-				if (command.equals("getAllOrders")) {
+				else if (data.length == 1 && "getAllOrders".equals(data[0])) {
+					System.out.println("server2");
 					ArrayList<Order> orders = db.getAllOrders();
 
 					if (orders.isEmpty()) {
@@ -76,13 +77,8 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));
 					}
 				}
-
-				// Case 2: Message is an Object[] indicating an update\watch specific order
-				// request
-			} else if (msg instanceof Object[]) {
-				Object[] data = (Object[]) msg;
 				// watch specific order request. Excepted format:{"getOrder", orderNumber}
-				if (data.length == 2 && "getOrder".equals(data[0])) {
+				else if (data.length == 2 && "getOrder".equals(data[0])) {
 					int orderNumber = (int) data[1];
 
 					ArrayList<Order> list = db.orderExists(orderNumber);
@@ -168,7 +164,7 @@ public class Server extends AbstractServer {
 			System.out.println("Could not retrieve client info: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Called automatically when a client disconnects from the server.
 	 *
@@ -176,17 +172,15 @@ public class Server extends AbstractServer {
 	 */
 	@Override
 	protected void clientDisconnected(ConnectionToClient client) {
-	    try {
-	        String clientIP = client.getInetAddress().getHostAddress();
-	        String clientHost = client.getInetAddress().getHostName();
-	        System.out.println("Client disconnected from: " + clientHost + " (" + clientIP + ")");
-	    } catch (Exception e) {
-	        System.out.println("Could not retrieve disconnected client info: " + e.getMessage());
-	    }
+		try {
+			String clientIP = client.getInetAddress().getHostAddress();
+			String clientHost = client.getInetAddress().getHostName();
+			System.out.println("Client disconnected from: " + clientHost + " (" + clientIP + ")");
+		} catch (Exception e) {
+			System.out.println("Could not retrieve disconnected client info: " + e.getMessage());
+		}
 	}
 
-
-	
 	/**
 	 * Returns a list of all currently connected clients with host and IP address.
 	 * Iterates over the client connections, casting each to ConnectionToClient.
@@ -194,27 +188,24 @@ public class Server extends AbstractServer {
 	 * @return A list of strings representing each connected client's host and IP.
 	 */
 	public ArrayList<String> getConnectedClientInfoList() {
-	    ArrayList<String> connectedClients = new ArrayList<>();
+		ArrayList<String> connectedClients = new ArrayList<>();
 
-	    // Iterate over all client threads and cast them to ConnectionToClient
-	    for (Thread t : this.getClientConnections()) {
-	        if (t instanceof ConnectionToClient client) {
-	            try {
-	                String clientIP = client.getInetAddress().getHostAddress();
-	                String clientHost = client.getInetAddress().getHostName();
-	                connectedClients.add("Host: " + clientHost + " (" + clientIP + ")");
-	            } catch (Exception e) {
-	                connectedClients.add("Unknown client");
-	            }
-	        } else {
-	            connectedClients.add("Unknown connection type");
-	        }
-	    }
+		// Iterate over all client threads and cast them to ConnectionToClient
+		for (Thread t : this.getClientConnections()) {
+			if (t instanceof ConnectionToClient client) {
+				try {
+					String clientIP = client.getInetAddress().getHostAddress();
+					String clientHost = client.getInetAddress().getHostName();
+					connectedClients.add("Host: " + clientHost + " (" + clientIP + ")");
+				} catch (Exception e) {
+					connectedClients.add("Unknown client");
+				}
+			} else {
+				connectedClients.add("Unknown connection type");
+			}
+		}
 
-	    return connectedClients;
+		return connectedClients;
 	}
-
-	
-	
 
 }
