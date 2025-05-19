@@ -88,7 +88,7 @@ public class DBController {
 				// Return true if a record exists in the result set
 				while (rs.next()) {
 					Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
-							rs.getDate("order_date"), rs.getInt("confirmation_code"), rs.getInt("subscriber_id"),
+							rs.getDate("order_date"), rs.getInt("confirmation_code"), rs.getInt("subscriberCode"),
 							rs.getDate("date_of_placing_an_order"));
 					list.add(newOrder);
 				}
@@ -119,7 +119,7 @@ public class DBController {
 			// Go through each row and create an Order object
 			while (rs.next()) {
 				Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
-						rs.getDate("order_date"), rs.getInt("confirmation_code"), rs.getInt("subscriber_id"),
+						rs.getDate("order_date"), rs.getInt("confirmation_code"), rs.getInt("subscriberCode"),
 						rs.getDate("date_of_placing_an_order"));
 				orders.add(newOrder);
 			}
@@ -288,4 +288,23 @@ public class DBController {
 		return 5;
 	}
 
+	public void placingAnNewOrder(Order newOrder) {
+		String query = "INSERT INTO `order` (parking_space, order_number, order_date, confirmation_code, subscriberCode, date_of_placing_an_order) VALUES (?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(0, newOrder.getParkingSpace());
+			stmt.setInt(1, newOrder.getOrderNumber());
+			stmt.setDate(2, newOrder.getOrderDate());
+			stmt.setInt(3, newOrder.getConfirmationCode());
+			stmt.setInt(4, newOrder.getSubscriberId());
+			stmt.setDate(0, newOrder.getDateOfPlacingAnOrder());
+			
+			int succeed=stmt.executeUpdate();
+			if(succeed>0) {
+				System.out.println("data in table");
+			}
+		} catch (Exception e) {
+			// Error during update execution
+			System.out.println("Error! " + e.getMessage());
+		}
+	}
 }

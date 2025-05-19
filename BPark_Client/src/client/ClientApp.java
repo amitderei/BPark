@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 public class ClientApp extends Application {
 
 	// Instance-level client used for communication with the server
-	private Client client;
+	private ClientController client;
 
 	/**
 	 * Called when the JavaFX application starts. Loads the client UI and waits for
@@ -65,7 +65,7 @@ public class ClientApp extends Application {
 	 * Allows setting the client instance, for example from a controller. This
 	 * enables dynamic client management without relying on static state.
 	 */
-	public void setClient(Client client) {
+	public void setClient(ClientController client) {
 		this.client = client;
 	}
 }
