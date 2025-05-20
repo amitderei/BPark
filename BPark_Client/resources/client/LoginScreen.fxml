@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- These imports tell JavaFX that we are going to use controls (buttons, text fields, etc.) and layout panes -->
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- This is the root layout of our screen. AnchorPane allows us to place elements at fixed coordinates -->
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.LoginScreen" prefWidth="400" prefHeight="300">
+
+
+    <children>
+
+        <!-- Title of the screen -->
+        <Label layoutX="140" layoutY="30" text="Login Screen" />
+
+        <!-- Label for the user ID -->
+        <Label layoutX="50" layoutY="80" text="User ID:" />
+
+        <!-- Text field where the user will enter their ID -->
+        <TextField fx:id="username" layoutX="150" layoutY="80" />
+
+        <!-- Label for the password -->
+        <Label layoutX="50" layoutY="120" text="Password:" />
+
+        <!-- Password field where the user will enter their code (hidden text) -->
+        <PasswordField fx:id="code" layoutX="150" layoutY="120" />
+
+        <!-- Button to login (calls the handleLoginClick method in the controller when clicked) -->
+        <Button fx:id="submit" layoutX="150" layoutY="170" text="Login"
+                onAction="#handleLoginClick" />
+
+        <!-- Button to login as a guest -->
+        <Button layoutX="230" layoutY="170" text="Login as Guest"
+                onAction="#redirectToMainGuest" />
+
+        <!-- Label to show an error message if login fails -->
+        <Label fx:id="lblError" layoutX="150" layoutY="210"
+               textFill="red" />
+
+    </children>
+</AnchorPane>

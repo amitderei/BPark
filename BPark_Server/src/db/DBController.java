@@ -1,5 +1,5 @@
 package db;
-
+import common.User;
 import java.sql.Connection;
 
 import java.sql.Date;
@@ -22,7 +22,7 @@ public class DBController {
 	private static DBController instance = null;
 
 	// JDBC connection object
-	private Connection conn;
+	private static Connection conn;
 
 	/**
 	 * Singleton accessor - returns the unique instance of the controller. Creates
@@ -41,7 +41,7 @@ public class DBController {
 	 * Establishes connection to the MySQL database. Sets up the JDBC driver and
 	 * opens the connection.
 	 */
-	public void connectToDB() {
+	public static void connectToDB() {
 		try {
 			// Loads and initializes the MySQL JDBC driver class
 			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
@@ -52,8 +52,8 @@ public class DBController {
 
 		try {
 			// Connects to the local MySQL server (replace credentials as needed)
-			this.conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=Asia/Jerusalem",
-					"root", "Aa123456");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=Asia/Jerusalem",
+					"root", "Yosi2311");
 			System.out.println("SQL connection succeed");
 		} catch (SQLException ex) {
 			// Prints SQL error information if connection fails
@@ -307,4 +307,33 @@ public class DBController {
 			System.out.println("Error! " + e.getMessage());
 		}
 	}
+	public static User validateLogin(String userId, String password) {
+	    try {
+	        // Create a prepared SQL statement to avoid SQL injection
+	        String sql = "SELECT role FROM user WHERE userId = ? AND password = ?";
+	        PreparedStatement stmt = conn.prepareStatement(sql);
+
+	        // Fill in the parameters
+	        stmt.setString(1, userId);
+	        stmt.setString(2, password);
+
+	        // Execute the query
+	        ResultSet rs = stmt.executeQuery();
+
+	        // If a match is found, return a new User with the retrieved role
+	        if (rs.next()) {
+	            String role = rs.getString("role");
+	            return new User(userId, role);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace(); // Print error if query fails
+	    }
+
+	    // If no match was found or an error occurred
+	    return null;
+	}
+
+	
+	
 }
