@@ -2,6 +2,8 @@ package client;
 
 import common.Order;
 import common.ServerResponse;
+import common.User;
+import controllers.LoginController;
 import controllers.OrderViewController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 public class ClientController extends AbstractClient {
 
     private OrderViewController controller;
+    private LoginController loginController;
 
     /**
      * Constructs a new Client instance with the specified server address and port.
@@ -44,6 +47,16 @@ public class ClientController extends AbstractClient {
     public OrderViewController getController() {
         return controller;
     }
+    
+    /**
+     * Assigns the LoginController for handling login responses.
+     *
+     * @param loginController the login controller instance
+     */
+    public void setLoginController(LoginController loginController) {
+        this.loginController = loginController;
+    }
+
 
     /**
      * Processes messages received from the server and updates the GUI accordingly.
@@ -52,6 +65,7 @@ public class ClientController extends AbstractClient {
      */
     @Override
     protected void handleMessageFromServer(Object msg) {
+        // Handle special shutdown message
         if (msg instanceof String && msg.equals("server_shutdown")) {
             Platform.runLater(() -> {
                 UiUtils.showAlert("Server Shutdown", "The server is shutting down. The application will now close.",
@@ -61,20 +75,38 @@ public class ClientController extends AbstractClient {
             return;
         }
 
+        // Handle unexpected message type
         if (!(msg instanceof ServerResponse response)) {
             System.err.println("Received unexpected message type from server: " + msg.getClass());
             return;
         }
 
         Platform.runLater(() -> {
+            // Handle login success
+            if (response.isSucceed() && response.getData() instanceof User user) {
+                if (loginController != null) {
+                    loginController.handleLoginSuccess(user);
+                }
+                return;
+            }
+
+            // Handle login failure
+            if (!response.isSucceed() && loginController != null && response.getMsg().toLowerCase().contains("invalid")) {
+                loginController.handleLoginFailure(response.getMsg());
+                return;
+            }
+
+            // Generic UI status update (for order controllers)
             if (controller != null) {
                 UiUtils.setStatus(controller.getStatusLabel(), response.getMsg(), response.isSucceed());
             }
 
+            // Show failure popup
             if (!response.isSucceed()) {
                 UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
             }
 
+            // Handle list of orders
             if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()) {
                 if (dataList.get(0) instanceof Order) {
                     @SuppressWarnings("unchecked")
@@ -86,6 +118,7 @@ public class ClientController extends AbstractClient {
             }
         });
     }
+
 
     /**
      * Sends a request to retrieve all orders from the server.

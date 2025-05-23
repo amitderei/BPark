@@ -308,6 +308,49 @@ public class DBController {
 		}
 	}
 
+	/**
+	 * Authenticates a user against the database using userId and password.
+	 * Queries the 'user' table for matching credentials and returns a User object if successful.
+	 *
+	 * @param userId   the user ID to search for (usually national ID or system ID)
+	 * @param password the user's password (must match exactly as stored in DB)
+	 * @return a User object containing userId and role if found and valid, or null if not authenticated
+	 */
+	public User authenticateUser(String userId, String password) {
+	    String query = "SELECT role FROM bpark.user WHERE userId = ? AND password = ?";
+
+	    // Use try-with-resources to ensure the statement and result set are closed automatically
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, userId);
+	        stmt.setString(2, password);
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            if (rs.next()) {
+	                String roleStr = rs.getString("role");
+
+	                try {
+	                    // Convert role string from DB to enum safely
+	                    UserRole role = UserRole.valueOf(roleStr);
+	                    return new User(userId, password, role);
+
+	                } catch (IllegalArgumentException e) {
+	                    // If DB contains an invalid role not defined in the enum
+	                    System.err.println("Unknown role found in DB: " + roleStr);
+	                }
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Authentication query failed: " + e.getMessage());
+	    }
+
+	    // Return null if login fails due to no match or error
+	    return null;
+	}
+
+
+
+
 
 	
 	

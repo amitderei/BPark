@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import common.Order;
 import common.ServerResponse;
+import common.User;
 import db.DBController;
 
 /**
@@ -63,6 +64,20 @@ public class Server extends AbstractServer {
 					}
 					return; // Stop processing further
 				}
+				
+				// Handle login: ["login", userId, password]
+                else if (data.length == 3 && "login".equals(data[0])) {
+                    String userId = (String) data[1];
+                    String password = (String) data[2];
+                    System.out.println("[SERVER] Login attempt from userId: " + userId);
+
+                    User user = db.authenticateUser(userId, password);
+                    if (user != null) {
+                    	client.sendToClient(new ServerResponse(true, user, "Login successful"));
+                    } else {
+                        client.sendToClient(new ServerResponse(false, null, "Invalid ID or password."));
+                    }
+                }
 
 				// If command is to get all orders
 				else if (data.length == 1 && "getAllOrders".equals(data[0])) {

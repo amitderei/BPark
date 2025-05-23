@@ -11,13 +11,13 @@ import javafx.stage.Stage;
 
 /**
  * Controller for the user type selection screen.
- * Navigates to the guest screen or shared login screen depending on user type.
+ * Navigates to the login or guest screen based on the selected user type.
  */
 public class UserTypeSelectionController implements ClientAware {
 
     private ClientController client;
 
-    /** Button used to trigger guest login. Used to access the active stage safely. */
+    /** Button used to retrieve the current window (stage) */
     @FXML
     private Button guestBtn;
 
@@ -34,9 +34,9 @@ public class UserTypeSelectionController implements ClientAware {
     private Button managerBtn;
 
     /**
-     * Sets the connected client instance.
+     * Injects the active ClientController for communication with the server.
      *
-     * @param client the active client connection
+     * @param client the active client instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -44,7 +44,7 @@ public class UserTypeSelectionController implements ClientAware {
     }
 
     /**
-     * Handles Guest selection — navigates to the Guest screen.
+     * Handles selection of guest user type and navigates to the guest screen.
      */
     @FXML
     public void handleGuest() {
@@ -52,7 +52,7 @@ public class UserTypeSelectionController implements ClientAware {
     }
 
     /**
-     * Handles Subscriber selection — navigates to the shared login screen with role.
+     * Handles selection of subscriber user type and navigates to login screen.
      */
     @FXML
     public void handleSubscriber() {
@@ -60,7 +60,7 @@ public class UserTypeSelectionController implements ClientAware {
     }
 
     /**
-     * Handles Attendant selection — navigates to the shared login screen with role.
+     * Handles selection of attendant user type and navigates to login screen.
      */
     @FXML
     public void handleAttendant() {
@@ -68,7 +68,7 @@ public class UserTypeSelectionController implements ClientAware {
     }
 
     /**
-     * Handles Manager selection — navigates to the shared login screen with role.
+     * Handles selection of manager user type and navigates to login screen.
      */
     @FXML
     public void handleManager() {
@@ -76,34 +76,34 @@ public class UserTypeSelectionController implements ClientAware {
     }
 
     /**
-     * Loads a new FXML screen and passes the client and user role if applicable.
-     * Uses guestBtn to retrieve the active window stage reliably.
+     * Loads a new screen and passes both the client and expected user role (if applicable).
      *
-     * @param path the FXML path to load
-     * @param role the user role (null if Guest)
+     * @param fxmlPath the relative path to the FXML screen
+     * @param role     the expected role for login (null if guest)
      */
-    private void loadScreen(String path, UserRole role) {
+    private void loadScreen(String fxmlPath, UserRole role) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
             Object controller = loader.getController();
-            if (controller instanceof ClientAware) {
-                ((ClientAware) controller).setClient(client);
-            }
-            if (controller instanceof LoginController && role != null) {
-                ((LoginController) controller).setUserRole(role);
+            if (controller instanceof ClientAware awareController) {
+                awareController.setClient(client);
             }
 
-            // Use the scene from an existing button to retrieve the current Stage
+            if (controller instanceof LoginController loginController && role != null) {
+                loginController.setUserRole(role);
+            }
+
             Stage stage = (Stage) guestBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Failed to load screen: " + path);
+            System.err.println("Failed to load screen: " + fxmlPath);
             e.printStackTrace();
         }
     }
 }
+
 

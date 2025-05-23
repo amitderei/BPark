@@ -12,56 +12,42 @@ import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
- * Controller for the shared login screen.
- * Handles login logic for Subscriber, Attendant, and Manager roles.
- * Allows navigating back to user type selection screen and forwards to
- * the relevant home screen upon successful login.
+ * Controller for the login screen of BPARK.
+ * Sends login requests to the server and handles navigation based on user role.
  */
 public class LoginController implements ClientAware {
 
-    /** Text field for user ID input */
     @FXML private TextField username;
-
-    /** Password field for password input */
     @FXML private PasswordField code;
-
-    /** Button to trigger login */
     @FXML private Button submit;
-
-    /** Label for displaying login error messages */
     @FXML private Label lblError;
-
-    /** Button to navigate back to the user type screen */
     @FXML private Button backButton;
 
-    /** Reference to the active client connection */
     private ClientController client;
-
-    /** The user role selected before login (e.g., Subscriber, Manager) */
     private UserRole userRole;
 
     /**
-     * Sets the connected ClientController instance.
+     * Sets the ClientController used to communicate with the server.
      *
-     * @param client the active client connection
+     * @param client the client instance to assign
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
+        client.setLoginController(this);
     }
 
     /**
-     * Sets the user role selected before login.
+     * Sets the user role that was selected prior to login.
      *
-     * @param role the role to set (e.g., Subscriber, Manager)
+     * @param role the role (Subscriber, Attendant, Manager)
      */
     public void setUserRole(UserRole role) {
         this.userRole = role;
     }
 
     /**
-     * Handles the Back button action.
-     * Navigates back to the user type selection screen.
+     * Navigates back to the user type selection screen when the "Back" button is clicked.
      */
     @FXML
     private void handleBack() {
@@ -69,13 +55,11 @@ public class LoginController implements ClientAware {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/UserTypeSelectionScreen.fxml"));
             Parent root = loader.load();
 
-            // Set client on the next controller
             Object controller = loader.getController();
-            if (controller instanceof ClientAware) {
-                ((ClientAware) controller).setClient(client);
+            if (controller instanceof ClientAware aware) {
+                aware.setClient(client);
             }
 
-            // Replace current scene with user type selection
             Stage stage = (Stage) backButton.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -88,7 +72,7 @@ public class LoginController implements ClientAware {
 
     /**
      * Triggered when the login button is clicked.
-     * Validates credentials and navigates to the corresponding user home screen.
+     * Validates input fields and sends a login request to the server.
      */
     @FXML
     private void handleLoginClick() {
@@ -100,20 +84,35 @@ public class LoginController implements ClientAware {
             return;
         }
 
-
-
+        try {
+            client.sendToServer(new Object[] { "login", userId, password });
+        } catch (Exception e) {
+            lblError.setText("Failed to send login request.");
+            System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
+        }
     }
 
     /**
-     * Navigates to the appropriate home screen based on the user's role.
+     * Called by ClientController when the login is successful.
+     * Redirects the user to the appropriate home screen.
      *
-     * @param role the user's role (Subscriber, Attendant, or Manager)
+     * @param user the authenticated user returned by the server
+     */
+    public void handleLoginSuccess(User user) {
+        System.out.println("[DEBUG] Login successful on client. Navigating to home...");
+        navigateToHome(user.getRole());
+    }
+
+    /**
+     * Navigates the user to their corresponding home screen based on role.
+     *
+     * @param role the user's role
      */
     private void navigateToHome(UserRole role) {
         String fxmlPath;
 
         switch (role) {
-            case Subscriber -> fxmlPath = "/client/SubscriberHome.fxml";
+            case Subscriber -> fxmlPath = "/client/SubscriberHomeScreen.fxml";
             case Attendant  -> fxmlPath = "/client/AttendantHome.fxml";
             case Manager    -> fxmlPath = "/client/ManagerHome.fxml";
             default -> {
@@ -127,11 +126,10 @@ public class LoginController implements ClientAware {
             Parent root = loader.load();
 
             Object controller = loader.getController();
-            if (controller instanceof ClientAware) {
-                ((ClientAware) controller).setClient(client);
+            if (controller instanceof ClientAware aware) {
+                aware.setClient(client);
             }
 
-            // Replace current scene with the relevant home screen
             Stage stage = (Stage) submit.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -142,5 +140,16 @@ public class LoginController implements ClientAware {
         }
     }
 
-
+    /**
+     * Displays a login error message (e.g., invalid credentials).
+     *
+     * @param message the error message to display to the user
+     */
+    public void handleLoginFailure(String message) {
+        lblError.setText(message);
+        System.err.println("[DEBUG] Login failed: " + message);
+    }
+    
+    
 }
+
