@@ -39,6 +39,17 @@ public class OrderViewController {
     @FXML private TextField ipTextField;
 
     private ClientController client;
+    
+    /**
+     * Returns the status label of the view.
+     * Used by external classes (e.g., ClientController) to update status messages.
+     *
+     * @return the status label
+     */
+    public Label getStatusLabel() {
+        return statusLabel;
+    }
+
 
     /**
      * Sets the connected client instance and updates UI elements accordingly.

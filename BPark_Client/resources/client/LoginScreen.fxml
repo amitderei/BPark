@@ -1,41 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- These imports tell JavaFX that we are going to use controls (buttons, text fields, etc.) and layout panes -->
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 
-<!-- This is the root layout of our screen. AnchorPane allows us to place elements at fixed coordinates -->
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.LoginScreen" prefWidth="400" prefHeight="300">
-
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.LoginController"
+            prefWidth="800.0" prefHeight="500.0">
 
     <children>
+    
+ 	   <Button fx:id="backButton" layoutX="20.0" layoutY="20.0" text="← Back"
+     	   onAction="#handleBack" prefWidth="80.0" />
 
-        <!-- Title of the screen -->
-        <Label layoutX="140" layoutY="30" text="Login Screen" />
+        <Label layoutX="340.0" layoutY="60.0" text="Login Screen">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
 
-        <!-- Label for the user ID -->
-        <Label layoutX="50" layoutY="80" text="User ID:" />
+        <Label layoutX="260.0" layoutY="140.0" text="User ID:" />
+        <TextField fx:id="username" layoutX="360.0" layoutY="140.0" prefWidth="180.0"/>
 
-        <!-- Text field where the user will enter their ID -->
-        <TextField fx:id="username" layoutX="150" layoutY="80" />
+        <Label layoutX="260.0" layoutY="190.0" text="Password:" />
+        <PasswordField fx:id="code" layoutX="360.0" layoutY="190.0" prefWidth="180.0"/>
 
-        <!-- Label for the password -->
-        <Label layoutX="50" layoutY="120" text="Password:" />
+        <Button fx:id="submit" layoutX="360.0" layoutY="250.0" text="Login"
+                onAction="#handleLoginClick" prefWidth="100.0"/>
 
-        <!-- Password field where the user will enter their code (hidden text) -->
-        <PasswordField fx:id="code" layoutX="150" layoutY="120" />
-
-        <!-- Button to login (calls the handleLoginClick method in the controller when clicked) -->
-        <Button fx:id="submit" layoutX="150" layoutY="170" text="Login"
-                onAction="#handleLoginClick" />
-
-        <!-- Button to login as a guest -->
-        <Button layoutX="230" layoutY="170" text="Login as Guest"
-                onAction="#redirectToMainGuest" />
-
-        <!-- Label to show an error message if login fails -->
-        <Label fx:id="lblError" layoutX="150" layoutY="210"
-               textFill="red" />
+        <Label fx:id="lblError" layoutX="360.0" layoutY="300.0" textFill="red" />
 
     </children>
 </AnchorPane>

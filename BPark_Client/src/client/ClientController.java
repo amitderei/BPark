@@ -1,177 +1,143 @@
 package client;
 
-import common.*;
+import common.Order;
+import common.ServerResponse;
 import controllers.OrderViewController;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import ocsf.client.AbstractClient;
+import ui.UiUtils;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * JavaFX controller class for the BPARK client UI. Responsible for handling
- * user interactions, updating the UI, and communicating with the
- * PrototypeClient (which handles the network logic).
+ * Handles network communication between the BPARK client and server.
+ * Wraps requests and responses using OCSF and updates the assigned controller.
  */
-public class ClientController extends AbstractClient{
-	private OrderViewController controller; // Reference to the client's GUI controller
+public class ClientController extends AbstractClient {
 
-	/**
-	 * Constructs a new Client instance with the specified server address and port.
-	 * Initializes the connection parameters but does not open the connection yet.
-	 *
-	 * @param host the server's hostname or IP address
-	 * @param port the server's listening port
-	 */
-	public ClientController(String host, int port) {
-		super(host, port); // Passes host and port to the parent class (AbstractClient)
-	}
+    private OrderViewController controller;
 
-	/**
-	 * Links this client with the GUI controller to allow GUI updates.
-	 *
-	 * @param orderViewController the JavaFX controller for updating the interface.
-	 */
-	public void setController(OrderViewController orderViewController) {
-		this.controller = orderViewController;
-	}
+    /**
+     * Constructs a new Client instance with the specified server address and port.
+     *
+     * @param host the server's hostname or IP address
+     * @param port the server's listening port
+     */
+    public ClientController(String host, int port) {
+        super(host, port);
+    }
 
-	/**
-	 * @return the currently assigned GUI controller.
-	 */
-	public OrderViewController getController() {
-		return controller;
-	}
+    /**
+     * Assigns the active GUI controller for use in updating the interface.
+     *
+     * @param orderViewController the JavaFX controller
+     */
+    public void setController(OrderViewController orderViewController) {
+        this.controller = orderViewController;
+    }
 
-	/**
-	 * Processes a response received from the server. - Shows a pop-up message to
-	 * the user indicating success or failure. - If the response contains a list of
-	 * Order objects, updates the orders table in the GUI. - If the response is
-	 * invalid or does not contain relevant data, no table update occurs.
-	 *
-	 * @param msg the server response, expected to be of type ServerResponse
-	 */
-	@Override
-	protected void handleMessageFromServer(Object msg) {
-		// Handle server shutdown notification
-		if (msg instanceof String && msg.equals("server_shutdown")) {
-		    Platform.runLater(() -> {
-		        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		        alert.setTitle("Server Shutdown");
-		        alert.setHeaderText("The server is shutting down.");
-		        alert.setContentText("The application will now close.");
-		        alert.showAndWait();
-		        System.exit(0);
-		    });
-		    return;
-		}
-		
-		// Validate that the received message is indeed a ServerResponse
-		if (!(msg instanceof ServerResponse)) {
-			System.err.println("Received unexpected message type from server: " + msg.getClass());
-			return; // Exit early if message is not as expected
-		}
+    /**
+     * @return the currently assigned controller
+     */
+    public OrderViewController getController() {
+        return controller;
+    }
 
-		// Safely cast the message to ServerResponse
-		ServerResponse response = (ServerResponse) msg;
+    /**
+     * Processes messages received from the server and updates the GUI accordingly.
+     *
+     * @param msg the incoming server message (expected to be a ServerResponse or String)
+     */
+    @Override
+    protected void handleMessageFromServer(Object msg) {
+        if (msg instanceof String && msg.equals("server_shutdown")) {
+            Platform.runLater(() -> {
+                UiUtils.showAlert("Server Shutdown", "The server is shutting down. The application will now close.",
+                        Alert.AlertType.INFORMATION);
+                System.exit(0);
+            });
+            return;
+        }
 
-		// Ensure that all GUI updates are executed on the JavaFX Application Thread
-		Platform.runLater(() -> {
-			// Update the status label in all cases
-			if (controller != null) {
-				controller.showStatus(response.getMsg(), response.isSucceed());
-			}
+        if (!(msg instanceof ServerResponse response)) {
+            System.err.println("Received unexpected message type from server: " + msg.getClass());
+            return;
+        }
 
-			// Show pop-up only if the response is a failure
-			if (!response.isSucceed()) {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("System Message");
-				alert.setContentText(response.getMsg());
-				alert.showAndWait();
-			}
+        Platform.runLater(() -> {
+            if (controller != null) {
+                UiUtils.setStatus(controller.getStatusLabel(), response.getMsg(), response.isSucceed());
+            }
 
-			// Proceed to update the table only if the response is successful and contains
-			// data
-			if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()) {
-				// Check if the first element is an Order (basic type-safety validation)
-				if (dataList.get(0) instanceof Order) {
-					@SuppressWarnings("unchecked")
-					ArrayList<Order> orders = (ArrayList<Order>) dataList;
-					controller.showStatus(response.getMsg(), true);
+            if (!response.isSucceed()) {
+                UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+            }
 
-					// Update the GUI table if a controller is linked to this client
-					if (controller != null) {
-						controller.displayOrders(orders);
-					}
-				}
-			}
-		});
-	}
+            if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()) {
+                if (dataList.get(0) instanceof Order) {
+                    @SuppressWarnings("unchecked")
+                    ArrayList<Order> orders = (ArrayList<Order>) dataList;
+                    if (controller != null) {
+                        controller.displayOrders(orders);
+                    }
+                }
+            }
+        });
+    }
 
-	/**
-	 * Sends a request to the server asking for all existing orders. Sends the
-	 * command "getAllOrders" to trigger data retrieval on the server side.
-	 */
-	public void requestAllOrders() {
-		try {
-			// Send a command to the server requesting all orders
-			sendToServer(new Object[] {"getAllOrders"});
-			controller.showStatus("Orders loaded successfully", true);
-		} catch (IOException e) {
-			// Log the error if the message could not be sent to the server
-			System.err.println("Failed to send 'getAllOrders' request to server: " + e.getMessage());
-		}
-	}
+    /**
+     * Sends a request to retrieve all orders from the server.
+     */
+    public void requestAllOrders() {
+        try {
+            sendToServer(new Object[]{"getAllOrders"});
+            if (controller != null)
+                UiUtils.setStatus(controller.getStatusLabel(), "Orders loaded successfully", true);
+        } catch (IOException e) {
+            System.err.println("Failed to send 'getAllOrders' request: " + e.getMessage());
+        }
+    }
 
-	/**
-	 * Sends a request to the server asking for specific order. Sends the command
-	 * "getOrder" and the order numberץ
-	 * 
-	 * @param orderNumber the ID of the order to watch
-	 */
-	public void requestOrderByOrderNum(int orderNumber) {
-		try {
-			// Prepare the request command as an object array and send to server
-			sendToServer(new Object[] { "getOrder", orderNumber });
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'getOrder' request to server: " + e.getMessage());
-		}
-	}
+    /**
+     * Sends a request to retrieve a specific order by its ID.
+     *
+     * @param orderNumber the ID of the order
+     */
+    public void requestOrderByOrderNum(int orderNumber) {
+        try {
+            sendToServer(new Object[]{"getOrder", orderNumber});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'getOrder' request: " + e.getMessage());
+        }
+    }
 
-	/**
-	 * Sends a request to the server to update a specific field in an order. The
-	 * server is expected to process the update and return a confirmation or error
-	 * message.
-	 *
-	 * @param orderNumber the ID of the order to update
-	 * @param field       the name of the field to update (e.g., "order_date",
-	 *                    "parking_space")
-	 * @param newValue    the new value to set for the specified field
-	 */
-	public void updateOrder(int orderNumber, String field, String newValue) {
-		try {
-			// Prepare the update command as an object array and send to server
-			sendToServer(new Object[] { "updateOrder", orderNumber, field, newValue });
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'updateOrder' request to server: " + e.getMessage());
-		}
-	}
-	
-	public void addNewOrder(Order newOrder) {
-		try {
-			sendToServer(new Object[] {"addNewOrder", newOrder});
-		} catch(IOException e) {
-			System.err.println("Failed to send 'addNewOrder' request to server: " + e.getMessage());
-		}
-	}
+    /**
+     * Sends a request to update a field in a specific order.
+     *
+     * @param orderNumber the order ID
+     * @param field       the field to update
+     * @param newValue    the new value to apply
+     */
+    public void updateOrder(int orderNumber, String field, String newValue) {
+        try {
+            sendToServer(new Object[]{"updateOrder", orderNumber, field, newValue});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'updateOrder' request: " + e.getMessage());
+        }
+    }
 
+    /**
+     * Sends a request to add a new order to the system.
+     *
+     * @param newOrder the new Order object to insert
+     */
+    public void addNewOrder(Order newOrder) {
+        try {
+            sendToServer(new Object[]{"addNewOrder", newOrder});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'addNewOrder' request: " + e.getMessage());
+        }
+    }
 }

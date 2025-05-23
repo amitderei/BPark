@@ -307,32 +307,7 @@ public class DBController {
 			System.out.println("Error! " + e.getMessage());
 		}
 	}
-	public static User validateLogin(String userId, String password) {
-	    try {
-	        // Create a prepared SQL statement to avoid SQL injection
-	        String sql = "SELECT role FROM user WHERE userId = ? AND password = ?";
-	        PreparedStatement stmt = conn.prepareStatement(sql);
 
-	        // Fill in the parameters
-	        stmt.setString(1, userId);
-	        stmt.setString(2, password);
-
-	        // Execute the query
-	        ResultSet rs = stmt.executeQuery();
-
-	        // If a match is found, return a new User with the retrieved role
-	        if (rs.next()) {
-	            String role = rs.getString("role");
-	            return new User(userId, role);
-	        }
-
-	    } catch (SQLException e) {
-	        e.printStackTrace(); // Print error if query fails
-	    }
-
-	    // If no match was found or an error occurred
-	    return null;
-	}
 
 	
 	

@@ -1,42 +1,50 @@
 package common;
 
+import java.io.Serializable;
 
 /**
- * This class represents a user in the system.
- * It holds the user's ID and their role (e.g. Subscriber, Manager, Bouncer).
+ * Represents a user in the BPARK system.
+ * Implements Serializable to support client-server communication.
  */
+public class User implements Serializable {
 
-public class User {
-	// The user's ID (e.g. 012345678)
+    private static final long serialVersionUID = 1L;
+
     private String userId;
-
-    // The user's role (e.g. Subscriber, Manager, etc.)
-    private String role;
+    private String password;
+    private UserRole role;
 
     /**
-     * Constructor to create a new User object with ID and role
-     * @param userId the unique ID of the user
-     * @param role the user's role
+     * Constructs a new User object.
+     *
+     * @param userId   the user's unique ID
+     * @param password the user's password
+     * @param role     the user's role (enum)
      */
-    public User(String userId, String role) {
+    public User(String userId, String password, UserRole role) {
         this.userId = userId;
+        this.password = password;
         this.role = role;
     }
 
-    /**
-     * Get the user's ID
-     * @return userId
-     */
     public String getUserId() {
         return userId;
     }
 
-    /**
-     * Get the user's role
-     * @return role
-     */
-    public String getRole() {
+    public String getPassword() {
+        return password;
+    }
+
+    public UserRole getRole() {
         return role;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+               "userId='" + userId + '\'' +
+               ", role=" + role +
+               '}';
+    }
 }
+

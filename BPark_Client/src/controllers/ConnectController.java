@@ -4,10 +4,14 @@ import java.net.InetAddress;
 
 import client.ClientController;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
@@ -15,7 +19,7 @@ import ui.UiUtils;
  * Allows users to input a server IP, connect to the server,
  * and exit the application safely.
  */
-public class ConnectController {
+public class ConnectController implements ClientAware {
 
     /** Displays local host and IP after successful connection */
     @FXML
@@ -49,6 +53,7 @@ public class ConnectController {
      *
      * @param client the connected ClientController instance
      */
+    @Override
     public void setClient(ClientController client) {
         this.client = client;
 
@@ -60,7 +65,6 @@ public class ConnectController {
         }
 
         try {
-            // Display local host name and IP address
             String host = InetAddress.getLocalHost().getHostName();
             String ip = InetAddress.getLocalHost().getHostAddress();
             connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
@@ -74,7 +78,8 @@ public class ConnectController {
     /**
      * Handles the "Connect to Server" button action.
      * Requires the user to provide a valid IP address in the text field.
-     * Attempts to connect to the server on port 5555.
+     * Attempts to connect to the server on port 5555, and on success,
+     * loads the user type selection screen.
      */
     @FXML
     public void connectToServer() {
@@ -87,24 +92,41 @@ public class ConnectController {
         try {
             String ip = ipTextField.getText().trim();
 
-            // Create a new client instance with the provided IP and port 5555
+            // Establish new connection to server on port 5555
             ClientController newClient = new ClientController(ip, 5555);
             newClient.openConnection();
 
-            // Store the connected client instance for future interactions
+            // Store the connected client and update UI
             this.client = newClient;
             setClient(newClient);
-
-            // Display success message and update UI
             UiUtils.setStatus(statusLabel, "Connected successfully to server at " + ip + ":5555", true);
             connectButton.setText("Connected");
             connectButton.setDisable(true);
+
+            // Load the next screen: user type selection
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/UserTypeSelectionScreen.fxml"));
+            Parent root = loader.load();
+
+            // Pass the client to the next controller (if applicable)
+            Object nextController = loader.getController();
+            if (nextController instanceof ClientAware) {
+                ((ClientAware) nextController).setClient(client);
+            }
+
+            // Show the new scene
+            Stage stage = (Stage) connectButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
         } catch (Exception e) {
             UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);
-            UiUtils.showAlert("BPARK - Message", "Could not connect to server: " + e.getMessage(), Alert.AlertType.ERROR);
-            System.err.println("Failed to connect to server: " + e.getMessage());
+            UiUtils.showAlert("BPARK - Message", "Could not connect to server or load next screen: " + e.getMessage(),
+                    Alert.AlertType.ERROR);
+            System.err.println("Connection or navigation error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 
     /**
      * Triggered when the "Exit" button is clicked.
