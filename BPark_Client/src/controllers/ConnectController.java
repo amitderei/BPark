@@ -91,7 +91,6 @@ public class ConnectController {
 
             // Store and link the client
             this.client = newClient;
-            newClient.setController(this);
 
             // Update connection UI
             setClient(newClient);

@@ -1,8 +1,5 @@
 package client;
 
-import db.DBController;
-import java.io.IOException;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -27,41 +24,15 @@ public class ClientApp extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-	    DBController.connectToDB();
-
 
 		// 1. Load the GUI layout from the FXML file (orders_view.fxml)
-	//	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/orders_view.fxml"));
-	//	Parent root = loader.load(); // Load the full UI hierarchy
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ConnectScreen.fxml"));
+		Parent root = loader.load(); // Load the full UI hierarchy
 
 		// 2. Display the GUI and wait for user to connect to the server
-		//primaryStage.setTitle("BPARK Client"); // Set window title
-		//primaryStage.setScene(new Scene(root)); // Set the GUI layout
-		//primaryStage.show(); // Show the window
-		
-		   try {
-		        // Load the login screen FXML from resources/client/LoginScreen.fxml
-		        FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/LoginScreen.fxml"));
-
-		        // Load the layout (AnchorPane from FXML)
-		        Parent root = loader.load();
-
-		        // Create a scene with the loaded layout
-		        Scene scene = new Scene(root);
-
-		        // Set the window title
-		        primaryStage.setTitle("BPark - Login");
-
-		        // Attach the scene to the primary stage
-		        primaryStage.setScene(scene);
-
-		        // Show the window
-		        primaryStage.show();
-
-		    } catch (IOException e) {
-		        // Print the error in case the FXML cannot be loaded
-		        e.printStackTrace();
-		    }
+		primaryStage.setTitle("BPARK Client"); // Set window title
+		primaryStage.setScene(new Scene(root)); // Set the GUI layout
+		primaryStage.show(); // Show the window
 	}
 
 	/**
