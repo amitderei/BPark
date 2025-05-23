@@ -93,15 +93,32 @@ public class LoginController implements ClientAware {
     }
 
     /**
-     * Called by ClientController when the login is successful.
-     * Redirects the user to the appropriate home screen.
+     * Called by the client when login is successful.
+     * Navigates to the appropriate screen based on user role.
+     * Validates that the logged-in user's role matches the expected one.
      *
      * @param user the authenticated user returned by the server
      */
     public void handleLoginSuccess(User user) {
-        System.out.println("[DEBUG] Login successful on client. Navigating to home...");
+        System.out.println("[DEBUG] Login successful on client. Validating role...");
+
+        if (user.getRole() != userRole) {
+            String expected = userRole.toString();
+            String actual = user.getRole().toString();
+
+            UiUtils.showAlert("Login Error", 
+                "You attempted to log in as a " + expected +
+                ", but the user is actually a " + actual + ".", 
+                Alert.AlertType.ERROR);
+
+            System.err.println("[DEBUG] Role mismatch: expected " + expected + ", but got " + actual);
+            return;
+        }
+
+        System.out.println("[DEBUG] Role validated. Navigating to home...");
         navigateToHome(user.getRole());
     }
+
 
     /**
      * Navigates the user to their corresponding home screen based on role.
