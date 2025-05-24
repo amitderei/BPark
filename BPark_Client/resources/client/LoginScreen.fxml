@@ -8,25 +8,31 @@
             prefWidth="800.0" prefHeight="500.0">
 
     <children>
-    
- 	   <Button fx:id="backButton" layoutX="20.0" layoutY="20.0" text="← Back"
-     	   onAction="#handleBack" prefWidth="80.0" />
 
+        <!-- Back button to return to user type selection -->
+        <Button fx:id="backButton" layoutX="20.0" layoutY="20.0" text="← Back"
+                onAction="#handleBack" prefWidth="80.0" />
+
+        <!-- Screen title -->
         <Label layoutX="340.0" layoutY="60.0" text="Login Screen">
             <font>
                 <Font size="24.0"/>
             </font>
         </Label>
 
-        <Label layoutX="260.0" layoutY="140.0" text="User ID:" />
+        <!-- Username label and input field -->
+        <Label layoutX="260.0" layoutY="140.0" text="Username:" />
         <TextField fx:id="username" layoutX="360.0" layoutY="140.0" prefWidth="180.0"/>
 
+        <!-- Password label and input field -->
         <Label layoutX="260.0" layoutY="190.0" text="Password:" />
         <PasswordField fx:id="code" layoutX="360.0" layoutY="190.0" prefWidth="180.0"/>
 
+        <!-- Login button -->
         <Button fx:id="submit" layoutX="360.0" layoutY="250.0" text="Login"
                 onAction="#handleLoginClick" prefWidth="100.0"/>
 
+        <!-- Error message label -->
         <Label fx:id="lblError" layoutX="360.0" layoutY="300.0" textFill="red" />
 
     </children>

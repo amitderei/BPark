@@ -4,45 +4,51 @@ import java.io.Serializable;
 
 /**
  * Represents a user in the BPARK system.
- * Implements Serializable to support client-server communication.
+ * Contains only safe information to transfer between server and client.
  */
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String userId;
-    private String password;
-    private UserRole role;
+    private String username;     // Unique username used for login
+    private UserRole role;       // User role (e.g., Subscriber, Manager, Attendant)
 
     /**
      * Constructs a new User object.
      *
-     * @param userId   the user's unique ID
-     * @param password the user's password
+     * @param username the username of the user
      * @param role     the user's role (enum)
      */
-    public User(String userId, String password, UserRole role) {
-        this.userId = userId;
-        this.password = password;
+    public User(String username, UserRole role) {
+        this.username = username;
         this.role = role;
     }
 
-    public String getUserId() {
-        return userId;
+    /**
+     * Returns the user's username.
+     *
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
+    /**
+     * Returns the user's role.
+     *
+     * @return the UserRole (enum)
+     */
     public UserRole getRole() {
         return role;
     }
 
+    /**
+     * String representation of the user for debugging/logging.
+     */
     @Override
     public String toString() {
         return "User{" +
-               "userId='" + userId + '\'' +
+               "username='" + username + '\'' +
                ", role=" + role +
                '}';
     }

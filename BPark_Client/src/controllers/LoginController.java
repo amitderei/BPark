@@ -80,30 +80,28 @@ public class LoginController implements ClientAware {
 
     /**
      * Triggered when the login button is clicked.
-     * Validates input fields and sends a login request to the server.
+     * Sends a login request to the server using username, password, and expected role.
      */
     @FXML
     private void handleLoginClick() {
-        // --- 1. Read user input from the text-fields ---
-        String userId   = username.getText();   
-        String password = code.getText();       
+        String username = this.username.getText().trim();   
+        String password = code.getText().trim();       
 
-        // --- 2. Basic client-side validation ---
-        if (userId.isEmpty() || password.isEmpty()) {
-            lblError.setText("Please enter both ID and password.");
-            return; // don’t bother the server with invalid data
+        if (username.isEmpty() || password.isEmpty()) {
+            lblError.setText("Please enter both username and password.");
+            return;
         }
 
         try {
-            // --- 3. Send a login request to the server (OCSF protocol) ---
-            // Format: ["login", userId, password]
-            client.sendToServer(new Object[]{"login", userId, password});
+            // Format: ["login", username, password, expectedRole]
+        	client.requestLogin(username, password, userRole);
         } catch (Exception e) {
-            // --- 4. Communication failure: inform the user & log details ---
             lblError.setText("Failed to send login request.");
             System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
         }
     }
+
+
 
 
     /**

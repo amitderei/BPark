@@ -3,6 +3,7 @@ package client;
 import common.Order;
 import common.ServerResponse;
 import common.User;
+import common.UserRole;
 import controllers.LoginController;
 import controllers.OrderViewController;
 import javafx.application.Platform;
@@ -173,4 +174,20 @@ public class ClientController extends AbstractClient {
             System.err.println("Failed to send 'addNewOrder' request: " + e.getMessage());
         }
     }
+    
+    /**
+     * Sends a login request to the server including username, password, and expected role.
+     *
+     * @param username the user's entered username
+     * @param password the user's entered password
+     * @param expectedRole the role the user is attempting to log in as
+     */
+    public void requestLogin(String username, String password, UserRole expectedRole) {
+        try {
+            sendToServer(new Object[]{"login", username, password, expectedRole});
+        } catch (IOException e) {
+            System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
+        }
+    }
+
 }

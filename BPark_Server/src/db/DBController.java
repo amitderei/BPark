@@ -309,19 +309,19 @@ public class DBController {
 	}
 
 	/**
-	 * Authenticates a user against the database using userId and password.
+	 * Authenticates a user against the database using username and password.
 	 * Queries the 'user' table for matching credentials and returns a User object if successful.
+	 * The returned User object will include only the username and role — password is not exposed.
 	 *
-	 * @param userId   the user ID to search for (usually national ID or system ID)
-	 * @param password the user's password (must match exactly as stored in DB)
-	 * @return a User object containing userId and role if found and valid, or null if not authenticated
+	 * @param username the username to search for (must match exactly)
+	 * @param password the user's password (must match exactly)
+	 * @return a User object containing username and role if found and valid, or null if authentication fails
 	 */
-	public User authenticateUser(String userId, String password) {
-	    String query = "SELECT role FROM bpark.user WHERE userId = ? AND password = ?";
+	public User authenticateUser(String username, String password) {
+	    String query = "SELECT role FROM bpark.user WHERE username = ? AND password = ?";
 
-	    // Use try-with-resources to ensure the statement and result set are closed automatically
 	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setString(1, userId);
+	        stmt.setString(1, username);
 	        stmt.setString(2, password);
 
 	        try (ResultSet rs = stmt.executeQuery()) {
@@ -329,24 +329,22 @@ public class DBController {
 	                String roleStr = rs.getString("role");
 
 	                try {
-	                    // Convert role string from DB to enum safely
-	                    UserRole role = UserRole.valueOf(roleStr);
-	                    return new User(userId, password, role);
-
+	                    UserRole role = UserRole.valueOf(roleStr); // Convert role string to enum
+	                    return new User(username, role); // No password returned
 	                } catch (IllegalArgumentException e) {
-	                    // If DB contains an invalid role not defined in the enum
-	                    System.err.println("Unknown role found in DB: " + roleStr);
+	                    System.err.println("[ERROR] Unknown role in database: " + roleStr);
 	                }
 	            }
 	        }
 
 	    } catch (SQLException e) {
-	        System.err.println("Authentication query failed: " + e.getMessage());
+	        System.err.println("[ERROR] Authentication query failed: " + e.getMessage());
 	    }
 
-	    // Return null if login fails due to no match or error
-	    return null;
+	    return null; // Login failed due to invalid credentials or error
 	}
+
+
 
 
 

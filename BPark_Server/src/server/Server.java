@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import common.Order;
 import common.ServerResponse;
 import common.User;
+import common.UserRole;
 import db.DBController;
 
 /**
@@ -65,19 +66,31 @@ public class Server extends AbstractServer {
 					return; // Stop processing further
 				}
 				
-				// Handle login: ["login", userId, password]
-                else if (data.length == 3 && "login".equals(data[0])) {
-                    String userId = (String) data[1];
-                    String password = (String) data[2];
-                    System.out.println("[SERVER] Login attempt from userId: " + userId);
+				
+				 //Handles login requests from clients.
+				 //Verifies credentials and ensures the role matches the user's selection.
+				 //Expected format: {"login", username, password, expectedRole}
+				else if (data.length == 4 && "login".equals(data[0])) {
+				    String username = (String) data[1];
+				    String password = (String) data[2];
+				    UserRole expectedRole = (UserRole) data[3];
 
-                    User user = db.authenticateUser(userId, password);
-                    if (user != null) {
-                    	client.sendToClient(new ServerResponse(true, user, "Login successful"));
-                    } else {
-                        client.sendToClient(new ServerResponse(false, null, "Invalid ID or password."));
-                    }
-                }
+				    System.out.println("[SERVER] Login attempt from username: " + username + " as " + expectedRole);
+
+				    User user = db.authenticateUser(username, password);
+
+				    if (user != null) {
+				        if (user.getRole() == expectedRole) {
+				            client.sendToClient(new ServerResponse(true, user, "Login successful"));
+				        } else {
+				            client.sendToClient(new ServerResponse(false, null,
+				            		"Invalid username or password."));  
+				        }
+				    } else {
+				        client.sendToClient(new ServerResponse(false, null, "Invalid username or password."));
+				    }
+				}
+
 
 				// If command is to get all orders
 				else if (data.length == 1 && "getAllOrders".equals(data[0])) {
