@@ -83,18 +83,22 @@ public class UserTypeSelectionController implements ClientAware {
      */
     private void loadScreen(String fxmlPath, UserRole role) {
         try {
+            /* 1. Load FXML + controller */
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
+            Parent     root   = loader.load();
 
-            Object controller = loader.getController();
-            if (controller instanceof ClientAware awareController) {
-                awareController.setClient(client);
+            /* 2. Inject ClientController into the new controller (if it wants one) */
+            Object ctrl = loader.getController();
+            if (ctrl instanceof ClientAware aware) {
+                aware.setClient(client);
             }
 
-            if (controller instanceof LoginController loginController && role != null) {
-                loginController.setUserRole(role);
+            /* 3. If this is the login screen, tell it which role to expect */
+            if (ctrl instanceof LoginController loginCtrl && role != null) {
+                loginCtrl.setUserRole(role);
             }
 
+            /* 4. Swap current scene with the newly loaded one */
             Stage stage = (Stage) guestBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
