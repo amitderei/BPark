@@ -176,18 +176,19 @@ public class ClientController extends AbstractClient {
     }
     
     /**
-     * Sends a login request to the server including username, password, and expected role.
+     * Sends a login request to the server using the given username and password.
+     * The server will determine the user's role and respond accordingly.
      *
      * @param username the user's entered username
      * @param password the user's entered password
-     * @param expectedRole the role the user is attempting to log in as
      */
-    public void requestLogin(String username, String password, UserRole expectedRole) {
+    public void requestLogin(String username, String password) {
         try {
-            sendToServer(new Object[]{"login", username, password, expectedRole});
+            sendToServer(new Object[]{"login", username, password});
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
         }
     }
+
 
 }

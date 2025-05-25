@@ -12,175 +12,122 @@ import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
- * Controller for the login screen of BPARK.
- * Sends login requests to the server and handles navigation based on user role.
+ * Controller for the login screen of the BPARK system.
+ * Handles login input, validation, request sending, and post-login redirection.
  */
 public class LoginController implements ClientAware {
 
+    /** Text field for entering username */
     @FXML private TextField username;
+
+    /** Password field for entering user's code (password) */
     @FXML private PasswordField code;
+
+    /** Submit button to trigger login */
     @FXML private Button submit;
+
+    /** Label to display error messages to the user */
     @FXML private Label lblError;
+
+    /** Button to go back to the previous screen */
     @FXML private Button backButton;
 
+    /** Client controller instance used for server communication */
     private ClientController client;
-    private UserRole userRole;
 
     /**
-     * Sets the ClientController used to communicate with the server.
+     * Sets the client instance for communication with the server.
+     * Also registers this controller to receive login results.
      *
-     * @param client the client instance to assign
+     * @param client the connected client instance
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
-        client.setLoginController(this);
+        client.setLoginController(this); // so client can call back upon login response
     }
 
     /**
-     * Sets the user role that was selected prior to login.
-     *
-     * @param role the role (Subscriber, Attendant, Manager)
-     */
-    public void setUserRole(UserRole role) {
-        this.userRole = role;
-    }
-
-    /**
-     * Navigates back to the user type selection screen when the "Back" button is clicked.
-     */
-    @FXML
-    private void handleBack() {
-        try {
-            // 1. Load the FXML for the user-type selection screen
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/UserTypeSelectionScreen.fxml"));
-            Parent root = loader.load();
-
-            // 2. Propagate the active ClientController to the next screen (if it needs it)
-            Object controller = loader.getController();
-            if (controller instanceof ClientAware aware) {
-                aware.setClient(client); // keep the existing server connection alive
-            }
-
-            // 3. Switch the current window to the newly loaded scene
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (Exception e) {
-            // 4. Show a user-friendly error dialog and print the stack trace for debugging
-            UiUtils.showAlert("BPARK - Error",
-                    "Failed to return to user type screen: " + e.getMessage(),
-                    Alert.AlertType.ERROR);
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * Triggered when the login button is clicked.
-     * Sends a login request to the server using username, password, and expected role.
+     * Handles the login button click.
+     * Sends a login request to the server using the entered credentials.
+     * Shows an error label if fields are empty.
      */
     @FXML
     private void handleLoginClick() {
+        // Get user input
         String username = this.username.getText().trim();   
         String password = code.getText().trim();       
 
+        // Validate input
         if (username.isEmpty() || password.isEmpty()) {
             lblError.setText("Please enter both username and password.");
             return;
         }
 
+        // Send login request to server
         try {
-            // Format: ["login", username, password, expectedRole]
-        	client.requestLogin(username, password, userRole);
+            client.requestLogin(username, password); // Role is no longer sent
         } catch (Exception e) {
             lblError.setText("Failed to send login request.");
             System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
         }
     }
 
-
-
-
     /**
-     * Called by the client when login is successful.
-     * Navigates to the appropriate screen based on user role.
-     * Validates that the logged-in user's role matches the expected one.
+     * Called by the client controller when login is successful.
+     * Navigates the user to their designated home screen based on role.
      *
-     * @param user the authenticated user returned by the server
+     * @param user the authenticated User object returned from the server
      */
     public void handleLoginSuccess(User user) {
-        System.out.println("[DEBUG] Login successful on client. Validating role...");
+        System.out.println("[DEBUG] Login successful. User role: " + user.getRole());
 
-        // --- 1. Verify that the role returned by the server matches the one the user selected ---
-        if (user.getRole() != userRole) {
-            String expected = userRole.toString();
-            String actual   = user.getRole().toString();
-
-            // Show an error dialog and log the mismatch for debugging
-            UiUtils.showAlert(
-                    "Login Error",
-                    "You attempted to log in as a " + expected +
-                    ", but the user is actually a " + actual + ".",
-                    Alert.AlertType.ERROR);
-
-            System.err.println("[DEBUG] Role mismatch: expected " + expected + ", but got " + actual);
-            return; // abort navigation
-        }
-
-        // --- 2. Role verified – proceed to the relevant home screen ---
-        System.out.println("[DEBUG] Role validated. Navigating to home...");
+        // Navigate to home screen based on role
         navigateToHome(user.getRole());
     }
 
-
-
     /**
-     * Navigates the user to their corresponding home screen based on role.
+     * Navigates the user to the corresponding home screen based on their role.
      *
-     * @param role the user's role
+     * @param role the user's assigned role
      */
     private void navigateToHome(UserRole role) {
         String fxmlPath;
 
-        // --- 1. Map each role to its dedicated FXML screen ---
+        // Choose FXML path based on user role
         switch (role) {
-            case Subscriber -> fxmlPath = "/client/subscriber_main.fxml";
-            case Attendant  -> fxmlPath = "/client/AttendantHome.fxml";
-            case Manager    -> fxmlPath = "/client/ManagerHome.fxml";
-            default -> { // safety-net: unknown role
-                UiUtils.showAlert("BPARK - Error",
-                        "Unknown role: " + role,
-                        Alert.AlertType.ERROR);
+            case Subscriber -> fxmlPath = "/client/Subscriber_main.fxml";
+            case Attendant  -> fxmlPath = "/client/Attendant_main.fxml";
+            case Manager    -> fxmlPath = "/client/Manager_main.fxml";
+            default -> {
+                UiUtils.showAlert("BPARK - Error", "Unknown role: " + role, Alert.AlertType.ERROR);
                 return;
             }
         }
 
         try {
-            // --- 2. Load the selected FXML and obtain its controller ---
-        	FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-        	Parent root = loader.load();
+            // Load the appropriate screen
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
 
-        	// --- 3. Get the controller and pass name and client ---
-        	Object controller = loader.getController();
+            Object controller = loader.getController();
 
-        	if (controller instanceof ClientAware aware) {
-        	    aware.setClient(client);
-        	}
+            // Inject the client into the new controller
+            if (controller instanceof ClientAware aware) {
+                aware.setClient(client);
+            }
 
-        	if (role == UserRole.Subscriber && controller instanceof SubscriberMainController subController) {
-        	    subController.setSubscriberName(username.getText().trim());
-        	}
+            // Pass username to subscriber screen (optional enhancement)
+            if (role == UserRole.Subscriber && controller instanceof SubscriberMainController subController) {
+                subController.setSubscriberName(username.getText().trim());
+            }
 
-            // --- 4. Replace the current scene with the newly loaded one ---
+            // Switch to the new screen
             Stage stage = (Stage) submit.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
 
         } catch (Exception e) {
-            // --- 5. Display a user-friendly error dialog and log the stack trace ---
             UiUtils.showAlert("BPARK - Error",
                     "Failed to load " + role + " screen.",
                     Alert.AlertType.ERROR);
@@ -188,17 +135,43 @@ public class LoginController implements ClientAware {
         }
     }
 
-
     /**
-     * Displays a login error message (e.g., invalid credentials).
+     * Displays a login error message in the UI.
+     * Typically triggered after failed authentication by the server.
      *
-     * @param message the error message to display to the user
+     * @param message the error message to display
      */
     public void handleLoginFailure(String message) {
         lblError.setText(message);
         System.err.println("[DEBUG] Login failed: " + message);
     }
-    
-    
+
+    /**
+     * Handles the "Back" button click.
+     * Returns the user to the main entry screen with login/guest options.
+     */
+    @FXML
+    private void handleBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/MainScreen.fxml"));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof ClientAware aware) {
+                aware.setClient(client);
+            }
+
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("BPARK - Welcome");
+            stage.show();
+
+        } catch (Exception e) {
+            UiUtils.showAlert("BPARK - Error",
+                    "Failed to return to main screen: " + e.getMessage(),
+                    Alert.AlertType.ERROR);
+            e.printStackTrace();
+        }
+    }
 }
 

@@ -7,233 +7,200 @@ import java.util.ArrayList;
 import common.Order;
 import common.ServerResponse;
 import common.User;
-import common.UserRole;
 import db.DBController;
 
 /**
- * Represents the server side of the BPARK prototype. Extends AbstractServer
- * from OCSF to handle client communication.
+ * Represents the server side of the BPARK prototype.
+ * Handles client connections and request processing using the OCSF framework.
  */
 public class Server extends AbstractServer {
 
-	private DBController db;
+    /** Singleton database controller used for all DB operations */
+    private DBController db;
 
-	/**
-	 * Constructs the server with the specified port and initializes DBController
-	 * (Singleton).
-	 *
-	 * @param port The port the server will listen on.
-	 */
-	public Server(int port) {
-		super(port); // Initialize AbstractServer with port
-		db = DBController.getInstance(); // Get singleton DB controller instance
-	}
+    /**
+     * Constructs a new server on the specified port.
+     *
+     * @param port the port number the server will listen on
+     */
+    public Server(int port) {
+        super(port);
+        db = DBController.getInstance();
+    }
 
-	/**
-	 * Called automatically when the server starts listening. Initializes the DB
-	 * connection and logs the startup.
-	 */
-	@Override
-	protected void serverStarted() {
-		db.connectToDB(); // Connect to the database once at startup
-		System.out.println("Server started on port " + getPort()); // Log server status
-	}
+    /**
+     * Called automatically when the server starts.
+     * Establishes the database connection.
+     */
+    @Override
+    protected void serverStarted() {
+        db.connectToDB();
+        System.out.println("Server started on port " + getPort());
+    }
 
-	/**
-	 * Handles incoming messages from clients. Supports two types of messages: 1.
-	 * String command "getAllOrders" - returns all orders in the system. 2. Object[]
-	 * for updating a specific field in an order.
-	 *
-	 * @param msg    The message sent by the client.
-	 * @param client The connection instance representing the client.
-	 */
-	@Override
-	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
-		try {
-			// Message is an Object[] indicating an update\watch specific order
-			// request
-			System.out.println("server1");
-			if (msg instanceof Object[]) {
-				Object[] data = (Object[]) msg;
-				if (data.length == 1 && "disconnect".equals(data[0])) {
-					try {
-						String clientIP = client.getInetAddress().getHostAddress();
-						String clientHost = client.getInetAddress().getHostName();
-						System.out.println("Client requested disconnect from: " + clientHost + " (" + clientIP + ")");
-					} catch (Exception e) {
-						System.out.println("Client requested disconnect, but could not retrieve client info.");
-					}
-					return; // Stop processing further
-				}
-				
-				
-				 //Handles login requests from clients.
-				 //Verifies credentials and ensures the role matches the user's selection.
-				 //Expected format: {"login", username, password, expectedRole}
-				else if (data.length == 4 && "login".equals(data[0])) {
-				    String username = (String) data[1];
-				    String password = (String) data[2];
-				    UserRole expectedRole = (UserRole) data[3];
+    /**
+     * Handles all incoming messages from connected clients.
+     *
+     * @param msg    the message sent by the client
+     * @param client the client connection instance
+     */
+    @Override
+    protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
+        try {
+            if (msg instanceof Object[] data) {
 
-				    System.out.println("[SERVER] Login attempt from username: " + username + " as " + expectedRole);
+                // Handle client disconnect request
+                if (data.length == 1 && "disconnect".equals(data[0])) {
+                    logClientDisconnect(client);
+                    return;
+                }
 
-				    User user = db.authenticateUser(username, password);
+                // Handle login request: ["login", username, password]
+                else if (data.length == 3 && "login".equals(data[0])) {
+                    String username = (String) data[1];
+                    String password = (String) data[2];
 
-				    if (user != null) {
-				        if (user.getRole() == expectedRole) {
-				            client.sendToClient(new ServerResponse(true, user, "Login successful"));
-				        } else {
-				            client.sendToClient(new ServerResponse(false, null,
-				            		"Invalid username or password."));  
-				        }
-				    } else {
-				        client.sendToClient(new ServerResponse(false, null, "Invalid username or password."));
-				    }
-				}
+                    System.out.println("[SERVER] Login attempt from username: " + username);
+
+                    User user = db.authenticateUser(username, password);
+                    System.out.println("[DEBUG] DB returned user: " + user);
 
 
-				// If command is to get all orders
-				else if (data.length == 1 && "getAllOrders".equals(data[0])) {
-					System.out.println("server2");
-					ArrayList<Order> orders = db.getAllOrders();
+                    if (user != null) {
+                        // Successful login – send User object back
+                    	System.out.println("[SERVER] Sending successful login response to client...");
+                        client.sendToClient(new ServerResponse(true, user, "Login successful"));
+                    } else {
+                        // Login failed – send generic error
+                        client.sendToClient(new ServerResponse(false, null, "Invalid username or password."));
+                    }
+                }
 
-					if (orders.isEmpty()) {
-						// No orders found – return failure message
-						client.sendToClient(new ServerResponse(false, null, "There are no orders in the system"));
-					} else {
-						// Orders found – return them to client
-						client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));
-					}
-				}
-				// watch specific order request. Excepted format:{"getOrder", orderNumber}
-				else if (data.length == 2 && "getOrder".equals(data[0])) {
-					int orderNumber = (int) data[1];
+                // Handle "getAllOrders" request
+                else if (data.length == 1 && "getAllOrders".equals(data[0])) {
+                    ArrayList<Order> orders = db.getAllOrders();
 
-					ArrayList<Order> list = db.orderExists(orderNumber);
+                    if (orders.isEmpty()) {
+                        client.sendToClient(new ServerResponse(false, null, "There are no orders in the system"));
+                    } else {
+                        client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));
+                    }
+                }
 
-					if (list.isEmpty()) {
-						// No order found – return failure message
-						client.sendToClient(new ServerResponse(false, null,
-								"There are no order with this order number in the system"));
-					} else {
-						// Order found – return it to client
-						client.sendToClient(new ServerResponse(true, list, "Order is displayed successfully."));
-					}
-				}
+                // Handle request for specific order: ["getOrder", orderNumber]
+                else if (data.length == 2 && "getOrder".equals(data[0])) {
+                    int orderNumber = (int) data[1];
+                    ArrayList<Order> list = db.orderExists(orderNumber);
 
-				// Expected format: {"updateOrder", orderNumber, field, newValue}
-				else if (data.length == 4 && "updateOrder".equals(data[0])) {
-					int orderNumber = (int) data[1];
-					String field = (String) data[2];
-					String newValue = (String) data[3];
+                    if (list.isEmpty()) {
+                        client.sendToClient(new ServerResponse(false, null,
+                                "There are no order with this order number in the system"));
+                    } else {
+                        client.sendToClient(new ServerResponse(true, list, "Order is displayed successfully."));
+                    }
+                }
 
-					int success;
+                // Handle update request: ["updateOrder", orderNumber, field, newValue]
+                else if (data.length == 4 && "updateOrder".equals(data[0])) {
+                    int orderNumber = (int) data[1];
+                    String field = (String) data[2];
+                    String newValue = (String) data[3];
 
-					try {
-						// Perform the update via DBController
-						success = db.updateOrderField(orderNumber, field, newValue);
-					} catch (Exception ex) {
-						client.sendToClient(new ServerResponse(false, null, "Update failed: " + ex.getMessage()));
-						return;
-					}
+                    try {
+                        int success = db.updateOrderField(orderNumber, field, newValue);
 
-					// Respond based on result code from update
-					switch (success) {
-					case 1:
-						// Parking space updated
-						client.sendToClient(new ServerResponse(true, db.getAllOrders(),
-								"Parking space was successfully changed for the order."));
-						break;
-					case 2:
-						client.sendToClient(new ServerResponse(false, null,
-								"Parking space was unsuccessfully changed for the order."));
-						break;
-					case 3:
-						// Order date updated
-						client.sendToClient(new ServerResponse(true, db.getAllOrders(),
-								"Order date was successfully changed for the order."));
-						break;
-					case 4:
-						client.sendToClient(new ServerResponse(false, null,
-								"order_date cannot be before date_of_placing_an_order."));
-						break;
-					case 5:
-						client.sendToClient(new ServerResponse(false, null,
-								"Order date was unsuccessfully changed for the order."));
-						break;
-					case 6:
-						client.sendToClient(
-								new ServerResponse(false, null, "This order number does not exist in the system."));
-						break;
-					case 7:
-						client.sendToClient(new ServerResponse(false, null, "order_date cannot be in the past."));
-						break;
-					}
-				}
-			}
-		} catch (IOException e) {
-			// Handle unexpected client communication failure
-			System.out.println("Client communication error: " + e.getMessage());
-		}
-	}
+                        switch (success) {
+                            case 1 -> client.sendToClient(new ServerResponse(true, db.getAllOrders(),
+                                    "Parking space was successfully changed for the order."));
+                            case 2 -> client.sendToClient(new ServerResponse(false, null,
+                                    "Parking space was unsuccessfully changed for the order."));
+                            case 3 -> client.sendToClient(new ServerResponse(true, db.getAllOrders(),
+                                    "Order date was successfully changed for the order."));
+                            case 4 -> client.sendToClient(new ServerResponse(false, null,
+                                    "order_date cannot be before date_of_placing_an_order."));
+                            case 5 -> client.sendToClient(new ServerResponse(false, null,
+                                    "Order date was unsuccessfully changed for the order."));
+                            case 6 -> client.sendToClient(new ServerResponse(false, null,
+                                    "This order number does not exist in the system."));
+                            case 7 -> client.sendToClient(new ServerResponse(false, null,
+                                    "order_date cannot be in the past."));
+                        }
 
-	/**
-	 * Logs the IP address and hostname of a newly connected client.
-	 *
-	 * @param client The client that connected.
-	 */
-	@Override
-	protected void clientConnected(ConnectionToClient client) {
-		try {
-			String clientIP = client.getInetAddress().getHostAddress();
-			String clientHost = client.getInetAddress().getHostName();
-			System.out.println("Client connected from: " + clientHost + " (" + clientIP + ")");
-		} catch (Exception e) {
-			System.out.println("Could not retrieve client info: " + e.getMessage());
-		}
-	}
+                    } catch (Exception ex) {
+                        client.sendToClient(new ServerResponse(false, null, "Update failed: " + ex.getMessage()));
+                    }
+                }
+            }
 
-	/**
-	 * Called automatically when a client disconnects from the server.
-	 *
-	 * @param client The client that disconnected.
-	 */
-	@Override
-	protected void clientDisconnected(ConnectionToClient client) {
-		try {
-			String clientIP = client.getInetAddress().getHostAddress();
-			String clientHost = client.getInetAddress().getHostName();
-			System.out.println("Client disconnected from: " + clientHost + " (" + clientIP + ")");
-		} catch (Exception e) {
-			System.out.println("Could not retrieve disconnected client info: " + e.getMessage());
-		}
-	}
+        } catch (IOException e) {
+            System.out.println("Client communication error: " + e.getMessage());
+        }
+    }
 
-	/**
-	 * Returns a list of all currently connected clients with host and IP address.
-	 * Iterates over the client connections, casting each to ConnectionToClient.
-	 *
-	 * @return A list of strings representing each connected client's host and IP.
-	 */
-	public ArrayList<String> getConnectedClientInfoList() {
-		ArrayList<String> connectedClients = new ArrayList<>();
+    /**
+     * Logs the IP and host of a newly connected client.
+     *
+     * @param client the connecting client
+     */
+    @Override
+    protected void clientConnected(ConnectionToClient client) {
+        try {
+            String clientIP = client.getInetAddress().getHostAddress();
+            String clientHost = client.getInetAddress().getHostName();
+            System.out.println("Client connected from: " + clientHost + " (" + clientIP + ")");
+        } catch (Exception e) {
+            System.out.println("Could not retrieve client info: " + e.getMessage());
+        }
+    }
 
-		// Iterate over all client threads and cast them to ConnectionToClient
-		for (Thread t : this.getClientConnections()) {
-			if (t instanceof ConnectionToClient client) {
-				try {
-					String clientIP = client.getInetAddress().getHostAddress();
-					String clientHost = client.getInetAddress().getHostName();
-					connectedClients.add("Host: " + clientHost + " (" + clientIP + ")");
-				} catch (Exception e) {
-					connectedClients.add("Unknown client");
-				}
-			} else {
-				connectedClients.add("Unknown connection type");
-			}
-		}
+    /**
+     * Logs disconnection of a client.
+     *
+     * @param client the disconnecting client
+     */
+    @Override
+    protected void clientDisconnected(ConnectionToClient client) {
+        logClientDisconnect(client);
+    }
 
-		return connectedClients;
-	}
+    /**
+     * Logs the disconnection of a client.
+     *
+     * @param client the client to log
+     */
+    private void logClientDisconnect(ConnectionToClient client) {
+        try {
+            String clientIP = client.getInetAddress().getHostAddress();
+            String clientHost = client.getInetAddress().getHostName();
+            System.out.println("Client disconnected from: " + clientHost + " (" + clientIP + ")");
+        } catch (Exception e) {
+            System.out.println("Could not retrieve disconnected client info: " + e.getMessage());
+        }
+    }
 
+    /**
+     * Returns a list of all currently connected clients (host and IP).
+     *
+     * @return list of strings describing connected clients
+     */
+    public ArrayList<String> getConnectedClientInfoList() {
+        ArrayList<String> connectedClients = new ArrayList<>();
+
+        for (Thread t : this.getClientConnections()) {
+            if (t instanceof ConnectionToClient client) {
+                try {
+                    String clientIP = client.getInetAddress().getHostAddress();
+                    String clientHost = client.getInetAddress().getHostName();
+                    connectedClients.add("Host: " + clientHost + " (" + clientIP + ")");
+                } catch (Exception e) {
+                    connectedClients.add("Unknown client");
+                }
+            } else {
+                connectedClients.add("Unknown connection type");
+            }
+        }
+
+        return connectedClients;
+    }
 }
+

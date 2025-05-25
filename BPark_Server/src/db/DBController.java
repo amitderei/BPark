@@ -53,7 +53,7 @@ public class DBController {
 		try {
 			// Connects to the local MySQL server (replace credentials as needed)
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=Asia/Jerusalem",
-					"root", "Yosi2311");
+					"root", "Aa123456");
 			System.out.println("SQL connection succeed");
 		} catch (SQLException ex) {
 			// Prints SQL error information if connection fails
@@ -309,13 +309,13 @@ public class DBController {
 	}
 
 	/**
-	 * Authenticates a user against the database using username and password.
-	 * Queries the 'user' table for matching credentials and returns a User object if successful.
-	 * The returned User object will include only the username and role — password is not exposed.
+	 * Authenticates a user using their username and password.
+	 * If the credentials match a record in the 'user' table, returns a User object with their assigned role.
+	 * The password is not returned in the User object for security reasons.
 	 *
-	 * @param username the username to search for (must match exactly)
-	 * @param password the user's password (must match exactly)
-	 * @return a User object containing username and role if found and valid, or null if authentication fails
+	 * @param username the username provided by the client
+	 * @param password the password provided by the client
+	 * @return a User object (username + role) if authentication succeeds, or null if it fails
 	 */
 	public User authenticateUser(String username, String password) {
 	    String query = "SELECT role FROM bpark.user WHERE username = ? AND password = ?";
@@ -330,7 +330,7 @@ public class DBController {
 
 	                try {
 	                    UserRole role = UserRole.valueOf(roleStr); // Convert role string to enum
-	                    return new User(username, role); // No password returned
+	                    return new User(username, role); // Password not returned
 	                } catch (IllegalArgumentException e) {
 	                    System.err.println("[ERROR] Unknown role in database: " + roleStr);
 	                }
@@ -341,8 +341,9 @@ public class DBController {
 	        System.err.println("[ERROR] Authentication query failed: " + e.getMessage());
 	    }
 
-	    return null; // Login failed due to invalid credentials or error
+	    return null;
 	}
+
 
 
 

@@ -21,21 +21,19 @@ import ui.UiUtils;
  * and exit the application safely.
  */
 public class ConnectController implements ClientAware {
-	private ClientApp app;
 
-	public void setApp(ClientApp app) {
-	    this.app = app;
-	}
+    /** Reference to the main JavaFX application instance */
+    private ClientApp app;
 
-    /** Displays local host and IP after successful connection */
+    /** Displays the connected hostname and IP address */
     @FXML
     private Label connectionLabel;
 
-    /** Screen title label */
+    /** Label for the screen's main title */
     @FXML
     private Label connectHeadline;
 
-    /** Displays connection status messages (success or error) */
+    /** Label for displaying connection status messages */
     @FXML
     private Label statusLabel;
 
@@ -43,19 +41,29 @@ public class ConnectController implements ClientAware {
     @FXML
     private Button connectButton;
 
-    /** Button to exit the application */
+    /** Button that closes the application */
     @FXML
     private Button exitButton;
 
-    /** Input field for server IP address */
+    /** Text field for entering the server's IP address */
     @FXML
     private TextField ipTextField;
 
-    /** Manages the client-side connection to the server */
+    /** Client controller for managing the connection to the server */
     private ClientController client;
 
     /**
-     * Sets the connected client instance and displays local host info if available.
+     * Injects the reference to the main JavaFX application.
+     *
+     * @param app the main client application instance
+     */
+    public void setApp(ClientApp app) {
+        this.app = app;
+    }
+
+    /**
+     * Sets the connected client instance and displays local host information.
+     * If client is null, shows an appropriate warning to the user.
      *
      * @param client the connected ClientController instance
      */
@@ -66,7 +74,6 @@ public class ConnectController implements ClientAware {
         if (client == null) {
             UiUtils.setStatus(statusLabel, "No connection to server. Please connect first.", false);
             UiUtils.showAlert("BPARK - Message", "No connection to server. Please connect first.", Alert.AlertType.WARNING);
-            System.err.println("Client is null. Cannot establish connection.");
             return;
         }
 
@@ -77,15 +84,13 @@ public class ConnectController implements ClientAware {
         } catch (Exception e) {
             UiUtils.setStatus(statusLabel, "Could not retrieve network information.", false);
             UiUtils.showAlert("BPARK - Message", "Could not retrieve network information: " + e.getMessage(), Alert.AlertType.WARNING);
-            System.err.println("Error retrieving network information: " + e.getMessage());
         }
     }
 
     /**
-     * Handles the "Connect to Server" button action.
-     * Requires the user to provide a valid IP address in the text field.
-     * Attempts to connect to the server on port 5555, and on success,
-     * loads the user type selection screen.
+     * Handles the "Connect to Server" button click.
+     * Validates the IP input, attempts to open a connection,
+     * and if successful, navigates to the MainScreen.
      */
     @FXML
     public void connectToServer() {
@@ -98,41 +103,31 @@ public class ConnectController implements ClientAware {
         try {
             String ip = ipTextField.getText().trim();
 
-            // Establish new connection to server on port 5555
+            // Establish connection to server on port 5555
             ClientController newClient = new ClientController(ip, 5555);
             newClient.openConnection();
 
-            // Store the connected client and update UI
             this.client = newClient;
             setClient(newClient);
+
             UiUtils.setStatus(statusLabel, "Connected successfully to server at " + ip + ":5555", true);
             connectButton.setText("Connected");
             connectButton.setDisable(true);
 
-            // Load the next screen: user type selection
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/UserTypeSelectionScreen.fxml"));
+            // Load main screen (Login + Guest)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/MainScreen.fxml"));
             Parent root = loader.load();
 
-            // Pass the client to the next controller (if applicable)
-            Object nextController = loader.getController();
-
-            if (nextController instanceof UserTypeSelectionController userTypeCtrl) {
-                userTypeCtrl.setClient(client); // ← מבטיח שה-client מוזן
-            } else if (nextController instanceof ClientAware aware) {
+            // Inject the client into the next controller
+            Object controller = loader.getController();
+            if (controller instanceof ClientAware aware) {
                 aware.setClient(client);
             }
 
-
-            // 💥 טיפול מיוחד ל־UserTypeSelectionController
-            if (nextController instanceof UserTypeSelectionController userTypeCtrl) {
-                userTypeCtrl.setClient(client); // 💡 חובה בשביל ה-login
-            }
-
-            
-
-            // Show the new scene
+            // Show the main screen
             Stage stage = (Stage) connectButton.getScene().getWindow();
             stage.setScene(new Scene(root));
+            stage.setTitle("BPARK - Welcome");
             stage.show();
 
         } catch (Exception e) {
@@ -144,10 +139,9 @@ public class ConnectController implements ClientAware {
         }
     }
 
-
     /**
-     * Triggered when the "Exit" button is clicked.
-     * Sends disconnect notification to server, closes connection, and exits.
+     * Handles the "Exit" button click.
+     * Gracefully disconnects from the server and terminates the application.
      */
     @FXML
     public void exitApplication() {
@@ -164,4 +158,3 @@ public class ConnectController implements ClientAware {
         System.exit(0);
     }
 }
-

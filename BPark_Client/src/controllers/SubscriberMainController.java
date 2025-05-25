@@ -1,5 +1,6 @@
 package controllers;
 
+import client.ClientController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -7,48 +8,91 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import java.io.IOException;
+import ui.UiUtils;
 
-public class SubscriberMainController {
+/**
+ * Controller for the Subscriber's main screen in the BPARK system.
+ * Displays a personalized greeting and provides access to subscriber actions.
+ */
+public class SubscriberMainController implements ClientAware {
 
+    /** Label displaying the subscriber's name */
     @FXML
-    private Label welcomeLabel; // Label to show subscriber's name
+    private Label welcomeLabel;
 
+    /** Logout button that returns to the main entry screen */
     @FXML
-    private Button logoutButton; // Button for logout (linked in FXML)
+    private Button logoutButton;
 
-    private String subscriberName; // Holds subscriber name passed from login
+    /** The name of the subscriber, injected from login */
+    private String subscriberName;
+
+    /** Client controller used to communicate with the server */
+    private ClientController client;
 
     /**
-     * This method is called from Login after successful login
+     * Injects the client controller after screen is loaded.
+     *
+     * @param client the active client instance
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
+
+    /**
+     * Called from the login controller to display a personalized welcome message.
+     * If the FXML field was not yet injected, the label will not be updated.
+     *
+     * @param name the subscriber's name
      */
     public void setSubscriberName(String name) {
         this.subscriberName = name;
-        welcomeLabel.setText("Welcome, " + name + "!");
+
+        if (welcomeLabel != null) {
+            welcomeLabel.setText("Welcome, " + name + "!");
+        }
     }
 
+    /**
+     * Handles "Home" button click. Since this is the home screen, does nothing.
+     */
     @FXML
     private void handleHomeClick() {
-        System.out.println("Home button clicked (subscriber already on home screen)");
+        System.out.println("Home button clicked (already on home screen)");
     }
 
+    /**
+     * Handles logout by returning the user to the main screen (Login/Guest).
+     */
     @FXML
     private void handleLogoutClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/UserTypeSelectionScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/MainScreen.fxml"));
             Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof ClientAware aware) {
+                aware.setClient(client);
+            }
+
             Stage stage = (Stage) logoutButton.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Select User Type");
-            stage.setWidth(800);
-            stage.setHeight(500);
+            stage.setTitle("BPARK - Welcome");
             stage.show();
-        } catch (IOException e) {
+
+        } catch (Exception e) {
+            UiUtils.showAlert("BPARK - Error",
+                    "Failed to load main screen: " + e.getMessage(),
+                    javafx.scene.control.Alert.AlertType.ERROR);
             e.printStackTrace();
         }
     }
 
-    // Each of these will be replaced with real functionality later
+    // -------------------------
+    // Navigation button handlers
+    // -------------------------
+
     @FXML private void handleViewPersonalInfo() {
         System.out.println("Viewing personal info...");
     }
@@ -81,4 +125,5 @@ public class SubscriberMainController {
         System.out.println("Confirming parking code...");
     }
 }
+
 
