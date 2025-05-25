@@ -48,7 +48,7 @@ public class UserTypeSelectionController implements ClientAware {
      */
     @FXML
     public void handleGuest() {
-        loadScreen("/client/GuestScreen.fxml", null);
+        loadScreen("/client/Guest_main.fxml", null);
     }
 
     /**
@@ -101,6 +101,9 @@ public class UserTypeSelectionController implements ClientAware {
             /* 4. Swap current scene with the newly loaded one */
             Stage stage = (Stage) guestBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
+            stage.setWidth(800);
+            stage.setHeight(500);
+
             stage.show();
 
         } catch (Exception e) {
