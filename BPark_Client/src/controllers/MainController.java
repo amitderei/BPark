@@ -67,8 +67,6 @@ public class MainController implements ClientAware {
 
             Stage stage = (Stage) guestBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setWidth(800);
-            stage.setHeight(500);
             stage.show();
 
         } catch (Exception e) {
