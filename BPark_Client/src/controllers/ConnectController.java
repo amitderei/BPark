@@ -2,6 +2,7 @@ package controllers;
 
 import java.net.InetAddress;
 
+import client.ClientApp;
 import client.ClientController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,6 +21,11 @@ import ui.UiUtils;
  * and exit the application safely.
  */
 public class ConnectController implements ClientAware {
+	private ClientApp app;
+
+	public void setApp(ClientApp app) {
+	    this.app = app;
+	}
 
     /** Displays local host and IP after successful connection */
     @FXML
@@ -109,9 +115,20 @@ public class ConnectController implements ClientAware {
 
             // Pass the client to the next controller (if applicable)
             Object nextController = loader.getController();
-            if (nextController instanceof ClientAware) {
-                ((ClientAware) nextController).setClient(client);
+
+            if (nextController instanceof UserTypeSelectionController userTypeCtrl) {
+                userTypeCtrl.setClient(client); // ← מבטיח שה-client מוזן
+            } else if (nextController instanceof ClientAware aware) {
+                aware.setClient(client);
             }
+
+
+            // 💥 טיפול מיוחד ל־UserTypeSelectionController
+            if (nextController instanceof UserTypeSelectionController userTypeCtrl) {
+                userTypeCtrl.setClient(client); // 💡 חובה בשביל ה-login
+            }
+
+            
 
             // Show the new scene
             Stage stage = (Stage) connectButton.getScene().getWindow();

@@ -147,7 +147,7 @@ public class LoginController implements ClientAware {
 
         // --- 1. Map each role to its dedicated FXML screen ---
         switch (role) {
-            case Subscriber -> fxmlPath = "/client/SubscriberHomeScreen.fxml";
+            case Subscriber -> fxmlPath = "/client/subscriber_main.fxml";
             case Attendant  -> fxmlPath = "/client/AttendantHome.fxml";
             case Manager    -> fxmlPath = "/client/ManagerHome.fxml";
             default -> { // safety-net: unknown role
@@ -160,14 +160,19 @@ public class LoginController implements ClientAware {
 
         try {
             // --- 2. Load the selected FXML and obtain its controller ---
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
+        	FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+        	Parent root = loader.load();
 
-            // --- 3. Pass the active ClientController to the new screen (if it needs it) ---
-            Object controller = loader.getController();
-            if (controller instanceof ClientAware aware) {
-                aware.setClient(client); // preserve existing server connection
-            }
+        	// --- 3. Get the controller and pass name and client ---
+        	Object controller = loader.getController();
+
+        	if (controller instanceof ClientAware aware) {
+        	    aware.setClient(client);
+        	}
+
+        	if (role == UserRole.Subscriber && controller instanceof SubscriberMainController subController) {
+        	    subController.setSubscriberName(username.getText().trim());
+        	}
 
             // --- 4. Replace the current scene with the newly loaded one ---
             Stage stage = (Stage) submit.getScene().getWindow();

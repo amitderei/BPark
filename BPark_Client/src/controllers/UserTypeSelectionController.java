@@ -57,6 +57,8 @@ public class UserTypeSelectionController implements ClientAware {
     @FXML
     public void handleSubscriber() {
         loadScreen("/client/LoginScreen.fxml", UserRole.Subscriber);
+       
+
     }
 
     /**
@@ -89,13 +91,12 @@ public class UserTypeSelectionController implements ClientAware {
 
             /* 2. Inject ClientController into the new controller (if it wants one) */
             Object ctrl = loader.getController();
-            if (ctrl instanceof ClientAware aware) {
-                aware.setClient(client);
-            }
-
-            /* 3. If this is the login screen, tell it which role to expect */
             if (ctrl instanceof LoginController loginCtrl && role != null) {
                 loginCtrl.setUserRole(role);
+                loginCtrl.setClient(client); 
+                // ← ניגשים ישירות כי יודעים שזו מחלקה ספציפית
+            } else if (ctrl instanceof ClientAware aware) {
+                aware.setClient(client); // ← לשאר הקונטרולרים
             }
 
             /* 4. Swap current scene with the newly loaded one */

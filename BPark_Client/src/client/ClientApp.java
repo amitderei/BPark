@@ -1,5 +1,6 @@
 package client;
 
+import controllers.ConnectController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -24,15 +25,18 @@ public class ClientApp extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+	    // 1. Load ConnectScreen.fxml
+	    FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ConnectScreen.fxml"));
+	    Parent root = loader.load();
 
-		// 1. Load the GUI layout from the FXML file (orders_view.fxml)
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ConnectScreen.fxml"));
-		Parent root = loader.load(); // Load the full UI hierarchy
+	    // 2. Get controller and inject ClientApp
+	    ConnectController controller = loader.getController();
+	    controller.setApp(this);
 
-		// 2. Display the GUI and wait for user to connect to the server
-		primaryStage.setTitle("BPARK Client"); // Set window title
-		primaryStage.setScene(new Scene(root)); // Set the GUI layout
-		primaryStage.show(); // Show the window
+	    // 3. Show the scene
+	    primaryStage.setTitle("BPARK Client");
+	    primaryStage.setScene(new Scene(root));
+	    primaryStage.show();
 	}
 
 	/**
