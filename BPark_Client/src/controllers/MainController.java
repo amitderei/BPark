@@ -39,7 +39,7 @@ public class MainController implements ClientAware {
      */
     @FXML
     public void handleGuest() {
-        loadScreen("/client/Guest_main.fxml");
+        loadScreen("/client/GuestMainScreen.fxml");
     }
 
     /**
