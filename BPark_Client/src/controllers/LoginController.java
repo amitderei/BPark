@@ -83,22 +83,23 @@ public class LoginController implements ClientAware {
         System.out.println("[DEBUG] Login successful. User role: " + user.getRole());
 
         // Navigate to home screen based on role
-        navigateToHome(user.getRole());
+        navigateToHome(user);
     }
 
     /**
      * Navigates the user to the corresponding home screen based on their role.
+     * Passes client and user data to the next screen's controller.
      *
-     * @param role the user's assigned role
+     * @param user the logged-in user
      */
-    private void navigateToHome(UserRole role) {
+    private void navigateToHome(User user) {
         String fxmlPath;
 
         // Choose FXML path based on user role
+        UserRole role = user.getRole();
         switch (role) {
             case Subscriber -> fxmlPath = "/client/SubscriberMainScreen.fxml";
-            case Attendant  -> fxmlPath = "/client/StaffMainScreen.fxml";
-            case Manager    -> fxmlPath = "/client/StaffMainScreen.fxml";
+            case Attendant, Manager -> fxmlPath = "/client/StaffMainScreen.fxml";
             default -> {
                 UiUtils.showAlert("BPARK - Error", "Unknown role: " + role, Alert.AlertType.ERROR);
                 return;
@@ -106,23 +107,29 @@ public class LoginController implements ClientAware {
         }
 
         try {
-            // Load the appropriate screen
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
             Object controller = loader.getController();
 
-            // Inject the client into the new controller
+            // Inject the client into the new screen
             if (controller instanceof ClientAware aware) {
                 aware.setClient(client);
             }
 
-            // Pass username to subscriber screen (optional enhancement)
-            if (role == UserRole.Subscriber && controller instanceof SubscriberMainController subController) {
+            // Inject the user into StaffMainController
+            if ((role == UserRole.Manager || role == UserRole.Attendant)
+                    && controller instanceof StaffMainController staffController) {
+                staffController.setUser(user);
+            }
+
+            // Inject subscriber name into SubscriberMainController
+            if (role == UserRole.Subscriber
+                    && controller instanceof SubscriberMainController subController) {
                 subController.setSubscriberName(username.getText().trim());
             }
 
-            // Switch to the new screen
+            // Show the screen
             Stage stage = (Stage) submit.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
