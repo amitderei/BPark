@@ -292,5 +292,18 @@ public class ClientController extends AbstractClient {
             System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
         }
     }
+
+    /**
+     * Sends a request to the server to check how many parking spots are currently available.
+     * This request is used in guest mode or before placing an order.
+     */
+    public void requestAvailableSpots() {
+        try {
+            sendToServer(new Object[]{"CheckParkingAvailability"});
+        } catch (IOException e) {
+            System.err.println("Failed to request available spots: " + e.getMessage());
+        }
+    }
+
 }
 
