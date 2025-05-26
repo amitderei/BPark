@@ -90,11 +90,14 @@ public class ClientController extends AbstractClient {
 
     /**
      * Processes messages received from the server.
+     * Handles login results, order data, error messages,
+     * vehicle pickup responses, and other system messages.
      *
-     * @param msg server message (expected to be ServerResponse or String)
+     * @param msg the message sent from the server (expected to be ServerResponse or String)
      */
     @Override
     protected void handleMessageFromServer(Object msg) {
+        // Handle server shutdown as plain String
         if (msg instanceof String str && str.equals("server_shutdown")) {
             Platform.runLater(() -> {
                 UiUtils.showAlert("Server Shutdown",
@@ -105,40 +108,34 @@ public class ClientController extends AbstractClient {
             return;
         }
 
+        // Validate expected type (ServerResponse)
         if (!(msg instanceof ServerResponse response)) {
             System.err.println("Unexpected message type: " + msg.getClass());
             return;
         }
 
         Platform.runLater(() -> {
-            // Login result
+            // ------------------------------
+            // Login results (success or fail)
+            // ------------------------------
+
             if (response.isSucceed() && response.getData() instanceof User user) {
                 if (loginController != null) {
                     loginController.handleLoginSuccess(user);
                 }
                 return;
-            }
-
-            // Login failure
-            if (!response.isSucceed()
+            } else if (!response.isSucceed()
                     && loginController != null
                     && response.getMsg().toLowerCase().contains("invalid")) {
                 loginController.handleLoginFailure(response.getMsg());
                 return;
             }
 
-            // Order controller status update
-            if (controller != null) {
-                UiUtils.setStatus(controller.getStatusLabel(), response.getMsg(), response.isSucceed());
-            }
+            // ------------------------------
+            // Order view controller feedback
+            // ------------------------------
 
-            // Generic failure
-            if (!response.isSucceed()) {
-                UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
-            }
-
-            // List of orders
-            if (response.isSucceed()
+            else if (response.isSucceed()
                     && response.getData() instanceof ArrayList<?> dataList
                     && !dataList.isEmpty()
                     && dataList.get(0) instanceof Order) {
@@ -147,24 +144,34 @@ public class ClientController extends AbstractClient {
                 if (controller != null) {
                     controller.displayOrders(orders);
                 }
+                return;
+            } else if (controller != null) {
+                UiUtils.setStatus(controller.getStatusLabel(), response.getMsg(), response.isSucceed());
             }
 
-            // Vehicle pickup response handling
+            // General error message popup (only if not handled before)
+            if (!response.isSucceed()) {
+                UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+            }
+
+            // ------------------------------
+            // Vehicle pickup screen feedback
+            // ------------------------------
+
             if (pickupController != null) {
                 UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
                 if (response.isSucceed()
                         && response.getMsg().toLowerCase().contains("subscriber verified")) {
                     pickupController.onSubscriberValidated();
-                }
-
-                if (response.isSucceed()
+                } else if (response.isSucceed()
                         && response.getMsg().toLowerCase().contains("pickup successful")) {
                     pickupController.disableAfterPickup();
                 }
             }
         });
     }
+
 
     /* ------------------------------------------------------------------
      * Order-related requests
