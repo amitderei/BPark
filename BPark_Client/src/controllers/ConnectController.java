@@ -5,14 +5,10 @@ import java.net.InetAddress;
 import client.ClientApp;
 import client.ClientController;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
@@ -26,28 +22,22 @@ public class ConnectController implements ClientAware {
     private ClientApp app;
 
     /** Displays the connected hostname and IP address */
-    @FXML
-    private Label connectionLabel;
+    @FXML private Label connectionLabel;
 
     /** Label for the screen's main title */
-    @FXML
-    private Label connectHeadline;
+    @FXML private Label connectHeadline;
 
     /** Label for displaying connection status messages */
-    @FXML
-    private Label statusLabel;
+    @FXML private Label statusLabel;
 
     /** Button that initiates the connection to the server */
-    @FXML
-    private Button connectButton;
+    @FXML private Button connectButton;
 
     /** Button that closes the application */
-    @FXML
-    private Button exitButton;
+    @FXML private Button exitButton;
 
     /** Text field for entering the server's IP address */
-    @FXML
-    private TextField ipTextField;
+    @FXML private TextField ipTextField;
 
     /** Client controller for managing the connection to the server */
     private ClientController client;
@@ -115,20 +105,10 @@ public class ConnectController implements ClientAware {
             connectButton.setDisable(true);
 
             // Load main screen (Login + Guest)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/MainScreen.fxml"));
-            Parent root = loader.load();
-
-            // Inject the client into the next controller
-            Object controller = loader.getController();
-            if (controller instanceof ClientAware aware) {
-                aware.setClient(client);
-            }
-
-            // Show the main screen
-            Stage stage = (Stage) connectButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("BPARK - Welcome");
-            stage.show();
+            UiUtils.loadScreen(connectButton,
+                               "/client/MainScreen.fxml",
+                               "BPARK - Welcome",
+                               client);
 
         } catch (Exception e) {
             UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);

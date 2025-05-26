@@ -33,7 +33,6 @@ public class SubscriberMainController implements ClientAware {
      *  Runtime fields
      * ------------------------------------------------------------- */
     private ClientController client;
-    private String subscriberName;
 
     /* -------------------------------------------------------------
      *  ClientAware implementation
@@ -55,7 +54,6 @@ public class SubscriberMainController implements ClientAware {
      * @param name subscriber's first name
      */
     public void setSubscriberName(String name) {
-        this.subscriberName = name;
         if (welcomeLabel != null) {
             welcomeLabel.setText("Welcome, " + name + "!");
         }
