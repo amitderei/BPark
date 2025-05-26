@@ -11,10 +11,11 @@
     <!-- Top toolbar -->
     <top>
         <ToolBar>
-            <!-- Button to return to main screen -->
+            <!-- Home button -->
             <Button text="🏠 Home" onAction="#handleHomeClick" />
             <Pane HBox.hgrow="ALWAYS" />
-            <Button fx:id="logoutButton" text="🔓 Logout" onAction="#handleLogoutClick" />
+            <!-- Back button -->
+            <Button fx:id="btnBack" text="🔙 Back" onAction="#handleBackClick" />
         </ToolBar>
     </top>
 

@@ -17,80 +17,101 @@ import java.util.ArrayList;
 
 /**
  * Handles network communication between the BPARK client and server.
- * Wraps requests and responses using OCSF and updates the assigned controller.
+ * Wraps client requests and processes server responses.
  */
 public class ClientController extends AbstractClient {
 
-    private OrderViewController controller;
-    private LoginController loginController;
-	private VehiclePickupController pickupController;
+    /* ------------------------------------------------------------------
+     * UI Controllers (injected after screen load)
+     * ------------------------------------------------------------------ */
 
+    /** Controller for displaying order data */
+    private OrderViewController controller;
+
+    /** Controller for handling login screen flow */
+    private LoginController loginController;
+
+    /** Controller for vehicle pickup screen (subscriber) */
+    private VehiclePickupController pickupController;
+
+    /* ------------------------------------------------------------------
+     * Constructor
+     * ------------------------------------------------------------------ */
 
     /**
-     * Constructs a new Client instance with the specified server address and port.
+     * Constructs a new ClientController instance.
      *
-     * @param host the server's hostname or IP address
+     * @param host the server's IP or hostname
      * @param port the server's listening port
      */
     public ClientController(String host, int port) {
         super(host, port);
     }
 
+    /* ------------------------------------------------------------------
+     * Setters / Getters
+     * ------------------------------------------------------------------ */
+
     /**
-     * Assigns the active GUI controller for use in updating the interface.
+     * Sets the OrderViewController used to update order data on screen.
      *
-     * @param orderViewController the JavaFX controller
+     * @param orderViewController the order screen controller
      */
     public void setController(OrderViewController orderViewController) {
         this.controller = orderViewController;
     }
 
-    /**
-     * @return the currently assigned controller
-     */
+    /** @return the active order controller */
     public OrderViewController getController() {
         return controller;
     }
-    
-	public void setPickupController(VehiclePickupController pickupController) {
-		this.pickupController = pickupController;
-	}
-    
+
     /**
-     * Assigns the LoginController for handling login responses.
+     * Sets the login screen controller.
      *
-     * @param loginController the login controller instance
+     * @param loginController the login screen controller
      */
     public void setLoginController(LoginController loginController) {
         this.loginController = loginController;
     }
 
+    /**
+     * Sets the vehicle pickup screen controller.
+     *
+     * @param pickupController the vehicle pickup controller
+     */
+    public void setPickupController(VehiclePickupController pickupController) {
+        this.pickupController = pickupController;
+    }
+
+    /* ------------------------------------------------------------------
+     * Server Response Handling
+     * ------------------------------------------------------------------ */
 
     /**
-     * Processes messages received from the server and updates the GUI accordingly.
+     * Processes messages received from the server.
      *
-     * @param msg the incoming server message (expected to be a ServerResponse or String)
+     * @param msg server message (expected to be ServerResponse or String)
      */
     @Override
     protected void handleMessageFromServer(Object msg) {
-        // Handle special shutdown message
-        if (msg instanceof String && msg.equals("server_shutdown")) {
+        if (msg instanceof String str && str.equals("server_shutdown")) {
             Platform.runLater(() -> {
-                UiUtils.showAlert("Server Shutdown", "The server is shutting down. The application will now close.",
+                UiUtils.showAlert("Server Shutdown",
+                        "The server is shutting down. The application will now close.",
                         Alert.AlertType.INFORMATION);
                 System.exit(0);
             });
             return;
         }
 
-        // Handle unexpected message type
         if (!(msg instanceof ServerResponse response)) {
-            System.err.println("Received unexpected message type from server: " + msg.getClass());
+            System.err.println("Unexpected message type: " + msg.getClass());
             return;
         }
 
         Platform.runLater(() -> {
-            // Handle login success
+            // Login result
             if (response.isSucceed() && response.getData() instanceof User user) {
                 if (loginController != null) {
                     loginController.handleLoginSuccess(user);
@@ -98,58 +119,58 @@ public class ClientController extends AbstractClient {
                 return;
             }
 
-            // Handle login failure
-            if (!response.isSucceed() && loginController != null && response.getMsg().toLowerCase().contains("invalid")) {
+            // Login failure
+            if (!response.isSucceed()
+                    && loginController != null
+                    && response.getMsg().toLowerCase().contains("invalid")) {
                 loginController.handleLoginFailure(response.getMsg());
                 return;
             }
 
-            // Generic UI status update (for order controllers)
+            // Order controller status update
             if (controller != null) {
                 UiUtils.setStatus(controller.getStatusLabel(), response.getMsg(), response.isSucceed());
             }
 
-            // Show failure popup
+            // Generic failure
             if (!response.isSucceed()) {
                 UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
             }
 
-            // Handle list of orders
-            if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()) {
-                if (dataList.get(0) instanceof Order) {
-                    @SuppressWarnings("unchecked")
-                    ArrayList<Order> orders = (ArrayList<Order>) dataList;
-                    if (controller != null) {
-                        controller.displayOrders(orders);
-                    }
+            // List of orders
+            if (response.isSucceed()
+                    && response.getData() instanceof ArrayList<?> dataList
+                    && !dataList.isEmpty()
+                    && dataList.get(0) instanceof Order) {
+                @SuppressWarnings("unchecked")
+                ArrayList<Order> orders = (ArrayList<Order>) dataList;
+                if (controller != null) {
+                    controller.displayOrders(orders);
                 }
             }
-            
-   	     // Vehicle-pickup screen updates
-	        if (pickupController != null) {
 
-	            // Always update status label for any relevant message
-	            UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+            // Vehicle pickup response handling
+            if (pickupController != null) {
+                UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
-	            // Trigger UI change after subscriber is verified
-	            if (response.isSucceed()
-	                    && response.getMsg().toLowerCase().contains("subscriber verified")) {
-	                pickupController.onSubscriberValidated();
-	            }
+                if (response.isSucceed()
+                        && response.getMsg().toLowerCase().contains("subscriber verified")) {
+                    pickupController.onSubscriberValidated();
+                }
 
-	            // Disable pickup controls if pickup succeeded
-	            if (response.isSucceed()
-	                    && response.getMsg().toLowerCase().contains("pickup successful")) {
-	                pickupController.disableAfterPickup();
-	            }
-	        }
+                if (response.isSucceed()
+                        && response.getMsg().toLowerCase().contains("pickup successful")) {
+                    pickupController.disableAfterPickup();
+                }
+            }
         });
     }
 
+    /* ------------------------------------------------------------------
+     * Order-related requests
+     * ------------------------------------------------------------------ */
 
-    /**
-     * Sends a request to retrieve all orders from the server.
-     */
+    /** Requests all orders from the server. */
     public void requestAllOrders() {
         try {
             sendToServer(new Object[]{"getAllOrders"});
@@ -161,9 +182,9 @@ public class ClientController extends AbstractClient {
     }
 
     /**
-     * Sends a request to retrieve a specific order by its ID.
+     * Requests a specific order by ID.
      *
-     * @param orderNumber the ID of the order
+     * @param orderNumber the order ID
      */
     public void requestOrderByOrderNum(int orderNumber) {
         try {
@@ -174,11 +195,11 @@ public class ClientController extends AbstractClient {
     }
 
     /**
-     * Sends a request to update a field in a specific order.
+     * Sends an update for a specific field in an order.
      *
      * @param orderNumber the order ID
      * @param field       the field to update
-     * @param newValue    the new value to apply
+     * @param newValue    the new value to set
      */
     public void updateOrder(int orderNumber, String field, String newValue) {
         try {
@@ -189,9 +210,9 @@ public class ClientController extends AbstractClient {
     }
 
     /**
-     * Sends a request to add a new order to the system.
+     * Sends a new order to the server.
      *
-     * @param newOrder the new Order object to insert
+     * @param newOrder the new Order to insert
      */
     public void addNewOrder(Order newOrder) {
         try {
@@ -200,13 +221,16 @@ public class ClientController extends AbstractClient {
             System.err.println("Failed to send 'addNewOrder' request: " + e.getMessage());
         }
     }
-    
+
+    /* ------------------------------------------------------------------
+     * Login / Subscriber flow
+     * ------------------------------------------------------------------ */
+
     /**
-     * Sends a login request to the server using the given username and password.
-     * The server will determine the user's role and respond accordingly.
+     * Sends a login request to the server.
      *
-     * @param username the user's entered username
-     * @param password the user's entered password
+     * @param username user's input username
+     * @param password user's input password
      */
     public void requestLogin(String username, String password) {
         try {
@@ -215,61 +239,58 @@ public class ClientController extends AbstractClient {
             System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
         }
     }
-    
-	/**
-	 * Sends a request to validate if the subscriber exists in the system.
-	 *
-	 * @param subscriberCode the code to validate
-	 */
-	public void validateSubscriber(int subscriberCode) {
-		try {
-			sendToServer(new Object[] { "validateSubscriber", subscriberCode });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'validateSubscriber' request to server: " + e.getMessage());
-		}
-	}
 
-	
-	/**
-	 * Sends a request to collect a vehicle using subscriberCode and confirmationCode.
-	 *
-	 * @param subscriberCode the subscriber's code
-	 * @param parkingCode the confirmation code
-	 */
-	public void collectCar(int subscriberCode, int parkingCode) {
-		try {
-			sendToServer(new Object[] { "collectCar", subscriberCode, parkingCode });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'collectCar' request: " + e.getMessage());
-		}
-	}
-	
-	/**
-	 * Sends a request to extend the current parking event for a subscriber.
-	 *
-	 * @param subscriberCode the subscriber's code
-	 */
-	public void requestExtension(int subscriberCode) {
-		try {
-			sendToServer(new Object[] { "extendParking", subscriberCode });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
-		}
-	}
-	
-	/**
-	 * Sends a request to the server to resend the parking code to the subscriber
-	 * via email and SMS.
-	 *
-	 * @param subscriberCode the subscriber's code
-	 */
-	public void sendLostParkingCode(int subscriberCode) {
-	    try {
-	        sendToServer(new Object[] { "sendLostCode", subscriberCode });
-	    } catch (IOException e) {
-	        System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
-	    }
-	}
+    /**
+     * Validates whether a subscriber exists using their code.
+     *
+     * @param subscriberCode the code to validate
+     */
+    public void validateSubscriber(int subscriberCode) {
+        try {
+            sendToServer(new Object[]{"validateSubscriber", subscriberCode});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'validateSubscriber' request: " + e.getMessage());
+        }
+    }
 
+    /**
+     * Sends a vehicle pickup request with subscriber code and parking code.
+     *
+     * @param subscriberCode the subscriber code
+     * @param parkingCode    the assigned parking code
+     */
+    public void collectCar(int subscriberCode, int parkingCode) {
+        try {
+            sendToServer(new Object[]{"collectCar", subscriberCode, parkingCode});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'collectCar' request: " + e.getMessage());
+        }
+    }
 
+    /**
+     * Sends a request to extend the current parking session.
+     *
+     * @param subscriberCode the subscriber code
+     */
+    public void requestExtension(int subscriberCode) {
+        try {
+            sendToServer(new Object[]{"extendParking", subscriberCode});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sends a request to resend the parking code (SMS + email).
+     *
+     * @param subscriberCode the subscriber code
+     */
+    public void sendLostParkingCode(int subscriberCode) {
+        try {
+            sendToServer(new Object[]{"sendLostCode", subscriberCode});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
+        }
+    }
 }
+

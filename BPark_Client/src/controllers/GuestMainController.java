@@ -5,18 +5,19 @@ import javafx.scene.control.Button;
 import ui.UiUtils;
 
 /**
- * Controller for the guest's main screen in the BPARK system.
- * Handles guest-level navigation and actions.
+ * Controller for the guest main screen.
+ * Allows basic guest functionality like viewing availability,
+ * and returning to the entry screen.
  */
 public class GuestMainController {
 
-    /** Button used to log out and return to the entry screen. */
+    /** Button to return to the main welcome screen */
     @FXML
-    private Button logoutButton;
+    private Button btnBack;
 
     /**
      * Triggered when the "Home" button is clicked.
-     * For a guest, this is already the home screen.
+     * This is already the home screen for guests.
      */
     @FXML
     private void handleHomeClick() {
@@ -24,25 +25,22 @@ public class GuestMainController {
     }
 
     /**
-     * Triggered when the "Logout" button is clicked.
-     * Returns the user to the guest/login selection screen.
+     * Triggered when the "Back" button is clicked.
+     * Returns to the user type selection screen.
      */
     @FXML
-    private void handleLogoutClick() {
-        UiUtils.loadScreen(logoutButton,
-                           "/client/UserTypeSelectionScreen.fxml",
+    private void handleBackClick() {
+        UiUtils.loadScreen(btnBack,
+                           "/client/MainScreen.fxml",
                            "Select User Type",
-                           null); // guest does not require ClientController
+                           null); // no client needed for guest
     }
 
     /**
      * Triggered when the "Check Parking Availability" button is clicked.
-     * Placeholder logic for future parking availability feature.
      */
     @FXML
     private void handleCheckAvailability() {
         System.out.println("Checking parking availability...");
-        // Future: load a screen or display actual availability
     }
 }
-
