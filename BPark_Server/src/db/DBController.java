@@ -618,4 +618,103 @@ public class DBController {
 	    }
 	}
 	
+	/**
+	 * Retrieves the names of all parking lots from the database.
+	 *
+	 * @return list of parking lot names
+	 */
+	public ArrayList<String> parkingLotList() {
+	    String query = "SELECT * FROM bpark.parkingLot";
+	    ArrayList<String> parkingLotArrayList = new ArrayList<>();
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            parkingLotArrayList.add(rs.getString("NameParkingLot"));
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error retrieving parking lot names: " + e.getMessage());
+	    }
+
+	    return parkingLotArrayList;
+	}
+
+	/**
+	 * Counts the number of available (unoccupied) parking spots
+	 * in a specific parking lot. Currently supports "Braude" lot.
+	 *
+	 * @return number of available spots, or -1 if an error occurred
+	 */
+	public int countAvailableSpots() {
+	    String query = "SELECT totalSpots, occupiedSpots FROM bpark.parkingLot WHERE NameParkingLot = 'Braude'";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        if (rs.next()) {
+	            int total = rs.getInt("totalSpots");
+	            int occupied = rs.getInt("occupiedSpots");
+	            return total - occupied;
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error counting available spots: " + e.getMessage());
+	    }
+
+	    return -1;
+	}
+
+	/*
+	// Optional: Finds the first available parking space.
+	// Currently not used in the system.
+	public ParkingSpace findAvailableSpot() {
+	    String query = "SELECT parking_space FROM bpark.parkingSpaces WHERE IsOccupied = FALSE LIMIT 1";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        if (rs.next()) {
+	            int spotId = rs.getInt("parking_space");
+	            return new ParkingSpace(spotId, false);
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error finding available parking spot: " + e.getMessage());
+	    }
+
+	    System.out.println("No available spot found.");
+	    return null;
+	}
+	*/
+
+	/**
+	 * Retrieves detailed information about a specific parking lot by name.
+	 *
+	 * @param name the name of the parking lot (e.g., "Braude")
+	 * @return ParkingLot object if found, or null if not found or error occurs
+	 */
+	public ParkingLot getParkingLotByName(String name) {
+	    String query = "SELECT * FROM bpark.parkingLot WHERE NameParkingLot = ?";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, name);
+	        ResultSet rs = stmt.executeQuery();
+
+	        if (rs.next()) {
+	            String lotName = rs.getString("NameParkingLot");
+	            int total = rs.getInt("totalSpots");
+	            int occupied = rs.getInt("occupiedSpots");
+	            return new ParkingLot(lotName, total, occupied);
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error retrieving parking lot '" + name + "': " + e.getMessage());
+	    }
+
+	    return null;
+	}
+
+	
 }
