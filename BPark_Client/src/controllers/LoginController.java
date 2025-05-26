@@ -97,8 +97,8 @@ public class LoginController implements ClientAware {
         // Choose FXML path based on user role
         switch (role) {
             case Subscriber -> fxmlPath = "/client/SubscriberMainScreen.fxml";
-            case Attendant  -> fxmlPath = "/client/AttendantMainScreen.fxml";
-            case Manager    -> fxmlPath = "/client/ManagerMainScreen.fxml";
+            case Attendant  -> fxmlPath = "/client/StaffMainScreen.fxml";
+            case Manager    -> fxmlPath = "/client/StaffMainScreen.fxml";
             default -> {
                 UiUtils.showAlert("BPARK - Error", "Unknown role: " + role, Alert.AlertType.ERROR);
                 return;
