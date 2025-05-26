@@ -40,6 +40,8 @@ public class Server extends AbstractServer {
 
     /**
      * Processes incoming messages from connected clients.
+     * Each message is expected to be an Object[] with an action string as the first element.
+     * Supported actions include login, order management, vehicle pickup, and parking availability.
      *
      * @param msg    the message received from the client
      * @param client the sending client
@@ -56,13 +58,13 @@ public class Server extends AbstractServer {
                 }
 
                 // Login request: ["login", username, password]
-                if (data.length == 3 && "login".equals(data[0])) {
+                else if (data.length == 3 && "login".equals(data[0])) {
                     handleLogin(data, client);
                     return;
                 }
 
-                // Get all orders
-                if (data.length == 1 && "getAllOrders".equals(data[0])) {
+                // Get all orders: ["getAllOrders"]
+                else if (data.length == 1 && "getAllOrders".equals(data[0])) {
                     ArrayList<Order> orders = db.getAllOrders();
                     if (orders.isEmpty()) {
                         client.sendToClient(new ServerResponse(false, null,
@@ -75,7 +77,7 @@ public class Server extends AbstractServer {
                 }
 
                 // Get single order: ["getOrder", orderNumber]
-                if (data.length == 2 && "getOrder".equals(data[0])) {
+                else if (data.length == 2 && "getOrder".equals(data[0])) {
                     int orderNumber = (int) data[1];
                     ArrayList<Order> list = db.orderExists(orderNumber);
                     if (list.isEmpty()) {
@@ -89,13 +91,13 @@ public class Server extends AbstractServer {
                 }
 
                 // Update order: ["updateOrder", orderNumber, field, newValue]
-                if (data.length == 4 && "updateOrder".equals(data[0])) {
+                else if (data.length == 4 && "updateOrder".equals(data[0])) {
                     handleUpdateOrder(data, client);
                     return;
                 }
 
                 // Validate subscriber: ["validateSubscriber", subscriberCode]
-                if (data.length == 2 && "validateSubscriber".equals(data[0])) {
+                else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
                     int subscriberCode = (int) data[1];
                     boolean exists = db.subscriberExists(subscriberCode);
                     if (exists) {
@@ -109,7 +111,7 @@ public class Server extends AbstractServer {
                 }
 
                 // Collect car: ["collectCar", subscriberCode, parkingCode]
-                if (data.length == 3 && "collectCar".equals(data[0])) {
+                else if (data.length == 3 && "collectCar".equals(data[0])) {
                     int subCode = (int) data[1];
                     int parkCode = (int) data[2];
                     try {
@@ -124,7 +126,7 @@ public class Server extends AbstractServer {
                 }
 
                 // Extend parking: ["extendParking", subscriberCode]
-                if (data.length == 2 && "extendParking".equals(data[0])) {
+                else if (data.length == 2 && "extendParking".equals(data[0])) {
                     int subCode = (int) data[1];
                     try {
                         boolean success = db.updateWasExtended(subCode);
@@ -144,7 +146,7 @@ public class Server extends AbstractServer {
                 }
 
                 // Resend parking code: ["sendLostCode", subscriberCode]
-                if (data.length == 2 && "sendLostCode".equals(data[0])) {
+                else if (data.length == 2 && "sendLostCode".equals(data[0])) {
                     int subCode = (int) data[1];
                     try {
                         ServerResponse response = db.sendParkingCodeToSubscriber(subCode);
@@ -154,6 +156,14 @@ public class Server extends AbstractServer {
                                 "An error occurred while sending your parking code."));
                         System.err.println("Error: sendLostCode - " + e.getMessage());
                     }
+                    return;
+                }
+
+                // Check parking availability: ["CheckParkingAvailability"]. ** Author - Ravid **
+                else if (data.length == 1 && "CheckParkingAvailability".equals(data[0])) {
+                    int count = db.countAvailableSpots();
+                    client.sendToClient(new ServerResponse(true, count, "Available spots: " + count));
+                    return;
                 }
             }
 
@@ -161,6 +171,7 @@ public class Server extends AbstractServer {
             System.err.println("Client communication error: " + e.getMessage());
         }
     }
+
 
     /**
      * Handles a login request.
