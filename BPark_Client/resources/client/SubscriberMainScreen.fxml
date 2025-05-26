@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21"
             fx:controller="controllers.SubscriberMainController"
@@ -11,34 +15,60 @@
     <!-- Top toolbar -->
     <top>
         <ToolBar>
-            <!-- Home button (goes to same screen) -->
-            <Button text="🏠 Home" onAction="#handleHomeClick" />
-            <Pane HBox.hgrow="ALWAYS" />
+            <!-- Home button -->
+            <Button fx:id="btnHome"   text="🏠 Home"   onAction="#handleHomeClick"/>
+            <Pane HBox.hgrow="ALWAYS"/>
             <!-- Logout button -->
-            <Button fx:id="logoutButton" text="🔓 Logout" onAction="#handleLogoutClick" />
+            <Button fx:id="btnLogout" text="🔓 Logout" onAction="#handleLogoutClick"/>
         </ToolBar>
     </top>
 
     <!-- Center content -->
     <center>
-        <VBox alignment="CENTER" spacing="15.0">
+        <VBox alignment="CENTER" spacing="15">
             <padding>
-                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
 
-            <!-- Welcome label (dynamically updated from controller) -->
-            <Label fx:id="welcomeLabel" text="Welcome, Subscriber!" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+            <!-- Welcome label -->
+            <Label fx:id="welcomeLabel"
+                   text="Welcome, Subscriber!"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
 
             <!-- Action buttons -->
-            <Button text="View Personal Info"           onAction="#handleViewPersonalInfo" />
-            <Button text="View Parking History"         onAction="#handleViewParkingHistory" />
-            <Button text="View Active Parking Info"     onAction="#handleViewActiveParkingInfo" />
-            <Button text="Extend Parking Time"          onAction="#handleExtendParkingTime" />
-            <Button text="Submit Vehicle"               onAction="#handleSubmitVehicle" />
-            <Button text="Retrieve Vehicle"             onAction="#handleRetrieveVehicle" />
-            <Button text="Parking Reservation"          onAction="#handleParkingReservation" />
-            <Button text="Parking Code Confirmation"    onAction="#handleParkingCodeConfirmation" />
+            <Button fx:id="btnViewPersonalInfo"
+                    text="View Personal Info"
+                    onAction="#handleViewPersonalInfo"/>
+
+            <Button fx:id="btnViewParkingHistory"
+                    text="View Parking History"
+                    onAction="#handleViewParkingHistory"/>
+
+            <Button fx:id="btnViewActiveParkingInfo"
+                    text="View Active Parking Info"
+                    onAction="#handleViewActiveParkingInfo"/>
+
+            <Button fx:id="btnExtendParkingTime"
+                    text="Extend Parking Time"
+                    onAction="#handleExtendParkingTime"/>
+
+            <Button fx:id="btnSubmitVehicle"
+                    text="Submit Vehicle"
+                    onAction="#handleSubmitVehicle"/>
+
+            <Button fx:id="btnRetrieveVehicle"
+                    text="Retrieve Vehicle"
+                    onAction="#handleRetrieveVehicle"/>
+
+            <Button fx:id="btnParkingReservation"
+                    text="Parking Reservation"
+                    onAction="#handleParkingReservation"/>
+
+            <Button fx:id="btnParkingCodeConfirmation"
+                    text="Parking Code Confirmation"
+                    onAction="#handleParkingCodeConfirmation"/>
         </VBox>
     </center>
 
 </BorderPane>
+

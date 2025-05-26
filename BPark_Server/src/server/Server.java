@@ -130,6 +130,69 @@ public class Server extends AbstractServer {
                         client.sendToClient(new ServerResponse(false, null, "Update failed: " + ex.getMessage()));
                     }
                 }
+                
+				// Validates the existence of a subscriber based on subscriberCode, Format: ["validateSubscriber", subscriberCode]
+				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
+				    int subscriberCode = (int) data[1];
+				    
+				    boolean exists = db.subscriberExists(subscriberCode);
+
+				    if (exists) {
+				        client.sendToClient(new ServerResponse(true, null, "Subscriber verified successfully."));
+				    } else {
+				        client.sendToClient(new ServerResponse(false, null, "Subscriber code not found. Please try again."));
+				    }
+				}
+				
+				// Expected format: ["collectCar", subscriberCode, parkingCode]
+				else if (data.length == 3 && "collectCar".equals(data[0])) {
+				    int subscriberCode = (int) data[1];
+				    int parkingCode = (int) data[2];
+
+				    try {
+				        // Attempt to collect the vehicle
+				        ServerResponse response = db.handleVehiclePickup(subscriberCode, parkingCode);
+				        client.sendToClient(response);
+
+				    } catch (Exception e) {
+				        client.sendToClient(new ServerResponse(false, null, "An error occurred while processing vehicle pickup."));
+				        System.err.println("Error handling collectCar: " + e.getMessage());
+				    }
+				}
+
+				
+				// Expected format: ["extendParking", subscriberCode]
+				else if (data.length == 2 && "extendParking".equals(data[0])) {
+					int subscriberCode = (int) data[1];
+
+					try {
+					    boolean success = db.updateWasExtended(subscriberCode);
+
+					    if (success) {
+					        client.sendToClient(new ServerResponse(true, null, "Parking was successfully extended."));
+					    } else {
+					        client.sendToClient(new ServerResponse(false, null, "Failed to extend parking. No active event found."));
+					    }
+
+					} catch (Exception e) {
+					    client.sendToClient(new ServerResponse(false, null, "An error occurred while extending parking."));
+					    System.err.println("Error handling extendParking: " + e.getMessage());
+					}
+				}
+				
+				// Expected format: ["sendLostCode", subscriberCode]
+				else if (data.length == 2 && "sendLostCode".equals(data[0])) {
+				    int subscriberCode = (int) data[1];
+
+				    try {
+				        // Retrieve and send the parking code to the subscriber
+				        ServerResponse response = db.sendParkingCodeToSubscriber(subscriberCode);
+				        client.sendToClient(response);
+				    } catch (Exception e) {
+				        client.sendToClient(new ServerResponse(false, null, "An error occurred while sending your parking code."));
+				        System.err.println("Error handling sendLostCode: " + e.getMessage());
+				    }
+				}
             }
 
         } catch (IOException e) {

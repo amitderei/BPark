@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.ArrayList;
 
 import common.*;
@@ -53,7 +54,7 @@ public class DBController {
 		try {
 			// Connects to the local MySQL server (replace credentials as needed)
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=Asia/Jerusalem",
-					"root", "Yosi2311");
+					"root", "Aa123456");
 			System.out.println("SQL connection succeed");
 		} catch (SQLException ex) {
 			// Prints SQL error information if connection fails
@@ -344,13 +345,277 @@ public class DBController {
 	    return null;
 	}
 
+	/**
+	 * Checks if a subscriber with the given subscriberCode exists in the database.
+	 *
+	 * @param subscriberCode the code to check
+	 * @return true if exists, false otherwise
+	 */
+	public boolean subscriberExists(int subscriberCode) {
+	    String query = "SELECT 1 FROM subscriber WHERE subscriberCode = ? LIMIT 1";
 
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setInt(1, subscriberCode);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); // If we get a result, subscriber exists
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error checking subscriber existence: " + e.getMessage());
+	        return false;
+	    }
+	}
+	
+	/**
+	 * Retrieves the open parking event for the given subscriber and parking code.
+	 * An event is considered open if its exitDate is null.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 * @param parkingCode the numeric parking code issued at entry
+	 * @return the matching open ParkingEvent, or null if not found
+	 * @throws SQLException if a database error occurs
+	 */
+	public ParkingEvent getOpenParkingEvent(int subscriberCode, int parkingCode) throws SQLException {
+	    String query = "SELECT * FROM parkingEvent " +
+	                   "WHERE subscriberCode = ? AND parkingCode = ? AND exitDate IS NULL " +
+	                   "ORDER BY eventId DESC LIMIT 1";
 
-
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setInt(1, subscriberCode);
+	        stmt.setInt(2, parkingCode);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            if (rs.next()) {
+	                return new ParkingEvent(
+	                    rs.getInt("eventId"),
+	                    rs.getInt("subscriberCode"),
+	                    rs.getDate("entryDate"),
+	                    rs.getTime("entryHour"),
+	                    rs.getDate("exitDate"),
+	                    rs.getTime("exitHour"),
+	                    rs.getBoolean("wasExtended"),
+	                    rs.getString("NameParkingLot"),
+	                    rs.getString("vehicleId"),
+	                    rs.getInt("parkingCode")
+	                );
+	            }
+	        }
+	    }
+	    return null;
+	}
 
 
 
 
 	
+	/**
+	 * Handles the vehicle pickup process for a given subscriber and parking code.
+	 * This method retrieves the active parking event (if any) where the given
+	 * subscriberCode and parkingCode match, and exitDate is null.
+	 * If such an event exists, it is finalized by updating the exit time,
+	 * and the parking duration is evaluated to determine the result.
+	 *
+	 * @param subscriberCode the subscriber's unique code
+	 * @param parkingCode the numeric parking code provided at entry
+	 * @return ServerResponse indicating success or failure, with a message
+	 */
+	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
+	    ParkingEvent event;
+	    try {
+	        // Retrieve the currently active parking event for this subscriber and code
+	        event = getOpenParkingEvent(subscriberCode, parkingCode);
+	    } catch (SQLException e) {
+	        System.err.println("Error retrieving parking event: " + e.getMessage());
+	        return new ServerResponse(false, null,
+	                "Internal error while locating your parking session.");
+	    }
+
+	    if (event == null) {
+	        // No matching open parking session found
+	        return new ServerResponse(false, null,
+	                "No active parking session found for this subscriber and code.");
+	    }
+
+	    try {
+	        // Close the parking event by updating the exit date and time
+	        finalizeParkingEvent(event.getEventId());
+
+	        // Calculate parking duration in hours
+	        long entryMillis = event.getEntryDate().toLocalDate()
+	                            .atTime(event.getEntryHour().toLocalTime())
+	                            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+	        long nowMillis = System.currentTimeMillis();
+	        long hours = (nowMillis - entryMillis) / (1000 * 60 * 60);
+
+	        // Determine the result based on parking duration and extension status
+	        if (hours <= 4) {
+	            return new ServerResponse(true, null,
+	                    "Vehicle pickup successful (" + hours + " hours).");
+	        } else if (hours <= 8 && !event.isWasExtended()) {
+	            return new ServerResponse(false, null,
+	                    "Parking exceeded 4 hours. Please extend before pickup.");
+	        } else {
+	            // Send notification about the delay
+	            sendNotification(event.getSubscriberCode(),
+	                    "You have exceeded the parking time limit. A delay over 8 hours is registered.");
+
+	            // Return the response to the client
+	            return new ServerResponse(true, null,
+	                    "Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Failed to finalize parking event: " + e.getMessage());
+	        return new ServerResponse(false, null,
+	                "Internal error while completing the pickup.");
+	    }
+	}
+
+
+
+
+
+	/**
+	 * Finalizes a parking event by:
+	 * - Setting exitDate and exitHour.
+	 * - Marking the parking space as unoccupied.
+	 * - Decreasing occupiedSpots in the corresponding parking lot.
+	 *
+	 * @param eventId the ID of the event to finalize
+	 * @throws SQLException if any update fails
+	 */
+	private void finalizeParkingEvent(int eventId) throws SQLException {
+	    // Step 1: Fetch the parking_space and parking lot name for this event
+	    String fetchQuery = "SELECT parking_space, NameParkingLot FROM parkingEvent WHERE eventId = ?";
+	    int parkingSpace = -1;
+	    String lotName = null;
+
+	    try (PreparedStatement fetchStmt = conn.prepareStatement(fetchQuery)) {
+	        fetchStmt.setInt(1, eventId);
+	        ResultSet rs = fetchStmt.executeQuery();
+	        if (rs.next()) {
+	            parkingSpace = rs.getInt("parking_space");
+	            lotName = rs.getString("NameParkingLot");
+	        } else {
+	            throw new SQLException("No event found with eventId = " + eventId);
+	        }
+	    }
+
+	    // Step 2: Finalize the event (set exitDate and exitHour)
+	    String finalizeQuery = "UPDATE parkingEvent SET exitDate = CURDATE(), exitHour = CURTIME() WHERE eventId = ?";
+	    try (PreparedStatement finalizeStmt = conn.prepareStatement(finalizeQuery)) {
+	        finalizeStmt.setInt(1, eventId);
+	        finalizeStmt.executeUpdate();
+	    }
+
+	    // Step 3: Mark parking space as available
+	    String updateSpace = "UPDATE parkingSpaces SET is_occupied = FALSE WHERE parking_space = ?";
+	    try (PreparedStatement spaceStmt = conn.prepareStatement(updateSpace)) {
+	        spaceStmt.setInt(1, parkingSpace);
+	        spaceStmt.executeUpdate();
+	    }
+
+	    // Step 4: Decrease occupiedSpots in the parking lot
+	    String updateLot = "UPDATE parkingLot SET occupiedSpots = occupiedSpots - 1 WHERE NameParkingLot = ?";
+	    try (PreparedStatement lotStmt = conn.prepareStatement(updateLot)) {
+	        lotStmt.setString(1, lotName);
+	        lotStmt.executeUpdate();
+	    }
+	}
+
+
+
+
+	
+	/**
+	 * Updates the latest parking event for the subscriber to indicate it was extended.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 * @return true if the update succeeded, false otherwise
+	 */
+	public boolean updateWasExtended(int subscriberCode) {
+	    String updateQuery = "UPDATE parkingEvent " +
+	                         "SET wasExtended = TRUE " +
+	                         "WHERE subscriberCode = ? " +
+	                         "ORDER BY eventId DESC LIMIT 1";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+	        stmt.setInt(1, subscriberCode);
+	        int rowsAffected = stmt.executeUpdate();
+	        return rowsAffected == 1;
+	    } catch (SQLException e) {
+	        System.err.println("Error updating wasExtended: " + e.getMessage());
+	        return false;
+	    }
+	}
+	
+	/**
+	 * Sends the active parking code to the subscriber by retrieving it
+	 * from the latest open parkingEvent and "sending" it to email and SMS.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 * @return ServerResponse with success or failure message
+	 */
+	public ServerResponse sendParkingCodeToSubscriber(int subscriberCode) {
+	    String query = """
+			SELECT e.parkingCode, s.email, s.phoneNumber
+			FROM parkingEvent e
+			JOIN subscriber s ON e.subscriberCode = s.subscriberCode
+			WHERE e.subscriberCode = ? AND e.exitDate IS NULL
+			ORDER BY e.eventId DESC
+			LIMIT 1
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setInt(1, subscriberCode);
+	        ResultSet rs = stmt.executeQuery();
+
+	        if (rs.next()) {
+	            int parkingCode = rs.getInt("parkingCode");
+
+	            // Send notification to subscriber with the parking code
+	            sendNotification(subscriberCode, "Your parking code is " + parkingCode);
+
+	            return new ServerResponse(true, null, "Parking code sent to your email and phone.");
+	        } else {
+	            // No open event found for this subscriber
+	            return new ServerResponse(false, null, "No active parking session found.");
+	        }
+
+	    } catch (SQLException e) {
+	        // Database error occurred
+	        System.err.println("Error sending parking code: " + e.getMessage());
+	        return new ServerResponse(false, null, "An error occurred while retrieving your parking code.");
+	    }
+	}
+
+
+	/**
+	 * Simulates sending a message to the subscriber via email and SMS.
+	 *
+	 * @param subscriberCode the subscriber to notify
+	 * @param message the message content to send
+	 */
+	private void sendNotification(int subscriberCode, String message) {
+	    String notifyQuery = """
+			SELECT email, phoneNumber
+			FROM subscriber
+			WHERE subscriberCode = ?
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(notifyQuery)) {
+	        stmt.setInt(1, subscriberCode);
+	        ResultSet rs = stmt.executeQuery();
+
+	        if (rs.next()) {
+	            String email = rs.getString("email");
+	            String phone = rs.getString("phoneNumber");
+
+	            System.out.println("EMAIL to " + email + ": " + message);
+	            System.out.println("SMS to " + phone + ": " + message);
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error sending notification: " + e.getMessage());
+	    }
+	}
 	
 }

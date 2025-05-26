@@ -2,128 +2,104 @@ package controllers;
 
 import client.ClientController;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
- * Controller for the Subscriber's main screen in the BPARK system.
- * Displays a personalized greeting and provides access to subscriber actions.
+ * Controller for the subscriber's main screen in the BPARK system.
+ * Provides navigation to all subscriber-level actions.
  */
 public class SubscriberMainController implements ClientAware {
 
-    /** Label displaying the subscriber's name */
-    @FXML
-    private Label welcomeLabel;
+    /* -------------------------------------------------------------
+     *  FXML-injected controls
+     * ------------------------------------------------------------- */
+    @FXML private Label  welcomeLabel;
 
-    /** Logout button that returns to the main entry screen */
-    @FXML
-    private Button logoutButton;
+    @FXML private Button btnHome;
+    @FXML private Button btnLogout;
 
-    /** The name of the subscriber, injected from login */
+    @FXML private Button btnViewPersonalInfo;
+    @FXML private Button btnViewParkingHistory;
+    @FXML private Button btnViewActiveParkingInfo;
+    @FXML private Button btnExtendParkingTime;
+    @FXML private Button btnSubmitVehicle;
+    @FXML private Button btnRetrieveVehicle;
+    @FXML private Button btnParkingReservation;
+    @FXML private Button btnParkingCodeConfirmation;
+
+    /* -------------------------------------------------------------
+     *  Runtime fields
+     * ------------------------------------------------------------- */
+    private ClientController client;
     private String subscriberName;
 
-    /** Client controller used to communicate with the server */
-    private ClientController client;
+    /* -------------------------------------------------------------
+     *  ClientAware implementation
+     * ------------------------------------------------------------- */
 
-    /**
-     * Injects the client controller after screen is loaded.
-     *
-     * @param client the active client instance
-     */
+    /** Injects the active client once the screen is loaded. */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
+    /* -------------------------------------------------------------
+     *  Public API
+     * ------------------------------------------------------------- */
+
     /**
-     * Called from the login controller to display a personalized welcome message.
-     * If the FXML field was not yet injected, the label will not be updated.
+     * Displays a personalized welcome message.
      *
-     * @param name the subscriber's name
+     * @param name subscriber's first name
      */
     public void setSubscriberName(String name) {
         this.subscriberName = name;
-
         if (welcomeLabel != null) {
             welcomeLabel.setText("Welcome, " + name + "!");
         }
     }
 
+    /* -------------------------------------------------------------
+     *  Top-toolbar handlers
+     * ------------------------------------------------------------- */
+
+    /** “Home” button – already on home, so nothing to do. */
+    @FXML private void handleHomeClick() {
+        System.out.println("Home button clicked (already on home screen).");
+    }
+
+    /** Logs out and returns to the entry screen. */
+    @FXML private void handleLogoutClick() {
+        UiUtils.loadScreen(btnLogout,
+                           "/client/MainScreen.fxml",
+                           "BPARK – Welcome",
+                           client);
+    }
+
+    /* -------------------------------------------------------------
+     *  Navigation button handlers (placeholders for now)
+     * ------------------------------------------------------------- */
+
+    @FXML private void handleViewPersonalInfo()        { System.out.println("Viewing personal info…"); }
+    @FXML private void handleViewParkingHistory()      { System.out.println("Viewing parking history…"); }
+    @FXML private void handleViewActiveParkingInfo()   { System.out.println("Viewing active parking info…"); }
+    @FXML private void handleExtendParkingTime()       { System.out.println("Extending parking time…"); }
+    @FXML private void handleSubmitVehicle()           { System.out.println("Submitting vehicle…"); }
+
     /**
-     * Handles "Home" button click. Since this is the home screen, does nothing.
+     * Opens the vehicle-pickup screen when the user clicks “Retrieve Vehicle”.
      */
     @FXML
-    private void handleHomeClick() {
-        System.out.println("Home button clicked (already on home screen)");
+    private void handleRetrieveVehicle() {
+        UiUtils.loadScreen(btnRetrieveVehicle,
+                           "/client/VehiclePickupScreen.fxml",
+                           "BPARK – Vehicle Pickup",
+                           client);
     }
 
-    /**
-     * Handles logout by returning the user to the main screen (Login/Guest).
-     */
-    @FXML
-    private void handleLogoutClick() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/MainScreen.fxml"));
-            Parent root = loader.load();
-
-            Object controller = loader.getController();
-            if (controller instanceof ClientAware aware) {
-                aware.setClient(client);
-            }
-
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("BPARK - Welcome");
-            stage.show();
-
-        } catch (Exception e) {
-            UiUtils.showAlert("BPARK - Error",
-                    "Failed to load main screen: " + e.getMessage(),
-                    javafx.scene.control.Alert.AlertType.ERROR);
-            e.printStackTrace();
-        }
-    }
-
-    // -------------------------
-    // Navigation button handlers
-    // -------------------------
-
-    @FXML private void handleViewPersonalInfo() {
-        System.out.println("Viewing personal info...");
-    }
-
-    @FXML private void handleViewParkingHistory() {
-        System.out.println("Viewing parking history...");
-    }
-
-    @FXML private void handleViewActiveParkingInfo() {
-        System.out.println("Viewing active parking info...");
-    }
-
-    @FXML private void handleExtendParkingTime() {
-        System.out.println("Extending parking time...");
-    }
-
-    @FXML private void handleSubmitVehicle() {
-        System.out.println("Submitting vehicle...");
-    }
-
-    @FXML private void handleRetrieveVehicle() {
-        System.out.println("Retrieving vehicle...");
-    }
-
-    @FXML private void handleParkingReservation() {
-        System.out.println("Reserving parking...");
-    }
-
-    @FXML private void handleParkingCodeConfirmation() {
-        System.out.println("Confirming parking code...");
-    }
+    @FXML private void handleParkingReservation()      { System.out.println("Reserving parking…"); }
+    @FXML private void handleParkingCodeConfirmation() { System.out.println("Confirming parking code…"); }
 }
-
 

@@ -6,6 +6,7 @@ import common.User;
 import common.UserRole;
 import controllers.LoginController;
 import controllers.OrderViewController;
+import controllers.VehiclePickupController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import ocsf.client.AbstractClient;
@@ -22,6 +23,8 @@ public class ClientController extends AbstractClient {
 
     private OrderViewController controller;
     private LoginController loginController;
+	private VehiclePickupController pickupController;
+
 
     /**
      * Constructs a new Client instance with the specified server address and port.
@@ -48,6 +51,10 @@ public class ClientController extends AbstractClient {
     public OrderViewController getController() {
         return controller;
     }
+    
+	public void setPickupController(VehiclePickupController pickupController) {
+		this.pickupController = pickupController;
+	}
     
     /**
      * Assigns the LoginController for handling login responses.
@@ -117,6 +124,25 @@ public class ClientController extends AbstractClient {
                     }
                 }
             }
+            
+   	     // Vehicle-pickup screen updates
+	        if (pickupController != null) {
+
+	            // Always update status label for any relevant message
+	            UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+
+	            // Trigger UI change after subscriber is verified
+	            if (response.isSucceed()
+	                    && response.getMsg().toLowerCase().contains("subscriber verified")) {
+	                pickupController.onSubscriberValidated();
+	            }
+
+	            // Disable pickup controls if pickup succeeded
+	            if (response.isSucceed()
+	                    && response.getMsg().toLowerCase().contains("pickup successful")) {
+	                pickupController.disableAfterPickup();
+	            }
+	        }
         });
     }
 
@@ -189,6 +215,61 @@ public class ClientController extends AbstractClient {
             System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
         }
     }
+    
+	/**
+	 * Sends a request to validate if the subscriber exists in the system.
+	 *
+	 * @param subscriberCode the code to validate
+	 */
+	public void validateSubscriber(int subscriberCode) {
+		try {
+			sendToServer(new Object[] { "validateSubscriber", subscriberCode });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'validateSubscriber' request to server: " + e.getMessage());
+		}
+	}
+
+	
+	/**
+	 * Sends a request to collect a vehicle using subscriberCode and confirmationCode.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 * @param parkingCode the confirmation code
+	 */
+	public void collectCar(int subscriberCode, int parkingCode) {
+		try {
+			sendToServer(new Object[] { "collectCar", subscriberCode, parkingCode });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'collectCar' request: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sends a request to extend the current parking event for a subscriber.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 */
+	public void requestExtension(int subscriberCode) {
+		try {
+			sendToServer(new Object[] { "extendParking", subscriberCode });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sends a request to the server to resend the parking code to the subscriber
+	 * via email and SMS.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 */
+	public void sendLostParkingCode(int subscriberCode) {
+	    try {
+	        sendToServer(new Object[] { "sendLostCode", subscriberCode });
+	    } catch (IOException e) {
+	        System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
+	    }
+	}
 
 
 }
