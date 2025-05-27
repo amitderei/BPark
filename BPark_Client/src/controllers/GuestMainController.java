@@ -1,8 +1,13 @@
 package controllers;
 
+
+import javafx.scene.control.Label;
 import client.ClientController;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.util.Duration;
 import ui.UiUtils;
 
 /**
@@ -18,6 +23,28 @@ public class GuestMainController implements ClientAware {
     /** Button to return to the main welcome screen */
     @FXML
     private Button btnBack;
+    
+  //Author: Ravid changes for autmoaticly availability
+  	@FXML
+  	private Label availableSpotsLabel;
+
+  	private Timeline updateTimeline;
+
+  	//start initilize for the 
+  	public void initialize() {
+  		startAutoUpdate();
+  	}
+  	private void startAutoUpdate() {
+  		updateTimeline = new Timeline(new KeyFrame(Duration.seconds(10), e -> client.requestAvailableSpots()));
+  		updateTimeline.setCycleCount(Timeline.INDEFINITE); //run in infinity loop
+  		updateTimeline.play(); //start timer
+  	}
+  	
+  	//server answer and this is update the label
+  	public void updateAvailableSpots(int count) {
+  		System.out.println("here we are in the center of town");
+  	    availableSpotsLabel.setText("Free spots: " + count);
+  	}
 
     /**
      * Injects the active ClientController (even for guests, may be needed for back navigation).

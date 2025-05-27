@@ -4,6 +4,7 @@ import common.Order;
 import common.ServerResponse;
 import common.User;
 import common.UserRole;
+import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.OrderViewController;
 import controllers.VehiclePickupController;
@@ -33,6 +34,9 @@ public class ClientController extends AbstractClient {
 
     /** Controller for vehicle pickup screen (subscriber) */
     private VehiclePickupController pickupController;
+    
+    /** Controller for new Guest page  */
+    private GuestMainController guestMainController;
 
     /* ------------------------------------------------------------------
      * Constructor
@@ -84,6 +88,10 @@ public class ClientController extends AbstractClient {
         this.pickupController = pickupController;
     }
 
+    public void setGuestMainController(GuestMainController guestMainController) {
+        this.guestMainController = guestMainController;
+    }
+    
     /* ------------------------------------------------------------------
      * Server Response Handling
      * ------------------------------------------------------------------ */
@@ -169,6 +177,22 @@ public class ClientController extends AbstractClient {
                     pickupController.disableAfterPickup();
                 }
             }
+            
+			//get response from server and back to GuestMainController with updateAvailableSpots
+            
+          //get response from server and back to CreateNeworder 
+			if (response.getData() instanceof Integer && guestMainController != null) {
+			    int count = (int) response.getData();
+			    guestMainController.updateAvailableSpots(count); // call method to update
+			}
+			/*
+            if (response.getMsg() != null && response.getMsg().startsWith("Available spots: ")
+                    && response.getData() instanceof Integer count
+                    && guestMainController != null) {
+            	System.out.println("Received available spots: " + count);
+                guestMainController.updateAvailableSpots(count);
+                
+            }*/
         });
     }
 
