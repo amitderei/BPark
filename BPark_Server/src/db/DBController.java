@@ -7,6 +7,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 
@@ -384,13 +387,18 @@ public class DBController {
 	        stmt.setInt(2, parkingCode);
 	        try (ResultSet rs = stmt.executeQuery()) {
 	            if (rs.next()) {
+	                // Handle nullable exit date and hour safely
+	                LocalDate exitDate = rs.getDate("exitDate") != null ? rs.getDate("exitDate").toLocalDate() : null;
+	                LocalTime exitHour = rs.getTime("exitHour") != null ? rs.getTime("exitHour").toLocalTime() : null;
+
 	                return new ParkingEvent(
 	                    rs.getInt("eventId"),
 	                    rs.getInt("subscriberCode"),
-	                    rs.getDate("entryDate"),
-	                    rs.getTime("entryHour"),
-	                    rs.getDate("exitDate"),
-	                    rs.getTime("exitHour"),
+	                    rs.getInt("parking_space"),             
+	                    rs.getDate("entryDate").toLocalDate(),
+	                    rs.getTime("entryHour").toLocalTime(),
+	                    exitDate,
+	                    exitHour,
 	                    rs.getBoolean("wasExtended"),
 	                    rs.getString("NameParkingLot"),
 	                    rs.getString("vehicleId"),
@@ -401,6 +409,7 @@ public class DBController {
 	    }
 	    return null;
 	}
+
 
 
 
@@ -438,11 +447,9 @@ public class DBController {
 	        // Close the parking event by updating the exit date and time
 	        finalizeParkingEvent(event.getEventId());
 
-	        // Calculate parking duration in hours
-	        long entryMillis = event.getEntryDate().toLocalDate()
-	                            .atTime(event.getEntryHour().toLocalTime())
-	                            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
+	        // Calculate parking duration in hours using LocalDateTime
+	        LocalDateTime entryDateTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+	        long entryMillis = entryDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	        long nowMillis = System.currentTimeMillis();
 	        long hours = (nowMillis - entryMillis) / (1000 * 60 * 60);
 
@@ -469,9 +476,6 @@ public class DBController {
 	                "Internal error while completing the pickup.");
 	    }
 	}
-
-
-
 
 
 	/**
