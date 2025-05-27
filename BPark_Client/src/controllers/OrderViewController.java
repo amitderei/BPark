@@ -215,7 +215,8 @@ public class OrderViewController {
      * Initializes TableView bindings and ComboBox behavior.
      * Automatically called after FXML is loaded.
      */
-    @FXML
+
+    /*
     public void initialize() {
         orderNumberCol.setCellValueFactory(cell ->
             new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getOrderNumber()).asObject());
@@ -224,7 +225,7 @@ public class OrderViewController {
         orderDateCol.setCellValueFactory(cell ->
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getOrderDate().toString()));
         confirmCol.setCellValueFactory(cell ->
-            new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getConfirmationCode()).asObject());
+           new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getConfirmationCode()).asObject());
         subscriberCol.setCellValueFactory(cell ->
             new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getSubscriberId()).asObject());
         placingDateCol.setCellValueFactory(cell ->
@@ -241,6 +242,7 @@ public class OrderViewController {
             updateValue.setVisible(!isDateField);
             updateValue.setManaged(!isDateField);
         });
+        
 
         updateDatePicker.setDayCellFactory(picker -> new DateCell() {
             @Override
@@ -252,4 +254,5 @@ public class OrderViewController {
             }
         });
     }
+    */
 }

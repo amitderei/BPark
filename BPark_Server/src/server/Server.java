@@ -2,6 +2,8 @@ package server;
 
 import ocsf.server.*;
 import java.io.IOException;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 
 import common.Order;
@@ -164,6 +166,17 @@ public class Server extends AbstractServer {
                     int count = db.countAvailableSpots();
                     client.sendToClient(new ServerResponse(true, count, "Available spots: " + count));
                     return;
+                }
+                
+                else if(data.length==3 && "checkAvailability".equals(data[0])) {
+                    System.out.println("checkAvailability-server");
+                    boolean possible=db.parkingSpaceCheckingForNewOrder((Date) data[1],(Time) data[2]);
+                    if (possible) {
+                        client.sendToClient(new ServerResponse(true, null, "Can make resarvation"));
+                    }
+                    else {
+                        client.sendToClient(new ServerResponse(false, null, "Can't make resarvation"));
+                    }
                 }
             }
 

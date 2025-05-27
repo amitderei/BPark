@@ -2,6 +2,7 @@ package common;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Time;
 
 /**
  * Represents a parking order record from the 'Order' table in the database.
@@ -14,11 +15,20 @@ public class Order implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private int orderNumber;
+	public void setSubscriberId(int subscriberId) {
+		this.subscriberId = subscriberId;
+	}
+
+	public Time getArrivalTime() {
+		return arrivalTime;
+	}
+
 	private int parkingSpace;
 	private Date orderDate;
-	private int confirmationCode;
+	private String confirmationCode;
 	private int subscriberId;
 	private Date dateOfPlacingAnOrder;
+	private Time arrivalTime;
 
 	/**
 	 * Constructs an Order object with all required fields.
@@ -30,14 +40,15 @@ public class Order implements Serializable {
 	 * @param subscriberId         The ID of the subscriber who placed the order.
 	 * @param dateOfPlacingAnOrder Actual date the order was placed.
 	 */
-	public Order(int orderNumber, int parkingSpace, Date orderDate, int confirmationCode, int subscriberId,
-			Date dateOfPlacingAnOrder) {
+	public Order(int orderNumber, int parkingSpace, Date orderDate,Time arrivalTime, String confirmationCode, int subscriberId,
+            Date dateOfPlacingAnOrder) {
 		this.orderNumber = orderNumber;
 		this.parkingSpace = parkingSpace;
 		this.orderDate = orderDate;
 		this.confirmationCode = confirmationCode;
 		this.subscriberId = subscriberId;
 		this.dateOfPlacingAnOrder = dateOfPlacingAnOrder;
+		this.arrivalTime=arrivalTime;
 	}
 
 	// Getters
@@ -66,7 +77,7 @@ public class Order implements Serializable {
 	/**
 	 * @return the confirmation code associated with the order.
 	 */
-	public int getConfirmationCode() {
+	public String getConfirmationCode() {
 		return confirmationCode;
 	}
 

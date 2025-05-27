@@ -2,17 +2,19 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CreateNewOrderViewController">
    <children>
       <GridPane layoutX="30.0" layoutY="28.0" prefHeight="345.0" prefWidth="539.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
         <columnConstraints>
@@ -31,25 +33,37 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
          <children>
-            <Label text="Parking Reservation" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+            <Label fx:id="headlineParkingReservation" text="Parking Reservation" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                <font>
                   <Font name="Calibri Bold" size="22.0" />
                </font>
             </Label>
-            <Label text="Choose a parking lot:" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+            <DatePicker fx:id="chooseDate" onAction="#dateChosen" prefHeight="25.0" prefWidth="155.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+            <Label fx:id="chooseDateAndTime" text="Choose date and time:" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
                <font>
                   <Font name="Calibri" size="14.0" />
                </font>
             </Label>
-            <ComboBox prefHeight="27.0" prefWidth="228.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-            <ComboBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-            <DatePicker prefHeight="25.0" prefWidth="155.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-            <Label text="Choose date and time:" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+            <Button fx:id="reserveNowButton" mnemonicParsing="false" onAction="#addNewOrder" text="Reserve Now" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+            <Label fx:id="subscriberCode" text="Subscriber code:" GridPane.halignment="CENTER" GridPane.rowIndex="1">
                <font>
                   <Font name="Calibri" size="14.0" />
                </font>
             </Label>
-            <Button mnemonicParsing="false" text="Reserve Now" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" />
+            <ComboBox fx:id="hourCombo" onAction="#hourChoosen" prefHeight="26.0" prefWidth="71.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ComboBox fx:id="minuteCombo" prefHeight="26.0" prefWidth="71.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+            <Label fx:id="betweenHourAndMinute" text=":" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+               <font>
+                  <Font name="Calibri" size="14.0" />
+               </font>
+            </Label>
+            <TextField fx:id="insertSubscriberCode" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <CheckBox fx:id="checkBox" mnemonicParsing="false" prefHeight="26.0" prefWidth="205.0" text="I agree to the " GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+            <Hyperlink fx:id="termsOfUseHyper" onAction="#showTermsOfUse" text="Terms of Use" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets right="30.0" />
+               </GridPane.margin>
+            </Hyperlink>
          </children>
       </GridPane>
    </children>

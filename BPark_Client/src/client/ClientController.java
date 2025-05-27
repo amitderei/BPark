@@ -4,9 +4,11 @@ import common.Order;
 import common.ServerResponse;
 import common.User;
 import common.UserRole;
+import controllers.CreateNewOrderViewController;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.OrderViewController;
+import controllers.ParkingReservationSummaryController;
 import controllers.VehiclePickupController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -14,6 +16,8 @@ import ocsf.client.AbstractClient;
 import ui.UiUtils;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 
 /**
@@ -37,6 +41,9 @@ public class ClientController extends AbstractClient {
     
     /** Controller for new Guest page  */
     private GuestMainController guestMainController;
+    
+    private CreateNewOrderViewController newOrderController;
+    private ParkingReservationSummaryController summaryController;
 
     /* ------------------------------------------------------------------
      * Constructor
@@ -91,6 +98,19 @@ public class ClientController extends AbstractClient {
     public void setGuestMainController(GuestMainController guestMainController) {
         this.guestMainController = guestMainController;
     }
+    
+	/**
+	 * set new order controller
+	 * @param controller
+	 */
+	public void setNewOrderController(CreateNewOrderViewController controller) {
+	    this.newOrderController = controller;
+	}
+	
+    public void setSummaryController(ParkingReservationSummaryController controller) {
+		this.summaryController=controller;
+		
+	}
     
     /* ------------------------------------------------------------------
      * Server Response Handling
@@ -186,14 +206,12 @@ public class ClientController extends AbstractClient {
 			    System.out.println(((Integer) count).toString());
 			    guestMainController.updateAvailableSpots(count); // call method to update
 			}
-			/*
-            if (response.getMsg() != null && response.getMsg().startsWith("Available spots: ")
-                    && response.getData() instanceof Integer count
-                    && guestMainController != null) {
-            	System.out.println("Received available spots: " + count);
-                guestMainController.updateAvailableSpots(count);
-                
-            }*/
+			
+			if (response.isSucceed() && response.getData() instanceof Order) {
+                if(newOrderController!= null) {
+                    newOrderController.setOrderAndGoToNextPage((Order) response.getData());
+                }
+           }
         });
     }
 
@@ -202,6 +220,20 @@ public class ClientController extends AbstractClient {
      * Order-related requests
      * ------------------------------------------------------------------ */
 
+    /**
+	 * add new order to order table
+	 * @param newOrder
+	 */
+	public void addNewOrder(Order newOrder) {
+		try {
+			sendToServer(new Object[] {"addNewOrder", newOrder});
+		} catch(IOException e) {
+			System.err.println("Failed to send 'addNewOrder' request to server: " + e.getMessage());
+		}
+	}
+	
+
+	
     /** Requests all orders from the server. */
     public void requestAllOrders() {
         try {
@@ -240,19 +272,16 @@ public class ClientController extends AbstractClient {
             System.err.println("Failed to send 'updateOrder' request: " + e.getMessage());
         }
     }
+    public void checkAvailability(Date date, Time time) {
+		try {
+			System.out.println("checkAvailability-client");
+			sendToServer(new Object[] {"checkAvailability", date, time});
+		} catch (IOException e) {
+			System.err.println("Failed to send 'checkAvailability' request to server: " + e.getMessage());
+		}
+	}
 
-    /**
-     * Sends a new order to the server.
-     *
-     * @param newOrder the new Order to insert
-     */
-    public void addNewOrder(Order newOrder) {
-        try {
-            sendToServer(new Object[]{"addNewOrder", newOrder});
-        } catch (IOException e) {
-            System.err.println("Failed to send 'addNewOrder' request: " + e.getMessage());
-        }
-    }
+
 
     /* ------------------------------------------------------------------
      * Login / Subscriber flow

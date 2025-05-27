@@ -56,7 +56,7 @@ public class MainController implements ClientAware {
     
     
     //this is good- need to improve UiUtilis
-    public void handleGoToOrderSummarry() {
+    public void handleGoToBack() {
 	    try {
 	    	
 	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/GuestMainScreen.fxml")); //load the Placing_an_order_view.fxml after search on resources
