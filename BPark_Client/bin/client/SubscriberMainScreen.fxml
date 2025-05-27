@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21"
+            fx:controller="controllers.SubscriberMainController"
+            prefWidth="800.0" prefHeight="500.0">
+
+    <!-- Top toolbar -->
+    <top>
+        <ToolBar>
+            <!-- Home button -->
+            <Button fx:id="btnHome"   text="🏠 Home"   onAction="#handleHomeClick"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <!-- Logout button -->
+            <Button fx:id="btnLogout" text="🔓 Logout" onAction="#handleLogoutClick"/>
+        </ToolBar>
+    </top>
+
+    <!-- Center content -->
+    <center>
+        <VBox alignment="CENTER" spacing="15">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <!-- Welcome label -->
+            <Label fx:id="welcomeLabel"
+                   text="Welcome, Subscriber!"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+            <!-- Action buttons -->
+            <Button fx:id="btnViewPersonalInfo"
+                    text="View Personal Info"
+                    onAction="#handleViewPersonalInfo"/>
+
+            <Button fx:id="btnViewParkingHistory"
+                    text="View Parking History"
+                    onAction="#handleViewParkingHistory"/>
+
+            <Button fx:id="btnViewActiveParkingInfo"
+                    text="View Active Parking Info"
+                    onAction="#handleViewActiveParkingInfo"/>
+
+            <Button fx:id="btnExtendParkingTime"
+                    text="Extend Parking Time"
+                    onAction="#handleExtendParkingTime"/>
+
+            <Button fx:id="btnSubmitVehicle"
+                    text="Submit Vehicle"
+                    onAction="#handleSubmitVehicle"/>
+
+            <Button fx:id="btnRetrieveVehicle"
+                    text="Retrieve Vehicle"
+                    onAction="#handleRetrieveVehicle"/>
+
+            <Button fx:id="btnParkingReservation"
+                    text="Parking Reservation"
+                    onAction="#handleParkingReservation"/>
+
+            <Button fx:id="btnParkingCodeConfirmation"
+                    text="Parking Code Confirmation"
+                    onAction="#handleParkingCodeConfirmation"/>
+        </VBox>
+    </center>
+
+</BorderPane>
+

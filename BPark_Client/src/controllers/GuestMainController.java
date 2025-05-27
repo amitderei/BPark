@@ -1,5 +1,6 @@
 package controllers;
 
+import client.ClientController;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import ui.UiUtils;
@@ -9,11 +10,24 @@ import ui.UiUtils;
  * Allows basic guest functionality like viewing availability,
  * and returning to the entry screen.
  */
-public class GuestMainController {
+public class GuestMainController implements ClientAware {
+
+    /** Reference to the client controller (may be null for guests) */
+    private ClientController client;
 
     /** Button to return to the main welcome screen */
     @FXML
     private Button btnBack;
+
+    /**
+     * Injects the active ClientController (even for guests, may be needed for back navigation).
+     *
+     * @param client the client instance (may be null)
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 
     /**
      * Triggered when the "Home" button is clicked.
@@ -33,7 +47,7 @@ public class GuestMainController {
         UiUtils.loadScreen(btnBack,
                            "/client/MainScreen.fxml",
                            "Select User Type",
-                           null); // no client needed for guest
+                           client); 
     }
 
     /**

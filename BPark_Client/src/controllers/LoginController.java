@@ -44,8 +44,8 @@ public class LoginController implements ClientAware {
     /** Triggered when the user clicks “Login”. */
     @FXML
     private void handleLoginClick() {
-        String user = username.getText().trim();
-        String pass = code.getText().trim();
+        String user = username.getText();
+        String pass = code.getText();
 
         if (user.isEmpty() || pass.isEmpty()) {
             lblError.setText("Please enter both username and password.");
