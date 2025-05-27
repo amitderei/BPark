@@ -30,10 +30,7 @@ public class GuestMainController implements ClientAware {
 
   	private Timeline updateTimeline;
 
-  	//start initilize for the 
-  	public void initialize() {
-  		startAutoUpdate();
-  	}
+  	
   	private void startAutoUpdate() {
   		updateTimeline = new Timeline(new KeyFrame(Duration.seconds(10), e -> client.requestAvailableSpots()));
   		updateTimeline.setCycleCount(Timeline.INDEFINITE); //run in infinity loop
@@ -42,7 +39,6 @@ public class GuestMainController implements ClientAware {
   	
   	//server answer and this is update the label
   	public void updateAvailableSpots(int count) {
-  		System.out.println("here we are in the center of town");
   	    availableSpotsLabel.setText("Free spots: " + count);
   	}
 
@@ -54,6 +50,7 @@ public class GuestMainController implements ClientAware {
     @Override
     public void setClient(ClientController client) {
         this.client = client;
+        startAutoUpdate();
     }
 
     /**
@@ -71,6 +68,9 @@ public class GuestMainController implements ClientAware {
      */
     @FXML
     private void handleBackClick() {
+    	if (updateTimeline != null) {
+    		updateTimeline.stop();
+        }
         UiUtils.loadScreen(btnBack,
                            "/client/MainScreen.fxml",
                            "Select User Type",

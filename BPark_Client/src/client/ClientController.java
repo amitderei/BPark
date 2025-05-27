@@ -183,6 +183,7 @@ public class ClientController extends AbstractClient {
           //get response from server and back to CreateNeworder 
 			if (response.getData() instanceof Integer && guestMainController != null) {
 			    int count = (int) response.getData();
+			    System.out.println(((Integer) count).toString());
 			    guestMainController.updateAvailableSpots(count); // call method to update
 			}
 			/*
@@ -335,6 +336,10 @@ public class ClientController extends AbstractClient {
             System.err.println("Failed to request available spots: " + e.getMessage());
         }
     }
+
+	public void setGuestController(GuestMainController controller) {
+		this.guestMainController=controller;
+	}
 
 }
 
