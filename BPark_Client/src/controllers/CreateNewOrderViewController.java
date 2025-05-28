@@ -9,6 +9,7 @@ import java.util.Random;
 
 import client.ClientController;
 import common.Order;
+import common.Subscriber;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -71,8 +72,11 @@ public class CreateNewOrderViewController {
 	 * start the initialize of the comboboxes and date pickers
 	 */
 	public void initializeComboBoxesAndDatePickers() {
+		insertSubscriberCode.setText(((Integer)(client.getSubscriber()).getSubscriberCode()).toString());
+		
 		hourCombo.getItems().clear();
 		minuteCombo.getItems().clear();
+		
 
 		// get the day of today
 		LocalDate today = LocalDate.now();

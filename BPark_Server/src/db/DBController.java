@@ -729,4 +729,33 @@ public class DBController {
 			return false;
 		}
 	}
+
+	/**
+	 * get details after subscriber log in
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public Subscriber getDetailsOfSubscriber(User user) {
+		String query = "SELECT * FROM subscriber WHERE username=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, user.getUsername());
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					Subscriber subscriber = new Subscriber(user.getUsername());
+					subscriber.setSubscriberCode(rs.getInt(1));
+					subscriber.setUserId(rs.getString(2));
+					subscriber.setFirstName(rs.getString(3));
+					subscriber.setLastName(rs.getString(4));
+					subscriber.setPhoneNum(rs.getString(5));
+					subscriber.setEmail(rs.getString(6));
+					subscriber.setTagId(rs.getString(8));
+					return subscriber;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Error! " + e.getMessage());
+		}
+		return null;
+	}
 }

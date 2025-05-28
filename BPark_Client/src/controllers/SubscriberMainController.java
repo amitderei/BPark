@@ -155,7 +155,7 @@ public class SubscriberMainController implements ClientAware {
 	        client.setNewOrderController(controller); //for act functions
 	        
 	        controller.initializeComboBoxesAndDatePickers();
-
+	        
 	        
 	        Stage stage = (Stage) btnParkingReservation.getScene().getWindow(); //get the stage
 	        Scene scene = new Scene(root); //create new scene
