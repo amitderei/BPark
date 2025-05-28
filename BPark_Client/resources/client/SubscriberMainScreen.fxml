@@ -41,7 +41,7 @@
 
             <Button fx:id="btnExtendParkingTime" onAction="#handleExtendParkingTime" text="Extend Parking Time" />
 
-            <Button fx:id="btnSubmitVehicle" onAction="#handleSubmitVehicle" text="Submit Vehicle" />
+            <Button fx:id="btnSubmitVehicle" onAction="#handleGoToDelivery" text="Submit Vehicle" />
 
             <Button fx:id="btnRetrieveVehicle" onAction="#handleRetrieveVehicle" text="Retrieve Vehicle" />
 

@@ -5,193 +5,190 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * Represents a parking event record from the 'parkingEvent' table in the database.
- * Used to transfer parking session data between client and server.
+ * Represents a parking event record from the 'parkingEvent' table in the
+ * database. Used to transfer parking session data between client and server.
  * Implements Serializable to support object transmission over the network.
  */
 public class ParkingEvent implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private int eventId;
-    private int subscriberCode;
-    private int parkingSpace;
-    private LocalDate entryDate;
-    private LocalTime entryHour;
-    private LocalDate exitDate;
-    private LocalTime exitHour;
-    private boolean wasExtended;
-    private String nameParkingLot;
-    private String vehicleId;
-    private int parkingCode;
+	private int eventId;
+	private int subscriberCode;
+	private int parkingSpace;
+	private LocalDate entryDate;
+	private LocalTime entryTime;
+	private LocalDate exitDate;
+	private LocalTime exitTime;
+	private boolean wasExtended;
+	private String lot;
+	private String vehicleID;
+	private String parkingCode;
 
-    /**
-     * Constructs a ParkingEvent with all required fields.
-     *
-     * @param eventId        the unique event ID
-     * @param subscriberCode the subscriber code
-     * @param parkingSpace   the parking space used during the event
-     * @param entryDate      the entry date
-     * @param entryHour      the entry time
-     * @param exitDate       the exit date (nullable if still active)
-     * @param exitHour       the exit time (nullable if still active)
-     * @param wasExtended    whether the parking session was extended
-     * @param nameParkingLot the name of the parking lot
-     * @param vehicleId      the vehicle ID parked
-     * @param parkingCode    the unique parking code assigned at entry
-     */
-    public ParkingEvent(int eventId, int subscriberCode, int parkingSpace, LocalDate entryDate, LocalTime entryHour,
-                        LocalDate exitDate, LocalTime exitHour, boolean wasExtended,
-                        String nameParkingLot, String vehicleId, int parkingCode) {
-        this.eventId = eventId;
-        this.subscriberCode = subscriberCode;
-        this.parkingSpace = parkingSpace;
-        this.entryDate = entryDate;
-        this.entryHour = entryHour;
-        this.exitDate = exitDate;
-        this.exitHour = exitHour;
-        this.wasExtended = wasExtended;
-        this.nameParkingLot = nameParkingLot;
-        this.vehicleId = vehicleId;
-        this.parkingCode = parkingCode;
-    }
+	/**
+	 * Constructs a ParkingEvent with all required fields.
+	 *
+	 * @param eventId        the unique event ID
+	 * @param subscriberCode the subscriber code
+	 * @param parkingSpace   the parking space used during the event
+	 * @param entryDate      the entry date
+	 * @param entryHour      the entry time
+	 * @param exitDate       the exit date (nullable if still active)
+	 * @param exitHour       the exit time (nullable if still active)
+	 * @param wasExtended    whether the parking session was extended
+	 * @param nameParkingLot the name of the parking lot
+	 * @param vehicleId      the vehicle ID parked
+	 * @param parkingCode    the unique parking code assigned at entry
+	 */
+	public ParkingEvent(int subscriberCode, int parkingSpace, LocalDate entryDate, LocalTime entryTime,
+			LocalDate exitDate, LocalTime exitTime, boolean wasExtended, String vehicleID2, String lot,
+			String parkingCode) {
+		this.subscriberCode = subscriberCode;
+		this.parkingSpace = parkingSpace;
+		this.entryDate = entryDate;
+		this.entryTime = entryTime;
+		this.exitDate = exitDate;
+		this.exitTime = exitTime;
+		this.wasExtended = wasExtended;
+		this.vehicleID = vehicleID2;
+		this.lot = lot;
+		this.parkingCode = parkingCode;
+	}
 
-    /**
-     * Returns the event ID.
-     *
-     * @return the parking event ID
-     */
-    public int getEventId() {
-        return eventId;
-    }
+	/**
+	 * Returns the event ID.
+	 *
+	 * @return the parking event ID
+	 */
+	public int getEventId() {
+		return eventId;
+	}
 
-    /**
-     * Returns the subscriber code.
-     *
-     * @return the subscriber's unique code
-     */
-    public int getSubscriberCode() {
-        return subscriberCode;
-    }
+	/**
+	 * Returns the subscriber code.
+	 *
+	 * @return the subscriber's unique code
+	 */
+	public int getSubscriberCode() {
+		return subscriberCode;
+	}
 
-    /**
-     * Returns the parking space number.
-     *
-     * @return the number of the parking space used
-     */
-    public int getParkingSpace() {
-        return parkingSpace;
-    }
+	/**
+	 * Returns the parking space number.
+	 *
+	 * @return the number of the parking space used
+	 */
+	public int getParkingSpace() {
+		return parkingSpace;
+	}
 
-    /**
-     * Returns the entry date of the parking event.
-     *
-     * @return the entry date
-     */
-    public LocalDate getEntryDate() {
-        return entryDate;
-    }
+	/**
+	 * Returns the entry date of the parking event.
+	 *
+	 * @return the entry date
+	 */
+	public LocalDate getEntryDate() {
+		return entryDate;
+	}
 
-    /**
-     * Returns the entry time of the parking event.
-     *
-     * @return the entry time
-     */
-    public LocalTime getEntryHour() {
-        return entryHour;
-    }
+	/**
+	 * Returns the entry time of the parking event.
+	 *
+	 * @return the entry time
+	 */
+	public LocalTime getEntryHour() {
+		return entryTime;
+	}
 
-    /**
-     * Returns the exit date of the parking event.
-     *
-     * @return the exit date, or null if not yet set
-     */
-    public LocalDate getExitDate() {
-        return exitDate;
-    }
+	/**
+	 * Returns the exit date of the parking event.
+	 *
+	 * @return the exit date, or null if not yet set
+	 */
+	public LocalDate getExitDate() {
+		return exitDate;
+	}
 
-    /**
-     * Returns the exit time of the parking event.
-     *
-     * @return the exit time, or null if not yet set
-     */
-    public LocalTime getExitHour() {
-        return exitHour;
-    }
+	/**
+	 * Returns the exit time of the parking event.
+	 *
+	 * @return the exit time, or null if not yet set
+	 */
+	public LocalTime getExitHour() {
+		return exitTime;
+	}
 
-    /**
-     * Indicates whether the parking session was extended.
-     *
-     * @return true if extended, false otherwise
-     */
-    public boolean isWasExtended() {
-        return wasExtended;
-    }
+	/**
+	 * Indicates whether the parking session was extended.
+	 *
+	 * @return true if extended, false otherwise
+	 */
+	public boolean isWasExtended() {
+		return wasExtended;
+	}
 
-    /**
-     * Returns the name of the parking lot.
-     *
-     * @return the parking lot name
-     */
-    public String getNameParkingLot() {
-        return nameParkingLot;
-    }
+	/**
+	 * Returns the name of the parking lot.
+	 *
+	 * @return the parking lot name
+	 */
+	public String getNameParkingLot() {
+		return lot;
+	}
 
-    /**
-     * Returns the vehicle ID associated with the event.
-     *
-     * @return the vehicle ID
-     */
-    public String getVehicleId() {
-        return vehicleId;
-    }
+	/**
+	 * Returns the vehicle ID associated with the event.
+	 *
+	 * @return the vehicle ID
+	 */
+	public String getVehicleId() {
+		return vehicleID;
+	}
 
-    /**
-     * Returns the parking code issued at entry.
-     *
-     * @return the parking code
-     */
-    public int getParkingCode() {
-        return parkingCode;
-    }
+	/**
+	 * Returns the parking code issued at entry.
+	 *
+	 * @return the parking code
+	 */
+	public String getParkingCode() {
+		return parkingCode;
+	}
 
-    /**
-     * Sets the exit date.
-     *
-     * @param exitDate the date the vehicle exited
-     */
-    public void setExitDate(LocalDate exitDate) {
-        this.exitDate = exitDate;
-    }
+	/**
+	 * Sets the exit date.
+	 *
+	 * @param exitDate the date the vehicle exited
+	 */
+	public void setExitDate(LocalDate exitDate) {
+		this.exitDate = exitDate;
+	}
 
-    /**
-     * Sets the exit time.
-     *
-     * @param exitHour the time the vehicle exited
-     */
-    public void setExitHour(LocalTime exitHour) {
-        this.exitHour = exitHour;
-    }
+	/**
+	 * Sets the exit time.
+	 *
+	 * @param exitHour the time the vehicle exited
+	 */
+	public void setExitHour(LocalTime exitHour) {
+		this.exitTime = exitHour;
+	}
 
-    /**
-     * Sets whether the session was extended.
-     *
-     * @param wasExtended true if extended, false otherwise
-     */
-    public void setWasExtended(boolean wasExtended) {
-        this.wasExtended = wasExtended;
-    }
+	/**
+	 * Sets whether the session was extended.
+	 *
+	 * @param wasExtended true if extended, false otherwise
+	 */
+	public void setWasExtended(boolean wasExtended) {
+		this.wasExtended = wasExtended;
+	}
 
-    @Override
-    public String toString() {
-        return "ParkingEvent #" + eventId +
-               " | Subscriber: " + subscriberCode +
-               " | Space: " + parkingSpace +
-               " | Entry: " + entryDate + " " + entryHour +
-               " | Exit: " + exitDate + " " + exitHour +
-               " | Extended: " + wasExtended +
-               " | Lot: " + nameParkingLot +
-               " | Vehicle: " + vehicleId +
-               " | Code: " + parkingCode;
-    }
+	public String getLot() {
+		return lot;
+	}
+
+	@Override
+	public String toString() {
+		return "ParkingEvent #" + eventId + " | Subscriber: " + subscriberCode + " | Space: " + parkingSpace
+				+ " | Entry: " + entryDate + " " + entryTime + " | Exit: " + exitDate + " " + exitTime + " | Extended: "
+				+ wasExtended + " | Lot: " + lot + " | Vehicle: " + vehicleID + " | Code: " + parkingCode;
+	}
 }

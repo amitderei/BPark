@@ -7,6 +7,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 
 import common.Order;
+import common.ParkingEvent;
 import common.ServerResponse;
 import common.Subscriber;
 import common.User;
@@ -110,9 +111,9 @@ public class Server extends AbstractServer {
 				else if (data.length == 2 && "subscriberDetails".equals(data[0])) {
 					Subscriber subscriber = db.getDetailsOfSubscriber((User) data[1]);
 					if (subscriber != null) {
-						client.sendToClient(new ServerResponse(true, subscriber, "Subscriber details saved successfully."));
-					}
-					else {
+						client.sendToClient(
+								new ServerResponse(true, subscriber, "Subscriber details saved successfully."));
+					} else {
 						client.sendToClient(new ServerResponse(false, null, "Subscriber details not found."));
 					}
 				}
@@ -191,11 +192,112 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, "reservation not succeed!"));
 					}
 				}
-			}
+				// Expected format: {"checkSubscriberCode", codeInt }
+				else if (data.length == 2 && "checkSubscriberCode".equals(data[0])) {
+					int codeInt = (int) data[1];
 
+					// Checking whether the code exists or not
+					if (!db.checkSubscriberCode(codeInt)) {
+						// If the code doesn't exist we will let the user to know
+						client.sendToClient(new ServerResponse(false, null, "Subscriber code does not exist."));
+						return;
+					}
+					// If the code does exist we will let the user to know and to continue
+					client.sendToClient(new ServerResponse(true, null, "Subscriber code is valid!"));
+
+				}
+				// Expected format: {"checkIfTheresReservation", codeInt}
+				else if (data.length == 2 && "checkIfTheresReservation".equals(data[0])) {
+					int codeInt = (int) data[1];
+
+					// Checking whether the subscriber has a reservation, then checks if there is a
+					// reservation in time of now
+					if (!db.checkSubscriberHasReservationNow(codeInt)) {
+						// If the subscriber doesn't have a reservation we will let the user to enter
+						// only regularly
+						client.sendToClient(new ServerResponse(true, null, "Subscriber doesn't have a reseravtion."));
+						return;
+					}
+					// If the subscriber has a reservation we will let the user to enter with the
+					// existing reservation
+					client.sendToClient(new ServerResponse(true, null, "Subscriber has a reservation."));
+
+				}
+
+				// Expected format: {"DeliveryViaReservation", codeInt, confirmationCodeInt}
+				else if (data.length == 3 && "DeliveryViaReservation".equals(data[0])) {
+					int codeInt = (int) data[1];
+					int confirmationCodeInt = (int) data[2];
+
+					// Checking whether the subscriber has entered his confirmation code currectly
+					if (!db.checkConfirmationCode(codeInt, confirmationCodeInt)) {
+						// If the subscriber code hasn't entered currectly we will tell the user
+						client.sendToClient(new ServerResponse(false, null, "The confirmation code isn't currect."));
+						return;
+					}
+					// Letting the user know that he has entered the confirmation code successfully
+					client.sendToClient(
+							new ServerResponse(true, null, "The confirmation code has entered successfully."));
+				}
+
+				// Expected format: {"IsThereFreeParkingSpace", lotName}
+				else if (data.length == 2 && "IsThereFreeParkingSpace".equals(data[0])) {
+					String lotName = (String) data[1];
+
+					if (!db.hasAvailableSpots(lotName)) {
+						// If the Lot is full we would let the user know that he can't deliver his
+						// vehicle right now.
+						client.sendToClient(new ServerResponse(false, null, "The Parking Lot is Full"));
+						return;
+					}
+					// Letting the user know that he can deliver his vehicle successfully
+					client.sendToClient(new ServerResponse(true, null, "There is free parking space"));
+				}
+
+				// Expected format: {"FindFreeParkingSpace"}
+				else if (data.length == 1 && "FindFreeParkingSpace".equals(data[0])) {
+
+					// Seeking for a parking space from the DB
+					int parkingSpaceInt = db.findParkingSpace();
+
+					// If the Lot is full we would let the user know that he can't deliver his
+					// vehicle right now.
+					client.sendToClient(new ServerResponse(true, parkingSpaceInt, "Found free parking space"));
+					return;
+				}
+
+				// Expected format: {"getVehicleID", codeInt}
+				else if (data.length == 2 && "getVehicleID".equals(data[0])) {
+					int codeInt = (int) data[1];
+
+					// Seeking for a matching vehicle to the asked subscriber
+					String vehicleID = db.findVehicleID(codeInt);
+
+					// The server sends the matched vehicleID
+					client.sendToClient(new ServerResponse(true, vehicleID, "Found matched vehicle"));
+					return;
+				}
+				// Expected format: {"DeliverVehicle", parkingEvent}
+				else if (data.length == 2 && "DeliverVehicle".equals(data[0])) {
+					ParkingEvent parkingEvent = (ParkingEvent) data[1];
+
+					// Inserting the parking event into the DB
+					db.AddParkingEvent(parkingEvent);
+					// Updating the amount of occupied parking space by +1
+					db.AddOccupiedParkingSpace();
+					// Updating the specific parking space on the 'parkingspaces' table
+					db.UpdateParkingSpace_occupied(parkingEvent.getParkingSpace());
+
+					// The server sends the successful addition of parking event
+					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));
+					return;
+				}
+
+			}
 		} catch (IOException e) {
 			System.err.println("Client communication error: " + e.getMessage());
 		}
+
 	}
 
 	/**

@@ -11,6 +11,7 @@ import controllers.LoginController;
 import controllers.OrderViewController;
 import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
+import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -49,6 +50,7 @@ public class ClientController extends AbstractClient {
 	private CreateNewOrderViewController newOrderController;
 	private ParkingReservationSummaryController summaryController;
 	private SubscriberMainController subscriberMainController;
+	private VehicleDeliveryController newDeliveryController;
 
 	private Subscriber subscriber;
 
@@ -123,12 +125,16 @@ public class ClientController extends AbstractClient {
 
 	}
 	
-	public void setSubscriber(Subscriber subscriber) {
-		this.subscriber=subscriber;
+	public void setDeliveryController(VehicleDeliveryController controller) {
+		this.newDeliveryController = controller;
+
 	}
-	
+
+	public void setSubscriber(Subscriber subscriber) {
+		this.subscriber = subscriber;
+	}
+
 	public Subscriber getSubscriber() {
-		System.out.println(subscriber.getSubscriberCode());
 		return subscriber;
 	}
 
@@ -229,9 +235,72 @@ public class ClientController extends AbstractClient {
 					newOrderController.setOrderAndGoToNextPage((Order) response.getData());
 				}
 			}
-			
-			if (response.isSucceed()&& response.getData() instanceof Subscriber) {
-				setSubscriber((Subscriber)response.getData());
+
+			if (response.isSucceed() && response.getData() instanceof Subscriber) {
+				setSubscriber((Subscriber) response.getData());
+			}
+
+			// Vehicle delivery screen updates
+			if (newDeliveryController != null) {
+				System.out.println(">> newDeliveryController connected!");
+				// 1 – handle subscriber code not found
+				if (response.getMsg().toLowerCase().contains("does not")) {
+					newDeliveryController.SubscriberCodeDoesntExist();
+				}
+
+				// 2 - handle subscriber validation successfully
+				if (response.getMsg().toLowerCase().contains("is valid!")) {
+					newDeliveryController.SubscriberCodeIsValid();
+				}
+
+				// 3 - handle subscriber has a reservation
+				if (response.getMsg().toLowerCase().contains("has a reservation.")) {
+					newDeliveryController.hasReservation();
+				}
+
+				// 4 - handle subscriber doesn't have a reservation
+				if (response.getMsg().toLowerCase().contains("doesn't have a reseravtion.")) {
+					newDeliveryController.NoReservation();
+				}
+
+				// 5 - handle subscriber entered subscriber code successfully
+				if (response.getMsg().toLowerCase().contains("confirmation code has entered")) {
+					newDeliveryController.ConfirmationCodeIsValid();
+				}
+
+				// 6 - handle subscriber entered subscriber code unsuccessfully
+				if (response.getMsg().toLowerCase().contains("confirmation code isn't")) {
+					newDeliveryController.ConfirmationCodeNotValid();
+				}
+
+				// 7 - handle no free parking spaces
+				if (response.getMsg().toLowerCase().contains("the Parking Lot is Full")) {
+					newDeliveryController.setParkingLotStatus(false);
+				}
+
+				// 8 - handle there's free parking space
+				if (response.getMsg().toLowerCase().contains("there is free parking space")) {
+					newDeliveryController.setParkingLotStatus(true);
+				}
+
+				// 9 - handle a parking space that is found
+				if (response.getMsg().toLowerCase().contains("found free parking space")) {
+					// gathering the available parking space
+					int parkingSpace = (int) response.getData();
+					newDeliveryController.parkingSpaceFuture.complete(parkingSpace);
+				}
+
+				// 10 - handle a matched vehicleID to the asked subscriber
+				if (response.getMsg().toLowerCase().contains("found matched vehicle")) {
+					// gathering the matched vehicle
+					String vehicleID = (String) response.getData();
+					newDeliveryController.vehicleIdFuture.complete(vehicleID);
+				}
+
+				// 11 - handle successful addition of adding a parking event into the DB
+				if (response.getMsg().toLowerCase().contains("added parking event successfully")) {
+					newDeliveryController.SuccessfulDelivery();
+				}
 			}
 		});
 	}
@@ -398,6 +467,7 @@ public class ClientController extends AbstractClient {
 
 	/**
 	 * send to server the user to get the subscriber details.
+	 * 
 	 * @param user
 	 */
 	public void subscriberDetails(User user) {

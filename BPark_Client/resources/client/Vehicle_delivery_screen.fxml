@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleDeliveryController">
+    <children>
+        <GridPane layoutX="10.0" layoutY="9.0" prefHeight="480.0" prefWidth="780.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="392.0" minWidth="10.0" prefWidth="243.5999755859375" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="312.0" minWidth="0.0" prefWidth="10.000024414062494" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="449.5999755859375" minWidth="10.0" prefWidth="420.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="324.0" minWidth="10.0" prefWidth="104.39999999999998" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="58.79998779296876" minHeight="2.2" prefHeight="34.39999694824218" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="56.599999999999994" minHeight="0.0" prefHeight="20.800003051757812" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="96.6" minHeight="0.0" prefHeight="27.799996948242182" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="98.4" minHeight="0.0" prefHeight="22.199981689453125" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="301.6000076293945" minHeight="0.0" prefHeight="38.20001831054688" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="289.5999938964844" minHeight="0.0" prefHeight="21.600012207031256" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="286.79999389648435" minHeight="0.0" prefHeight="30.399987792968744" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="286.79999389648435" minHeight="10.0" prefHeight="24.800006103515614" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="286.79999389648435" minHeight="10.0" prefHeight="24.799981689453148" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="286.79999389648435" minHeight="10.0" prefHeight="25.599999999999966" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="286.79999389648435" minHeight="10.0" prefHeight="186.39999999999998" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <TextField fx:id="subscriberCodeField" prefHeight="29.0" prefWidth="162.0" promptText="Enter subscriber code..." GridPane.rowIndex="3" />
+                <Button fx:id="submitButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="25.0" prefWidth="72.0" text="Submit" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Vehicle Delivery : terminal" textAlignment="CENTER" wrappingWidth="293.5" GridPane.columnIndex="2" GridPane.halignment="CENTER">
+                    <font>
+                        <Font name="Calibri" size="27.0" />
+                    </font>
+                </Text>
+            <Label fx:id="subscriberCodeLabel" text=" " GridPane.rowIndex="4" />
+            <Label text=" Subscriber code :" GridPane.rowIndex="2" />
+            <Label fx:id="ReservationORRegularEnteranceLabel" prefHeight="18.0" prefWidth="354.0" text="Enter to the Parking Lot (based on free place)" visible="false" GridPane.rowIndex="6" />
+            <TextField fx:id="ReservationConfirmationCodeField" prefHeight="29.0" prefWidth="162.0" promptText="Enter confirmation code..." visible="false" GridPane.rowIndex="7" />
+            <Button fx:id="ReservationORRegularEnteranceButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleDelivery" prefHeight="26.0" prefWidth="102.0" text="Deliver Vehicle" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+            <Label fx:id="ReservationConfirmationCodeLabel" prefHeight="18.0" prefWidth="257.0" text=" " GridPane.rowIndex="8" />
+            <Label fx:id="deliverStatusUpdateLabel" prefHeight="18.0" prefWidth="244.0" text=" Status--Of--Parking--Lot" visible="false" GridPane.rowIndex="9" />
+            <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="244.0" text=" " visible="false" GridPane.rowIndex="10" />
+            </children>
+        </GridPane>
+    </children>
+</AnchorPane>

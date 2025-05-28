@@ -165,4 +165,27 @@ public class SubscriberMainController implements ClientAware {
 	        System.out.println("Error:"+ e.getMessage());
 	    }
 	}
+	
+	
+	public void handleGoToDelivery() {
+	    try {
+	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Vehicle_delivery_screen.fxml")); //load the Placing_an_order_view.fxml after search on resources
+	        Parent root = loader.load();
+
+	        
+	        VehicleDeliveryController controller = loader.getController(); //after loading the fxml- get the controller
+	        controller.setClient(client);// move the client to the new controller
+	        client.setDeliveryController(controller); //for act functions
+	        
+	        
+	        
+	        
+	        Stage stage = (Stage) btnParkingReservation.getScene().getWindow(); //get the stage
+	        Scene scene = new Scene(root); //create new scene
+	        stage.setScene(scene);
+	        stage.show();
+	    } catch (Exception e) {
+	        System.out.println("Error:"+ e.getMessage());
+	    }
+	}
 }
