@@ -307,6 +307,7 @@ public class CreateNewOrderViewController {
 	}
 	
 	public void setOrderAndGoToNextPage(Order order) {
+		System.out.println("setOrderAndGoToNextPage");
 		this.newOrder=order;
 		handleGoToOrderSummarry(newOrder);
 	}

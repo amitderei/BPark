@@ -9,6 +9,7 @@ import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.OrderViewController;
 import controllers.ParkingReservationSummaryController;
+import controllers.SubscriberMainController;
 import controllers.VehiclePickupController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -44,6 +45,7 @@ public class ClientController extends AbstractClient {
     
     private CreateNewOrderViewController newOrderController;
     private ParkingReservationSummaryController summaryController;
+    private SubscriberMainController subscriberMainController;
 
     /* ------------------------------------------------------------------
      * Constructor
@@ -368,6 +370,10 @@ public class ClientController extends AbstractClient {
 
 	public void setGuestController(GuestMainController controller) {
 		this.guestMainController=controller;
+	}
+
+	public void setSubscriberMainController(SubscriberMainController controller) {
+		this.subscriberMainController=controller;
 	}
 
 }
