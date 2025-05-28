@@ -352,6 +352,30 @@ public class DBController {
 			return false;
 		}
 	}
+	
+	/**
+	 * Retrieves the subscriber code associated with a given tag ID.
+	 * This version performs a case-sensitive match using the BINARY keyword.
+	 *
+	 * @param tagId the tag identifier (e.g. "TAG_001")
+	 * @return the subscriberCode if found, or -1 if not found or error
+	 */
+	public int getSubscriberCodeByTag(String tagId) {
+	    String query = "SELECT subscriberCode FROM subscriber WHERE BINARY tagId = ?";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, tagId);
+	        ResultSet rs = stmt.executeQuery();
+
+	        if (rs.next()) {
+	            return rs.getInt("subscriberCode");
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error retrieving subscriber by tag: " + e.getMessage());
+	    }
+
+	    return -1; // Not found or error
+	}
 
 	/**
 	 * Retrieves the open parking event for the given subscriber and parking code.

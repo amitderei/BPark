@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.layout.AnchorPane?>
 
@@ -12,36 +13,41 @@
             fx:controller="controllers.VehiclePickupController"
             prefWidth="800.0" prefHeight="500.0">
     <children>
-        <VBox alignment="CENTER" spacing="15.0" AnchorPane.topAnchor="50.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0">
-            <!-- Screen Title -->
+        <VBox alignment="CENTER" spacing="15.0" AnchorPane.topAnchor="30.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0">
+
+            <!-- Title -->
             <Label text="Vehicle Pickup">
                 <font>
                     <Font size="26.0" />
                 </font>
             </Label>
 
-            <!-- Subscriber Code Input -->
+            <!-- Subscriber Code -->
             <Label text="Enter Subscriber Code:" />
             <TextField fx:id="txtSubscriberCode" promptText="e.g. 1001" />
+            <Button fx:id="btnNext" text="Verify Code" onAction="#validateSubscriber" />
 
-            <Button fx:id="btnNext" text="Next" onAction="#validateSubscriber" />
+            <!-- Tag ID -->
+            <Label text="Or scan your tag:" />
+            <TextField fx:id="txtTagId" promptText="e.g. TAG_001" />
+            <Button fx:id="btnReadTag" text="Verify Tag" onAction="#handleReadTag" />
 
-            <!-- Confirmation Code Section -->
+            <!-- Parking Code -->
             <Label fx:id="lblParkingPrompt" text="Enter your parking code:"
                    visible="false" managed="false" />
             <TextField fx:id="txtParkingCode" promptText="e.g. 654321"
                        visible="false" managed="false" />
 
-            <!-- Action Buttons -->
-            <Button fx:id="btnCollectCar" text="Collect Car" onAction="#collectCar"
-                    visible="false" managed="false" />
-            <Button fx:id="btnLostCode" text="I Lost My Code" onAction="#sendLostCode"
-                    visible="false" managed="false" />
-            <Button fx:id="btnExtend" text="Extend Parking" onAction="#extendParking"
-                    visible="false" managed="false" />
-
-            <!-- Status Feedback -->
+            <!-- Action Buttons in Row -->
+            <HBox spacing="20.0" alignment="CENTER">
+                <Button fx:id="btnCollectCar" text="Collect Car" onAction="#collectCar"
+                        visible="false" managed="false" />
+                <Button fx:id="btnLostCode" text="I Lost My Code" onAction="#sendLostCode"
+                        visible="false" managed="false" />
+            </HBox>
+            <!-- Status -->
             <Label fx:id="lblStatus" text="" wrapText="true" style="-fx-text-fill: green;" />
+
         </VBox>
     </children>
 </AnchorPane>

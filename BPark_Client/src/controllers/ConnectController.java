@@ -112,10 +112,12 @@ public class ConnectController implements ClientAware {
 
         } catch (Exception e) {
             UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);
-            UiUtils.showAlert("BPARK - Message", "Could not connect to server or load next screen: " + e.getMessage(),
-                    Alert.AlertType.ERROR);
-            System.err.println("Connection or navigation error: " + e.getMessage());
-            e.printStackTrace();
+            UiUtils.showAlert("Connection Failed",
+                "Could not connect to the server. Please check the IP address and try again.",
+                Alert.AlertType.ERROR);
+
+            // Optionally log internal error to console for debugging (not shown to user)
+            System.err.println("[ERROR] Server connection failed: " + e.getMessage());
         }
     }
 

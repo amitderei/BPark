@@ -96,17 +96,38 @@ public class Server extends AbstractServer {
 					return;
 				}
 
-				// Validate subscriber: ["validateSubscriber", subscriberCode]
-				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
-					int subscriberCode = (int) data[1];
-					boolean exists = db.subscriberExists(subscriberCode);
-					if (exists) {
-						client.sendToClient(new ServerResponse(true, null, "Subscriber verified successfully."));
-					} else {
-						client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
-					}
-					return;
-				}
+                // Validate subscriber by tag: ["validateSubscriberByTag", tagId]
+                else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
+                    String tagId = (String) data[1];
+                    int subscriberCode = db.getSubscriberCodeByTag(tagId);
+
+                    if (subscriberCode > 0) {
+                        // Return subscriberCode in response so client can continue with pickup flow
+                        client.sendToClient(new ServerResponse(true, subscriberCode,
+                                "Subscriber verified successfully by tag."));
+                    } else {
+                        client.sendToClient(new ServerResponse(false, null,
+                                "Tag ID not recognized. Please try again."));
+                    }
+                    return;
+                }
+
+
+                // Collect car: ["collectCar", subscriberCode, parkingCode]
+                else if (data.length == 3 && "collectCar".equals(data[0])) {
+                    int subCode = (int) data[1];
+                    int parkCode = (int) data[2];
+                    try {
+                        ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
+                        client.sendToClient(response);
+                    } catch (Exception e) {
+                        client.sendToClient(new ServerResponse(false, null,
+                                "An error occurred while collecting the vehicle."));
+                        System.err.println("Error: collectCar - " + e.getMessage());
+                    }
+                    return;
+                }
+
 
 				else if (data.length == 2 && "subscriberDetails".equals(data[0])) {
 					Subscriber subscriber = db.getDetailsOfSubscriber((User) data[1]);
@@ -118,53 +139,20 @@ public class Server extends AbstractServer {
 					}
 				}
 
-				// Collect car: ["collectCar", subscriberCode, parkingCode]
-				else if (data.length == 3 && "collectCar".equals(data[0])) {
-					int subCode = (int) data[1];
-					int parkCode = (int) data[2];
-					try {
-						ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
-						client.sendToClient(response);
-					} catch (Exception e) {
-						client.sendToClient(
-								new ServerResponse(false, null, "An error occurred while collecting the vehicle."));
-						System.err.println("Error: collectCar - " + e.getMessage());
-					}
-					return;
-				}
 
-				// Extend parking: ["extendParking", subscriberCode]
-				else if (data.length == 2 && "extendParking".equals(data[0])) {
-					int subCode = (int) data[1];
-					try {
-						boolean success = db.updateWasExtended(subCode);
-						if (success) {
-							client.sendToClient(new ServerResponse(true, null, "Parking was successfully extended."));
-						} else {
-							client.sendToClient(
-									new ServerResponse(false, null, "No active event found. Extension failed."));
-						}
-					} catch (Exception e) {
-						client.sendToClient(
-								new ServerResponse(false, null, "An error occurred while extending parking."));
-						System.err.println("Error: extendParking - " + e.getMessage());
-					}
-					return;
-				}
-
-				// Resend parking code: ["sendLostCode", subscriberCode]
-				else if (data.length == 2 && "sendLostCode".equals(data[0])) {
-					int subCode = (int) data[1];
-					try {
-						ServerResponse response = db.sendParkingCodeToSubscriber(subCode);
-						client.sendToClient(response);
-					} catch (Exception e) {
-						client.sendToClient(
-								new ServerResponse(false, null, "An error occurred while sending your parking code."));
-						System.err.println("Error: sendLostCode - " + e.getMessage());
-					}
-					return;
-				}
+                // Resend parking code: ["sendLostCode", subscriberCode]
+                else if (data.length == 2 && "sendLostCode".equals(data[0])) {
+                    int subCode = (int) data[1];
+                    try {
+                        ServerResponse response = db.sendParkingCodeToSubscriber(subCode);
+                        client.sendToClient(response);
+                    } catch (Exception e) {
+                        client.sendToClient(new ServerResponse(false, null,
+                                "An error occurred while sending your parking code."));
+                        System.err.println("Error: sendLostCode - " + e.getMessage());
+                    }
+                    return;
+                }
 
 				// Check parking availability: ["CheckParkingAvailability"]. ** Author - Ravid
 				// **

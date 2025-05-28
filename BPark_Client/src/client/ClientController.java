@@ -206,19 +206,32 @@ public class ClientController extends AbstractClient {
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
 			}
 
-			// ------------------------------
-			// Vehicle pickup screen feedback
-			// ------------------------------
+            // ------------------------------
+            // Handle vehicle pickup responses
+            // ------------------------------
+            if (pickupController != null) {
+                UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
-			if (pickupController != null) {
-				UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+                if (response.isSucceed()) {
+                    String lowerMsg = response.getMsg().toLowerCase(); // changed from 'msg' to 'lowerMsg'
 
-				if (response.isSucceed() && response.getMsg().toLowerCase().contains("subscriber verified")) {
-					pickupController.onSubscriberValidated();
-				} else if (response.isSucceed() && response.getMsg().toLowerCase().contains("pickup successful")) {
-					pickupController.disableAfterPickup();
-				}
-			}
+                    // Handle subscriber validation (by code or by tag)
+                    if (lowerMsg.contains("subscriber verified")) {
+                        if (response.getData() instanceof Integer subscriberCode) {
+                            // Subscriber was validated using tag ID
+                            pickupController.onSubscriberValidated(subscriberCode);
+                        } else {
+                            // Subscriber was validated using numeric code input
+                            pickupController.onSubscriberValidated();
+                        }
+                    }
+
+                    // Handle successful car collection
+                    else if (lowerMsg.contains("pickup successful")) {
+                        pickupController.disableAfterPickup();
+                    }
+                }
+            }
 
 			// get response from server and back to GuestMainController with
 			// updateAvailableSpots
@@ -404,6 +417,19 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'validateSubscriber' request: " + e.getMessage());
 		}
 	}
+	
+    /**
+     * Validates a subscriber by their RFID tag ID.
+     *
+     * @param tagId the unique tag identifier (e.g., "TAG_001")
+     */
+    public void validateSubscriberByTag(String tagId) {
+        try {
+            sendToServer(new Object[]{"validateSubscriberByTag", tagId});
+        } catch (IOException e) {
+            System.err.println("Failed to send 'validateSubscriberByTag' request: " + e.getMessage());
+        }
+    }
 
 	/**
 	 * Sends a vehicle pickup request with subscriber code and parking code.
@@ -477,4 +503,5 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
 		}
 	}
+	
 }
