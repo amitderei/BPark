@@ -91,6 +91,7 @@ public class Server extends AbstractServer {
                     }
                     return;
                 }
+                
 
                 // Update order: ["updateOrder", orderNumber, field, newValue]
                 else if (data.length == 4 && "updateOrder".equals(data[0])) {
@@ -178,6 +179,17 @@ public class Server extends AbstractServer {
                         client.sendToClient(new ServerResponse(false, null, "Can't make resarvation"));
                     }
                 }
+                else if(data.length==2&& "addNewOrder".equals(data[0])) {
+					Order orderToAdd=(Order)data[1];
+					boolean success=db.placingAnNewOrder(orderToAdd);
+					
+					if (success) {
+						client.sendToClient(new ServerResponse(true, orderToAdd, "reservation succeed!"));
+					}
+					else {
+						client.sendToClient(new ServerResponse(false, null, "reservation not succeed!"));
+					}
+				}
             }
 
         } catch (IOException e) {

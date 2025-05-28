@@ -79,7 +79,7 @@ public class DBController {
 	 */
 	public ArrayList<Order> orderExists(int orderNumber) {
         // SQL query to check if an order with the given number exists
-        String query = "SELECT * FROM order WHERE order_number=?";
+        String query = "SELECT * FROM `order` WHERE order_number=?";
 
         ArrayList<Order> list = new ArrayList<>();
 
@@ -117,7 +117,7 @@ public class DBController {
 	public ArrayList<Order> getAllOrders() {
         // Define the SQL query to fetch all columns from the 'order' table
         System.out.println("DB");
-        String query = "SELECT * FROM order";
+        String query = "SELECT * FROM `order`";
         ArrayList<Order> orders = new ArrayList<>();
 
         try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
@@ -693,7 +693,7 @@ public class DBController {
 		return false;}
 
 	public void setOrderId(Order newOrder) {
-		String newQuery="SELECT order_number FROM order WHERE order_date=? AND arrival_time=? AND parking_space=?";
+		String newQuery="SELECT order_number FROM `order` WHERE order_date=? AND arrival_time=? AND parking_space=?";
 		try (PreparedStatement stmt = conn.prepareStatement(newQuery)) {
 			stmt.setDate(1, newOrder.getOrderDate());
 			stmt.setTime(2, newOrder.getArrivalTime());
@@ -713,7 +713,7 @@ public class DBController {
 	insert new order to orders table
 	@param newOrder*/
 	public boolean placingAnNewOrder(Order newOrder) {
-		String query = "INSERT INTO order (parking_space, order_date, arrival_time ,confirmation_code, subscriberCode, date_of_placing_an_order) VALUES (?, ?, ?, ?, ?, ?)";
+		String query = "INSERT INTO `order` (parking_space, order_date, arrival_time ,confirmation_code, subscriberCode, date_of_placing_an_order) VALUES (?, ?, ?, ?, ?, ?)";
 		int parking_space_id=getParkingSpace(newOrder.getArrivalTime(), newOrder.getOrderDate());
 		newOrder.setParkingSpace(parking_space_id);
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
