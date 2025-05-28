@@ -378,93 +378,111 @@ public class DBController {
 	}
 
 	/**
-	 * Retrieves the open parking event for the given subscriber and parking code.
-	 * An event is considered open if its exitDate is null.
+	 * Retrieves the latest open parking event for the specified subscriber and parking code.
+	 * An event is considered open if its exitDate is null (i.e., the vehicle has not exited yet).
 	 *
-	 * @param subscriberCode the subscriber's code
-	 * @param parkingCode    the numeric parking code issued at entry
-	 * @return the matching open ParkingEvent, or null if not found
-	 * @throws SQLException if a database error occurs
+	 * @param subscriberCode the subscriber's unique identifier
+	 * @param parkingCode    the numeric code assigned when the vehicle entered
+	 * @return a ParkingEvent object if a match is found; null otherwise
+	 * @throws SQLException if a database access error occurs
 	 */
 	public ParkingEvent getOpenParkingEvent(int subscriberCode, int parkingCode) throws SQLException {
-		String query = "SELECT * FROM parkingEvent "
-				+ "WHERE subscriberCode = ? AND parkingCode = ? AND exitDate IS NULL "
-				+ "ORDER BY eventId DESC LIMIT 1";
+	    String query = "SELECT * FROM parkingEvent "
+	                 + "WHERE subscriberCode = ? AND parkingCode = ? AND exitDate IS NULL "
+	                 + "ORDER BY eventId DESC LIMIT 1";
 
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, subscriberCode);
-			stmt.setInt(2, parkingCode);
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					// Handle nullable exit date and hour safely
-					LocalDate exitDate = rs.getDate("exitDate") != null ? rs.getDate("exitDate").toLocalDate() : null;
-					LocalTime exitHour = rs.getTime("exitHour") != null ? rs.getTime("exitHour").toLocalTime() : null;
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setInt(1, subscriberCode);
+	        stmt.setInt(2, parkingCode);
 
-					return new ParkingEvent( rs.getInt("subscriberCode"),
-							rs.getInt("parking_space"), rs.getDate("entryDate").toLocalDate(),
-							rs.getTime("entryHour").toLocalTime(), exitDate, exitHour, rs.getBoolean("wasExtended"),
-							rs.getString("NameParkingLot"), rs.getString("vehicleId"), rs.getString("parkingCode"));
-				}
-			}
-		}
-		return null;
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            if (rs.next()) {
+	                LocalDate exitDate = rs.getDate("exitDate") != null
+	                                   ? rs.getDate("exitDate").toLocalDate()
+	                                   : null;
+	                LocalTime exitHour = rs.getTime("exitHour") != null
+	                                   ? rs.getTime("exitHour").toLocalTime()
+	                                   : null;
+
+	                ParkingEvent event = new ParkingEvent(
+	                    rs.getInt("subscriberCode"),
+	                    rs.getInt("parking_space"),
+	                    rs.getDate("entryDate").toLocalDate(),
+	                    rs.getTime("entryHour").toLocalTime(),
+	                    exitDate,
+	                    exitHour,
+	                    rs.getBoolean("wasExtended"),
+	                    rs.getString("vehicleId"),
+	                    rs.getString("NameParkingLot"),
+	                    rs.getString("parkingCode")
+	                );
+
+	                event.setEventId(rs.getInt("eventId")); // Set ID after object construction
+	                return event;
+	            }
+	        }
+	    }
+
+	    return null;
 	}
 
+
+
+
 	/**
-	 * Handles the vehicle pickup process for a given subscriber and parking code.
-	 * This method retrieves the active parking event (if any) where the given
-	 * subscriberCode and parkingCode match, and exitDate is null. If such an event
-	 * exists, it is finalized by updating the exit time, and the parking duration
-	 * is evaluated to determine the result.
+	 * Finalizes a parking session for a subscriber by marking exit time and
+	 * evaluating the parking duration. Sends notifications if parking time exceeds limits.
 	 *
-	 * @param subscriberCode the subscriber's unique code
-	 * @param parkingCode    the numeric parking code provided at entry
-	 * @return ServerResponse indicating success or failure, with a message
+	 * Logic:
+	 * - Retrieves the open parking event by subscriber code and parking code.
+	 * - Updates exit date/time and frees the parking space.
+	 * - Calculates parking duration.
+	 * - If duration > 8 hours, a delay is recorded and a notification is sent.
+	 *
+	 * @param subscriberCode the subscriber's unique identifier
+	 * @param parkingCode    the numeric code assigned upon parking
+	 * @return ServerResponse indicating the result (success/failure + message)
 	 */
 	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
-		ParkingEvent event;
-		try {
-			// Retrieve the currently active parking event for this subscriber and code
-			event = getOpenParkingEvent(subscriberCode, parkingCode);
-		} catch (SQLException e) {
-			System.err.println("Error retrieving parking event: " + e.getMessage());
-			return new ServerResponse(false, null, "Internal error while locating your parking session.");
-		}
+	    ParkingEvent event;
+	    try {
+	        event = getOpenParkingEvent(subscriberCode, parkingCode);
+	    } catch (SQLException e) {
+	        System.err.println("Error retrieving parking event: " + e.getMessage());
+	        return new ServerResponse(false, null, "Internal error while locating your parking session.");
+	    }
 
-		if (event == null) {
-			// No matching open parking session found
-			return new ServerResponse(false, null, "No active parking session found for this subscriber and code.");
-		}
+	    if (event == null) {
+	        return new ServerResponse(false, null, "No active parking session found for this subscriber and code.");
+	    }
 
-		try {
-			// Close the parking event by updating the exit date and time
-			finalizeParkingEvent(event.getEventId());
+	    try {
+	        // Finalize the event (exit time, free spot, update lot stats)
+	        finalizeParkingEvent(event.getEventId());
 
-			// Calculate parking duration in hours using LocalDateTime
-			LocalDateTime entryDateTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
-			long entryMillis = entryDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-			long nowMillis = System.currentTimeMillis();
-			long hours = (nowMillis - entryMillis) / (1000 * 60 * 60);
+	        // Calculate duration
+	        LocalDateTime entryDateTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+	        long entryMillis = entryDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	        long nowMillis = System.currentTimeMillis();
+	        long hours = (nowMillis - entryMillis) / (1000 * 60 * 60);
 
-			// Determine the result based on parking duration and extension status
-			if (hours <= 4) {
-				return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
-			} else if (hours <= 8 && !event.isWasExtended()) {
-				return new ServerResponse(false, null, "Parking exceeded 4 hours. Please extend before pickup.");
-			} else {
-				// Send notification about the delay
-				sendNotification(event.getSubscriberCode(),
-						"You have exceeded the parking time limit. A delay over 8 hours is registered.");
+	        // Decide response based on time + extension status
+	        if (hours <= 4) {
+	            return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
+	        } else if (hours <= 8 && !event.isWasExtended()) {
+	            return new ServerResponse(false, null, "Parking exceeded 4 hours. Please extend before pickup.");
+	        } else {
+	            sendNotification(event.getSubscriberCode(),
+	                    "You have exceeded the parking time limit. A delay over 8 hours is registered.");
 
-				// Return the response to the client
-				return new ServerResponse(true, null,
-						"Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
-			}
+	            return new ServerResponse(true, null,
+	                    "Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
+	        }
 
-		} catch (SQLException e) {
-			System.err.println("Failed to finalize parking event: " + e.getMessage());
-			return new ServerResponse(false, null, "Internal error while completing the pickup.");
-		}
+	    } catch (SQLException e) {
+	        System.err.println("Failed to finalize parking event: " + e.getMessage());
+	        return new ServerResponse(false, null, "Internal error while completing the pickup.");
+	    }
 	}
 
 	/**

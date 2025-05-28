@@ -63,6 +63,16 @@ public class ParkingEvent implements Serializable {
 	public int getEventId() {
 		return eventId;
 	}
+	
+	/**
+	 * Sets the unique identifier (eventId) for this parking event.
+	 *
+	 * @param eventId the identifier assigned to this event
+	 */
+	public void setEventId(int eventId) {
+		this.eventId = eventId;
+	}
+
 
 	/**
 	 * Returns the subscriber code.
