@@ -107,6 +107,14 @@ public class Order implements Serializable {
 	}
 
 	/**
+	 * set new order number
+	 * @param orderNumber
+	 */
+	public void setOrderNumber(int orderNumber) {
+		this.orderNumber = orderNumber;
+	}
+
+	/**
 	 * Sets a new order date.
 	 *
 	 * @param orderDate the new date of the order.
