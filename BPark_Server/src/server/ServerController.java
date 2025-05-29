@@ -179,5 +179,10 @@ public class ServerController {
 		clientUpdateTimeline.setCycleCount(Timeline.INDEFINITE);
 		clientUpdateTimeline.play();
 	}
+	
+	@FXML
+	public void initialize() {
+		txtPort.setText("5555");
+	}
 
 }

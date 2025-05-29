@@ -76,6 +76,7 @@ public class ServerApp extends Application {
 
         // Link this ServerApp instance to the controller
         controller.setApp(this);
+        
 
         // Create a scene using the loaded layout
         Scene scene = new Scene(root);
