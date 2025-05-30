@@ -31,24 +31,21 @@
 
             <!-- Welcome label -->
             <Label fx:id="welcomeLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Welcome, Subscriber!" />
-
-            <!-- Action buttons -->
-            <Button fx:id="btnViewPersonalInfo" onAction="#handleViewPersonalInfo" text="View Personal Info" />
-
-            <Button fx:id="btnViewParkingHistory" onAction="#handleViewParkingHistory" text="View Parking History" />
-
-            <Button fx:id="btnViewActiveParkingInfo" onAction="#handleViewActiveParkingInfo" text="View Active Parking Info" />
-
-            <Button fx:id="btnExtendParkingTime" onAction="#handleExtendParkingTime" text="Extend Parking Time" />
-
-            <Button fx:id="btnSubmitVehicle" onAction="#handleGoToDelivery" text="Submit Vehicle" />
-
-            <Button fx:id="btnRetrieveVehicle" onAction="#handleRetrieveVehicle" text="Retrieve Vehicle" />
-
-            <Button fx:id="btnParkingReservation" onAction="#handleGoToCreateOrder" text="Parking Reservation" />
-
-            <Button fx:id="btnParkingCodeConfirmation" onAction="#handleParkingCodeConfirmation" text="Parking Code Confirmation" />
         </VBox>
     </center>
+   <left>
+      <VBox prefHeight="453.0" prefWidth="183.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnViewPersonalInfo" mnemonicParsing="false" onAction="#handleViewPersonalInfo" prefHeight="44.0" prefWidth="209.0" text="View Personal Info" />
+            <Button fx:id="btnViewParkingHistory" mnemonicParsing="false" onAction="#handleViewParkingHistory" prefHeight="44.0" prefWidth="209.0" text="View Parking History" />
+            <Button fx:id="btnViewActiveParkingInfo" mnemonicParsing="false" onAction="#handleViewActiveParkingInfo" prefHeight="44.0" prefWidth="209.0" text="View Active Parking Info" />
+            <Button fx:id="btnExtendParkingTime" mnemonicParsing="false" onAction="#handleExtendParkingTime" prefHeight="44.0" prefWidth="209.0" text="Extend Parking Time" />
+            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="209.0" text="Submit Vehicle" />
+            <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
+            <Button fx:id="btnParkingReservation" mnemonicParsing="false" onAction="#handleGoToCreateOrder" prefHeight="44.0" prefWidth="209.0" text="Parking Reservation" />
+            <Button fx:id="btnParkingCodeConfirmation" mnemonicParsing="false" onAction="#handleParkingCodeConfirmation" prefHeight="44.0" prefWidth="209.0" text="Parking Code Confirmation" />
+         </children>
+      </VBox>
+   </left>
 
 </BorderPane>

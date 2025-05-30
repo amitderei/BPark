@@ -71,7 +71,7 @@ public class CreateNewOrderViewController {
 	/**
 	 * start the initialize of the comboboxes and date pickers
 	 */
-	public void initializeComboBoxesAndDatePickers() {
+	public void initializeCombo() {
 		insertSubscriberCode.setText(((Integer)(client.getSubscriber()).getSubscriberCode()).toString());
 		
 		hourCombo.getItems().clear();
