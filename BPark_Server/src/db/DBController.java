@@ -430,60 +430,63 @@ public class DBController {
 
 
 	/**
-	 * Finalizes a parking session for a subscriber by marking exit time and
-	 * evaluating the parking duration. Sends notifications if parking time exceeds limits.
+	 * Handles vehicle pickup for a subscriber by finalizing the parking event,
+	 * calculating the total parking duration, and determining if the pickup is allowed
+	 * based on whether an extension was used.
 	 *
-	 * Logic:
-	 * - Retrieves the open parking event by subscriber code and parking code.
-	 * - Updates exit date/time and frees the parking space.
-	 * - Calculates parking duration.
-	 * - If duration > 8 hours, a delay is recorded and a notification is sent.
+	 * - Allows pickup within 4 hours by default.
+	 * - If an extension was used, allows up to 8 hours.
+	 * - If over 8 hours, notifies the subscriber and registers a delay.
 	 *
-	 * @param subscriberCode the subscriber's unique identifier
-	 * @param parkingCode    the numeric code assigned upon parking
-	 * @return ServerResponse indicating the result (success/failure + message)
+	 * @param subscriberCode the subscriber's ID
+	 * @param parkingCode    the code entered by the subscriber to identify the parking event
+	 * @return ServerResponse indicating the result and a message to be shown to the user
 	 */
 	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
 	    ParkingEvent event;
+
 	    try {
 	        event = getOpenParkingEvent(subscriberCode, parkingCode);
 	    } catch (SQLException e) {
 	        System.err.println("Error retrieving parking event: " + e.getMessage());
-	        return new ServerResponse(false, null, "Internal error while locating your parking session.");
+	        return new ServerResponse(false, null, "An error occurred while retrieving your parking session.");
 	    }
 
 	    if (event == null) {
-	        return new ServerResponse(false, null, "No active parking session found for this subscriber and code.");
+	        return new ServerResponse(false, null, "No active parking session found for the provided information.");
 	    }
 
 	    try {
-	        // Finalize the event (exit time, free spot, update lot stats)
 	        finalizeParkingEvent(event.getEventId());
 
-	        // Calculate duration
-	        LocalDateTime entryDateTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
-	        long entryMillis = entryDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-	        long nowMillis = System.currentTimeMillis();
-	        long hours = (nowMillis - entryMillis) / (1000 * 60 * 60);
+	        // Calculate time difference in hours between entry and now
+	        LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+	        long hours = (System.currentTimeMillis() -
+	                      entryTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+	                     / (1000 * 60 * 60);
 
-	        // Decide response based on time + extension status
-	        if (hours <= 4) {
+	        int allowedHours = event.isWasExtended() ? 8 : 4;
+
+	        if (hours <= allowedHours) {
 	            return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
-	        } else if (hours <= 8 && !event.isWasExtended()) {
-	            return new ServerResponse(false, null, "Parking exceeded 4 hours. Please extend before pickup.");
-	        } else {
-	            sendNotification(event.getSubscriberCode(),
-	                    "You have exceeded the parking time limit. A delay over 8 hours is registered.");
-
-	            return new ServerResponse(true, null,
-	                    "Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
 	        }
+
+	        if (!event.isWasExtended()) {
+	            return new ServerResponse(false, null, "Parking exceeded 4 hours. Please extend your session before pickup.");
+	        }
+
+	        // More than 8 hours even after extension → considered delayed
+	        sendNotification(subscriberCode, "You have exceeded the extended parking limit. A delay over 8 hours was recorded.");
+
+	        return new ServerResponse(true, null,
+	                "Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
 
 	    } catch (SQLException e) {
 	        System.err.println("Failed to finalize parking event: " + e.getMessage());
-	        return new ServerResponse(false, null, "Internal error while completing the pickup.");
+	        return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
 	    }
 	}
+
 
 	/**
 	 * Finalizes a parking event by: - Setting exitDate and exitHour. - Marking the
