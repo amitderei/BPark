@@ -147,7 +147,7 @@ public class VehicleDeliveryController {
 	 * Updates the label accordingly, disables the submit button,
 	 * and proceeds to check if there's an existing reservation.
 	 */
-	public void SubscriberCodeIsValid() {
+	public void subscriberCodeIsValid() {
 		subscriberCodeLabel.setText("Subscriber code is valid!");
 		subscriberCodeLabel.setStyle("-fx-text-fill: green;");
 
@@ -165,7 +165,7 @@ public class VehicleDeliveryController {
 	 * Called when the subscriber code doesn't exist in the database.
 	 * Updates the label to display an error message.
 	 */
-	public void SubscriberCodeDoesntExist() {
+	public void subscriberCodeDoesntExist() {
 		subscriberCodeLabel.setText("Subscriber code does not exist.");
 		subscriberCodeLabel.setStyle("-fx-text-fill: red;");
 	}
@@ -280,7 +280,7 @@ public class VehicleDeliveryController {
 	 * Called when the Confirmation code doesn't exist in the database.
 	 * Updates the label to display an error message.
 	 */
-	public void ConfirmationCodeNotValid() {
+	public void confirmationCodeNotValid() {
 		ReservationConfirmationCodeLabel.setText("Confirmation code not currect.");
 		ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: red;");
 
@@ -293,7 +293,7 @@ public class VehicleDeliveryController {
 	 * Updates the label accordingly, disables the submit button,
 	 * and proceeds to update the delivery inside the database.
 	 */
-	public void ConfirmationCodeIsValid() {
+	public void confirmationCodeIsValid() {
 		ReservationConfirmationCodeLabel.setText("Confirmation code is valid!");
 		ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: green;");
 
@@ -358,7 +358,7 @@ public class VehicleDeliveryController {
 		}
 
 		// Starting the deliver vehicle process after knowing whether there is free space or no
-		DeliverVehicle();
+		deliverVehicle();
 
 	}
 
@@ -398,7 +398,7 @@ public class VehicleDeliveryController {
 	 * 5. Creating a ParkingEvent object with all necessary details.
 	 * 6. Sending the ParkingEvent to the server for insertion.
 	 */
-	public void DeliverVehicle() {
+	public void deliverVehicle() {
 
 		// If there are no free space then we won't allow anyone to park in the parking lot
 		if(!parkingLotStatus) {return;}
@@ -449,7 +449,7 @@ public class VehicleDeliveryController {
 	 * Updates the delivery status label in the UI to indicate a successful delivery.
 	 * The message is displayed in green to visually confirm completion to the user.
 	 */
-	public void SuccessfulDelivery() {
+	public void successfulDelivery() {
 		InsertionUpdateLabel.setText("Completed delivery successfully!");
 		InsertionUpdateLabel.setStyle("-fx-text-fill: green;");
 		InsertionUpdateLabel.setVisible(true);

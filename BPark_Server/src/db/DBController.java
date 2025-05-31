@@ -953,7 +953,7 @@ public class DBController {
 	 *
 	 * @param parkingEvent The ParkingEvent object containing all the event data to be stored.
 	 */
-	public void AddParkingEvent(ParkingEvent parkingEvent) {
+	public void addParkingEvent(ParkingEvent parkingEvent) {
 		String query = "INSERT INTO bpark.parkingevent (subscriberCode, parking_space, entryDate, entryHour, exitDate, exitHour, wasExtended, vehicleId, NameParkingLot, parkingCode) VALUES "
 				+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -981,7 +981,7 @@ public class DBController {
 	/**
 	 * Increments the number of occupied parking spots in the 'parkinglot' table by 1.
 	 */
-	public void AddOccupiedParkingSpace() {
+	public void addOccupiedParkingSpace() {
 	    String query = "UPDATE bpark.parkinglot SET occupiedSpots = occupiedSpots + 1 WHERE NameParkingLot = 'Braude'";
 
 	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -996,7 +996,7 @@ public class DBController {
 	 *
 	 * @param parkingSpace The parking space number to mark as occupied (as a String).
 	 */
-	public void UpdateParkingSpace_occupied(int parkingSpace) {
+	public void updateParkingSpaceOccupied(int parkingSpace) {
 	    String query = "UPDATE bpark.parkingspaces SET is_occupied = 1 WHERE parking_space = ?";
 
 	    try (PreparedStatement stmt = conn.prepareStatement(query)) {

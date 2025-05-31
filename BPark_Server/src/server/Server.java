@@ -270,11 +270,11 @@ public class Server extends AbstractServer {
 					ParkingEvent parkingEvent = (ParkingEvent) data[1];
 
 					// Inserting the parking event into the DB
-					db.AddParkingEvent(parkingEvent);
+					db.addParkingEvent(parkingEvent);
 					// Updating the amount of occupied parking space by +1
-					db.AddOccupiedParkingSpace();
+					db.addOccupiedParkingSpace();
 					// Updating the specific parking space on the 'parkingspaces' table
-					db.UpdateParkingSpace_occupied(parkingEvent.getParkingSpace());
+					db.updateParkingSpaceOccupied(parkingEvent.getParkingSpace());
 
 					// The server sends the successful addition of parking event
 					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));

@@ -258,12 +258,12 @@ public class ClientController extends AbstractClient {
 				System.out.println(">> newDeliveryController connected!");
 				// 1 – handle subscriber code not found
 				if (response.getMsg().toLowerCase().contains("does not")) {
-					newDeliveryController.SubscriberCodeDoesntExist();
+					newDeliveryController.subscriberCodeDoesntExist();
 				}
 
 				// 2 - handle subscriber validation successfully
 				if (response.getMsg().toLowerCase().contains("is valid!")) {
-					newDeliveryController.SubscriberCodeIsValid();
+					newDeliveryController.subscriberCodeIsValid();
 				}
 
 				// 3 - handle subscriber has a reservation
@@ -278,12 +278,12 @@ public class ClientController extends AbstractClient {
 
 				// 5 - handle subscriber entered subscriber code successfully
 				if (response.getMsg().toLowerCase().contains("confirmation code has entered")) {
-					newDeliveryController.ConfirmationCodeIsValid();
+					newDeliveryController.confirmationCodeIsValid();
 				}
 
 				// 6 - handle subscriber entered subscriber code unsuccessfully
 				if (response.getMsg().toLowerCase().contains("confirmation code isn't")) {
-					newDeliveryController.ConfirmationCodeNotValid();
+					newDeliveryController.confirmationCodeNotValid();
 				}
 
 				// 7 - handle no free parking spaces
@@ -312,7 +312,7 @@ public class ClientController extends AbstractClient {
 
 				// 11 - handle successful addition of adding a parking event into the DB
 				if (response.getMsg().toLowerCase().contains("added parking event successfully")) {
-					newDeliveryController.SuccessfulDelivery();
+					newDeliveryController.successfulDelivery();
 				}
 			}
 		});
