@@ -111,6 +111,19 @@ public class Server extends AbstractServer {
                     }
                     return;
                 }
+				
+				// Validate subscriber by numeric code: ["validateSubscriber", subscriberCode]
+                else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
+                    int subscriberCode = (int) data[1];
+
+                    if (!db.subscriberExists(subscriberCode)) {
+                        client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
+                    } else {
+                        client.sendToClient(new ServerResponse(true, null, "Subscriber verified")); 
+                    }
+                    return;
+                }
+
 
 
                 // Collect car: ["collectCar", subscriberCode, parkingCode]
