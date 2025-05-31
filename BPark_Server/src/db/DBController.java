@@ -801,31 +801,6 @@ public class DBController {
 		return null;
 	}
 	
-	
-	/**
-	 * Checks whether a subscriber with the specified code exists in the database.
-	 * Executes a SELECT COUNT(*) query using a prepared statement to safely check
-	 * if the subscriberCode appears in the 'subscriber' table.
-	 *
-	 * @param subscriberCode The unique identifier of the subscriber to check.
-	 * @return true if a subscriber with the given code exists, false otherwise.
-	 */
-	public boolean checkSubscriberCode(int subscriberCode) {
-		String query = "SELECT COUNT(*) FROM subscriber WHERE subscriberCode = ?";
-
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, subscriberCode);
-			ResultSet rs = stmt.executeQuery();
-
-			if (rs.next()) {
-				return rs.getInt(1) > 0; // If the number that has returned is bigger than 0 it means that there's a subscriberCode that is asked
-			}
-		} catch (SQLException e) {
-			System.err.println("Error checking subscriber existence: " + e.getMessage());
-		}
-
-		return false;
-	}
 
 	/**
 	 * Checks whether the given subscriber has a valid reservation at the current date and time.

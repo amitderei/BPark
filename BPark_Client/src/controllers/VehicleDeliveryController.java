@@ -104,10 +104,10 @@ public class VehicleDeliveryController {
 
 			// Prepare the checking if exists command as an object array and send to server
 			try {
-				client.sendToServer(new Object[] { "checkSubscriberCode", codeInt });
+				client.sendToServer(new Object[] { "subscriberExists", codeInt });
 			} catch (IOException e) {
 				// Log the error if the update request fails to send
-				System.err.println("Failed to send 'checkSubscriberCode' request to server: " + e.getMessage());
+				System.err.println("Failed to send 'subscriberExists' request to server: " + e.getMessage());
 			}
 
 			// There will be an exception thrown due to a String not containing only digits.

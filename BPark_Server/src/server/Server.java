@@ -180,12 +180,12 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, "reservation not succeed!"));
 					}
 				}
-				// Expected format: {"checkSubscriberCode", codeInt }
-				else if (data.length == 2 && "checkSubscriberCode".equals(data[0])) {
+				// Expected format: {"subscriberExists", codeInt }
+				else if (data.length == 2 && "subscriberExists".equals(data[0])) {
 					int codeInt = (int) data[1];
 
 					// Checking whether the code exists or not
-					if (!db.checkSubscriberCode(codeInt)) {
+					if (!db.subscriberExists(codeInt)) {
 						// If the code doesn't exist we will let the user to know
 						client.sendToClient(new ServerResponse(false, null, "Subscriber code does not exist."));
 						return;
