@@ -33,11 +33,19 @@ public class MainLayoutController {
 	@FXML
 	private Button btnParkingCodeConfirmation;
 	
+	
+	
 	@FXML
 	private AnchorPane center;
 	
 	private ClientController client;
 
+	
+	private String subscriberName;
+
+	public void setSubscriberName(String name) {
+	    this.subscriberName = name;
+	}
 	
 	/** “Home” button – already on home, so nothing to do. */
 	@FXML
@@ -98,7 +106,13 @@ public class MainLayoutController {
 	
 	public void loadScreen(String fxml) {
 		try {
-			Parent content= FXMLLoader.load(getClass().getResource(fxml));
+			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
+			Parent content=loader.load();
+			
+			Object ctrl=loader.getController();
+			if(ctrl instanceof SubscriberMainController controller) {
+				controller.setSubscriberName(subscriberName);
+			}
 			center.getChildren().clear();
 			center.getChildren().add(content);
 		}catch(Exception e) {
