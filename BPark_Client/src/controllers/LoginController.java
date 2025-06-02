@@ -18,10 +18,7 @@ import ui.UiUtils;
  */
 public class LoginController implements ClientAware {
 
-	/*
-	 * ------------------------------------------------------------------ FXML
-	 * controls ------------------------------------------------------------------
-	 */
+
 	@FXML
 	private TextField username;
 	@FXML
@@ -33,10 +30,7 @@ public class LoginController implements ClientAware {
 	@FXML
 	private Button backButton;
 
-	/*
-	 * ------------------------------------------------------------------ Runtime
-	 * ------------------------------------------------------------------
-	 */
+
 	private ClientController client;
 
 	/** Injects the active client and registers callback for login result. */
@@ -46,10 +40,7 @@ public class LoginController implements ClientAware {
 		client.setLoginController(this);
 	}
 
-	/*
-	 * ------------------------------------------------------------------ Login flow
-	 * ------------------------------------------------------------------
-	 */
+
 
 	/** Triggered when the user clicks “Login”. */
 	@FXML
@@ -81,10 +72,7 @@ public class LoginController implements ClientAware {
 		System.err.println("[DEBUG] Login failed: " + msg);
 	}
 
-	/*
-	 * ------------------------------------------------------------------ Navigation
-	 * helpers ------------------------------------------------------------------
-	 */
+
 
 	/**
 	 * Loads the appropriate main screen according to the user's role, injecting
@@ -96,7 +84,7 @@ public class LoginController implements ClientAware {
 
 		switch (role) {
 		case Subscriber:
-			fxml = "/client/SubscriberMainScreen.fxml";
+			fxml = "/client/SubscriberMainLayout.fxml";
 			client.subscriberDetails(user);
 			break;
 		case Attendant, Manager:
@@ -113,9 +101,9 @@ public class LoginController implements ClientAware {
 			Parent root = loader.load();
 			Object ctrl = loader.getController();
 
-			// Inject client
-			if (ctrl instanceof ClientAware aware) {
-				aware.setClient(client);
+			if(ctrl instanceof MainLayoutController) {
+				((MainLayoutController)ctrl).setClient(client);
+				((MainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
 			}
 			// Extra data per role
 			if (ctrl instanceof StaffMainController staff) {
@@ -143,6 +131,6 @@ public class LoginController implements ClientAware {
 	 */
 	@FXML
 	private void handleBack() {
-		UiUtils.loadScreen(backButton, "/client/MainScreen.fxml", "BPARK – Welcome", client);
+		UiUtils.loadScreen(backButton, "/client/MainLayout.fxml", "BPARK – Welcome", client);
 	}
 }

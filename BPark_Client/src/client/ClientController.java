@@ -29,11 +29,7 @@ import java.util.ArrayList;
  */
 public class ClientController extends AbstractClient {
 
-	/*
-	 * ------------------------------------------------------------------ UI
-	 * Controllers (injected after screen load)
-	 * ------------------------------------------------------------------
-	 */
+
 
 	/** Controller for displaying order data */
 	private OrderViewController controller;
@@ -54,11 +50,7 @@ public class ClientController extends AbstractClient {
 
 	private Subscriber subscriber;
 
-	/*
-	 * ------------------------------------------------------------------
-	 * Constructor
-	 * ------------------------------------------------------------------
-	 */
+
 
 	/**
 	 * Constructs a new ClientController instance.
@@ -70,10 +62,7 @@ public class ClientController extends AbstractClient {
 		super(host, port);
 	}
 
-	/*
-	 * ------------------------------------------------------------------ Setters /
-	 * Getters ------------------------------------------------------------------
-	 */
+
 
 	/**
 	 * Sets the OrderViewController used to update order data on screen.
@@ -138,11 +127,6 @@ public class ClientController extends AbstractClient {
 		return subscriber;
 	}
 
-	/*
-	 * ------------------------------------------------------------------ Server
-	 * Response Handling
-	 * ------------------------------------------------------------------
-	 */
 
 	/**
 	 * Processes messages received from the server. Handles login results, order
@@ -185,9 +169,7 @@ public class ClientController extends AbstractClient {
 				return;
 			}
 
-			// ------------------------------
-			// Order view controller feedback
-			// ------------------------------
+
 
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()
 					&& dataList.get(0) instanceof Order) {
@@ -206,9 +188,6 @@ public class ClientController extends AbstractClient {
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
 			}
 
-            // ------------------------------
-            // Handle vehicle pickup responses
-            // ------------------------------
             if (pickupController != null) {
                 UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
@@ -318,11 +297,7 @@ public class ClientController extends AbstractClient {
 		});
 	}
 
-	/*
-	 * ------------------------------------------------------------------
-	 * Order-related requests
-	 * ------------------------------------------------------------------
-	 */
+
 
 	/**
 	 * add new order to order table
@@ -385,11 +360,7 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	/*
-	 * ------------------------------------------------------------------ Login /
-	 * Subscriber flow
-	 * ------------------------------------------------------------------
-	 */
+
 
 	/**
 	 * Sends a login request to the server.
