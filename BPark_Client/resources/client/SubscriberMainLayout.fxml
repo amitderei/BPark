@@ -30,7 +30,7 @@
             <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="200.0" text="Submit Vehicle" />
             <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
             <Button fx:id="btnParkingReservation" mnemonicParsing="false" onAction="#handleGoToCreateOrder" prefHeight="44.0" prefWidth="209.0" text="Parking Reservation" />
-            <Button fx:id="btnParkingCodeConfirmation" mnemonicParsing="false" onAction="#handleParkingCodeConfirmation" prefHeight="44.0" prefWidth="209.0" text="Parking Code Confirmation" />
+            <Button fx:id="btnMyReservations" mnemonicParsing="false" onAction="#handleMyReservations" prefHeight="44.0" prefWidth="209.0" text="My Reservations" />
          </children>
       </VBox>
    </left>

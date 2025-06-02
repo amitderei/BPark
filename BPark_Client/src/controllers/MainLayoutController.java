@@ -34,7 +34,7 @@ public class MainLayoutController {
 	@FXML
 	private Button btnParkingReservation;
 	@FXML
-	private Button btnParkingCodeConfirmation;
+	private Button btnMyReservations;
 	
 	
 	
@@ -105,8 +105,8 @@ public class MainLayoutController {
 	}
 
 	@FXML
-	private void handleParkingCodeConfirmation() {
-		System.out.println("Confirming parking code…");
+	private void handleMyReservations() {
+		loadScreen("/client/WatchAndCancelOrdersScreen.fxml");
 	}
 	
 	public void loadScreen(String fxml) {
@@ -122,6 +122,11 @@ public class MainLayoutController {
 				client.setNewOrderController(controller); // for act functions
 				controller.setClient(client);
 				controller.initializeCombo();
+			}
+			if(ctrl instanceof WatchAndCancelOrdersController controller) {
+				client.setWatchAndCancelOrdersController(controller);
+				controller.setClient(client);
+				controller.defineTable();
 			}
 			
 			

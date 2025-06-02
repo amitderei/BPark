@@ -14,6 +14,7 @@ import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
+import controllers.WatchAndCancelOrdersController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import ocsf.client.AbstractClient;
@@ -32,23 +33,17 @@ public class ClientController extends AbstractClient {
 
 
 
-	/** Controller for displaying order data */
 	private OrderViewController controller;
-
-	/** Controller for handling login screen flow */
 	private LoginController loginController;
-
-	/** Controller for vehicle pickup screen (subscriber) */
 	private VehiclePickupController pickupController;
-
-	/** Controller for new Guest page */
 	private GuestMainController guestMainController;
-
 	private CreateNewOrderViewController newOrderController;
 	private ParkingReservationSummaryController summaryController;
 	private SubscriberMainController subscriberMainController;
 	private VehicleDeliveryController newDeliveryController;
 	private MainLayoutController mainLayoutController;
+	private WatchAndCancelOrdersController watchAndCancelOrdersController;
+
 
 	private Subscriber subscriber;
 
@@ -80,6 +75,16 @@ public class ClientController extends AbstractClient {
 		return controller;
 	}
 
+	public WatchAndCancelOrdersController getWatchAndCancelOrdersController() {
+		return watchAndCancelOrdersController;
+	}
+
+
+
+	public void setWatchAndCancelOrdersController(WatchAndCancelOrdersController watchAndCancelOrdersController) {
+		this.watchAndCancelOrdersController = watchAndCancelOrdersController;
+	}
+	
 	/**
 	 * Sets the login screen controller.
 	 *
@@ -88,6 +93,8 @@ public class ClientController extends AbstractClient {
 	public void setLoginController(LoginController loginController) {
 		this.loginController = loginController;
 	}
+	
+	
 
 	/**
 	 * Sets the vehicle pickup screen controller.
@@ -177,7 +184,16 @@ public class ClientController extends AbstractClient {
 				return;
 			}
 
-
+			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && response.getMsg().equals("Orders of subscriber displayed successfully.") && dataList.get(0) instanceof Order) {
+				System.out.println("here1");
+				@SuppressWarnings("unchecked")
+				ArrayList<Order> orders= (ArrayList<Order>) dataList;
+				if (watchAndCancelOrdersController!=null) {
+					System.out.println("here2");
+					watchAndCancelOrdersController.displayOrders(orders);
+				}
+				return;
+			}
 
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()
 					&& dataList.get(0) instanceof Order) {
@@ -481,6 +497,18 @@ public class ClientController extends AbstractClient {
 			sendToServer(new Object[] { "subscriberDetails", user });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * send to server the subscriber that connect to client to get all his reservations
+	 */
+	public void askForReservations() {
+		try {
+			sendToServer(new Object[] { "askForReservations", subscriber});
+		}catch (IOException e) {
+			System.err.println("Failed to send 'askForReservations' request: " + e.getMessage());
 		}
 	}
 	

@@ -1038,4 +1038,27 @@ public class DBController {
 
 		return null; // Vehicle ID matching to this subscriber not found
 	}
+	
+	public ArrayList<Order> returnReservationOfSubscriber(Subscriber subscriber){
+		System.out.println("here3");
+		String query="SELECT * FROM `order` WHERE subscriberCode=? AND order_date>CURDATE()+INTERVAL 1 DAY";
+		ArrayList<Order> orders=new ArrayList<>();
+		int subsCode= subscriber.getSubscriberCode();
+		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subsCode);
+			try(ResultSet rs = stmt.executeQuery()){
+				while(rs.next()) {
+					Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
+							rs.getDate("order_date"), rs.getTime("arrival_time"), rs.getString("confirmation_code"),
+							rs.getInt("subscriberCode"), rs.getDate("date_of_placing_an_order"));
+					orders.add(newOrder);
+				}
+				return orders;
+			}
+		}catch (SQLException e) {
+			System.err.println("Error finding reservations: " + e.getMessage());
+		}
+		return null;
+	}
+
 }
