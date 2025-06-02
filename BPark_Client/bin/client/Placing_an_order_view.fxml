@@ -8,26 +8,15 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CreateNewOrderViewController">
-   <top>
-      <ToolBar>
-         <items>
-            <Button fx:id="btnHome" text="🏠 Home" />
-            <Pane HBox.hgrow="ALWAYS" />
-            <Button fx:id="btnLogout" text="🔓 Logout" />
-         </items>
-      </ToolBar>
-   </top>
+<BorderPane prefHeight="453.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CreateNewOrderViewController">
+   
    <center>
       <VBox alignment="CENTER" spacing="15">
          <padding>
@@ -88,18 +77,5 @@
          </children>
       </VBox>
    </center>
-   <left>
-      <VBox prefHeight="453.0" prefWidth="183.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
-         <children>
-            <Button fx:id="btnViewPersonalInfo" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="View Personal Info" />
-            <Button fx:id="btnViewParkingHistory" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="View Parking History" />
-            <Button fx:id="btnViewActiveParkingInfo" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="View Active Parking Info" />
-            <Button fx:id="btnExtendParkingTime" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Extend Parking Time" />
-            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Submit Vehicle" />
-            <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
-            <Button fx:id="btnParkingReservation" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Parking Reservation" />
-            <Button fx:id="btnParkingCodeConfirmation" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Parking Code Confirmation" />
-         </children>
-      </VBox>
-   </left>
+   
 </BorderPane>

@@ -113,6 +113,11 @@ public class MainLayoutController {
 			if(ctrl instanceof SubscriberMainController controller) {
 				controller.setSubscriberName(subscriberName);
 			}
+			if(ctrl instanceof CreateNewOrderViewController controller) {
+				client.setNewOrderController(controller); // for act functions
+				controller.setClient(client);
+				controller.initializeCombo();
+			}
 			center.getChildren().clear();
 			center.getChildren().add(content);
 		}catch(Exception e) {
@@ -122,19 +127,8 @@ public class MainLayoutController {
 
 	public void handleGoToCreateOrder() {
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Placing_an_order_view.fxml")); // load the Placing_an_order_view.fxml after search on resources
-			Parent root = loader.load();
-
-			CreateNewOrderViewController controller = loader.getController(); // after loading the fxml- get the controller
-			controller.setClient(client);// move the client to the new controller
-			client.setNewOrderController(controller); // for act functions
+			loadScreen("/client/Placing_an_order_view.fxml"); // load the Placing_an_order_view.fxml after search on resources
 			
-			controller.initializeCombo();
-
-			Stage stage = (Stage) btnParkingReservation.getScene().getWindow(); // get the stage
-			Scene scene = new Scene(root); // create new scene
-			stage.setScene(scene);
-			stage.show();
 		} catch (Exception e) {
 			System.out.println("Error:" + e.getMessage());
 			  e.printStackTrace();
