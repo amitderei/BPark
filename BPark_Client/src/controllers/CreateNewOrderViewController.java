@@ -63,6 +63,8 @@ public class CreateNewOrderViewController {
 
 	@FXML
 	private Button reserveNowButton; // update button
+	
+	private MainLayoutController mainLayoutController; 
 
 	private ClientController client;
 	
@@ -290,28 +292,16 @@ public class CreateNewOrderViewController {
 	
 	private void handleGoToOrderSummarry(Order order) {
 	    try {
-	    	System.out.println("move to new page");
-	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ReservationSummary.fxml")); //load the Placing_an_order_view.fxml after search on resources
-	        Parent root = loader.load();
-
-	        
-	        ParkingReservationSummaryController controller = loader.getController(); //after loading the fxml- get the controller
-	        controller.setClient(client);// move the client to the new controller
-	        client.setSummaryController(controller); //for act functions
-	        
-	        controller.setLabels(order);
-	        
-	        Stage stage = (Stage) reserveNowButton.getScene().getWindow(); //get the stage
-	        Scene scene = new Scene(root); //create new scene
-	        stage.setScene(scene);
-	        stage.show();
+	    	mainLayoutController=client.getMainLayoutController();
+	    	mainLayoutController.loadScreen("/client/ReservationSummary.fxml", order);
+	    	
 	    } catch (Exception e) {
 	        System.out.println("Error:"+ e.getMessage());
 	    }
 	}
 	
+	
 	public void setOrderAndGoToNextPage(Order order) {
-		System.out.println("setOrderAndGoToNextPage");
 		this.newOrder=order;
 		handleGoToOrderSummarry(newOrder);
 	}

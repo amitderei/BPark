@@ -1,6 +1,9 @@
 package controllers;
 
+import java.io.IOException;
+
 import client.ClientController;
+import common.Order;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -47,10 +50,12 @@ public class MainLayoutController {
 	    this.subscriberName = name;
 	}
 	
-	/** “Home” button – already on home, so nothing to do. */
+	/**
+	 * load the home page in the center
+	 */
 	@FXML
 	private void handleHomeClick() {
-		System.out.println("Home button clicked (already on home screen).");
+		loadScreen("/client/SubscriberMainScreen.fxml");
 	}
 
 	/** Logs out and returns to the entry screen. */
@@ -118,11 +123,34 @@ public class MainLayoutController {
 				controller.setClient(client);
 				controller.initializeCombo();
 			}
+			
+			
 			center.getChildren().clear();
 			center.getChildren().add(content);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void loadScreen(String fxml, Order order) {
+		try {
+			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
+			Parent content=loader.load();
+			Object ctrl=loader.getController();
+			
+			if (ctrl instanceof ParkingReservationSummaryController controller) {
+				client.setSummaryController(controller);
+				controller.setClient(client);
+				controller.setLabels(order);
+			}
+			
+			center.getChildren().clear();
+			center.getChildren().add(content);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	public void handleGoToCreateOrder() {

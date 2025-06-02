@@ -8,6 +8,7 @@ import common.UserRole;
 import controllers.CreateNewOrderViewController;
 import controllers.GuestMainController;
 import controllers.LoginController;
+import controllers.MainLayoutController;
 import controllers.OrderViewController;
 import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
@@ -47,6 +48,7 @@ public class ClientController extends AbstractClient {
 	private ParkingReservationSummaryController summaryController;
 	private SubscriberMainController subscriberMainController;
 	private VehicleDeliveryController newDeliveryController;
+	private MainLayoutController mainLayoutController;
 
 	private Subscriber subscriber;
 
@@ -109,6 +111,15 @@ public class ClientController extends AbstractClient {
 		this.newOrderController = controller;
 	}
 
+	public void setMainLayoutController(MainLayoutController controller) {
+		this.mainLayoutController = controller;
+
+	}
+	
+	public MainLayoutController getMainLayoutController() {
+		return mainLayoutController;
+	}
+	
 	public void setSummaryController(ParkingReservationSummaryController controller) {
 		this.summaryController = controller;
 
@@ -154,9 +165,6 @@ public class ClientController extends AbstractClient {
 		}
 
 		Platform.runLater(() -> {
-			// ------------------------------
-			// Login results (success or fail)
-			// ------------------------------
 
 			if (response.isSucceed() && response.getData() instanceof User user) {
 				if (loginController != null) {
@@ -225,6 +233,7 @@ public class ClientController extends AbstractClient {
 			if (response.isSucceed() && response.getData() instanceof Order) {
 				if (newOrderController != null) {
 					newOrderController.setOrderAndGoToNextPage((Order) response.getData());
+					
 				}
 			}
 

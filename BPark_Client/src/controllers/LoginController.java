@@ -102,6 +102,7 @@ public class LoginController implements ClientAware {
 			Object ctrl = loader.getController();
 
 			if(ctrl instanceof MainLayoutController) {
+				client.setMainLayoutController((MainLayoutController)ctrl);
 				((MainLayoutController)ctrl).setClient(client);
 				((MainLayoutController)ctrl).setSubscriberName(username.getText().trim());
 				((MainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");

@@ -63,10 +63,21 @@ public class ParkingReservationSummaryController {
 	@FXML
 	private Label support;
 	
-	@FXML
-	private Button backToHome;
+
 	
 	private ClientController client;
+	
+	private Order order;
+
+	public Order getOrder() {
+		return order;
+	}
+
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+
 
 	/**
 	 * set client
@@ -88,25 +99,6 @@ public class ParkingReservationSummaryController {
 		parkingSpaceOfOrder.setText(((Integer)order.getParkingSpace()).toString());
 	}
 	
-	public void handleGoToMainScreen() {
-	    try {
-	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/SubscriberMainScreen.fxml")); //load the Placing_an_order_view.fxml after search on resources
-	        Parent root = loader.load();
-
-	        
-	        SubscriberMainController controller = loader.getController(); //after loading the fxml- get the controller
-	        controller.setClient(client);// move the client to the new controller
-	        client.setSubscriberMainController(controller); //for act functions
-	        
-
-	        
-	        Stage stage = (Stage) backToHome.getScene().getWindow(); //get the stage
-	        Scene scene = new Scene(root); //create new scene
-	        stage.setScene(scene);
-	        stage.show();
-	    } catch (Exception e) {
-	        System.out.println("Error:"+ e.getMessage());
-	    }
-	}
+	
 	
 }
