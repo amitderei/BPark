@@ -68,7 +68,7 @@ public class MainLayoutController {
 
 	@FXML
 	private void handleViewPersonalInfo() {
-		System.out.println("Viewing personal info…");
+		loadScreen("/client/ViewSubscriberDetailsScreen.fxml");
 	}
 
 	@FXML
@@ -131,6 +131,12 @@ public class MainLayoutController {
 				client.setWatchAndCancelOrdersController(controller);
 				controller.setClient(client);
 				controller.defineTable();
+			}
+			if(ctrl instanceof ViewSubscriberDetailsController controller) {
+				client.setViewSubscriberDetailsController(controller);
+				controller.setClient(client);
+				controller.setSubscriberAndPassword();
+				controller.setLabels();
 			}
 			
 			

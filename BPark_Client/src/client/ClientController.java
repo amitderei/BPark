@@ -14,6 +14,7 @@ import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
+import controllers.ViewSubscriberDetailsController;
 import controllers.WatchAndCancelOrdersController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -43,9 +44,12 @@ public class ClientController extends AbstractClient {
 	private VehicleDeliveryController newDeliveryController;
 	private MainLayoutController mainLayoutController;
 	private WatchAndCancelOrdersController watchAndCancelOrdersController;
+	private ViewSubscriberDetailsController viewSubscriberDetailsController;
 
 
 	private Subscriber subscriber;
+	
+	private String password;
 
 
 
@@ -68,6 +72,19 @@ public class ClientController extends AbstractClient {
 	 */
 	public void setController(OrderViewController orderViewController) {
 		this.controller = orderViewController;
+	}
+	
+	/**
+	 * set the password in order to reduce I/O
+	 * @param password
+	 */
+	public void setPassword(String password) {
+		this.password=password;
+	}
+	
+	
+	public String getPassword() {
+		return password;
 	}
 
 	/** @return the active order controller */
@@ -94,6 +111,15 @@ public class ClientController extends AbstractClient {
 		this.loginController = loginController;
 	}
 	
+	
+	/**
+	 * Sets the ViewSubscriberDetails screen controller.
+	 *
+	 * @param loginController the login screen controller
+	 */
+	public void setViewSubscriberDetailsController(ViewSubscriberDetailsController viewSubscriberDetailsController) {
+		this.viewSubscriberDetailsController = viewSubscriberDetailsController;
+	}
 	
 
 	/**

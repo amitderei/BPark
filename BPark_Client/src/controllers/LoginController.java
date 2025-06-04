@@ -29,7 +29,8 @@ public class LoginController implements ClientAware {
 	private Label lblError;
 	@FXML
 	private Button backButton;
-
+	
+	private String password;
 
 	private ClientController client;
 
@@ -46,14 +47,14 @@ public class LoginController implements ClientAware {
 	@FXML
 	private void handleLoginClick() {
 		String user = username.getText();
-		String pass = code.getText();
+		password = code.getText();
 
-		if (user.isEmpty() || pass.isEmpty()) {
+		if (user.isEmpty() || password.isEmpty()) {
 			lblError.setText("Please enter both username and password.");
 			return;
 		}
 		try {
-			client.requestLogin(user, pass);
+			client.requestLogin(user, password);
 		} catch (Exception ex) {
 			lblError.setText("Failed to send login request.");
 			ex.printStackTrace();
@@ -106,6 +107,7 @@ public class LoginController implements ClientAware {
 				((MainLayoutController)ctrl).setClient(client);
 				((MainLayoutController)ctrl).setSubscriberName(username.getText().trim());
 				((MainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
+				client.setPassword(password);
 			}
 			// Extra data per role
 			if (ctrl instanceof StaffMainController staff) {
