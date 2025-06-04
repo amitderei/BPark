@@ -4,8 +4,8 @@ import common.Order;
 import common.ServerResponse;
 import common.Subscriber;
 import common.User;
-import common.UserRole;
 import controllers.CreateNewOrderViewController;
+import controllers.EditSubscriberDetailsController;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.MainLayoutController;
@@ -32,8 +32,6 @@ import java.util.ArrayList;
  */
 public class ClientController extends AbstractClient {
 
-
-
 	private OrderViewController controller;
 	private LoginController loginController;
 	private VehiclePickupController pickupController;
@@ -45,13 +43,11 @@ public class ClientController extends AbstractClient {
 	private MainLayoutController mainLayoutController;
 	private WatchAndCancelOrdersController watchAndCancelOrdersController;
 	private ViewSubscriberDetailsController viewSubscriberDetailsController;
-
+	private EditSubscriberDetailsController editSubscriberDetailsController;
 
 	private Subscriber subscriber;
-	
+
 	private String password;
-
-
 
 	/**
 	 * Constructs a new ClientController instance.
@@ -63,8 +59,6 @@ public class ClientController extends AbstractClient {
 		super(host, port);
 	}
 
-
-
 	/**
 	 * Sets the OrderViewController used to update order data on screen.
 	 *
@@ -73,16 +67,16 @@ public class ClientController extends AbstractClient {
 	public void setController(OrderViewController orderViewController) {
 		this.controller = orderViewController;
 	}
-	
+
 	/**
 	 * set the password in order to reduce I/O
+	 * 
 	 * @param password
 	 */
 	public void setPassword(String password) {
-		this.password=password;
+		this.password = password;
 	}
-	
-	
+
 	public String getPassword() {
 		return password;
 	}
@@ -96,12 +90,10 @@ public class ClientController extends AbstractClient {
 		return watchAndCancelOrdersController;
 	}
 
-
-
 	public void setWatchAndCancelOrdersController(WatchAndCancelOrdersController watchAndCancelOrdersController) {
 		this.watchAndCancelOrdersController = watchAndCancelOrdersController;
 	}
-	
+
 	/**
 	 * Sets the login screen controller.
 	 *
@@ -110,8 +102,7 @@ public class ClientController extends AbstractClient {
 	public void setLoginController(LoginController loginController) {
 		this.loginController = loginController;
 	}
-	
-	
+
 	/**
 	 * Sets the ViewSubscriberDetails screen controller.
 	 *
@@ -120,7 +111,6 @@ public class ClientController extends AbstractClient {
 	public void setViewSubscriberDetailsController(ViewSubscriberDetailsController viewSubscriberDetailsController) {
 		this.viewSubscriberDetailsController = viewSubscriberDetailsController;
 	}
-	
 
 	/**
 	 * Sets the vehicle pickup screen controller.
@@ -133,6 +123,12 @@ public class ClientController extends AbstractClient {
 
 	public void setGuestMainController(GuestMainController guestMainController) {
 		this.guestMainController = guestMainController;
+	}
+	
+	
+
+	public void setEditSubscriberDetailsController(EditSubscriberDetailsController editSubscriberDetailsController) {
+		this.editSubscriberDetailsController = editSubscriberDetailsController;
 	}
 
 	/**
@@ -148,16 +144,16 @@ public class ClientController extends AbstractClient {
 		this.mainLayoutController = controller;
 
 	}
-	
+
 	public MainLayoutController getMainLayoutController() {
 		return mainLayoutController;
 	}
-	
+
 	public void setSummaryController(ParkingReservationSummaryController controller) {
 		this.summaryController = controller;
 
 	}
-	
+
 	public void setDeliveryController(VehicleDeliveryController controller) {
 		this.newDeliveryController = controller;
 
@@ -170,7 +166,6 @@ public class ClientController extends AbstractClient {
 	public Subscriber getSubscriber() {
 		return subscriber;
 	}
-
 
 	/**
 	 * Processes messages received from the server. Handles login results, order
@@ -209,23 +204,38 @@ public class ClientController extends AbstractClient {
 				loginController.handleLoginFailure(response.getMsg());
 				return;
 			}
-			
-			//update the table after deleting order
-			else if(response.isSucceed() && response.getMsg().equals("order deleted successfully.")) {
-				if(watchAndCancelOrdersController!=null) {
+
+			// update the table after deleting order
+			else if (response.isSucceed() && response.getMsg().equals("order deleted successfully.")) {
+				if (watchAndCancelOrdersController != null) {
 					askForReservations();
 				}
 			}
-			//display orders of subscriber in table 
-			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && response.getMsg().equals("Orders of subscriber displayed successfully.") && dataList.get(0) instanceof Order) {
+			// display orders of subscriber in table
+			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
+					&& response.getMsg().equals("Orders of subscriber displayed successfully.")
+					&& dataList.get(0) instanceof Order) {
 				@SuppressWarnings("unchecked")
-				ArrayList<Order> orders= (ArrayList<Order>) dataList;
-				if (watchAndCancelOrdersController!=null) {
+				ArrayList<Order> orders = (ArrayList<Order>) dataList;
+				if (watchAndCancelOrdersController != null) {
 					watchAndCancelOrdersController.displayOrders(orders);
 				}
 				return;
 			}
 
+			else if (response.isSucceed() && response.getMsg().equals("Details updated successfully.")) {
+				@SuppressWarnings("unchecked")
+				ArrayList<Object> newDetails=(ArrayList<Object>) response.getData();
+				if(newDetails.get(0) instanceof Subscriber) {
+					setSubscriber((Subscriber)newDetails.get(0));
+					newDetails.remove(0);
+				}
+				if (!newDetails.isEmpty()) {
+					setPassword(((User) newDetails.get(0)).getPassword());
+				}
+				editSubscriberDetailsController.handleGoToView();
+			}
+			
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()
 					&& dataList.get(0) instanceof Order) {
 				@SuppressWarnings("unchecked")
@@ -243,29 +253,29 @@ public class ClientController extends AbstractClient {
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
 			}
 
-            if (pickupController != null) {
-                UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+			if (pickupController != null) {
+				UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
-                if (response.isSucceed()) {
-                    String lowerMsg = response.getMsg().toLowerCase(); // changed from 'msg' to 'lowerMsg'
+				if (response.isSucceed()) {
+					String lowerMsg = response.getMsg().toLowerCase(); // changed from 'msg' to 'lowerMsg'
 
-                    // Handle subscriber validation (by code or by tag)
-                    if (lowerMsg.contains("subscriber verified")) {
-                        if (response.getData() instanceof Integer subscriberCode) {
-                            // Subscriber was validated using tag ID
-                            pickupController.onSubscriberValidated(subscriberCode);
-                        } else {
-                            // Subscriber was validated using numeric code input
-                            pickupController.onSubscriberValidated();
-                        }
-                    }
+					// Handle subscriber validation (by code or by tag)
+					if (lowerMsg.contains("subscriber verified")) {
+						if (response.getData() instanceof Integer subscriberCode) {
+							// Subscriber was validated using tag ID
+							pickupController.onSubscriberValidated(subscriberCode);
+						} else {
+							// Subscriber was validated using numeric code input
+							pickupController.onSubscriberValidated();
+						}
+					}
 
-                    // Handle successful car collection
-                    else if (lowerMsg.contains("pickup successful")) {
-                        pickupController.disableAfterPickup();
-                    }
-                }
-            }
+					// Handle successful car collection
+					else if (lowerMsg.contains("pickup successful")) {
+						pickupController.disableAfterPickup();
+					}
+				}
+			}
 
 			// get response from server and back to GuestMainController with
 			// updateAvailableSpots
@@ -280,7 +290,7 @@ public class ClientController extends AbstractClient {
 			if (response.isSucceed() && response.getData() instanceof Order) {
 				if (newOrderController != null) {
 					newOrderController.setOrderAndGoToNextPage((Order) response.getData());
-					
+
 				}
 			}
 
@@ -353,8 +363,6 @@ public class ClientController extends AbstractClient {
 		});
 	}
 
-
-
 	/**
 	 * add new order to order table
 	 * 
@@ -416,8 +424,6 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-
-
 	/**
 	 * Sends a login request to the server.
 	 *
@@ -444,19 +450,19 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'validateSubscriber' request: " + e.getMessage());
 		}
 	}
-	
-    /**
-     * Validates a subscriber by their RFID tag ID.
-     *
-     * @param tagId the unique tag identifier (e.g., "TAG_001")
-     */
-    public void validateSubscriberByTag(String tagId) {
-        try {
-            sendToServer(new Object[]{"validateSubscriberByTag", tagId});
-        } catch (IOException e) {
-            System.err.println("Failed to send 'validateSubscriberByTag' request: " + e.getMessage());
-        }
-    }
+
+	/**
+	 * Validates a subscriber by their RFID tag ID.
+	 *
+	 * @param tagId the unique tag identifier (e.g., "TAG_001")
+	 */
+	public void validateSubscriberByTag(String tagId) {
+		try {
+			sendToServer(new Object[] { "validateSubscriberByTag", tagId });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'validateSubscriberByTag' request: " + e.getMessage());
+		}
+	}
 
 	/**
 	 * Sends a vehicle pickup request with subscriber code and parking code.
@@ -530,26 +536,43 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
 		}
 	}
-	
-	
+
 	/**
-	 * send to server the subscriber that connect to client to get all his reservations
+	 * send to server the subscriber that connect to client to get all his
+	 * reservations
 	 */
 	public void askForReservations() {
 		try {
-			sendToServer(new Object[] { "askForReservations", subscriber});
-		}catch (IOException e) {
+			sendToServer(new Object[] { "askForReservations", subscriber });
+		} catch (IOException e) {
 			System.err.println("Failed to send 'askForReservations' request: " + e.getMessage());
 		}
 	}
-	
-	
+
+	/**
+	 * the function send to server the command and the order number
+	 * 
+	 * @param orderNumberToDelete (this is the primary key of order)
+	 */
 	public void deleteOrder(int orderNumberToDelete) {
 		try {
-			sendToServer(new Object[] { "deleteOrder", orderNumberToDelete});
-		}catch (IOException e) {
+			sendToServer(new Object[] { "deleteOrder", orderNumberToDelete });
+		} catch (IOException e) {
 			System.err.println("Failed to send 'deleteOrder' request: " + e.getMessage());
 		}
 	}
 	
+	/**
+	 * the function send to server the command, subscriber details and user details
+	 * @param subscriber- the new details of subscriber
+	 * @param user- the new details of user
+	 */
+	public void updateDetailsOfSubscriber(Subscriber subscriber, User user) {
+		try {
+			sendToServer(new Object[] { "updateDetailsOfSubscriber", subscriber, user});
+		} catch (IOException e) {
+			System.err.println("Failed to send 'updateDetailsOfSubscriber' request: " + e.getMessage());
+		}
+	}
+
 }

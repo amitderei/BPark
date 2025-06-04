@@ -12,6 +12,7 @@ public class User implements Serializable {
 
     private String username;     // Unique username used for login
     private UserRole role;       // User role (e.g., Subscriber, Manager, Attendant)
+    private String password;
 
     /**
      * Constructs a new User object.
@@ -22,6 +23,11 @@ public class User implements Serializable {
     public User(String username, UserRole role) {
         this.username = username;
         this.role = role;
+    }
+    
+    public User(String username, String password) {
+    	this.username=username;
+    	this.password=password;
     }
 
     /**
@@ -41,8 +47,17 @@ public class User implements Serializable {
     public UserRole getRole() {
         return role;
     }
-
+    
+    
     /**
+     *  returns password of user.
+     * @return password of user
+     */
+    public String getPassword() {
+		return password;
+	}
+
+	/**
      * String representation of the user for debugging/logging.
      */
     @Override

@@ -161,6 +161,28 @@ public class Server extends AbstractServer {
                     }
                     return;
                 }
+				//update details of subscriber. expected format={command, subscriber\null, user\null}
+                else if (data.length==3 && "updateDetailsOfSubscriber".equals(data[0])) {
+                	boolean isSucceedSubscriber=true;
+                	boolean isSucceedUser=true;
+                	ArrayList<Object> newDetails= new ArrayList<>();
+                	if (data[1]!=null) {
+                		Subscriber subscriber= (Subscriber) data[1];
+                		isSucceedSubscriber=db.changeDetailsOfSubscriber(subscriber);
+                		newDetails.add(subscriber);
+                	}
+                	if(data[2]!=null) {
+                		User user=(User) data[2];
+                		isSucceedUser=db.changeDetailsOfUser(user);
+                		newDetails.add(user);
+                	}
+                	if (isSucceedSubscriber && isSucceedUser) {
+                		 client.sendToClient(new ServerResponse(true, newDetails, "Details updated successfully.")); 
+                	}
+                	else {
+                		client.sendToClient(new ServerResponse(false, null, "The update did not occur due to a problem. Please try again later."));
+                	}
+                }
 
 
 				else if (data.length == 2 && "subscriberDetails".equals(data[0])) {

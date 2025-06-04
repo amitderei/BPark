@@ -67,7 +67,7 @@ public class MainLayoutController {
 	
 
 	@FXML
-	private void handleViewPersonalInfo() {
+	public void handleViewPersonalInfo() {
 		loadScreen("/client/ViewSubscriberDetailsScreen.fxml");
 	}
 
@@ -137,6 +137,12 @@ public class MainLayoutController {
 				controller.setClient(client);
 				controller.setSubscriberAndPassword();
 				controller.setLabels();
+			}
+			if(ctrl instanceof EditSubscriberDetailsController controller) {
+				client.setEditSubscriberDetailsController(controller);
+				controller.setClient(client);
+				controller.setSubscriberAndPassword();
+				controller.setTextOnField();
 			}
 			
 			

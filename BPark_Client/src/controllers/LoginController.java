@@ -18,7 +18,6 @@ import ui.UiUtils;
  */
 public class LoginController implements ClientAware {
 
-
 	@FXML
 	private TextField username;
 	@FXML
@@ -29,7 +28,7 @@ public class LoginController implements ClientAware {
 	private Label lblError;
 	@FXML
 	private Button backButton;
-	
+
 	private String password;
 
 	private ClientController client;
@@ -40,8 +39,6 @@ public class LoginController implements ClientAware {
 		this.client = client;
 		client.setLoginController(this);
 	}
-
-
 
 	/** Triggered when the user clicks “Login”. */
 	@FXML
@@ -73,8 +70,6 @@ public class LoginController implements ClientAware {
 		System.err.println("[DEBUG] Login failed: " + msg);
 	}
 
-
-
 	/**
 	 * Loads the appropriate main screen according to the user's role, injecting
 	 * both ClientController and User where needed.
@@ -95,27 +90,23 @@ public class LoginController implements ClientAware {
 			UiUtils.showAlert("BPARK – Error", "Unknown role: " + role, Alert.AlertType.ERROR);
 			return;
 		}
-		
 
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
 			Parent root = loader.load();
 			Object ctrl = loader.getController();
 
-			if(ctrl instanceof MainLayoutController) {
-				client.setMainLayoutController((MainLayoutController)ctrl);
-				((MainLayoutController)ctrl).setClient(client);
-				((MainLayoutController)ctrl).setSubscriberName(username.getText().trim());
-				((MainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
+			if (ctrl instanceof MainLayoutController) {
+				client.setMainLayoutController((MainLayoutController) ctrl);
+				((MainLayoutController) ctrl).setClient(client);
+				((MainLayoutController) ctrl).setSubscriberName(username.getText().trim());
+				((MainLayoutController) ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
 				client.setPassword(password);
 			}
 			// Extra data per role
 			if (ctrl instanceof StaffMainController staff) {
 				staff.setUser(user);
 			}
-		
-			
-			
 
 			Stage stage = (Stage) submit.getScene().getWindow();
 			stage.setScene(new Scene(root));

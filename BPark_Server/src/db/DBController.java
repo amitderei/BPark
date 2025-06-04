@@ -1073,5 +1073,45 @@ public class DBController {
 			return false;
 		}
 	}
+	
+	/**
+	 * update the password of user
+	 * @param user - for updating details
+	 * @return if the action succeed
+	 */
+	public boolean changeDetailsOfUser(User user) {
+		System.out.println("user");
+		String query="UPDATE user SET password=? WHERE username=?";
+		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, user.getPassword());
+			stmt.setString(2, user.getUsername());
+			int rowsUpdated = stmt.executeUpdate();
+			return rowsUpdated > 0;
+		}catch(SQLException e) {
+			System.err.println("Error update user: " + e.getMessage());
+			return false;
+		}
+	}
+	
+	/**
+	 * update the details of subscriber
+	 * @param subscriber - for updating details 
+	 * @return if the action succeed
+	 */
+	public boolean changeDetailsOfSubscriber(Subscriber subscriber) {
+		String query="UPDATE subscriber SET firstName=?, lastName=?, phoneNumber=?,  email=? WHERE subscriberCode=?";
+		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, subscriber.getFirstName());
+			stmt.setString(2, subscriber.getLastName());
+			stmt.setString(3, subscriber.getPhoneNum());
+			stmt.setString(4, subscriber.getEmail());
+			stmt.setInt(5, subscriber.getSubscriberCode());
+			int rowsUpdated = stmt.executeUpdate();
+			return rowsUpdated > 0;
+		}catch(SQLException e) {
+			System.err.println("Error update subscriber: " + e.getMessage());
+			return false;
+		}
+	}
 
 }

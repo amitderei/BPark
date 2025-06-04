@@ -47,6 +47,6 @@
       <TextField fx:id="passwordEdit" maxWidth="175.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <TextField fx:id="emailEdit" maxWidth="175.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
       <TextField fx:id="phoneNumberEdit" maxWidth="175.0" prefHeight="25.0" prefWidth="175.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-      <Button fx:id="phoneNumberEdit" mnemonicParsing="false" text="Save Changes" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
+      <Button fx:id="saveChangesBtn" mnemonicParsing="false" onAction="#saveChanges" text="Save Changes" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
    </children>
 </GridPane>
