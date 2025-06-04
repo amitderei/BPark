@@ -109,6 +109,10 @@ public class MainLayoutController {
 		loadScreen("/client/WatchAndCancelOrdersScreen.fxml");
 	}
 	
+	/**
+	 * load screen in the center of borderPane
+	 * @param fxml
+	 */
 	public void loadScreen(String fxml) {
 		try {
 			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
@@ -137,6 +141,11 @@ public class MainLayoutController {
 		}
 	}
 	
+	/**
+	 * load the summary screen with order details on the center of borderPane
+	 * @param fxml (String of fxml)
+	 * @param order
+	 */
 	public void loadScreen(String fxml, Order order) {
 		try {
 			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));

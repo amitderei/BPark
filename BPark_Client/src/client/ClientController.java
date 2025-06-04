@@ -184,12 +184,13 @@ public class ClientController extends AbstractClient {
 				return;
 			}
 			
+			//update the table after deleting order
 			else if(response.isSucceed() && response.getMsg().equals("order deleted successfully.")) {
 				if(watchAndCancelOrdersController!=null) {
 					askForReservations();
 				}
 			}
-
+			//display orders of subscriber in table 
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && response.getMsg().equals("Orders of subscriber displayed successfully.") && dataList.get(0) instanceof Order) {
 				@SuppressWarnings("unchecked")
 				ArrayList<Order> orders= (ArrayList<Order>) dataList;
