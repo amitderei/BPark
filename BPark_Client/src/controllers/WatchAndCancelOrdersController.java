@@ -37,19 +37,32 @@ public class WatchAndCancelOrdersController {
 
 	private ClientController client;
 
-	
 	public void defineTable() {
-		System.out.println("here10");
 		orderNumberColumn.setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
 		dateColumn.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
 		timeColumn.setCellValueFactory(new PropertyValueFactory<>("arrivalTime"));
 		confirmationCodeColumn.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
 
 		client.askForReservations();
+		
+		cancelOrderColumn.setCellFactory(column->new TableCell<>(){
+			private Button deleteBtn= new Button("Cancel");
+			{
+				deleteBtn.setOnAction(e->{
+				Order orderToDelete=getTableView().getItems().get(getIndex());
+				int orderNumberToDelete= orderToDelete.getOrderNumber();
+				client.deleteOrder(orderNumberToDelete);
+			});
+			}
+			
+			protected void updateItem(Void item, boolean empty) {
+				super.updateItem(item, empty);
+				setGraphic(empty? null: deleteBtn);
+			}
+		});
 	}
 
 	public void displayOrders(ArrayList<Order> orders) {
-		System.out.println("here");
 		ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
 		reservationTable.setItems(observableList);
 	}
@@ -57,7 +70,5 @@ public class WatchAndCancelOrdersController {
 	public void setClient(ClientController client) {
 		this.client = client;
 	}
-	
-	
 
 }

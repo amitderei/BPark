@@ -92,12 +92,22 @@ public class Server extends AbstractServer {
 				
 				//get all reservations of subscriber
 				else if (data.length==2 && "askForReservations".equals(data[0])){
-					System.out.println("here4");
 					ArrayList<Order> orders=db.returnReservationOfSubscriber((Subscriber)data[1]);
 					if (orders.isEmpty()) {
 						client.sendToClient(new ServerResponse(false, null, "No orders."));
 					} else {
 						client.sendToClient(new ServerResponse(true, orders, "Orders of subscriber displayed successfully."));
+					}
+				}
+				//expected format: {deleteOrder, orderNumber}
+				else if (data.length==2 && "deleteOrder".equals(data[0])) {
+					int orderNumberToDelete=(int) data[1];
+					boolean succeed= db.deleteOrder(orderNumberToDelete);
+					if(succeed) {
+						client.sendToClient(new ServerResponse(true, null, "order deleted successfully."));
+					}
+					else {
+						client.sendToClient(new ServerResponse(false, null, "order didn't delete"));
 					}
 				}
 
@@ -194,7 +204,9 @@ public class Server extends AbstractServer {
 					} else {
 						client.sendToClient(new ServerResponse(false, null, "Can't make resarvation"));
 					}
-				} else if (data.length == 2 && "addNewOrder".equals(data[0])) {
+				}
+				//Expected format: {"addNewOrder", order}
+				else if (data.length == 2 && "addNewOrder".equals(data[0])) {
 					Order orderToAdd = (Order) data[1];
 					boolean success = db.placingAnNewOrder(orderToAdd);
 

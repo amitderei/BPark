@@ -352,34 +352,35 @@ public class DBController {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Retrieves the subscriber code associated with a given tag ID.
-	 * This version performs a case-sensitive match using the BINARY keyword.
+	 * Retrieves the subscriber code associated with a given tag ID. This version
+	 * performs a case-sensitive match using the BINARY keyword.
 	 *
 	 * @param tagId the tag identifier (e.g. "TAG_001")
 	 * @return the subscriberCode if found, or -1 if not found or error
 	 */
 	public int getSubscriberCodeByTag(String tagId) {
-	    String query = "SELECT subscriberCode FROM subscriber WHERE BINARY tagId = ?";
+		String query = "SELECT subscriberCode FROM subscriber WHERE BINARY tagId = ?";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setString(1, tagId);
-	        ResultSet rs = stmt.executeQuery();
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, tagId);
+			ResultSet rs = stmt.executeQuery();
 
-	        if (rs.next()) {
-	            return rs.getInt("subscriberCode");
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error retrieving subscriber by tag: " + e.getMessage());
-	    }
+			if (rs.next()) {
+				return rs.getInt("subscriberCode");
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving subscriber by tag: " + e.getMessage());
+		}
 
-	    return -1; // Not found or error
+		return -1; // Not found or error
 	}
 
 	/**
-	 * Retrieves the latest open parking event for the specified subscriber and parking code.
-	 * An event is considered open if its exitDate is null (i.e., the vehicle has not exited yet).
+	 * Retrieves the latest open parking event for the specified subscriber and
+	 * parking code. An event is considered open if its exitDate is null (i.e., the
+	 * vehicle has not exited yet).
 	 *
 	 * @param subscriberCode the subscriber's unique identifier
 	 * @param parkingCode    the numeric code assigned when the vehicle entered
@@ -387,106 +388,93 @@ public class DBController {
 	 * @throws SQLException if a database access error occurs
 	 */
 	public ParkingEvent getOpenParkingEvent(int subscriberCode, int parkingCode) throws SQLException {
-	    String query = "SELECT * FROM parkingEvent "
-	                 + "WHERE subscriberCode = ? AND parkingCode = ? AND exitDate IS NULL "
-	                 + "ORDER BY eventId DESC LIMIT 1";
+		String query = "SELECT * FROM parkingEvent "
+				+ "WHERE subscriberCode = ? AND parkingCode = ? AND exitDate IS NULL "
+				+ "ORDER BY eventId DESC LIMIT 1";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setInt(1, subscriberCode);
-	        stmt.setInt(2, parkingCode);
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subscriberCode);
+			stmt.setInt(2, parkingCode);
 
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                LocalDate exitDate = rs.getDate("exitDate") != null
-	                                   ? rs.getDate("exitDate").toLocalDate()
-	                                   : null;
-	                LocalTime exitHour = rs.getTime("exitHour") != null
-	                                   ? rs.getTime("exitHour").toLocalTime()
-	                                   : null;
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					LocalDate exitDate = rs.getDate("exitDate") != null ? rs.getDate("exitDate").toLocalDate() : null;
+					LocalTime exitHour = rs.getTime("exitHour") != null ? rs.getTime("exitHour").toLocalTime() : null;
 
-	                ParkingEvent event = new ParkingEvent(
-	                    rs.getInt("subscriberCode"),
-	                    rs.getInt("parking_space"),
-	                    rs.getDate("entryDate").toLocalDate(),
-	                    rs.getTime("entryHour").toLocalTime(),
-	                    exitDate,
-	                    exitHour,
-	                    rs.getBoolean("wasExtended"),
-	                    rs.getString("vehicleId"),
-	                    rs.getString("NameParkingLot"),
-	                    rs.getString("parkingCode")
-	                );
+					ParkingEvent event = new ParkingEvent(rs.getInt("subscriberCode"), rs.getInt("parking_space"),
+							rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime(), exitDate,
+							exitHour, rs.getBoolean("wasExtended"), rs.getString("vehicleId"),
+							rs.getString("NameParkingLot"), rs.getString("parkingCode"));
 
-	                event.setEventId(rs.getInt("eventId")); // Set ID after object construction
-	                return event;
-	            }
-	        }
-	    }
+					event.setEventId(rs.getInt("eventId")); // Set ID after object construction
+					return event;
+				}
+			}
+		}
 
-	    return null;
+		return null;
 	}
-
-
-
 
 	/**
 	 * Handles vehicle pickup for a subscriber by finalizing the parking event,
-	 * calculating the total parking duration, and determining if the pickup is allowed
-	 * based on whether an extension was used.
+	 * calculating the total parking duration, and determining if the pickup is
+	 * allowed based on whether an extension was used.
 	 *
-	 * - Allows pickup within 4 hours by default.
-	 * - If an extension was used, allows up to 8 hours.
-	 * - If over 8 hours, notifies the subscriber and registers a delay.
+	 * - Allows pickup within 4 hours by default. - If an extension was used, allows
+	 * up to 8 hours. - If over 8 hours, notifies the subscriber and registers a
+	 * delay.
 	 *
 	 * @param subscriberCode the subscriber's ID
-	 * @param parkingCode    the code entered by the subscriber to identify the parking event
-	 * @return ServerResponse indicating the result and a message to be shown to the user
+	 * @param parkingCode    the code entered by the subscriber to identify the
+	 *                       parking event
+	 * @return ServerResponse indicating the result and a message to be shown to the
+	 *         user
 	 */
 	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
-	    ParkingEvent event;
+		ParkingEvent event;
 
-	    try {
-	        event = getOpenParkingEvent(subscriberCode, parkingCode);
-	    } catch (SQLException e) {
-	        System.err.println("Error retrieving parking event: " + e.getMessage());
-	        return new ServerResponse(false, null, "An error occurred while retrieving your parking session.");
-	    }
+		try {
+			event = getOpenParkingEvent(subscriberCode, parkingCode);
+		} catch (SQLException e) {
+			System.err.println("Error retrieving parking event: " + e.getMessage());
+			return new ServerResponse(false, null, "An error occurred while retrieving your parking session.");
+		}
 
-	    if (event == null) {
-	        return new ServerResponse(false, null, "No active parking session found for the provided information.");
-	    }
+		if (event == null) {
+			return new ServerResponse(false, null, "No active parking session found for the provided information.");
+		}
 
-	    try {
-	        finalizeParkingEvent(event.getEventId());
+		try {
+			finalizeParkingEvent(event.getEventId());
 
-	        // Calculate time difference in hours between entry and now
-	        LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
-	        long hours = (System.currentTimeMillis() -
-	                      entryTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-	                     / (1000 * 60 * 60);
+			// Calculate time difference in hours between entry and now
+			LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+			long hours = (System.currentTimeMillis()
+					- entryTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) / (1000 * 60 * 60);
 
-	        int allowedHours = event.isWasExtended() ? 8 : 4;
+			int allowedHours = event.isWasExtended() ? 8 : 4;
 
-	        if (hours <= allowedHours) {
-	            return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
-	        }
+			if (hours <= allowedHours) {
+				return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
+			}
 
-	        if (!event.isWasExtended()) {
-	            return new ServerResponse(false, null, "Parking exceeded 4 hours. Please extend your session before pickup.");
-	        }
+			if (!event.isWasExtended()) {
+				return new ServerResponse(false, null,
+						"Parking exceeded 4 hours. Please extend your session before pickup.");
+			}
 
-	        // More than 8 hours even after extension → considered delayed
-	        sendNotification(subscriberCode, "You have exceeded the extended parking limit. A delay over 8 hours was recorded.");
+			// More than 8 hours even after extension → considered delayed
+			sendNotification(subscriberCode,
+					"You have exceeded the extended parking limit. A delay over 8 hours was recorded.");
 
-	        return new ServerResponse(true, null,
-	                "Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
+			return new ServerResponse(true, null,
+					"Pickup successful. Delay over 8 hours registered. A notification was sent to your email and phone.");
 
-	    } catch (SQLException e) {
-	        System.err.println("Failed to finalize parking event: " + e.getMessage());
-	        return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
-	    }
+		} catch (SQLException e) {
+			System.err.println("Failed to finalize parking event: " + e.getMessage());
+			return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
+		}
 	}
-
 
 	/**
 	 * Finalizes a parking event by: - Setting exitDate and exitHour. - Marking the
@@ -803,16 +791,15 @@ public class DBController {
 		}
 		return null;
 	}
-	
 
 	/**
-	 * Checks whether the given subscriber has a valid reservation at the current date and time.
-	 * A reservation is considered valid only if:
-	 * - The reservation date is today.
-	 * - The current time is within 15 minutes after the scheduled arrival time.
+	 * Checks whether the given subscriber has a valid reservation at the current
+	 * date and time. A reservation is considered valid only if: - The reservation
+	 * date is today. - The current time is within 15 minutes after the scheduled
+	 * arrival time.
 	 *
-	 * For example: if a reservation is for 08:00, it is only valid between 08:00 and 08:15.
-	 * After 08:15, entry is no longer allowed.
+	 * For example: if a reservation is for 08:00, it is only valid between 08:00
+	 * and 08:15. After 08:15, entry is no longer allowed.
 	 *
 	 * @param subscriberCode The unique identifier of the subscriber to check.
 	 * @return true if a valid reservation exists now, false otherwise.
@@ -825,10 +812,11 @@ public class DBController {
 			stmt.setInt(1, subscriberCode);
 			ResultSet rs = stmt.executeQuery();
 
-			LocalDate today = LocalDate.now();   // Current date
-			LocalTime now = LocalTime.now();     // Current time
+			LocalDate today = LocalDate.now(); // Current date
+			LocalTime now = LocalTime.now(); // Current time
 
-			// Going over all of the subscriber's reservation to check if there's a reservation in the range
+			// Going over all of the subscriber's reservation to check if there's a
+			// reservation in the range
 			while (rs.next()) {
 				LocalDate orderDate = rs.getDate("order_date").toLocalDate();
 				LocalTime arrivalTime = rs.getTime("arrival_time").toLocalTime();
@@ -852,14 +840,14 @@ public class DBController {
 		return false; // No active reservation found for current time
 	}
 
-
 	/**
-	 * Checks if a subscriber has a valid reservation with a specific confirmation code
-	 * and that the current time is within 15 minutes from the arrival time.
+	 * Checks if a subscriber has a valid reservation with a specific confirmation
+	 * code and that the current time is within 15 minutes from the arrival time.
 	 *
-	 * @param subscriberCode The subscriber code to check
+	 * @param subscriberCode   The subscriber code to check
 	 * @param confirmationCode The confirmation code to verify
-	 * @return true if a valid reservation with the given confirmation code exists and the current time is within the allowed window, false otherwise
+	 * @return true if a valid reservation with the given confirmation code exists
+	 *         and the current time is within the allowed window, false otherwise
 	 */
 	public boolean checkConfirmationCode(int subscriberCode, int confirmationCode) {
 		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ? AND confirmation_code = ?";
@@ -871,10 +859,11 @@ public class DBController {
 			// Execute the query
 			ResultSet rs = stmt.executeQuery();
 
-			LocalDate today = LocalDate.now();   // Current date
-			LocalTime now = LocalTime.now();     // Current time
+			LocalDate today = LocalDate.now(); // Current date
+			LocalTime now = LocalTime.now(); // Current time
 
-			// Going over all of the subscriber's reservation to check if there's a reservation in the range
+			// Going over all of the subscriber's reservation to check if there's a
+			// reservation in the range
 			while (rs.next()) {
 				LocalDate orderDate = rs.getDate("order_date").toLocalDate();
 				LocalTime arrivalTime = rs.getTime("arrival_time").toLocalTime();
@@ -895,15 +884,15 @@ public class DBController {
 			System.err.println("Error while checking confirmation code: " + e.getMessage());
 		}
 
-		return false; // No confirmation code matching has found 
+		return false; // No confirmation code matching has found
 	}
-
 
 	/**
 	 * Checks if there are available parking spots in the specified parking lot.
 	 *
 	 * @param parkingLotName The name of the parking lot to check.
-	 * @return true if there are available spots (occupied < total), false otherwise.
+	 * @return true if there are available spots (occupied < total), false
+	 *         otherwise.
 	 */
 	public boolean hasAvailableSpots(String parkingLotName) {
 		String query = "SELECT totalSpots, occupiedSpots FROM bpark.parkinglot WHERE NameParkingLot = ?";
@@ -917,14 +906,15 @@ public class DBController {
 				int totalSpots = rs.getInt("totalSpots");
 				int occupiedSpots = rs.getInt("occupiedSpots");
 
-				//return true if there are more parking spots that occupied spots, false otherwise				
+				// return true if there are more parking spots that occupied spots, false
+				// otherwise
 				return occupiedSpots < totalSpots;
 			}
 
 		} catch (SQLException e) {
 			System.err.println("Error checking available spots: " + e.getMessage());
 		}
-		
+
 		System.out.println("error");
 		return false; // Return false if parking lot not found or error occurred
 	}
@@ -932,8 +922,8 @@ public class DBController {
 	/**
 	 * Finds the first available parking space that is not currently occupied.
 	 *
-	 * Queries the 'parkingspaces' table for a parking space where 'is_occupied' is false.
-	 * Returns the 'parking_space' value of the first free spot found.
+	 * Queries the 'parkingspaces' table for a parking space where 'is_occupied' is
+	 * false. Returns the 'parking_space' value of the first free spot found.
 	 *
 	 * @return the parking space number if available, if not found then -1.
 	 */
@@ -954,70 +944,72 @@ public class DBController {
 	/**
 	 * Inserts a new parking event into the 'parkingevent' table in the database.
 	 *
-	 * @param parkingEvent The ParkingEvent object containing all the event data to be stored.
+	 * @param parkingEvent The ParkingEvent object containing all the event data to
+	 *                     be stored.
 	 */
 	public void addParkingEvent(ParkingEvent parkingEvent) {
 		String query = "INSERT INTO bpark.parkingevent (subscriberCode, parking_space, entryDate, entryHour, exitDate, exitHour, wasExtended, vehicleId, NameParkingLot, parkingCode) VALUES "
 				+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, parkingEvent.getSubscriberCode());
+			stmt.setInt(2, parkingEvent.getParkingSpace());
+			stmt.setDate(3, Date.valueOf(parkingEvent.getEntryDate()));
+			stmt.setTime(4, Time.valueOf(parkingEvent.getEntryHour()));
+			stmt.setDate(5, parkingEvent.getExitDate() != null ? Date.valueOf(parkingEvent.getExitDate()) : null);
+			stmt.setTime(6, parkingEvent.getExitHour() != null ? Time.valueOf(parkingEvent.getExitHour()) : null);
+			stmt.setBoolean(7, parkingEvent.isWasExtended());
+			stmt.setString(8, parkingEvent.getVehicleId());
+			stmt.setString(9, parkingEvent.getLot());
+			stmt.setString(10, parkingEvent.getParkingCode());
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setInt(1, parkingEvent.getSubscriberCode());
-	        stmt.setInt(2, parkingEvent.getParkingSpace());
-	        stmt.setDate(3, Date.valueOf(parkingEvent.getEntryDate()));
-	        stmt.setTime(4, Time.valueOf(parkingEvent.getEntryHour()));
-	        stmt.setDate(5, parkingEvent.getExitDate() != null ? Date.valueOf(parkingEvent.getExitDate()) : null);
-	        stmt.setTime(6, parkingEvent.getExitHour() != null ? Time.valueOf(parkingEvent.getExitHour()) : null);
-	        stmt.setBoolean(7, parkingEvent.isWasExtended());
-	        stmt.setString(8, parkingEvent.getVehicleId());
-	        stmt.setString(9, parkingEvent.getLot());
-	        stmt.setString(10, parkingEvent.getParkingCode());
+			stmt.executeUpdate();
 
-	        stmt.executeUpdate();
-	        
-	        System.out.println(">> INSERTING PARKING EVENT FOR: " + parkingEvent.getSubscriberCode());
-	    } catch (SQLException e) {
-	        System.err.println("Error inserting parking event: " + e.getMessage());
-	    }
+			System.out.println(">> INSERTING PARKING EVENT FOR: " + parkingEvent.getSubscriberCode());
+		} catch (SQLException e) {
+			System.err.println("Error inserting parking event: " + e.getMessage());
+		}
 	}
 
 	/**
-	 * Increments the number of occupied parking spots in the 'parkinglot' table by 1.
+	 * Increments the number of occupied parking spots in the 'parkinglot' table by
+	 * 1.
 	 */
 	public void addOccupiedParkingSpace() {
-	    String query = "UPDATE bpark.parkinglot SET occupiedSpots = occupiedSpots + 1 WHERE NameParkingLot = 'Braude'";
+		String query = "UPDATE bpark.parkinglot SET occupiedSpots = occupiedSpots + 1 WHERE NameParkingLot = 'Braude'";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.executeUpdate();
-	    } catch (SQLException e) {
-	        System.err.println("Error updating occupied parking spots: " + e.getMessage());
-	    }
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("Error updating occupied parking spots: " + e.getMessage());
+		}
 	}
 
 	/**
-	 * Updates the specified parking space to be marked as occupied in the 'parkingspaces' table.
+	 * Updates the specified parking space to be marked as occupied in the
+	 * 'parkingspaces' table.
 	 *
-	 * @param parkingSpace The parking space number to mark as occupied (as a String).
+	 * @param parkingSpace The parking space number to mark as occupied (as a
+	 *                     String).
 	 */
 	public void updateParkingSpaceOccupied(int parkingSpace) {
-	    String query = "UPDATE bpark.parkingspaces SET is_occupied = 1 WHERE parking_space = ?";
+		String query = "UPDATE bpark.parkingspaces SET is_occupied = 1 WHERE parking_space = ?";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setInt(1, parkingSpace);  // Parse String to int
-	        stmt.executeUpdate();
-	    } catch (SQLException e) {
-	        System.err.println("Error updating parking space occupancy: " + e.getMessage());
-	    } catch (NumberFormatException e) {
-	        System.err.println("Invalid parking space format: " + parkingSpace);
-	    }
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, parkingSpace); // Parse String to int
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("Error updating parking space occupancy: " + e.getMessage());
+		} catch (NumberFormatException e) {
+			System.err.println("Invalid parking space format: " + parkingSpace);
+		}
 	}
-
 
 	/**
 	 * Finds the vehicle ID associated with the given subscriber code.
-
-	 * Executes a query on the 'vehicle' table to retrieve the vehicleId
-	 * for the specified subscriberCode.
+	 * 
+	 * Executes a query on the 'vehicle' table to retrieve the vehicleId for the
+	 * specified subscriberCode.
 	 *
 	 * @param subscriberCode the unique code of the subscriber.
 	 * @return the vehicle ID if found, otherwise -1.
@@ -1038,16 +1030,20 @@ public class DBController {
 
 		return null; // Vehicle ID matching to this subscriber not found
 	}
-	
-	public ArrayList<Order> returnReservationOfSubscriber(Subscriber subscriber){
-		System.out.println("here3");
-		String query="SELECT * FROM `order` WHERE subscriberCode=? AND order_date>CURDATE()+INTERVAL 1 DAY";
-		ArrayList<Order> orders=new ArrayList<>();
-		int subsCode= subscriber.getSubscriberCode();
-		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+
+	/**
+	 * the function get all the reservations of subscriber and return them.
+	 * @param subscriber
+	 * @return arrayList of subscriber's reservations
+	 */
+	public ArrayList<Order> returnReservationOfSubscriber(Subscriber subscriber) {
+		String query = "SELECT * FROM `order` WHERE subscriberCode=? AND order_date>CURDATE()+INTERVAL 1 DAY";
+		ArrayList<Order> orders = new ArrayList<>();
+		int subsCode = subscriber.getSubscriberCode();
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subsCode);
-			try(ResultSet rs = stmt.executeQuery()){
-				while(rs.next()) {
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
 					Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
 							rs.getDate("order_date"), rs.getTime("arrival_time"), rs.getString("confirmation_code"),
 							rs.getInt("subscriberCode"), rs.getDate("date_of_placing_an_order"));
@@ -1055,10 +1051,27 @@ public class DBController {
 				}
 				return orders;
 			}
-		}catch (SQLException e) {
+		} catch (SQLException e) {
 			System.err.println("Error finding reservations: " + e.getMessage());
 		}
 		return null;
+	}
+
+	/**
+	 * delete the order from SQL
+	 * @param orderNumber
+	 * @return true if succeed, else- false
+	 */
+	public boolean deleteOrder(int orderNumber) {
+		String query="DELETE FROM `order` WHERE order_number=?";
+		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, orderNumber);
+			int ifDelete = stmt.executeUpdate(); 
+			return (ifDelete > 0);
+		} catch (SQLException e) {
+			System.err.println("Error delete order: " + e.getMessage());
+			return false;
+		}
 	}
 
 }

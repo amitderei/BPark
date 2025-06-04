@@ -183,13 +183,17 @@ public class ClientController extends AbstractClient {
 				loginController.handleLoginFailure(response.getMsg());
 				return;
 			}
+			
+			else if(response.isSucceed() && response.getMsg().equals("order deleted successfully.")) {
+				if(watchAndCancelOrdersController!=null) {
+					askForReservations();
+				}
+			}
 
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && response.getMsg().equals("Orders of subscriber displayed successfully.") && dataList.get(0) instanceof Order) {
-				System.out.println("here1");
 				@SuppressWarnings("unchecked")
 				ArrayList<Order> orders= (ArrayList<Order>) dataList;
 				if (watchAndCancelOrdersController!=null) {
-					System.out.println("here2");
 					watchAndCancelOrdersController.displayOrders(orders);
 				}
 				return;
@@ -509,6 +513,15 @@ public class ClientController extends AbstractClient {
 			sendToServer(new Object[] { "askForReservations", subscriber});
 		}catch (IOException e) {
 			System.err.println("Failed to send 'askForReservations' request: " + e.getMessage());
+		}
+	}
+	
+	
+	public void deleteOrder(int orderNumberToDelete) {
+		try {
+			sendToServer(new Object[] { "deleteOrder", orderNumberToDelete});
+		}catch (IOException e) {
+			System.err.println("Failed to send 'deleteOrder' request: " + e.getMessage());
 		}
 	}
 	

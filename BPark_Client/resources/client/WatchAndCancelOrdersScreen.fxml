@@ -40,7 +40,7 @@
                   <TableColumn fx:id="dateColumn" prefWidth="99.0" text="Order date" />
                   <TableColumn fx:id="timeColumn" minWidth="0.0" prefWidth="99.0" text="Order time" />
                   <TableColumn fx:id="confirmationCodeColumn" prefWidth="138.0" text="Confirmation code" />
-                  <TableColumn prefWidth="124.0" text="Cancel Order" />
+                  <TableColumn fx:id="cancelOrderColumn" prefWidth="124.0" text="Cancel Order" />
                </columns>
             </TableView>
          </children>
