@@ -1,6 +1,7 @@
 package controllers;
 
 import client.ClientController;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,67 +16,68 @@ import ui.UiUtils;
  */
 public class MainController implements ClientAware {
 
-    /* ------------------------------------------------------------------
-     *  FXML-injected controls
-     * ------------------------------------------------------------------ */
-    @FXML private Button guestBtn;   // “Enter as Guest”
-    @FXML private Button loginBtn;   // “Login”
+	/* ------------------------------------------------------------------
+	 *  FXML-injected controls
+	 * ------------------------------------------------------------------ */
+	@FXML private Button guestBtn;   // “Enter as Guest”
+	@FXML private Button loginBtn;   // “Login”
+	@FXML private Button btnExit;
+	@FXML private Button btnBack;
+	/* ------------------------------------------------------------------
+	 *  Runtime
+	 * ------------------------------------------------------------------ */
+	private ClientController client;
 
-    /* ------------------------------------------------------------------
-     *  Runtime
-     * ------------------------------------------------------------------ */
-    private ClientController client;
+	/** Injects the active client. */
+	@Override
+	public void setClient(ClientController client) {
+		this.client = client;
+	}
 
-    /** Injects the active client. */
-    @Override
-    public void setClient(ClientController client) {
-        this.client = client;
-    }
+	/* ------------------------------------------------------------------
+	 *  Button handlers
+	 * ------------------------------------------------------------------ */
 
-    /* ------------------------------------------------------------------
-     *  Button handlers
-     * ------------------------------------------------------------------ */
+	/** Opens the guest interface. */
+	@FXML
+	public void handleGuest() {
+		UiUtils.loadScreen(guestBtn,
+				"/client/GuestMainScreen.fxml",
+				"BPARK – Guest",
+				client);               // client may be null for guest flow
+	}
 
-    /** Opens the guest interface. */
-    @FXML
-    public void handleGuest() {
-        UiUtils.loadScreen(guestBtn,
-                           "/client/GuestMainScreen.fxml",
-                           "BPARK – Guest",
-                           client);               // client may be null for guest flow
-    }
+	/** Opens the login screen. */
+	@FXML
+	public void handleLogin() {
+		UiUtils.loadScreen(loginBtn,
+				"/client/LoginScreen.fxml",
+				"BPARK – Login",
+				client);
+	}
 
-    /** Opens the login screen. */
-    @FXML
-    public void handleLogin() {
-        UiUtils.loadScreen(loginBtn,
-                           "/client/LoginScreen.fxml",
-                           "BPARK – Login",
-                           client);
-    }
-    
-    
-    //this is good- need to improve UiUtilis
-    public void handleGoToBack() {
-	    try {
-	    	
-	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/GuestMainScreen.fxml")); //load the Placing_an_order_view.fxml after search on resources
-	        Parent root = loader.load();
+	@FXML
+	private void handleExitClick() {
 
-	        
-	        GuestMainController controller = loader.getController(); //after loading the fxml- get the controller
-	        controller.setClient(client);// move the client to the new controller
-	        client.setGuestController(controller); //for act functions
-	        
-	        
-	        Stage stage = (Stage) guestBtn.getScene().getWindow(); //get the stage
-	        Scene scene = new Scene(root); //create new scene
-	        
-	        stage.setScene(scene);
-	        stage.show();
-	    } catch(Exception e) {
-	    	System.out.println("Error!"+e.getMessage());
-	    }
+		try {
+			if (client != null && client.isConnected()) {
+				client.sendToServer(new Object[] { "disconnect" });
+				client.closeConnection();
+				System.out.println("Client disconnected successfully.");
+			}
+		} catch (Exception e) {
+			System.err.println("Failed to disconnect client: " + e.getMessage());
+		}
+		Platform.exit();
+		System.exit(0);
+	}
+
+	@FXML
+	private void handleBackClick() {
+		UiUtils.loadScreen(btnBack,
+				"/client/SelectionScreen.fxml",
+				"Select User Type",
+				client); 
 	}
 }
 
