@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  * Main entry point for launching the BPARK server application.
@@ -76,6 +77,9 @@ public class ServerApp extends Application {
 
         // Link this ServerApp instance to the controller
         controller.setApp(this);
+        
+	    //remove the top lane of app
+	    primaryStage.initStyle(StageStyle.UNDECORATED);
         
 
         // Create a scene using the loaded layout

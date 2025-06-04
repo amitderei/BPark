@@ -4,6 +4,7 @@ import client.ClientController;
 import common.User;
 import common.Subscriber;
 import common.UserRole;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,7 +30,8 @@ public class LoginController implements ClientAware {
 	private Label lblError;
 	@FXML
 	private Button backButton;
-
+	@FXML
+	private Button btnExit;
 
 	private ClientController client;
 
@@ -72,7 +74,26 @@ public class LoginController implements ClientAware {
 		System.err.println("[DEBUG] Login failed: " + msg);
 	}
 
+	/**
+	 * Handles the "Exit" button click. Gracefully disconnects from the server and
+	 * terminates the application.
+	 */
+	
+	@FXML
+	private void handleExitClick() {
 
+			try {
+				if (client != null && client.isConnected()) {
+					client.sendToServer(new Object[] { "disconnect" });
+					client.closeConnection();
+					System.out.println("Client disconnected successfully.");
+				}
+			} catch (Exception e) {
+				System.err.println("Failed to disconnect client: " + e.getMessage());
+			}
+			Platform.exit();
+			System.exit(0);
+		}
 
 	/**
 	 * Loads the appropriate main screen according to the user's role, injecting

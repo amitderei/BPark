@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import client.ClientController;
 import common.Order;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,21 +36,22 @@ public class MainLayoutController {
 	private Button btnParkingReservation;
 	@FXML
 	private Button btnMyReservations;
-	
-	
-	
+	@FXML
+	private Button btnExit;
+
+
 	@FXML
 	private AnchorPane center;
-	
+
 	private ClientController client;
 
-	
+
 	private String subscriberName;
 
 	public void setSubscriberName(String name) {
-	    this.subscriberName = name;
+		this.subscriberName = name;
 	}
-	
+
 	/**
 	 * load the home page in the center
 	 */
@@ -64,7 +66,26 @@ public class MainLayoutController {
 		UiUtils.loadScreen(btnLogout, "/client/MainScreen.fxml", "BPARK – Welcome", client);
 	}
 
-	
+	/**
+	 * Handles the "Exit" button click. Gracefully disconnects from the server and
+	 * terminates the application.
+	 */
+
+	@FXML
+	private void handleExitClick() {
+
+		try {
+			if (client != null && client.isConnected()) {
+				client.sendToServer(new Object[] { "disconnect" });
+				client.closeConnection();
+				System.out.println("Client disconnected successfully.");
+			}
+		} catch (Exception e) {
+			System.err.println("Failed to disconnect client: " + e.getMessage());
+		}
+		Platform.exit();
+		System.exit(0);
+	}
 
 	@FXML
 	private void handleViewPersonalInfo() {
@@ -108,12 +129,17 @@ public class MainLayoutController {
 	private void handleMyReservations() {
 		loadScreen("/client/WatchAndCancelOrdersScreen.fxml");
 	}
-	
+
+
+	/**
+	 * load screen in the center of borderPane
+	 * @param fxml
+	 */
 	public void loadScreen(String fxml) {
 		try {
 			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
 			Parent content=loader.load();
-			
+
 			Object ctrl=loader.getController();
 			if(ctrl instanceof SubscriberMainController controller) {
 				controller.setSubscriberName(subscriberName);
@@ -128,55 +154,61 @@ public class MainLayoutController {
 				controller.setClient(client);
 				controller.defineTable();
 			}
-			
-			
+
+
 			center.getChildren().clear();
 			center.getChildren().add(content);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * load the summary screen with order details on the center of borderPane
+	 * @param fxml (String of fxml)
+	 * @param order
+	 */
+
 	public void loadScreen(String fxml, Order order) {
 		try {
 			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
 			Parent content=loader.load();
 			Object ctrl=loader.getController();
-			
+
 			if (ctrl instanceof ParkingReservationSummaryController controller) {
 				client.setSummaryController(controller);
 				controller.setClient(client);
 				controller.setLabels(order);
 			}
-			
+
 			center.getChildren().clear();
 			center.getChildren().add(content);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
+
+
 	}
 
 	public void handleGoToCreateOrder() {
 		try {
 			loadScreen("/client/Placing_an_order_view.fxml"); // load the Placing_an_order_view.fxml after search on resources
-			
+
 		} catch (Exception e) {
 			System.out.println("Error:" + e.getMessage());
-			  e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
 	public void handleGoToDelivery() {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Vehicle_delivery_screen.fxml")); // load
-																												// the
-																												// Placing_an_order_view.fxml
-																												// after
-																												// search
-																												// on
-																												// resources
+			// the
+			// Placing_an_order_view.fxml
+			// after
+			// search
+			// on
+			// resources
 			Parent root = loader.load();
 
 			VehicleDeliveryController controller = loader.getController(); // after loading the fxml- get the controller
@@ -191,7 +223,7 @@ public class MainLayoutController {
 			System.out.println("Error:" + e.getMessage());
 		}
 	}
-	
+
 	public void setClient(ClientController client) {
 		this.client=client;
 	}

@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  * Entry point for launching the client-side application of BPARK. This class
@@ -33,6 +34,9 @@ public class ClientApp extends Application {
 	    ConnectController controller = loader.getController();
 	    controller.setApp(this);
 
+	    //remove the top lane of app
+	    primaryStage.initStyle(StageStyle.UNDECORATED);
+	    
 	    // 3. Show the scene
 	    primaryStage.setTitle("BPARK Client");
 	    primaryStage.setScene(new Scene(root));
