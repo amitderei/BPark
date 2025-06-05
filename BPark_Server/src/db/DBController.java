@@ -1033,6 +1033,7 @@ public class DBController {
 
 	/**
 	 * the function get all the reservations of subscriber and return them.
+	 * 
 	 * @param subscriber
 	 * @return arrayList of subscriber's reservations
 	 */
@@ -1059,48 +1060,51 @@ public class DBController {
 
 	/**
 	 * delete the order from SQL
+	 * 
 	 * @param orderNumber
 	 * @return true if succeed, else- false
 	 */
 	public boolean deleteOrder(int orderNumber) {
-		String query="DELETE FROM `order` WHERE order_number=?";
-		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+		String query = "DELETE FROM `order` WHERE order_number=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, orderNumber);
-			int ifDelete = stmt.executeUpdate(); 
+			int ifDelete = stmt.executeUpdate();
 			return (ifDelete > 0);
 		} catch (SQLException e) {
 			System.err.println("Error delete order: " + e.getMessage());
 			return false;
 		}
 	}
-	
+
 	/**
 	 * update the password of user
+	 * 
 	 * @param user - for updating details
 	 * @return if the action succeed
 	 */
 	public boolean changeDetailsOfUser(User user) {
 		System.out.println("user");
-		String query="UPDATE user SET password=? WHERE username=?";
-		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+		String query = "UPDATE user SET password=? WHERE username=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, user.getPassword());
 			stmt.setString(2, user.getUsername());
 			int rowsUpdated = stmt.executeUpdate();
 			return rowsUpdated > 0;
-		}catch(SQLException e) {
+		} catch (SQLException e) {
 			System.err.println("Error update user: " + e.getMessage());
 			return false;
 		}
 	}
-	
+
 	/**
 	 * update the details of subscriber
-	 * @param subscriber - for updating details 
+	 * 
+	 * @param subscriber - for updating details
 	 * @return if the action succeed
 	 */
 	public boolean changeDetailsOfSubscriber(Subscriber subscriber) {
-		String query="UPDATE subscriber SET firstName=?, lastName=?, phoneNumber=?,  email=? WHERE subscriberCode=?";
-		try(PreparedStatement stmt = conn.prepareStatement(query)) {
+		String query = "UPDATE subscriber SET firstName=?, lastName=?, phoneNumber=?,  email=? WHERE subscriberCode=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, subscriber.getFirstName());
 			stmt.setString(2, subscriber.getLastName());
 			stmt.setString(3, subscriber.getPhoneNum());
@@ -1108,10 +1112,39 @@ public class DBController {
 			stmt.setInt(5, subscriber.getSubscriberCode());
 			int rowsUpdated = stmt.executeUpdate();
 			return rowsUpdated > 0;
-		}catch(SQLException e) {
+		} catch (SQLException e) {
 			System.err.println("Error update subscriber: " + e.getMessage());
 			return false;
 		}
 	}
 
+	public ArrayList<ParkingEvent> parkingHistoryOfSubscriber(Subscriber subscriber) {
+		System.out.println("display");
+		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=?";
+		ArrayList<ParkingEvent> history = new ArrayList<>();
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subscriber.getSubscriberCode());
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					ParkingEvent newParkingEvent = new ParkingEvent(rs.getInt("subscriberCode"),
+							rs.getInt("parking_space"), rs.getDate("entryDate").toLocalDate(),
+							rs.getTime("entryHour").toLocalTime(), rs.getBoolean("wasExtended"),
+							rs.getString("vehicleId"), rs.getString("NameParkingLot"), rs.getString("parkingCode"));
+					Date exitDate=rs.getDate("exitDate");
+					Time exitTime=rs.getTime("exitHour");
+					if (exitDate==null && exitTime==null) {
+						newParkingEvent.setExitDate(rs.getDate("exitDate").toLocalDate());
+						newParkingEvent.setExitHour(rs.getTime("exitHour").toLocalTime());
+					}
+					newParkingEvent.setEventId(rs.getInt("eventId"));
+					history.add(newParkingEvent);
+				}
+			}
+			return history;
+		} catch (SQLException e) {
+			System.err.println("Error in parking history: " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

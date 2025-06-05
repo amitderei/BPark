@@ -1,6 +1,7 @@
 package client;
 
 import common.Order;
+import common.ParkingEvent;
 import common.ServerResponse;
 import common.Subscriber;
 import common.User;
@@ -14,6 +15,7 @@ import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
+import controllers.ViewParkingHistoryController;
 import controllers.ViewSubscriberDetailsController;
 import controllers.WatchAndCancelOrdersController;
 import javafx.application.Platform;
@@ -44,6 +46,7 @@ public class ClientController extends AbstractClient {
 	private WatchAndCancelOrdersController watchAndCancelOrdersController;
 	private ViewSubscriberDetailsController viewSubscriberDetailsController;
 	private EditSubscriberDetailsController editSubscriberDetailsController;
+	private ViewParkingHistoryController viewParkingHistoryController;
 
 	private Subscriber subscriber;
 
@@ -92,6 +95,10 @@ public class ClientController extends AbstractClient {
 
 	public void setWatchAndCancelOrdersController(WatchAndCancelOrdersController watchAndCancelOrdersController) {
 		this.watchAndCancelOrdersController = watchAndCancelOrdersController;
+	}
+	
+	public void setViewParkingHistoryController(ViewParkingHistoryController viewParkingHistoryController) {
+		this.viewParkingHistoryController=viewParkingHistoryController;
 	}
 
 	/**
@@ -174,6 +181,7 @@ public class ClientController extends AbstractClient {
 	 * @param msg the message sent from the server (expected to be ServerResponse or
 	 *            String)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void handleMessageFromServer(Object msg) {
 		// Handle server shutdown as plain String
@@ -211,11 +219,18 @@ public class ClientController extends AbstractClient {
 					askForReservations();
 				}
 			}
+			
+			else if (response.isSucceed()&& response.getMsg().equals("Parking history data loaded successfully.")) {
+				System.out.println("display3");
+				if (viewParkingHistoryController!=null) {
+					System.out.println("display2");
+					viewParkingHistoryController.displayOrders((ArrayList<ParkingEvent>) response.getData());
+				}
+			}
 			// display orders of subscriber in table
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
 					&& response.getMsg().equals("Orders of subscriber displayed successfully.")
 					&& dataList.get(0) instanceof Order) {
-				@SuppressWarnings("unchecked")
 				ArrayList<Order> orders = (ArrayList<Order>) dataList;
 				if (watchAndCancelOrdersController != null) {
 					watchAndCancelOrdersController.displayOrders(orders);
@@ -224,7 +239,6 @@ public class ClientController extends AbstractClient {
 			}
 
 			else if (response.isSucceed() && response.getMsg().equals("Details updated successfully.")) {
-				@SuppressWarnings("unchecked")
 				ArrayList<Object> newDetails=(ArrayList<Object>) response.getData();
 				if(newDetails.get(0) instanceof Subscriber) {
 					setSubscriber((Subscriber)newDetails.get(0));
@@ -238,7 +252,6 @@ public class ClientController extends AbstractClient {
 			
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()
 					&& dataList.get(0) instanceof Order) {
-				@SuppressWarnings("unchecked")
 				ArrayList<Order> orders = (ArrayList<Order>) dataList;
 				if (controller != null) {
 					controller.displayOrders(orders);
@@ -572,6 +585,17 @@ public class ClientController extends AbstractClient {
 			sendToServer(new Object[] { "updateDetailsOfSubscriber", subscriber, user});
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateDetailsOfSubscriber' request: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * the function send to server the command, subscriber details
+	 */
+	public void updateParkingHistoryOfSubscriber() {
+		try {
+			sendToServer(new Object[] { "updateParkingHistoryOfSubscriber", subscriber});
+		} catch (IOException e) {
+			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}
 	}
 

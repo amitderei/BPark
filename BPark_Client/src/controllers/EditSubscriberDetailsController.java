@@ -1,5 +1,8 @@
 package controllers;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import client.ClientController;
 import common.Subscriber;
 import common.User;
@@ -107,7 +110,15 @@ public class EditSubscriberDetailsController {
 	 */
 	public void saveChanges() {
 		if(subscriberCodeEdit.getText().trim().isEmpty() || subscriberCodeEdit.getText().trim().isEmpty() || firstNameEdit.getText().trim().isEmpty() || lastNameEdit.getText().trim().isEmpty()|| passwordEdit.getText().trim().isEmpty() || emailEdit.getText().trim().isEmpty() || phoneNumberEdit.getText().trim().isEmpty()) {
-			UiUtils.showAlert("Error", "There is empty field", AlertType.ERROR);
+			UiUtils.showAlert("Error", "There is empty field.", AlertType.ERROR);
+			return;
+		}
+		if(!isValidEmail(emailEdit.getText().trim())) {
+			UiUtils.showAlert("Error", "Email format is not valid.", AlertType.ERROR);
+			return;
+		}
+		if(!isValidPhone(phoneNumberEdit.getText().trim())) {
+			UiUtils.showAlert("Error", "Phone number format is not valid.", AlertType.ERROR);
 			return;
 		}
 		Subscriber newDetails= new Subscriber(Integer.parseInt(subscriberCodeEdit.getText()), subscriber.getUserId(), firstNameEdit.getText(), lastNameEdit.getText(), phoneNumberEdit.getText(), emailEdit.getText(), usernameEdit.getText(), subscriber.getTagId());
@@ -123,7 +134,34 @@ public class EditSubscriberDetailsController {
 		}
 		else if (!passwordChange) {
 			client.updateDetailsOfSubscriber(null, new User(usernameEdit.getText(), newPassword));
-		}	
+		}
+		else {
+			handleGoToView();
+		}
+	}
+	
+	/**
+	 * check if the email is valid by regular expression
+	 * @param email (the email we need to check)
+	 * @return true if it belongs to language, else return false
+	 */
+	private static boolean isValidEmail(String email) {
+		String regulerExpression="^[A-Za-z0-9_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+		Pattern pattern=Pattern.compile(regulerExpression); //check the regular expression
+		Matcher matcher= pattern.matcher(email); //check is email match to regular expression(if email belongs to the language of regularExpression 
+		return matcher.matches(); 
+	}
+	
+	/**
+	 * check if the phone is valid by regular expression
+	 * @param phone (the phone we need to check)
+	 * @return true if it belongs to language, else return false
+	 */
+	private static boolean isValidPhone(String phone) {
+		String regularExpression="^05[0-9]{8}$";
+		Pattern pattern=Pattern.compile(regularExpression);
+		Matcher matcher=pattern.matcher(phone);
+		return matcher.matches();
 	}
 	
 	public void handleGoToView() {

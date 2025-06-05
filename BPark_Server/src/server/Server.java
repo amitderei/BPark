@@ -110,6 +110,21 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, "order didn't delete"));
 					}
 				}
+				//get parking history of subscriber: expected format {"updateParkingHistoryOfSubscriber", subscriber}
+				else if(data.length==2 && "updateParkingHistoryOfSubscriber".equals(data[0])) {
+					ArrayList<ParkingEvent> history=db.parkingHistoryOfSubscriber((Subscriber)data[1]);
+					if(history==null) {
+						 System.err.println("history is null - probably SQL error");
+						 client.sendToClient(new ServerResponse(false, null, "There was an error loading parking history."));
+					}
+					else if(history.isEmpty()) {
+						client.sendToClient(new ServerResponse(false, null, "There is no data for this user."));
+					}
+					else {
+						System.out.println("display1");
+						client.sendToClient(new ServerResponse(true, history, "Parking history data loaded successfully."));
+					}
+				}
 
 				// Update order: ["updateOrder", orderNumber, field, newValue]
 				else if (data.length == 4 && "updateOrder".equals(data[0])) {

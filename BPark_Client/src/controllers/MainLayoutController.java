@@ -73,7 +73,7 @@ public class MainLayoutController {
 
 	@FXML
 	private void handleViewParkingHistory() {
-		System.out.println("Viewing parking history…");
+		loadScreen("/client/viewSubscriberHistoryScreen.fxml");
 	}
 
 	@FXML
@@ -143,6 +143,12 @@ public class MainLayoutController {
 				controller.setClient(client);
 				controller.setSubscriberAndPassword();
 				controller.setTextOnField();
+			}
+			if (ctrl instanceof ViewParkingHistoryController controller) {
+				client.setViewParkingHistoryController(controller);
+				controller.setClient(client);
+				controller.setTable();
+				
 			}
 			
 			

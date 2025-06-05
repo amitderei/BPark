@@ -54,6 +54,19 @@ public class ParkingEvent implements Serializable {
 		this.lot = lot;
 		this.parkingCode = parkingCode;
 	}
+	
+	public ParkingEvent(int subscriberCode, int parkingSpace, LocalDate entryDate, LocalTime entryTime,
+		 boolean wasExtended, String vehicleID2, String lot,
+			String parkingCode) {
+		this.subscriberCode = subscriberCode;
+		this.parkingSpace = parkingSpace;
+		this.entryDate = entryDate;
+		this.entryTime = entryTime;
+		this.wasExtended = wasExtended;
+		this.vehicleID = vehicleID2;
+		this.lot = lot;
+		this.parkingCode = parkingCode;
+	}
 
 	/**
 	 * Returns the event ID.
