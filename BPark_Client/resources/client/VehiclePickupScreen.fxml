@@ -10,9 +10,16 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.VehiclePickupController"
+			fx:controller="controllers.VehiclePickupController"
             prefWidth="800.0" prefHeight="500.0">
     <children>
+	    
+	    <Button text="Back" onAction="#handleBackClick"
+	        AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" />
+	
+		<Button text="Exit" onAction="#handleExitClick"
+	        AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
+    
         <VBox alignment="CENTER" spacing="15.0" AnchorPane.topAnchor="30.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0">
 
             <!-- Title -->
@@ -21,6 +28,7 @@
                     <Font size="26.0" />
                 </font>
             </Label>
+           
 
             <!-- Subscriber Code -->
             <Label text="Enter Subscriber Code:" />
@@ -48,6 +56,7 @@
             <!-- Status -->
             <Label fx:id="lblStatus" text="" wrapText="true" style="-fx-text-fill: green;" />
 
+	
         </VBox>
     </children>
 </AnchorPane>

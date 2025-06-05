@@ -1,4 +1,8 @@
 package controllers;
+import javafx.fxml.FXML;
+import javafx.application.Platform;
+
+import javafx.application.Platform;
 
 import client.ClientController;
 import javafx.fxml.FXML;
@@ -164,5 +168,26 @@ public class VehiclePickupController implements ClientAware {
         btnCollectCar.setDisable(true);
         btnLostCode.setDisable(true);
     }
+    
+    @FXML
+    private void handleBackClick() {
+        UiUtils.loadScreen(btnCollectCar, "/client/TerminalMainLayout.fxml", "BPARK – Terminal", client);
+    }
+    
+    @FXML
+    private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[]{"disconnect"});
+                client.closeConnection();
+                System.out.println("Client disconnected successfully.");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to disconnect client: " + e.getMessage());
+        }
+        Platform.exit();
+        System.exit(0);
+    }
+
 }
 

@@ -13,14 +13,21 @@ import client.ClientController;
 import common.ParkingEvent;
 
 import javafx.scene.control.TextField;
-
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import ui.UiUtils;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
-public class VehicleDeliveryController {
+public class VehicleDeliveryController implements ClientAware{
+	
+	@FXML
+	private Button btnBack;
+	
+	@FXML
+	private Button btnExit; 
 
 	@FXML
 	private TextField subscriberCodeField;   // Text field that will be used for seeking the subscriber code
@@ -483,6 +490,30 @@ public class VehicleDeliveryController {
 		// Display the alert window and wait until user closes it
 		alert.show();
 	}
+	
+	@FXML
+	private void handleBackClick() {
+	    System.out.println("BACK CLICKED"); 
+	    UiUtils.loadScreen(btnBack, "/client/TerminalMainLayout.fxml", "BPARK – Terminal", client);
+	}
+
+	@FXML
+	private void exitFromDelivery() {
+	    System.out.println("EXIT CLICKED"); 
+	    try {
+	        if (client != null && client.isConnected()) {
+	            client.sendToServer(new Object[]{"disconnect"});
+	            client.closeConnection();
+	            System.out.println("Client disconnected successfully.");
+	        }
+	    } catch (Exception e) {
+	        System.err.println("Failed to disconnect client: " + e.getMessage());
+	    }
+	    Platform.exit();
+	    System.exit(0);
+	}
+
+
 
 
 }

@@ -1,5 +1,13 @@
 package controllers;
 
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import javafx.fxml.FXMLLoader;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -47,11 +55,27 @@ public class ModeSelectionController implements ClientAware {
 	/** Opens the Terminal screen. */
 	@FXML
 	public void handleTerminal() {
-		UiUtils.loadScreen(btnTerminal,
-				"/client/TerminalMainLayout.fxml",
-				"BPARK – Guest",
-				client);          
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/TerminalMainLayout.fxml"));
+			Parent root = loader.load();
+
+			// Pass client to controller
+			Object ctrl = loader.getController();
+			if (ctrl instanceof ClientAware aware) {
+				aware.setClient(client);
+			}
+
+			// Set scene
+			btnTerminal.getScene().getWindow().hide();
+			Stage stage = (Stage) btnTerminal.getScene().getWindow();  
+			UiUtils.setScene(stage, root, "BPARK – Terminal");
+
+		} catch (Exception e) {
+			UiUtils.showAlert("BPARK – Error", "Failed to load terminal screen:\n" + e.getMessage(), Alert.AlertType.ERROR);
+			e.printStackTrace();
+		}
 	}
+
 	
 	@FXML
 	private void handleExitClick() {

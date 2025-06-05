@@ -14,7 +14,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import ui.UiUtils;
 
-public class TerminalController {
+public class TerminalController implements ClientAware {
 
 	@FXML 
 	private Button btnExit;
@@ -30,26 +30,33 @@ public class TerminalController {
 	private AnchorPane center;
 
 	private ClientController client;
-
+	
+	/**
+	 * Sets the client instance used for communication with the server.
+	 */
 	public void setClient(ClientController client) {
 		this.client=client;
 	}
 
 	/**
-	 * load the home page in the center
+	 * Loads the main terminal screen into the center pane.
 	 */
 	@FXML
 	private void handleHomeClick() {
 		loadScreen("/client/TerminalMainScreen.fxml");
 	}
+	
+	/**
+	 * Loads the user type selection screen (back button).
+	 */
 	@FXML
 	private void handleBackClick() {
-		UiUtils.loadScreen(btnBack,
-				"/client/SelectionScreen.fxml",
-				"Select User Type",
-				client); 
+		UiUtils.loadScreen(btnBack,"/client/SelectionScreen.fxml", "Select User Type",client); 
 	}
-
+	
+	/**
+	 * Disconnects from the server and exits the application.
+	 */
 	@FXML
 	private void handleExitClick() {
 
@@ -66,29 +73,31 @@ public class TerminalController {
 		System.exit(0);
 	}
 
+	/**
+	 * Navigates to the delivery screen and sets up the controller.
+	 */
+	@FXML
 	public void handleGoToDelivery() {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Vehicle_delivery_screen.fxml")); // load
-			// the
-			// Placing_an_order_view.fxml
-			// after
-			// search
-			// on
-			// resources
+	
+	    try {
+	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Vehicle_delivery_screen.fxml"));
 			Parent root = loader.load();
+			VehicleDeliveryController controller = loader.getController();
+			controller.setClient(client); 
+			client.setDeliveryController(controller);
 
-			VehicleDeliveryController controller = loader.getController(); // after loading the fxml- get the controller
-			controller.setClient(client);// move the client to the new controller
-			client.setDeliveryController(controller); // for act functions
+	        Stage stage = (Stage) btnSubmitVehicle.getScene().getWindow();
+	        Scene scene = new Scene(root);
+	        
+	        System.out.println("✔ Vehicle_delivery_screen.fxml loaded successfully");
 
-			Stage stage = (Stage).getScene().getWindow(); // get the stage
-			Scene scene = new Scene(root); // create new scene
-			stage.setScene(scene);
-			stage.show();
-		} catch (Exception e) {
-			System.out.println("Error:" + e.getMessage());
-		}
+	        stage.setScene(scene);
+	        stage.show();
+	    } catch (Exception e) {
+	        System.out.println("Error: " + e.getMessage());
+	    }
 	}
+
 	
 	/**
 	 * Opens the vehicle-pickup screen when the user clicks “Retrieve Vehicle”.

@@ -88,5 +88,14 @@ public final class UiUtils {
             ex.printStackTrace();
         }
     }
+    public static void setScene(Stage stage, Parent root, String title) {
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle(title);
+        stage.setWidth(800);
+        stage.setHeight(500);
+        stage.show();
+    }
+
 }
 
