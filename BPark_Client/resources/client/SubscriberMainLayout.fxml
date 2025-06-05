@@ -15,18 +15,12 @@
         <ToolBar>
             <!-- Home button -->
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
-            <Pane HBox.hgrow="ALWAYS">
-            <children>
-               <Button fx:id="btnExit" layoutX="9.0" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="25.0" prefWidth="43.0" text="Exit" />
-            </children></Pane>
+            <Pane HBox.hgrow="ALWAYS" />
             <!-- Logout button -->
             <Button fx:id="btnLogout" onAction="#handleLogoutClick" text="🔓 Logout" />
         </ToolBar>
     </top>
-   <center>
-      <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
-   </center>
-   <bottom>
+   <left>
       <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="btnViewPersonalInfo" mnemonicParsing="false" onAction="#handleViewPersonalInfo" prefHeight="44.0" prefWidth="209.0" text="View Personal Info" />
@@ -39,6 +33,9 @@
             <Button fx:id="btnMyReservations" mnemonicParsing="false" onAction="#handleMyReservations" prefHeight="44.0" prefWidth="209.0" text="My Reservations" />
          </children>
       </VBox>
-   </bottom>
+   </left>
+   <center>
+      <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+   </center>
 
 </BorderPane>

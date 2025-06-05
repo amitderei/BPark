@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TerminalController">
+
+    <!-- Top toolbar -->
+    <top>
+        <ToolBar>
+            <!-- Home button -->
+            <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
+            <Pane HBox.hgrow="ALWAYS">
+            <children>
+               <Button fx:id="btnExit" layoutX="655.0" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="25.0" prefWidth="43.0" text="Exit" />
+               <Button fx:id="btnBack" layoutX="593.0" mnemonicParsing="false" text="🔙 Back" />
+            </children></Pane>
+        </ToolBar>
+    </top>
+   <center>
+      <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+   </center>
+   <bottom>
+      <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnViewActiveParkingInfo" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Show Available Spots" />
+            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="210.0" text="Submit Vehicle" />
+            <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
+         </children>
+      </VBox>
+   </bottom>
+
+</BorderPane>

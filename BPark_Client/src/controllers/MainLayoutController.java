@@ -186,8 +186,6 @@ public class MainLayoutController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-
 	}
 
 	public void handleGoToCreateOrder() {

@@ -48,7 +48,7 @@ public class ModeSelectionController implements ClientAware {
 	@FXML
 	public void handleTerminal() {
 		UiUtils.loadScreen(btnTerminal,
-				"/client/TerminalScreen.fxml",
+				"/client/TerminalMainLayout.fxml",
 				"BPARK – Guest",
 				client);          
 	}
