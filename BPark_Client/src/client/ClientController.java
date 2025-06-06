@@ -562,5 +562,14 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}
 	}
+	
+	public void forgotMyParkingCode() {
+		try {
+			System.out.println("forgotMyParkingCode-client");
+			sendToServer(new Object[] { "forgotMyParkingCode", subscriber });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
+		}
+	}
 
 }

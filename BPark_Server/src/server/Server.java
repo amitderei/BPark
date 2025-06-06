@@ -12,6 +12,7 @@ import common.ServerResponse;
 import common.Subscriber;
 import common.User;
 import db.DBController;
+import mailService.MailService;
 
 /**
  * Represents the BPARK server. Handles client connections and dispatches
@@ -94,9 +95,15 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, history, "Parking history data loaded successfully."));
 					}
 				}
-
-			
-
+				else if(data.length==2 && "forgotMyParkingCode".equals(data[0])) {
+					System.out.println("forgotMyParkingCode-server");
+					try {
+						System.out.println(((Subscriber) data[1]).getEmail());
+					MailService.sendEmail(((Subscriber) data[1]).getEmail(), "11111");
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
 				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
 					String tagId = (String) data[1];

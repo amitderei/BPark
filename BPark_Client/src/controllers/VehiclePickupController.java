@@ -164,5 +164,9 @@ public class VehiclePickupController implements ClientAware {
         btnCollectCar.setDisable(true);
         btnLostCode.setDisable(true);
     }
+    
+    public void forgotMyCode() {
+    	client.forgotMyParkingCode();
+    }
 }
 
