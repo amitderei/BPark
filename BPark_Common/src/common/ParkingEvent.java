@@ -1,7 +1,9 @@
 package common;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
@@ -24,6 +26,9 @@ public class ParkingEvent implements Serializable {
 	private String lot;
 	private String vehicleID;
 	private String parkingCode;
+	
+	private static final long minutesFourHours=240;
+	private static final long minutesEightHours=480;
 
 	/**
 	 * Constructs a ParkingEvent with all required fields.
@@ -55,18 +60,7 @@ public class ParkingEvent implements Serializable {
 		this.parkingCode = parkingCode;
 	}
 	
-	public ParkingEvent(int subscriberCode, int parkingSpace, LocalDate entryDate, LocalTime entryTime,
-		 boolean wasExtended, String vehicleID2, String lot,
-			String parkingCode) {
-		this.subscriberCode = subscriberCode;
-		this.parkingSpace = parkingSpace;
-		this.entryDate = entryDate;
-		this.entryTime = entryTime;
-		this.wasExtended = wasExtended;
-		this.vehicleID = vehicleID2;
-		this.lot = lot;
-		this.parkingCode = parkingCode;
-	}
+	public ParkingEvent() {}
 
 	/**
 	 * Returns the event ID.
@@ -206,6 +200,77 @@ public class ParkingEvent implements Serializable {
 
 	public String getLot() {
 		return lot;
+	}
+	
+	
+
+	public void setSubscriberCode(int subscriberCode) {
+		this.subscriberCode = subscriberCode;
+	}
+
+	public void setParkingSpace(int parkingSpace) {
+		this.parkingSpace = parkingSpace;
+	}
+
+	public void setEntryDate(LocalDate entryDate) {
+		this.entryDate = entryDate;
+	}
+
+	public void setEntryTime(LocalTime entryTime) {
+		this.entryTime = entryTime;
+	}
+
+	public void setExitTime(LocalTime exitTime) {
+		this.exitTime = exitTime;
+	}
+
+	public void setLot(String lot) {
+		this.lot = lot;
+	}
+
+	public void setVehicleID(String vehicleID) {
+		this.vehicleID = vehicleID;
+	}
+
+	public void setParkingCode(String parkingCode) {
+		this.parkingCode = parkingCode;
+	}
+	
+	public String getStatus() {
+		LocalTime exitHour;
+		LocalDate exitDateNow;
+		LocalTime entryHour=entryTime;
+		if (exitTime==null) {
+			exitHour= LocalTime.now();
+			exitDateNow=LocalDate.now();
+		}
+		else {
+			exitHour=exitTime;
+			exitDateNow=exitDate;
+		}
+		LocalDateTime entry=LocalDateTime.of(entryDate, entryHour);
+		LocalDateTime exit=LocalDateTime.of(exitDateNow, exitHour);
+		
+		Duration duration=Duration.between(entry, exit);
+		long totalMinutes=duration.toMinutes();
+		
+		if (wasExtended) {
+			
+			if(totalMinutes>minutesEightHours) {
+				return "Delayed";
+			}
+			else {
+				return "On time";
+			}
+		}
+		else {
+			if(totalMinutes>minutesFourHours) {
+				return "Delayed";
+			}
+			else {
+				return "On time";
+			}
+		}
 	}
 
 	@Override

@@ -114,14 +114,12 @@ public class Server extends AbstractServer {
 				else if(data.length==2 && "updateParkingHistoryOfSubscriber".equals(data[0])) {
 					ArrayList<ParkingEvent> history=db.parkingHistoryOfSubscriber((Subscriber)data[1]);
 					if(history==null) {
-						 System.err.println("history is null - probably SQL error");
 						 client.sendToClient(new ServerResponse(false, null, "There was an error loading parking history."));
 					}
 					else if(history.isEmpty()) {
 						client.sendToClient(new ServerResponse(false, null, "There is no data for this user."));
 					}
 					else {
-						System.out.println("display1");
 						client.sendToClient(new ServerResponse(true, history, "Parking history data loaded successfully."));
 					}
 				}

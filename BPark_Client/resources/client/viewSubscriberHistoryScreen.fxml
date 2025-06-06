@@ -36,11 +36,12 @@
             </Label>
             <TableView fx:id="parkingHistoryTable" prefHeight="60.0" prefWidth="560.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
                <columns>
-                  <TableColumn fx:id="eventNumberColumn" prefWidth="108.0" text="Event ID" />
-                  <TableColumn fx:id="entryDateColumn" prefWidth="106.66665649414062" text="Entry Date" />
-                  <TableColumn fx:id="entryHourColumn" minWidth="0.0" prefWidth="114.66668701171875" text="Entry Hour" />
-                  <TableColumn fx:id="exitDateColumn" prefWidth="114.0" text="Exit Date" />
-                  <TableColumn fx:id="exitHourColumn" prefWidth="120.66668701171875" text="Exit Hour" />
+                  <TableColumn fx:id="eventNumberColumn" prefWidth="86.0" text="Event ID" />
+                  <TableColumn fx:id="entryDateColumn" prefWidth="103.0" text="Entry Date" />
+                  <TableColumn fx:id="entryHourColumn" minWidth="0.0" prefWidth="99.0" text="Entry Hour" />
+                  <TableColumn fx:id="exitDateColumn" prefWidth="91.0" text="Exit Date" />
+                  <TableColumn fx:id="exitHourColumn" prefWidth="91.0" text="Exit Hour" />
+                  <TableColumn fx:id="status" prefWidth="89.0" text="Status" />
                </columns>
             </TableView>
          </children>

@@ -221,10 +221,8 @@ public class ClientController extends AbstractClient {
 			}
 			
 			else if (response.isSucceed()&& response.getMsg().equals("Parking history data loaded successfully.")) {
-				System.out.println("display3");
 				if (viewParkingHistoryController!=null) {
-					System.out.println("display2");
-					viewParkingHistoryController.displayOrders((ArrayList<ParkingEvent>) response.getData());
+					viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
 				}
 			}
 			// display orders of subscriber in table

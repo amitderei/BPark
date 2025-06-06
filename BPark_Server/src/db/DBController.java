@@ -1119,29 +1119,34 @@ public class DBController {
 	}
 
 	public ArrayList<ParkingEvent> parkingHistoryOfSubscriber(Subscriber subscriber) {
-		System.out.println("display");
 		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=?";
-		ArrayList<ParkingEvent> history = new ArrayList<>();
+		ArrayList<ParkingEvent> historyOfParking = new ArrayList<>();
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriber.getSubscriberCode());
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
-					ParkingEvent newParkingEvent = new ParkingEvent(rs.getInt("subscriberCode"),
-							rs.getInt("parking_space"), rs.getDate("entryDate").toLocalDate(),
-							rs.getTime("entryHour").toLocalTime(), rs.getBoolean("wasExtended"),
-							rs.getString("vehicleId"), rs.getString("NameParkingLot"), rs.getString("parkingCode"));
+					ParkingEvent newParkingEvent = new ParkingEvent();
+					newParkingEvent.setEventId(rs.getInt("eventId"));
+					newParkingEvent.setSubscriberCode(rs.getInt("subscriberCode"));
+					newParkingEvent.setParkingSpace(rs.getInt("parking_space"));
+					newParkingEvent.setEntryDate((rs.getDate("entryDate")).toLocalDate());
+					newParkingEvent.setEntryTime((rs.getTime("entryHour")).toLocalTime());
 					Date exitDate=rs.getDate("exitDate");
 					Time exitTime=rs.getTime("exitHour");
-					if (exitDate==null && exitTime==null) {
+					if (exitDate!=null && exitTime!=null) {
 						newParkingEvent.setExitDate(rs.getDate("exitDate").toLocalDate());
 						newParkingEvent.setExitHour(rs.getTime("exitHour").toLocalTime());
 					}
-					newParkingEvent.setEventId(rs.getInt("eventId"));
-					history.add(newParkingEvent);
+					newParkingEvent.setWasExtended(rs.getBoolean("wasExtended"));
+					newParkingEvent.setVehicleID(rs.getString("vehicleId"));
+					newParkingEvent.setLot(rs.getString("NameParkingLot"));
+					newParkingEvent.setParkingCode(rs.getString("parkingCode"));
+					historyOfParking.add(newParkingEvent);
 				}
+				return historyOfParking;
 			}
-			return history;
-		} catch (SQLException e) {
+			
+		} catch (Exception e) {
 			System.err.println("Error in parking history: " + e.getMessage());
 			e.printStackTrace();
 			return null;
