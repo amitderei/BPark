@@ -370,6 +370,38 @@ public class ClientController extends AbstractClient {
 				if (response.getMsg().toLowerCase().contains("added parking event successfully")) {
 					newDeliveryController.successfulDelivery();
 				}
+				
+				// 12 - handle existing tag
+				if (response.getMsg().toLowerCase().contains("tag exists")) {
+					newDeliveryController.tagFound();
+				}
+				
+				// 13 - handle tag doesn't exists
+				if (response.getMsg().toLowerCase().contains("tag does not exists")) {
+					newDeliveryController.tagNotFound();
+				}
+				
+				// 14 - handle subscriber found by a tag, deliver the vehicle with a parking event creation
+				if (response.getMsg().toLowerCase().contains("subscriber with matching tag has been found")) {
+					int subCode = (int) response.getData();
+					newDeliveryController.subCodeFuture.complete(subCode);
+				}
+				
+				// 15 - handle subscriber isn't inside the parking lot
+				if (response.getMsg().toLowerCase().contains("the subscriber didn't entered his vehicle yet")) {
+					newDeliveryController.checkIfTheresReservation();
+				}
+							
+				// 16 - handle vehicle with the matched tagId isn't inside the parking lot
+				if (response.getMsg().toLowerCase().contains("the tag isn't inside")) {
+					newDeliveryController.findMatchedSubToTheTag();
+				}
+	
+				// 17 - handle subscriber is already inside the parking lot
+				if (response.getMsg().toLowerCase().contains("the vehicle is already inside the parking lot")) {
+					newDeliveryController.vehicleIsAlreadyInside();
+				}
+
 			}
 		});
 	}

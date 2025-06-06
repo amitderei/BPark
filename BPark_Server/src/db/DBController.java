@@ -1146,10 +1146,101 @@ public class DBController {
 				return historyOfParking;
 			}
 			
+			
+			
 		} catch (Exception e) {
 			System.err.println("Error in parking history: " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
+	
+	/**
+	 * Method that checks whether the tag exists in the DB or no
+	 * If yes then return true, false otherwise
+	 */
+	public boolean tagExists(String tag) {
+
+		boolean exists = false;
+
+		try {
+			// Checking whether the tag exists or not
+			String query = "SELECT 1 FROM bpark.subscriber WHERE tagId = ? LIMIT 1";
+
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setString(1, tag); // Inserting the tag
+
+			ResultSet rs = ps.executeQuery();
+			exists = rs.next();  // If the tag has been found it means that he will exists
+
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			System.err.println("Error finding Tag: " + e.getMessage());
+		}
+
+		return exists;
+	}
+	
+	
+	/**
+	 * Method that returns the subscriber through a matched tag-Id with the DB
+	 * Returns the subscriberCode, in case of an error returns -1
+	 */
+	public int seekForTheSubscriberWithTag(String tag) {
+		String query = "SELECT s.subscriberCode FROM bpark.subscriber s WHERE s.tagId = ?";
+
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, tag);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				return rs.getInt("subscriberCode");
+			}
+		} catch (SQLException e) {
+			System.err.println("Error finding subscriber code by tag: " + e.getMessage());
+		}
+		return -1; // Subscriber code matching to the tag not found
+	}
+	
+	/**
+	 * Checks whether the subscriber already has entered his vehicle into the parking lot
+	 * If he entered already return true, otherwise return false
+	 */
+	public boolean checkSubscriberEntered(int codeInt) {
+		String query = "SELECT * FROM bpark.parkingevent WHERE subscriberCode = ? AND exitHour IS NULL";
+
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, codeInt);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next(); // if any row is returned, subscriber is inside
+		} catch (SQLException e) {
+			// If there is no subscriber code in the table it means that he didn't entered yet and the method will return false
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	
+	
+	/**
+	 * Checks whether the vehicle that is matched to the tag-Id is already inside the parking lot
+	 * If he entered already return true, otherwise return false
+	 */
+	public boolean checkTagIDEntered(String tag) {
+		String query = "SELECT pe.* FROM bpark.parkingevent pe " +
+				"JOIN bpark.subscriber s ON pe.subscriberCode = s.subscriberCode " +
+				"WHERE s.tagId = ? AND pe.exitHour IS NULL";
+
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, tag);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next(); // if any row is returned, tag is inside
+		} catch (SQLException e) {
+			// If there is no matched subscriberCode to the tagId in the table it means that he didn't entered yet and the method will return false
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 }

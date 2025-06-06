@@ -89,7 +89,7 @@ public class Server extends AbstractServer {
 					}
 					return;
 				}
-				
+
 				//get all reservations of subscriber
 				else if (data.length==2 && "askForReservations".equals(data[0])){
 					ArrayList<Order> orders=db.returnReservationOfSubscriber((Subscriber)data[1]);
@@ -114,7 +114,7 @@ public class Server extends AbstractServer {
 				else if(data.length==2 && "updateParkingHistoryOfSubscriber".equals(data[0])) {
 					ArrayList<ParkingEvent> history=db.parkingHistoryOfSubscriber((Subscriber)data[1]);
 					if(history==null) {
-						 client.sendToClient(new ServerResponse(false, null, "There was an error loading parking history."));
+						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking history."));
 					}
 					else if(history.isEmpty()) {
 						client.sendToClient(new ServerResponse(false, null, "There is no data for this user."));
@@ -130,72 +130,72 @@ public class Server extends AbstractServer {
 					return;
 				}
 
-                // Validate subscriber by tag: ["validateSubscriberByTag", tagId]
-                else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
-                    String tagId = (String) data[1];
-                    int subscriberCode = db.getSubscriberCodeByTag(tagId);
+				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
+				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
+					String tagId = (String) data[1];
+					int subscriberCode = db.getSubscriberCodeByTag(tagId);
 
-                    if (subscriberCode > 0) {
-                        // Return subscriberCode in response so client can continue with pickup flow
-                        client.sendToClient(new ServerResponse(true, subscriberCode,
-                                "Subscriber verified successfully by tag."));
-                    } else {
-                        client.sendToClient(new ServerResponse(false, null,
-                                "Tag ID not recognized. Please try again."));
-                    }
-                    return;
-                }
-				
+					if (subscriberCode > 0) {
+						// Return subscriberCode in response so client can continue with pickup flow
+						client.sendToClient(new ServerResponse(true, subscriberCode,
+								"Subscriber verified successfully by tag."));
+					} else {
+						client.sendToClient(new ServerResponse(false, null,
+								"Tag ID not recognized. Please try again."));
+					}
+					return;
+				}
+
 				// Validate subscriber by numeric code: ["validateSubscriber", subscriberCode]
-                else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
-                    int subscriberCode = (int) data[1];
+				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
+					int subscriberCode = (int) data[1];
 
-                    if (!db.subscriberExists(subscriberCode)) {
-                        client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
-                    } else {
-                        client.sendToClient(new ServerResponse(true, null, "Subscriber verified")); 
-                    }
-                    return;
-                }
+					if (!db.subscriberExists(subscriberCode)) {
+						client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
+					} else {
+						client.sendToClient(new ServerResponse(true, null, "Subscriber verified")); 
+					}
+					return;
+				}
 
 
 
-                // Collect car: ["collectCar", subscriberCode, parkingCode]
-                else if (data.length == 3 && "collectCar".equals(data[0])) {
-                    int subCode = (int) data[1];
-                    int parkCode = (int) data[2];
-                    try {
-                        ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
-                        client.sendToClient(response);
-                    } catch (Exception e) {
-                        client.sendToClient(new ServerResponse(false, null,
-                                "An error occurred while collecting the vehicle."));
-                        System.err.println("Error: collectCar - " + e.getMessage());
-                    }
-                    return;
-                }
+				// Collect car: ["collectCar", subscriberCode, parkingCode]
+				else if (data.length == 3 && "collectCar".equals(data[0])) {
+					int subCode = (int) data[1];
+					int parkCode = (int) data[2];
+					try {
+						ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
+						client.sendToClient(response);
+					} catch (Exception e) {
+						client.sendToClient(new ServerResponse(false, null,
+								"An error occurred while collecting the vehicle."));
+						System.err.println("Error: collectCar - " + e.getMessage());
+					}
+					return;
+				}
 				//update details of subscriber. expected format={command, subscriber\null, user\null}
-                else if (data.length==3 && "updateDetailsOfSubscriber".equals(data[0])) {
-                	boolean isSucceedSubscriber=true;
-                	boolean isSucceedUser=true;
-                	ArrayList<Object> newDetails= new ArrayList<>();
-                	if (data[1]!=null) {
-                		Subscriber subscriber= (Subscriber) data[1];
-                		isSucceedSubscriber=db.changeDetailsOfSubscriber(subscriber);
-                		newDetails.add(subscriber);
-                	}
-                	if(data[2]!=null) {
-                		User user=(User) data[2];
-                		isSucceedUser=db.changeDetailsOfUser(user);
-                		newDetails.add(user);
-                	}
-                	if (isSucceedSubscriber && isSucceedUser) {
-                		 client.sendToClient(new ServerResponse(true, newDetails, "Details updated successfully.")); 
-                	}
-                	else {
-                		client.sendToClient(new ServerResponse(false, null, "The update did not occur due to a problem. Please try again later."));
-                	}
-                }
+				else if (data.length==3 && "updateDetailsOfSubscriber".equals(data[0])) {
+					boolean isSucceedSubscriber=true;
+					boolean isSucceedUser=true;
+					ArrayList<Object> newDetails= new ArrayList<>();
+					if (data[1]!=null) {
+						Subscriber subscriber= (Subscriber) data[1];
+						isSucceedSubscriber=db.changeDetailsOfSubscriber(subscriber);
+						newDetails.add(subscriber);
+					}
+					if(data[2]!=null) {
+						User user=(User) data[2];
+						isSucceedUser=db.changeDetailsOfUser(user);
+						newDetails.add(user);
+					}
+					if (isSucceedSubscriber && isSucceedUser) {
+						client.sendToClient(new ServerResponse(true, newDetails, "Details updated successfully.")); 
+					}
+					else {
+						client.sendToClient(new ServerResponse(false, null, "The update did not occur due to a problem. Please try again later."));
+					}
+				}
 
 
 				else if (data.length == 2 && "subscriberDetails".equals(data[0])) {
@@ -209,19 +209,19 @@ public class Server extends AbstractServer {
 				}
 
 
-                // Resend parking code: ["sendLostCode", subscriberCode]
-                else if (data.length == 2 && "sendLostCode".equals(data[0])) {
-                    int subCode = (int) data[1];
-                    try {
-                        ServerResponse response = db.sendParkingCodeToSubscriber(subCode);
-                        client.sendToClient(response);
-                    } catch (Exception e) {
-                        client.sendToClient(new ServerResponse(false, null,
-                                "An error occurred while sending your parking code."));
-                        System.err.println("Error: sendLostCode - " + e.getMessage());
-                    }
-                    return;
-                }
+				// Resend parking code: ["sendLostCode", subscriberCode]
+				else if (data.length == 2 && "sendLostCode".equals(data[0])) {
+					int subCode = (int) data[1];
+					try {
+						ServerResponse response = db.sendParkingCodeToSubscriber(subCode);
+						client.sendToClient(response);
+					} catch (Exception e) {
+						client.sendToClient(new ServerResponse(false, null,
+								"An error occurred while sending your parking code."));
+						System.err.println("Error: sendLostCode - " + e.getMessage());
+					}
+					return;
+				}
 
 				// Check parking availability: ["CheckParkingAvailability"]. ** Author - Ravid
 				// **
@@ -351,6 +351,60 @@ public class Server extends AbstractServer {
 					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));
 					return;
 				}
+				// Expected format: {"TagExists", tag}
+				else if (data.length == 2 && "TagExists".equals(data[0])) {
+					String tag = (String) data[1];
+
+					// Check whether the tag exists in the DB or not
+					if (!db.tagExists(tag)) {
+						client.sendToClient(new ServerResponse(false, null, "Tag does not exists"));
+						return;
+					}
+
+					// The server sends that the tag has been found
+					client.sendToClient(new ServerResponse(true, null, "Tag exists"));
+					return;
+				}
+				// Expected format: {"FindMatchedSubToTheTag", tag}
+				else if (data.length == 2 && "findMatchedSubToTheTag".equals(data[0])) {
+					String tag = (String) data[1];
+
+					// Gathering the subscriber threw the relevant tag of his
+					int subCode = db.seekForTheSubscriberWithTag(tag);
+
+					// The server sends the successful addition of parking event
+					client.sendToClient(new ServerResponse(true, subCode, "Subscriber with matching tag has been found"));
+					return;
+				}
+				// Expected format: {"subscriberAlreadyEntered", codeInt}
+				else if (data.length == 2 && "subscriberAlreadyEntered".equals(data[0])) {
+					int codeInt = (int) data[1];
+
+					if (!db.checkSubscriberEntered(codeInt)) {
+						// The server will check whether the subscriber has already entered his vehicle into the parking lot or not
+						client.sendToClient(new ServerResponse(true, null, "The subscriber didn't entered his vehicle yet"));
+						return;
+					}
+					// If this method will return true, it means that he already entered his vehicle into the parking lot
+					client.sendToClient(new ServerResponse(false, null, "The vehicle is already inside the parking lot"));
+					return;
+				}
+
+				// Expected format: {"tagIdAlreadyEntered", tag}
+				else if (data.length == 2 && "tagIdAlreadyEntered".equals(data[0])) {
+					String tag = (String) data[1];
+
+					if (!db.checkTagIDEntered(tag)) {
+						// The server will check whether the vehicle that is matched with the tag is already inside the parking lot
+						client.sendToClient(new ServerResponse(true, null, "The tag isn't inside"));
+						return;
+					}
+					// If this method will return true, it means that the vehicle that is matched with the tag is already inside the parking lot
+					client.sendToClient(new ServerResponse(false, null, "The vehicle is Already inside the parking lot"));
+					return;
+				}
+
+
 
 			}
 		} catch (IOException e) {
@@ -400,12 +454,12 @@ public class Server extends AbstractServer {
 			int success = db.updateOrderField(orderNumber, field, newValue);
 			switch (success) {
 			case 1 ->
-				client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Parking space updated successfully."));
+			client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Parking space updated successfully."));
 			case 2 -> client.sendToClient(new ServerResponse(false, null, "Failed to update parking space."));
 			case 3 ->
-				client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Order date updated successfully."));
+			client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Order date updated successfully."));
 			case 4 ->
-				client.sendToClient(new ServerResponse(false, null, "Order date cannot be before placement date."));
+			client.sendToClient(new ServerResponse(false, null, "Order date cannot be before placement date."));
 			case 5 -> client.sendToClient(new ServerResponse(false, null, "Failed to update order date."));
 			case 6 -> client.sendToClient(new ServerResponse(false, null, "Order number does not exist."));
 			case 7 -> client.sendToClient(new ServerResponse(false, null, "Order date cannot be in the past."));
