@@ -22,6 +22,8 @@ public class Server extends AbstractServer {
 
 	/** Singleton DB controller used for all database operations */
 	private DBController db;
+	
+	private MailService sendEmail=new MailService();
 
 	/**
 	 * Constructs a new server instance.
@@ -98,11 +100,13 @@ public class Server extends AbstractServer {
 				else if(data.length==2 && "forgotMyParkingCode".equals(data[0])) {
 					System.out.println("forgotMyParkingCode-server");
 					try {
-						System.out.println(((Subscriber) data[1]).getEmail());
-					MailService.sendEmail(((Subscriber) data[1]).getEmail(), "11111");
-					}catch(Exception e) {
-						e.printStackTrace();
-					}
+				        String email = ((Subscriber) data[1]).getEmail();
+				        sendEmail.sendEmail(email, "11111");
+				        client.sendToClient(new ServerResponse(true, null, "The code was sent to your email."));
+				    } catch(Exception e) {
+				        e.printStackTrace();
+				        client.sendToClient(new ServerResponse(false, null, "Failed to send email. Please try again later."));
+				    }
 				}
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
 				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {

@@ -14,10 +14,7 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/OCSF"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/BPark_Common"/>
-	<classpathentry kind="lib" path="C:/Users/Owner_5_23/Downloads/jakarta.mail-2.0.1.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/jakarta.mail-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta.activation-2.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
