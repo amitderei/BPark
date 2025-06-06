@@ -10,7 +10,6 @@ import controllers.EditSubscriberDetailsController;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.MainLayoutController;
-import controllers.OrderViewController;
 import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
 import controllers.VehicleDeliveryController;
@@ -34,7 +33,7 @@ import java.util.ArrayList;
  */
 public class ClientController extends AbstractClient {
 
-	private OrderViewController controller;
+
 	private LoginController loginController;
 	private VehiclePickupController pickupController;
 	private GuestMainController guestMainController;
@@ -62,14 +61,7 @@ public class ClientController extends AbstractClient {
 		super(host, port);
 	}
 
-	/**
-	 * Sets the OrderViewController used to update order data on screen.
-	 *
-	 * @param orderViewController the order screen controller
-	 */
-	public void setController(OrderViewController orderViewController) {
-		this.controller = orderViewController;
-	}
+
 
 	/**
 	 * set the password in order to reduce I/O
@@ -84,10 +76,7 @@ public class ClientController extends AbstractClient {
 		return password;
 	}
 
-	/** @return the active order controller */
-	public OrderViewController getController() {
-		return controller;
-	}
+
 
 	public WatchAndCancelOrdersController getWatchAndCancelOrdersController() {
 		return watchAndCancelOrdersController;
@@ -248,17 +237,6 @@ public class ClientController extends AbstractClient {
 				editSubscriberDetailsController.handleGoToView();
 			}
 			
-			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && !dataList.isEmpty()
-					&& dataList.get(0) instanceof Order) {
-				ArrayList<Order> orders = (ArrayList<Order>) dataList;
-				if (controller != null) {
-					controller.displayOrders(orders);
-				}
-				return;
-			} else if (controller != null) {
-				UiUtils.setStatus(controller.getStatusLabel(), response.getMsg(), response.isSucceed());
-			}
-
 			// General error message popup (only if not handled before)
 			if (!response.isSucceed()) {
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
@@ -419,48 +397,12 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	/** Requests all orders from the server. */
-	public void requestAllOrders() {
-		try {
-			sendToServer(new Object[] { "getAllOrders" });
-			if (controller != null)
-				UiUtils.setStatus(controller.getStatusLabel(), "Orders loaded successfully", true);
-		} catch (IOException e) {
-			System.err.println("Failed to send 'getAllOrders' request: " + e.getMessage());
-		}
-	}
 
-	/**
-	 * Requests a specific order by ID.
-	 *
-	 * @param orderNumber the order ID
-	 */
-	public void requestOrderByOrderNum(int orderNumber) {
-		try {
-			sendToServer(new Object[] { "getOrder", orderNumber });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'getOrder' request: " + e.getMessage());
-		}
-	}
 
-	/**
-	 * Sends an update for a specific field in an order.
-	 *
-	 * @param orderNumber the order ID
-	 * @param field       the field to update
-	 * @param newValue    the new value to set
-	 */
-	public void updateOrder(int orderNumber, String field, String newValue) {
-		try {
-			sendToServer(new Object[] { "updateOrder", orderNumber, field, newValue });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'updateOrder' request: " + e.getMessage());
-		}
-	}
+
 
 	public void checkAvailability(Date date, Time time) {
 		try {
-			System.out.println("checkAvailability-client");
 			sendToServer(new Object[] { "checkAvailability", date, time });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'checkAvailability' request to server: " + e.getMessage());

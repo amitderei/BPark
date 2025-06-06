@@ -67,28 +67,9 @@ public class Server extends AbstractServer {
 					return;
 				}
 
-				// Get all orders: ["getAllOrders"]
-				else if (data.length == 1 && "getAllOrders".equals(data[0])) {
-					ArrayList<Order> orders = db.getAllOrders();
-					if (orders.isEmpty()) {
-						client.sendToClient(new ServerResponse(false, null, "There are no orders in the system"));
-					} else {
-						client.sendToClient(new ServerResponse(true, orders, "Orders are displayed successfully."));
-					}
-					return;
-				}
+			
 
-				// Get single order: ["getOrder", orderNumber]
-				else if (data.length == 2 && "getOrder".equals(data[0])) {
-					int orderNumber = (int) data[1];
-					ArrayList<Order> list = db.orderExists(orderNumber);
-					if (list.isEmpty()) {
-						client.sendToClient(new ServerResponse(false, null, "No order with this number exists."));
-					} else {
-						client.sendToClient(new ServerResponse(true, list, "Order displayed successfully."));
-					}
-					return;
-				}
+		
 
 				//get all reservations of subscriber
 				else if (data.length==2 && "askForReservations".equals(data[0])){
@@ -124,11 +105,7 @@ public class Server extends AbstractServer {
 					}
 				}
 
-				// Update order: ["updateOrder", orderNumber, field, newValue]
-				else if (data.length == 4 && "updateOrder".equals(data[0])) {
-					handleUpdateOrder(data, client);
-					return;
-				}
+			
 
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
 				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
@@ -438,41 +415,7 @@ public class Server extends AbstractServer {
 		}
 	}
 
-	/**
-	 * Handles an order update request.
-	 *
-	 * @param data   the message parts: ["updateOrder", orderNumber, field,
-	 *               newValue]
-	 * @param client the requesting client
-	 */
-	private void handleUpdateOrder(Object[] data, ConnectionToClient client) {
-		int orderNumber = (int) data[1];
-		String field = (String) data[2];
-		String newValue = (String) data[3];
-
-		try {
-			int success = db.updateOrderField(orderNumber, field, newValue);
-			switch (success) {
-			case 1 ->
-			client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Parking space updated successfully."));
-			case 2 -> client.sendToClient(new ServerResponse(false, null, "Failed to update parking space."));
-			case 3 ->
-			client.sendToClient(new ServerResponse(true, db.getAllOrders(), "Order date updated successfully."));
-			case 4 ->
-			client.sendToClient(new ServerResponse(false, null, "Order date cannot be before placement date."));
-			case 5 -> client.sendToClient(new ServerResponse(false, null, "Failed to update order date."));
-			case 6 -> client.sendToClient(new ServerResponse(false, null, "Order number does not exist."));
-			case 7 -> client.sendToClient(new ServerResponse(false, null, "Order date cannot be in the past."));
-			}
-
-		} catch (Exception ex) {
-			try {
-				client.sendToClient(new ServerResponse(false, null, "Update failed: " + ex.getMessage()));
-			} catch (IOException e) {
-				System.err.println("Error sending update response: " + e.getMessage());
-			}
-		}
-	}
+	
 
 	/**
 	 * Logs new client connections.
