@@ -110,31 +110,49 @@ public class Server extends AbstractServer {
 				}
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
 				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
-					String tagId = (String) data[1];
-					int subscriberCode = db.getSubscriberCodeByTag(tagId);
+				    String tagId = (String) data[1];
+				    int subscriberCode = db.getSubscriberCodeByTag(tagId);
 
-					if (subscriberCode > 0) {
-						// Return subscriberCode in response so client can continue with pickup flow
-						client.sendToClient(new ServerResponse(true, subscriberCode,
-								"Subscriber verified successfully by tag."));
-					} else {
-						client.sendToClient(new ServerResponse(false, null,
-								"Tag ID not recognized. Please try again."));
-					}
-					return;
+				    // Step 1: Check if tag is known
+				    if (subscriberCode > 0) {
+				        // Step 2: Ensure that the vehicle associated with this tag is inside the parking lot
+				        if (!db.checkSubscriberEntered(subscriberCode)) {
+				            client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+				            return;
+				        }
+
+				        // Step 3: Valid tag and active parking → send subscriber code for client use
+				        client.sendToClient(new ServerResponse(true, subscriberCode,
+				                "Subscriber verified successfully by tag."));
+				    } else {
+				        client.sendToClient(new ServerResponse(false, null,
+				                "Tag ID not recognized. Please try again."));
+				    }
+				    return;
 				}
+
 
 				// Validate subscriber by numeric code: ["validateSubscriber", subscriberCode]
 				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
-					int subscriberCode = (int) data[1];
+				    int subscriberCode = (int) data[1];
 
-					if (!db.subscriberExists(subscriberCode)) {
-						client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
-					} else {
-						client.sendToClient(new ServerResponse(true, null, "Subscriber verified")); 
-					}
-					return;
+				    // Step 1: Verify that subscriber exists in DB
+				    if (!db.subscriberExists(subscriberCode)) {
+				        client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
+				        return;
+				    }
+
+				    // Step 2: Check that the subscriber's vehicle is currently parked (active session)
+				    if (!db.checkSubscriberEntered(subscriberCode)) {
+				        client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+				        return;
+				    }
+
+				    // Step 3: If both checks pass, approve validation
+				    client.sendToClient(new ServerResponse(true, null, "Subscriber verified"));
+				    return;
 				}
+
 
 				// Login request: ["login", username, password]
 				else if (data.length == 3 && "login".equals(data[0])) {
