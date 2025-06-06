@@ -12,7 +12,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class WatchAndCancelOrdersController {
+public class WatchAndCancelOrdersController implements ClientAware{
 
 	@FXML
 	private Label headline;

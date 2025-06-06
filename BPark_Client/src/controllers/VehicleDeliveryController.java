@@ -45,7 +45,7 @@ import javafx.scene.control.Label;
  * 
  */
 
-public class VehicleDeliveryController {
+public class VehicleDeliveryController implements ClientAware{
 
 	/**SUBSCRIBER CODE CHECKINGS AND VISIBILITY TOGGLINGS**/
 	@FXML

@@ -13,7 +13,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import ui.UiUtils;
 
-public class MainLayoutController {
+public class MainLayoutController implements ClientAware{
 	@FXML
 	private Button btnHome;
 	@FXML

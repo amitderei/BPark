@@ -33,7 +33,6 @@ import java.util.ArrayList;
  */
 public class ClientController extends AbstractClient {
 
-
 	private LoginController loginController;
 	private VehiclePickupController pickupController;
 	private GuestMainController guestMainController;
@@ -61,8 +60,6 @@ public class ClientController extends AbstractClient {
 		super(host, port);
 	}
 
-
-
 	/**
 	 * set the password in order to reduce I/O
 	 * 
@@ -76,8 +73,6 @@ public class ClientController extends AbstractClient {
 		return password;
 	}
 
-
-
 	public WatchAndCancelOrdersController getWatchAndCancelOrdersController() {
 		return watchAndCancelOrdersController;
 	}
@@ -85,9 +80,9 @@ public class ClientController extends AbstractClient {
 	public void setWatchAndCancelOrdersController(WatchAndCancelOrdersController watchAndCancelOrdersController) {
 		this.watchAndCancelOrdersController = watchAndCancelOrdersController;
 	}
-	
+
 	public void setViewParkingHistoryController(ViewParkingHistoryController viewParkingHistoryController) {
-		this.viewParkingHistoryController=viewParkingHistoryController;
+		this.viewParkingHistoryController = viewParkingHistoryController;
 	}
 
 	/**
@@ -97,6 +92,14 @@ public class ClientController extends AbstractClient {
 	 */
 	public void setLoginController(LoginController loginController) {
 		this.loginController = loginController;
+	}
+
+	public void setGuestController(GuestMainController controller) {
+		this.guestMainController = controller;
+	}
+
+	public void setSubscriberMainController(SubscriberMainController controller) {
+		this.subscriberMainController = controller;
 	}
 
 	/**
@@ -120,8 +123,6 @@ public class ClientController extends AbstractClient {
 	public void setGuestMainController(GuestMainController guestMainController) {
 		this.guestMainController = guestMainController;
 	}
-	
-	
 
 	public void setEditSubscriberDetailsController(EditSubscriberDetailsController editSubscriberDetailsController) {
 		this.editSubscriberDetailsController = editSubscriberDetailsController;
@@ -191,16 +192,23 @@ public class ClientController extends AbstractClient {
 
 		Platform.runLater(() -> {
 
-			if (response.isSucceed() && response.getData() instanceof User user) {
-				if (loginController != null) {
-					loginController.handleLoginSuccess(user);
-				}
-				return;
-			} else if (!response.isSucceed() && loginController != null
+			if (!response.isSucceed() && loginController != null
 					&& response.getMsg().toLowerCase().contains("invalid")) {
 				loginController.handleLoginFailure(response.getMsg());
 				return;
 			}
+			
+			// General error message popup (only if not handled before)
+			if (!response.isSucceed()) {
+				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+			}
+			
+			else if (response.isSucceed() && response.getData() instanceof User user) {
+				if (loginController != null) {
+					loginController.handleLoginSuccess(user);
+				}
+				return;
+			} 
 
 			// update the table after deleting order
 			else if (response.isSucceed() && response.getMsg().equals("order deleted successfully.")) {
@@ -208,16 +216,15 @@ public class ClientController extends AbstractClient {
 					askForReservations();
 				}
 			}
-			
-			else if (response.isSucceed()&& response.getMsg().equals("Parking history data loaded successfully.")) {
-				if (viewParkingHistoryController!=null) {
+
+			else if (response.isSucceed() && response.getMsg().equals("Parking history data loaded successfully.")) {
+				if (viewParkingHistoryController != null) {
 					viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
 				}
 			}
 			// display orders of subscriber in table
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
-					&& response.getMsg().equals("Orders of subscriber displayed successfully.")
-					&& dataList.get(0) instanceof Order) {
+					&& response.getMsg().equals("Orders of subscriber displayed successfully.")) {
 				ArrayList<Order> orders = (ArrayList<Order>) dataList;
 				if (watchAndCancelOrdersController != null) {
 					watchAndCancelOrdersController.displayOrders(orders);
@@ -226,9 +233,9 @@ public class ClientController extends AbstractClient {
 			}
 
 			else if (response.isSucceed() && response.getMsg().equals("Details updated successfully.")) {
-				ArrayList<Object> newDetails=(ArrayList<Object>) response.getData();
-				if(newDetails.get(0) instanceof Subscriber) {
-					setSubscriber((Subscriber)newDetails.get(0));
+				ArrayList<Object> newDetails = (ArrayList<Object>) response.getData();
+				if (newDetails.get(0) instanceof Subscriber) {
+					setSubscriber((Subscriber) newDetails.get(0));
 					newDetails.remove(0);
 				}
 				if (!newDetails.isEmpty()) {
@@ -236,13 +243,8 @@ public class ClientController extends AbstractClient {
 				}
 				editSubscriberDetailsController.handleGoToView();
 			}
-			
-			// General error message popup (only if not handled before)
-			if (!response.isSucceed()) {
-				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
-			}
 
-			if (pickupController != null) {
+			else if (pickupController != null) {
 				UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
 				if (response.isSucceed()) {
@@ -348,33 +350,34 @@ public class ClientController extends AbstractClient {
 				if (response.getMsg().toLowerCase().contains("added parking event successfully")) {
 					newDeliveryController.successfulDelivery();
 				}
-				
+
 				// 12 - handle existing tag
 				if (response.getMsg().toLowerCase().contains("tag exists")) {
 					newDeliveryController.tagFound();
 				}
-				
+
 				// 13 - handle tag doesn't exists
 				if (response.getMsg().toLowerCase().contains("tag does not exists")) {
 					newDeliveryController.tagNotFound();
 				}
-				
-				// 14 - handle subscriber found by a tag, deliver the vehicle with a parking event creation
+
+				// 14 - handle subscriber found by a tag, deliver the vehicle with a parking
+				// event creation
 				if (response.getMsg().toLowerCase().contains("subscriber with matching tag has been found")) {
 					int subCode = (int) response.getData();
 					newDeliveryController.subCodeFuture.complete(subCode);
 				}
-				
+
 				// 15 - handle subscriber isn't inside the parking lot
 				if (response.getMsg().toLowerCase().contains("the subscriber didn't entered his vehicle yet")) {
 					newDeliveryController.checkIfTheresReservation();
 				}
-							
+
 				// 16 - handle vehicle with the matched tagId isn't inside the parking lot
 				if (response.getMsg().toLowerCase().contains("the tag isn't inside")) {
 					newDeliveryController.findMatchedSubToTheTag();
 				}
-	
+
 				// 17 - handle subscriber is already inside the parking lot
 				if (response.getMsg().toLowerCase().contains("the vehicle is already inside the parking lot")) {
 					newDeliveryController.vehicleIsAlreadyInside();
@@ -396,10 +399,6 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'addNewOrder' request to server: " + e.getMessage());
 		}
 	}
-
-
-
-
 
 	public void checkAvailability(Date date, Time time) {
 		try {
@@ -501,14 +500,6 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	public void setGuestController(GuestMainController controller) {
-		this.guestMainController = controller;
-	}
-
-	public void setSubscriberMainController(SubscriberMainController controller) {
-		this.subscriberMainController = controller;
-	}
-
 	/**
 	 * send to server the user to get the subscriber details.
 	 * 
@@ -546,26 +537,27 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'deleteOrder' request: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * the function send to server the command, subscriber details and user details
+	 * 
 	 * @param subscriber- the new details of subscriber
-	 * @param user- the new details of user
+	 * @param user-       the new details of user
 	 */
 	public void updateDetailsOfSubscriber(Subscriber subscriber, User user) {
 		try {
-			sendToServer(new Object[] { "updateDetailsOfSubscriber", subscriber, user});
+			sendToServer(new Object[] { "updateDetailsOfSubscriber", subscriber, user });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateDetailsOfSubscriber' request: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * the function send to server the command, subscriber details
 	 */
 	public void updateParkingHistoryOfSubscriber() {
 		try {
-			sendToServer(new Object[] { "updateParkingHistoryOfSubscriber", subscriber});
+			sendToServer(new Object[] { "updateParkingHistoryOfSubscriber", subscriber });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}

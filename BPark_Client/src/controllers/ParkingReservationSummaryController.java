@@ -10,7 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
-public class ParkingReservationSummaryController {
+public class ParkingReservationSummaryController implements ClientAware{
 
 	@FXML
 	private Label headline;

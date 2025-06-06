@@ -16,7 +16,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class ViewParkingHistoryController {
+public class ViewParkingHistoryController implements ClientAware{
 	@FXML
 	private Label headline;
 	

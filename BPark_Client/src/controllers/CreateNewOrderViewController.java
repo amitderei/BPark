@@ -29,7 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class CreateNewOrderViewController {
+public class CreateNewOrderViewController implements ClientAware{
 
 	@FXML
 	private Label headlineParkingReservation; // headline

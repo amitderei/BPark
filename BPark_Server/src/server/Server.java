@@ -61,16 +61,6 @@ public class Server extends AbstractServer {
 					return;
 				}
 
-				// Login request: ["login", username, password]
-				else if (data.length == 3 && "login".equals(data[0])) {
-					handleLogin(data, client);
-					return;
-				}
-
-			
-
-		
-
 				//get all reservations of subscriber
 				else if (data.length==2 && "askForReservations".equals(data[0])){
 					ArrayList<Order> orders=db.returnReservationOfSubscriber((Subscriber)data[1]);
@@ -135,7 +125,11 @@ public class Server extends AbstractServer {
 					return;
 				}
 
-
+				// Login request: ["login", username, password]
+				else if (data.length == 3 && "login".equals(data[0])) {
+					handleLogin(data, client);
+					return;
+				}
 
 				// Collect car: ["collectCar", subscriberCode, parkingCode]
 				else if (data.length == 3 && "collectCar".equals(data[0])) {

@@ -13,7 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import ui.UiUtils;
 
-public class EditSubscriberDetailsController {
+public class EditSubscriberDetailsController implements ClientAware{
 	@FXML
 	private Label headline;
 

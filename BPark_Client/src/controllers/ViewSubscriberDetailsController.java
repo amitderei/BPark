@@ -6,7 +6,7 @@ import common.Subscriber;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-public class ViewSubscriberDetailsController {
+public class ViewSubscriberDetailsController implements ClientAware{
 	@FXML
 	private Label headline;
 	
