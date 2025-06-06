@@ -14,11 +14,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.VehicleDeliveryController">
     <children>
-     <Button fx:id="btnBack" text="Back" onAction="#handleBackClick"
-        AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" />
 
-   <Button fx:id="btnExit" text="Exit" onAction="#exitFromDelivery" 
-        AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
 
 	        
         <GridPane layoutX="10.0" layoutY="9.0" prefHeight="480.0" prefWidth="780.0">
@@ -60,5 +56,10 @@
             <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="244.0" text=" " visible="false" GridPane.rowIndex="10" />
             </children>
         </GridPane>
+         <Button fx:id="btnBack" text="Back" onAction="#handleBackClick"
+        AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" />
+
+   <Button fx:id="btnExit" text="Exit" onAction="#exitFromDelivery" 
+        AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
     </children>
 </AnchorPane>
