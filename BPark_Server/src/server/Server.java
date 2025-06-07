@@ -98,9 +98,11 @@ public class Server extends AbstractServer {
 					}
 				}
 				else if(data.length==2 && "forgotMyParkingCode".equals(data[0])) {
-					System.out.println("forgotMyParkingCode-server");
 					try {
-				        String email = ((Subscriber) data[1]).getEmail();
+						String[] emailAndPhone=db.getEmailAndPhoneNumber((int) data[1]);
+						String email=emailAndPhone[0];
+						String phone=emailAndPhone[1];
+				       
 				        sendEmail.sendEmail(email, "11111");
 				        client.sendToClient(new ServerResponse(true, null, "The code was sent to your email."));
 				    } catch(Exception e) {

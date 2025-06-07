@@ -166,7 +166,7 @@ public class VehiclePickupController implements ClientAware {
     }
     
     public void forgotMyCode() {
-    	client.forgotMyParkingCode();
+    	client.forgotMyParkingCode(validatedSubscriberCode);
     }
 }
 

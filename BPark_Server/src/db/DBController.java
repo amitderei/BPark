@@ -1055,4 +1055,22 @@ public class DBController {
 		}
 	}
 	
+	
+	public String[] getEmailAndPhoneNumber(int subscriberCode) {
+		String query="SELECT phoneNumber, email FROM subscriber WHERE subscriberCode=?";
+		String[] arrayForPhoneAndEmail=new String[2];
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subscriberCode);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				arrayForPhoneAndEmail[0]= rs.getString("email");
+				arrayForPhoneAndEmail[1]=rs.getString("phoneNumner");
+				return arrayForPhoneAndEmail;
+			}
+		} catch (SQLException e) {
+			System.out.println("Error finding email and phone number: "+e.getMessage());
+		}
+		return null;
+	}
+	
 }
