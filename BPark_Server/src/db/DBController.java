@@ -1064,7 +1064,7 @@ public class DBController {
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				arrayForPhoneAndEmail[0]= rs.getString("email");
-				arrayForPhoneAndEmail[1]=rs.getString("phoneNumner");
+				arrayForPhoneAndEmail[1]=rs.getString("phoneNumber");
 				return arrayForPhoneAndEmail;
 			}
 		} catch (SQLException e) {
