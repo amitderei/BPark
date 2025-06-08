@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.List;
 
 import common.Order;
 import common.ParkingEvent;
@@ -416,6 +417,21 @@ public class Server extends AbstractServer {
 					// If this method will return true, it means that the vehicle that is matched with the tag is already inside the parking lot
 					client.sendToClient(new ServerResponse(false, null, "The vehicle is Already inside the parking lot"));
 					return;
+				}
+				
+				// return all subscribers and their late pickup counts
+				else if (data.length == 1 && "get_all_subscribers".equals(data[0])) {
+				    System.out.println("[SERVER] Received get_all_subscribers request");
+				    ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
+				    client.sendToClient(new ServerResponse(true, rows, "all_subscribers"));
+				    return;
+				}
+				
+				// “get_active_parkings” → returns List<ParkingEvent>
+				else if (data.length == 1 && "get_active_parkings".equals(data[0])) {
+				    List<ParkingEvent> events = db.getActiveParkingEvents();
+				    client.sendToClient(new ServerResponse(true, events, "active_parkings"));
+				    return;
 				}
 
 

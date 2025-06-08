@@ -105,6 +105,7 @@ public class LoginController implements ClientAware {
 			}
 			// Extra data per role
 			if (ctrl instanceof StaffMainController staff) {
+				staff.setClient(client);
 				staff.setUser(user);
 			}
 

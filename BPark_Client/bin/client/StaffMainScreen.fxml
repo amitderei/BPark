@@ -27,8 +27,13 @@
 
             <!-- manager & attendant -->
             <Button text="Register Users" onAction="#handleRegisterUsers" />
-            <Button text="View Subscriber Info" onAction="#handleViewSubscriberInfo" />
-            <Button text="View Active Parkings" onAction="#handleViewActiveParkings" />
+			<Button fx:id="btnViewSubscriberInfo"
+			        text="View Subscriber Info"
+			        onAction="#handleViewSubscriberInfo"/>
+
+			<Button fx:id="btnViewActiveParkings"
+			        text="View Active Parkings"
+			        onAction="#handleViewActiveParkings"/>
 
             <!-- manager only  -->
             <Button fx:id="parkingReportButton" text="View Parking Time Report" onAction="#handleViewParkingReport" />

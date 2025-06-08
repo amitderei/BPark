@@ -4,10 +4,15 @@ import client.ClientController;
 import common.User;
 import common.UserRole;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import ui.UiUtils;
+import java.io.IOException;
 
 /**
  * Controller for the shared staff main screen (Attendant & Manager).
@@ -24,6 +29,12 @@ public class StaffMainController implements ClientAware {
     // Manager-only buttons
     @FXML private Button parkingReportButton;
     @FXML private Button subscriberReportButton;
+    
+    @FXML
+    private Button btnViewSubscriberInfo;
+    
+    @FXML
+    private Button btnViewActiveParkings;
 
     /* -------------------------------------------------------------
      * Runtime fields
@@ -83,8 +94,24 @@ public class StaffMainController implements ClientAware {
      * ------------------------------------------------------------- */
 
     @FXML private void handleRegisterUsers()        { UiUtils.showAlert("Register",      "Register users functionality.",        Alert.AlertType.INFORMATION); }
-    @FXML private void handleViewSubscriberInfo()   { UiUtils.showAlert("Subscribers",   "Viewing subscriber information.",      Alert.AlertType.INFORMATION); }
-    @FXML private void handleViewActiveParkings()   { UiUtils.showAlert("Active",        "Viewing active parkings.",             Alert.AlertType.INFORMATION); }
+
+    @FXML
+    private void handleViewSubscriberInfo() {
+    	UiUtils.loadScreen(btnViewSubscriberInfo,
+                "/client/ViewSubscribersInfoScreen.fxml",
+                "Subscribers",
+                client);
+
+    }
+
+    @FXML
+    private void handleViewActiveParkings() {
+        UiUtils.loadScreen(btnViewActiveParkings,
+                           "/client/ViewActiveParkingsScreen.fxml",
+                           "Active Parkings",
+                           client);
+    }
+    
     @FXML private void handleViewParkingReport()    { UiUtils.showAlert("Report",        "Viewing parking time report.",         Alert.AlertType.INFORMATION); }
     @FXML private void handleViewSubscriberReport() { UiUtils.showAlert("Report",        "Viewing subscriber status report.",    Alert.AlertType.INFORMATION); }
 }

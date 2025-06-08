@@ -17,6 +17,8 @@ import controllers.VehiclePickupController;
 import controllers.ViewParkingHistoryController;
 import controllers.ViewSubscriberDetailsController;
 import controllers.WatchAndCancelOrdersController;
+import controllers.ViewSubscribersInfoController;
+import controllers.ViewActiveParkingsController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import ocsf.client.AbstractClient;
@@ -26,6 +28,9 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handles network communication between the BPARK client and server. Wraps
@@ -45,6 +50,8 @@ public class ClientController extends AbstractClient {
 	private ViewSubscriberDetailsController viewSubscriberDetailsController;
 	private EditSubscriberDetailsController editSubscriberDetailsController;
 	private ViewParkingHistoryController viewParkingHistoryController;
+	private ViewSubscribersInfoController viewSubscribersInfoController;
+	private ViewActiveParkingsController viewActiveParkingsController;
 
 	private Subscriber subscriber;
 
@@ -100,6 +107,14 @@ public class ClientController extends AbstractClient {
 
 	public void setSubscriberMainController(SubscriberMainController controller) {
 		this.subscriberMainController = controller;
+	}
+	
+	public void setViewActiveParkingsController(ViewActiveParkingsController controller) {
+	    this.viewActiveParkingsController = controller;
+	}
+	
+	public void setViewSubscribersInfoController(ViewSubscribersInfoController c) {
+	    this.viewSubscribersInfoController = c;
 	}
 
 	/**
@@ -287,6 +302,40 @@ public class ClientController extends AbstractClient {
 
 			if (response.isSucceed() && response.getData() instanceof Subscriber) {
 				setSubscriber((Subscriber) response.getData());
+			}
+			
+			// "all_subscribers"  rows = List<Object[]> { [0]=Subscriber , [1]=Integer lateCount }
+			if (response.isSucceed() && "all_subscribers".equals(response.getMsg())) {
+
+			    ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
+
+			    System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
+
+			    List<Subscriber> subs = new ArrayList<>();
+			    Map<Subscriber, Integer> lateMap = new HashMap<>();
+
+			    for (Object[] r : rows) {
+			        Subscriber s = (Subscriber) r[0];
+			        int late = (Integer) r[1];
+			        subs.add(s);
+			        lateMap.put(s, late);
+			        System.out.println(" -> " + s.getUsername() + ", late: " + late);
+			    }
+
+			    if (viewSubscribersInfoController != null)
+			        viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
+
+			    return; // handled
+			}
+			
+			// staff -view current active parking events
+			if (response.isSucceed() && "active_parkings".equals(response.getMsg())) {
+			    ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
+
+			    if (viewActiveParkingsController != null)
+			        viewActiveParkingsController.onActiveParkingsReceived(events);
+
+			    return; // handled
 			}
 
 			// Vehicle delivery screen updates
@@ -569,6 +618,33 @@ public class ClientController extends AbstractClient {
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}
+	}
+	
+    /**
+     * Requests a list of all subscribers and their late pickup counts.
+     * Used in staff views for monitoring subscriber activity.
+     */
+    public void requestAllSubscribers() {
+
+	    try {
+	        System.out.println("[DEBUG] Sending 'get_all_subscribers' to server");
+	        sendToServer(new Object[] { "get_all_subscribers" });
+	    } catch (IOException e) {
+	        System.err.println("Failed to send 'get_all_subscribers' request: " + e.getMessage());
+	    }
+	}
+	
+    /**
+     * Requests a list of all active parking events (vehicles currently inside).
+     * Used by staff to monitor current parking activity.
+     */
+    public void requestActiveParkingEvents() {
+	    try {
+	        sendToServer(new Object[] { "get_active_parkings" });
+	    } catch (IOException e) {
+	        System.err.println("Failed to send request for active parking events.");
+	        e.printStackTrace();
+	    }
 	}
 
 }

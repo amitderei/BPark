@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.List;
 
 import common.*;
 
@@ -1075,6 +1076,115 @@ public class DBController {
 			System.out.println("Error finding email and phone number: "+e.getMessage());
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns every subscriber plus a computed “late” count.
+	 *
+	 * Late =  (duration > 8 h)  OR  (duration > 4 h AND wasExtended = FALSE)
+	 *
+	 * @return List<Object[]> where
+	 *         index 0 → Subscriber,  index 1 → Integer lateCount
+	 */
+	public List<Object[]> getAllSubscribersWithLateCount() {
+	    final String sql =
+	        """
+	        SELECT s.subscriberCode,
+	               s.userId,
+	               s.firstName,
+	               s.lastName,
+	               s.phoneNumber,
+	               s.email,
+	               s.username,
+	               s.tagId,
+	               COALESCE(l.late_cnt, 0) AS late_count
+	        FROM   bpark.subscriber AS s
+	        LEFT JOIN (
+	            SELECT subscriberCode,
+	                   COUNT(*) AS late_cnt
+	            FROM   bpark.parkingEvent
+	            WHERE  exitDate IS NOT NULL
+	              AND (
+	                   TIMESTAMPDIFF(
+	                     HOUR,
+	                     TIMESTAMP(entryDate, entryHour),
+	                     TIMESTAMP(exitDate, exitHour)
+	                   ) > 8
+	                 OR (
+	                     wasExtended = FALSE
+	                     AND TIMESTAMPDIFF(
+	                           HOUR,
+	                           TIMESTAMP(entryDate, entryHour),
+	                           TIMESTAMP(exitDate, exitHour)
+	                        ) > 4
+	                 )
+	              )
+	            GROUP BY subscriberCode
+	        ) AS l USING (subscriberCode)
+	        ORDER BY s.subscriberCode;
+	        """;
+
+	    List<Object[]> result = new ArrayList<>();
+
+	    try (PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            Subscriber sub = new Subscriber(
+	                rs.getInt("subscriberCode"),
+	                rs.getString("userId"),
+	                rs.getString("firstName"),
+	                rs.getString("lastName"),
+	                rs.getString("phoneNumber"),
+	                rs.getString("email"),
+	                rs.getString("username"),
+	                rs.getString("tagId")
+	            );
+
+	            int lateCount = rs.getInt("late_count");
+	            result.add(new Object[] { sub, lateCount });
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace(); // replace with proper logging if required
+	    }
+	    return result;
+	}
+	
+	/**
+	 * Retrieves all active (open) parking events from the database.
+	 * Active events are those that have no recorded exit date/time.
+	 *
+	 * @return a list of ParkingEvent objects
+	 */
+	public List<ParkingEvent> getActiveParkingEvents() {
+	    List<ParkingEvent> list = new ArrayList<>();
+
+	    String sql = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND exitHour IS NULL";
+
+	    try (PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            ParkingEvent event = new ParkingEvent();
+
+	            event.setEventId(rs.getInt("eventId"));
+	            event.setSubscriberCode(rs.getInt("subscriberCode"));
+	            event.setParkingSpace(rs.getInt("parking_space"));
+	            event.setEntryDate(rs.getDate("entryDate").toLocalDate());
+	            event.setEntryTime(rs.getTime("entryHour").toLocalTime()); // משתלב עם setEntryTime
+	            event.setWasExtended(rs.getBoolean("wasExtended"));
+	            event.setLot(rs.getString("nameParkingLot"));
+	            event.setVehicleID(rs.getString("vehicleId"));
+	            event.setParkingCode(rs.getString("parkingCode"));
+
+	            list.add(event);
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error retrieving active parking events: " + e.getMessage());
+	    }
+
+	    return list;
 	}
 	
 }
