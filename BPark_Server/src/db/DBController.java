@@ -1017,24 +1017,21 @@ public class DBController {
 	}
 	
 	/**
-	 * Returns the parking code if the subscriber has an active parking event.
-	 * If the subscriber is not currently parked, returns -1.
-	 *
-	 * @param subscriberCode the subscriber's numeric code
-	 * @return the parking code, or -1 if vehicle is not currently parked
+	 * Checks whether the subscriber already has entered his vehicle into the parking lot
+	 * If he entered already return true, otherwise return false
 	 */
-	public int getParkingCodeIfEntered(int subscriberCode) {
-		String query = "SELECT parkingCode FROM bpark.parkingevent WHERE subscriberCode = ? AND exitHour IS NULL";
+	public boolean checkSubscriberEntered(int codeInt) {
+		String query = "SELECT * FROM bpark.parkingevent WHERE subscriberCode = ? AND exitHour IS NULL";
+
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, subscriberCode);
+			stmt.setInt(1, codeInt);
 			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
-				return rs.getInt("parkingCode");
-			}
+			return rs.next(); // if any row is returned, subscriber is inside
 		} catch (SQLException e) {
+			// If there is no subscriber code in the table it means that he didn't entered yet and the method will return false
 			e.printStackTrace();
+			return false;
 		}
-		return -1;
 	}
 
 	

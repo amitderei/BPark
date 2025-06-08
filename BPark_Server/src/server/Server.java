@@ -113,53 +113,48 @@ public class Server extends AbstractServer {
 				}
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
 				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
-					String tagId = (String) data[1];
-					int subscriberCode = db.getSubscriberCodeByTag(tagId);
+				    String tagId = (String) data[1];
+				    int subscriberCode = db.getSubscriberCodeByTag(tagId);
 
-					// Check if tag exists in system
-					if (subscriberCode > 0) {
-						// Check if vehicle is currently parked
-						int parkingCode = db.getParkingCodeIfEntered(subscriberCode);
+				    // Step 1: Check if tag is known
+				    if (subscriberCode > 0) {
+				        // Step 2: Ensure that the vehicle associated with this tag is inside the parking lot
+				        if (!db.checkSubscriberEntered(subscriberCode)) {
+				            client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+				            return;
+				        }
 
-						// If not parked, return error
-						if (parkingCode == -1) {
-							client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
-							return;
-						}
-
-						// Tag is valid and vehicle is inside → allow subscriber to continue
-						client.sendToClient(new ServerResponse(true, subscriberCode,
-								"Subscriber verified successfully by tag."));
-					} else {
-						// Tag not recognized
-						client.sendToClient(new ServerResponse(false, null,
-								"Tag ID not recognized. Please try again."));
-					}
-					return;
+				        // Step 3: Valid tag and active parking → send subscriber code for client use
+				        client.sendToClient(new ServerResponse(true, subscriberCode,
+				                "Subscriber verified successfully by tag."));
+				    } else {
+				        client.sendToClient(new ServerResponse(false, null,
+				                "Tag ID not recognized. Please try again."));
+				    }
+				    return;
 				}
 
 
 
 				// Validate subscriber by numeric code: ["validateSubscriber", subscriberCode]
 				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
-					int subscriberCode = (int) data[1];
+				    int subscriberCode = (int) data[1];
 
-					// First check if subscriber exists
-					if (!db.subscriberExists(subscriberCode)) {
-						client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
-						return;
-					}
+				    // Step 1: Verify that subscriber exists in DB
+				    if (!db.subscriberExists(subscriberCode)) {
+				        client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
+				        return;
+				    }
 
-					// Then check if vehicle is currently inside
-					int parkingCode = db.getParkingCodeIfEntered(subscriberCode);
-					if (parkingCode == -1) {
-						client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
-						return;
-					}
+				    // Step 2: Check that the subscriber's vehicle is currently parked (active session)
+				    if (!db.checkSubscriberEntered(subscriberCode)) {
+				        client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+				        return;
+				    }
 
-					// All checks passed – approve subscriber
-					client.sendToClient(new ServerResponse(true, null, "Subscriber verified"));
-					return;
+				    // Step 3: If both checks pass, approve validation
+				    client.sendToClient(new ServerResponse(true, null, "Subscriber verified"));
+				    return;
 				}
 
 
@@ -390,16 +385,12 @@ public class Server extends AbstractServer {
 				else if (data.length == 2 && "subscriberAlreadyEntered".equals(data[0])) {
 					int codeInt = (int) data[1];
 
-					// Check if there's an active parking event for this subscriber
-					int parkingCode = db.getParkingCodeIfEntered(codeInt);
-
-					// If not parked – allow entry
-					if (parkingCode == -1) {
-						client.sendToClient(new ServerResponse(true, null, "The subscriber didn't enter his vehicle yet"));
+					if (!db.checkSubscriberEntered(codeInt)) {
+						// The server will check whether the subscriber has already entered his vehicle into the parking lot or not
+						client.sendToClient(new ServerResponse(true, null, "The subscriber didn't entered his vehicle yet"));
 						return;
 					}
-
-					// If vehicle is already inside – block re-entry
+					// If this method will return true, it means that he already entered his vehicle into the parking lot
 					client.sendToClient(new ServerResponse(false, null, "The vehicle is already inside the parking lot"));
 					return;
 				}
