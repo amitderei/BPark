@@ -1184,4 +1184,29 @@ public class DBController {
 	    return list;
 	}
 	
+	
+	public ParkingEvent getActiveParkingEvent(Subscriber subscriber) {
+		String query="SELECT * FROM parkingEvent WHERE subscriberCode=? AND exitHour IS NULL";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subscriber.getSubscriberCode());
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				ParkingEvent newParkingEvent=new ParkingEvent();
+				newParkingEvent.setEventId(rs.getInt("eventId"));
+				newParkingEvent.setSubscriberCode(rs.getInt("subscriberCode"));
+				newParkingEvent.setParkingSpace(rs.getInt("parking_space"));
+				newParkingEvent.setEntryDate((rs.getDate("entryDate")).toLocalDate());
+				newParkingEvent.setEntryTime((rs.getTime("entryHour")).toLocalTime());
+				newParkingEvent.setWasExtended(rs.getBoolean("wasExtended"));
+				newParkingEvent.setVehicleID(rs.getString("vehicleId"));
+				newParkingEvent.setLot(rs.getString("NameParkingLot"));
+				newParkingEvent.setParkingCode(rs.getString("parkingCode"));
+				return newParkingEvent;
+			}
+		} catch (SQLException e) {
+			System.out.println("Error finding active parking info: "+e.getMessage());
+		}
+		return null;
+	}
+	
 }

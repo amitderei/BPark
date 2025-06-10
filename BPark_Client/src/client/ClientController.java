@@ -14,6 +14,7 @@ import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
+import controllers.ViewActiveParkingInfoController;
 import controllers.ViewParkingHistoryController;
 import controllers.ViewSubscriberDetailsController;
 import controllers.WatchAndCancelOrdersController;
@@ -52,10 +53,12 @@ public class ClientController extends AbstractClient {
 	private ViewParkingHistoryController viewParkingHistoryController;
 	private ViewSubscribersInfoController viewSubscribersInfoController;
 	private ViewActiveParkingsController viewActiveParkingsController;
+	private ViewActiveParkingInfoController viewActiveParkingInfoController;
 
 	private Subscriber subscriber;
 
 	private String password;
+	
 
 	/**
 	 * Constructs a new ClientController instance.
@@ -169,6 +172,10 @@ public class ClientController extends AbstractClient {
 	public void setDeliveryController(VehicleDeliveryController controller) {
 		this.newDeliveryController = controller;
 
+	}
+	
+	public void setViewActiveParkingInfoController(ViewActiveParkingInfoController viewActiveParkingInfoController) {
+		this.viewActiveParkingInfoController = viewActiveParkingInfoController;
 	}
 
 	public void setSubscriber(Subscriber subscriber) {
@@ -326,6 +333,14 @@ public class ClientController extends AbstractClient {
 			        viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
 
 			    return; // handled
+			}
+			
+			else if (response.isSucceed()&&response.getMsg().equals("Active parking info loaded successfully.")) {
+				if(viewActiveParkingInfoController!=null) {
+					viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
+					viewActiveParkingInfoController.setTexts();
+				}
+				return;
 			}
 			
 			// staff -view current active parking events
@@ -646,5 +661,16 @@ public class ClientController extends AbstractClient {
 	        e.printStackTrace();
 	    }
 	}
-
+    
+    /**
+     * Requests all active parking events of subscriber
+     * Used by subscriber
+     */
+    public void getDetailsOfActiveInfo() {
+		try {
+			sendToServer(new Object[] { "getDetailsOfActiveInfo", subscriber });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'getDetailsOfActiveInfo' request: " + e.getMessage());
+		}
+    }
 }

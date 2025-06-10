@@ -98,6 +98,17 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, history, "Parking history data loaded successfully."));
 					}
 				}
+				
+				else if (data.length==2 && "getDetailsOfActiveInfo".equals(data[0])) {
+					ParkingEvent parkingEvent=db.getActiveParkingEvent((Subscriber)data[1]);
+					if (parkingEvent==null) {
+						client.sendToClient(new ServerResponse(false, null, "There is no active parking."));
+					}
+					else {
+						client.sendToClient(new ServerResponse(true, parkingEvent, "Active parking info loaded successfully."));
+					}
+				}
+				
 				else if(data.length==2 && "forgotMyParkingCode".equals(data[0])) {
 					try {
 						String[] emailAndPhone=db.getEmailAndPhoneNumber((int) data[1]);

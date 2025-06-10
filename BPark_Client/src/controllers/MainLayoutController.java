@@ -78,7 +78,7 @@ public class MainLayoutController implements ClientAware{
 
 	@FXML
 	private void handleViewActiveParkingInfo() {
-		System.out.println("Viewing active parking info…");
+		loadScreen("/client/ViewActiveParkingInfoScreen.fxml");
 	}
 
 	@FXML
@@ -149,6 +149,11 @@ public class MainLayoutController implements ClientAware{
 				controller.setClient(client);
 				controller.setTable();
 				
+			}
+			if (ctrl instanceof ViewActiveParkingInfoController controller) {
+				client.setViewActiveParkingInfoController(controller);
+				controller.setClient(client);
+				controller.getDetailsOfActiveInfo();
 			}
 			
 			
