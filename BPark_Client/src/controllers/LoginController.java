@@ -125,6 +125,6 @@ public class LoginController implements ClientAware {
 	 */
 	@FXML
 	private void handleBack() {
-		UiUtils.loadScreen(backButton, "/client/MainLayout.fxml", "BPARK – Welcome", client);
+		UiUtils.loadScreen(backButton, "/client/MainScreen.fxml", "BPARK – Welcome", client);
 	}
 }
