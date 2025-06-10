@@ -60,7 +60,7 @@ public class DBController {
 		try {
 			// Connects to the local MySQL server (replace credentials as needed)
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/bpark?serverTimezone=Asia/Jerusalem", "root",
-					"Yosi2311");
+					"Aa123456");
 			System.out.println("SQL connection succeed");
 		} catch (SQLException ex) {
 			// Prints SQL error information if connection fails
