@@ -4,6 +4,7 @@ import client.ClientController;
 import common.User;
 import common.Subscriber;
 import common.UserRole;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,6 +19,7 @@ import ui.UiUtils;
  */
 public class LoginController implements ClientAware {
 
+
 	@FXML
 	private TextField username;
 	@FXML
@@ -28,8 +30,8 @@ public class LoginController implements ClientAware {
 	private Label lblError;
 	@FXML
 	private Button backButton;
-
-	private String password;
+	@FXML
+	private Button btnExit;
 
 	private ClientController client;
 
@@ -40,18 +42,20 @@ public class LoginController implements ClientAware {
 		client.setLoginController(this);
 	}
 
+
+
 	/** Triggered when the user clicks “Login”. */
 	@FXML
 	private void handleLoginClick() {
 		String user = username.getText();
-		password = code.getText();
+		String pass = code.getText();
 
-		if (user.isEmpty() || password.isEmpty()) {
+		if (user.isEmpty() || pass.isEmpty()) {
 			lblError.setText("Please enter both username and password.");
 			return;
 		}
 		try {
-			client.requestLogin(user, password);
+			client.requestLogin(user, pass);
 		} catch (Exception ex) {
 			lblError.setText("Failed to send login request.");
 			ex.printStackTrace();
@@ -69,6 +73,27 @@ public class LoginController implements ClientAware {
 		lblError.setText(msg);
 		System.err.println("[DEBUG] Login failed: " + msg);
 	}
+
+	/**
+	 * Handles the "Exit" button click. Gracefully disconnects from the server and
+	 * terminates the application.
+	 */
+	
+	@FXML
+	private void handleExitClick() {
+
+			try {
+				if (client != null && client.isConnected()) {
+					client.sendToServer(new Object[] { "disconnect" });
+					client.closeConnection();
+					System.out.println("Client disconnected successfully.");
+				}
+			} catch (Exception e) {
+				System.err.println("Failed to disconnect client: " + e.getMessage());
+			}
+			Platform.exit();
+			System.exit(0);
+		}
 
 	/**
 	 * Loads the appropriate main screen according to the user's role, injecting
@@ -90,24 +115,26 @@ public class LoginController implements ClientAware {
 			UiUtils.showAlert("BPARK – Error", "Unknown role: " + role, Alert.AlertType.ERROR);
 			return;
 		}
+		
 
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
 			Parent root = loader.load();
 			Object ctrl = loader.getController();
 
-			if (ctrl instanceof MainLayoutController) {
-				client.setMainLayoutController((MainLayoutController) ctrl);
-				((MainLayoutController) ctrl).setClient(client);
-				((MainLayoutController) ctrl).setSubscriberName(username.getText().trim());
-				((MainLayoutController) ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
-				client.setPassword(password);
+			if(ctrl instanceof MainLayoutController) {
+				client.setMainLayoutController((MainLayoutController)ctrl);
+				((MainLayoutController)ctrl).setClient(client);
+				((MainLayoutController)ctrl).setSubscriberName(username.getText().trim());
+				((MainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
 			}
 			// Extra data per role
 			if (ctrl instanceof StaffMainController staff) {
-				staff.setClient(client);
 				staff.setUser(user);
 			}
+		
+			
+			
 
 			Stage stage = (Stage) submit.getScene().getWindow();
 			stage.setScene(new Scene(root));
