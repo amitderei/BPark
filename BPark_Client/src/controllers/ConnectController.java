@@ -112,6 +112,7 @@ public class ConnectController implements ClientAware {
 			UiUtils.setStatus(statusLabel, "Connected successfully to server at " + ip + ":5555", true);
 			connectButton.setText("Connected");
 			connectButton.setDisable(true);
+			UiUtils.client=this.client;
 
 			// Load main screen (Login + Guest)
 			UiUtils.loadScreen(connectButton, "/client/MainScreen.fxml", "BPARK - Welcome", client);

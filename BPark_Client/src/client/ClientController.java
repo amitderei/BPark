@@ -9,9 +9,11 @@ import controllers.CreateNewOrderViewController;
 import controllers.EditSubscriberDetailsController;
 import controllers.GuestMainController;
 import controllers.LoginController;
+import controllers.MainController;
 import controllers.MainLayoutController;
 import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
+import controllers.TerminalController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
 import controllers.ViewActiveParkingInfoController;
@@ -54,6 +56,8 @@ public class ClientController extends AbstractClient {
 	private ViewSubscribersInfoController viewSubscribersInfoController;
 	private ViewActiveParkingsController viewActiveParkingsController;
 	private ViewActiveParkingInfoController viewActiveParkingInfoController;
+	private TerminalController terminalController;
+	private MainController mainController;
 
 	private Subscriber subscriber;
 
@@ -93,6 +97,14 @@ public class ClientController extends AbstractClient {
 
 	public void setViewParkingHistoryController(ViewParkingHistoryController viewParkingHistoryController) {
 		this.viewParkingHistoryController = viewParkingHistoryController;
+	}
+	
+	public void setMainController(MainController mainController) {
+		this.mainController=mainController;
+	}
+	
+	public void setTerminalController(TerminalController terminalController) {
+		this.terminalController=terminalController;
 	}
 
 	/**
