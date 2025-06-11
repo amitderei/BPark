@@ -8,10 +8,12 @@ import common.UserRole;
 import controllers.CreateNewOrderViewController;
 import controllers.GuestMainController;
 import controllers.LoginController;
+import controllers.MainController;
 import controllers.MainLayoutController;
 import controllers.OrderViewController;
 import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
+import controllers.TerminalController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
 import controllers.WatchAndCancelOrdersController;
@@ -43,8 +45,8 @@ public class ClientController extends AbstractClient {
 	private VehicleDeliveryController newDeliveryController;
 	private MainLayoutController mainLayoutController;
 	private WatchAndCancelOrdersController watchAndCancelOrdersController;
-
-
+	private TerminalController terminalController;
+	private MainController mainController;
 	private Subscriber subscriber;
 
 
@@ -78,6 +80,10 @@ public class ClientController extends AbstractClient {
 	public WatchAndCancelOrdersController getWatchAndCancelOrdersController() {
 		return watchAndCancelOrdersController;
 	}
+	
+	public void setMainController(MainController mainController) {
+		this.mainController=mainController;
+	}
 
 
 
@@ -94,6 +100,9 @@ public class ClientController extends AbstractClient {
 		this.loginController = loginController;
 	}
 	
+	public void setTerminalController(TerminalController terminalController) {
+		this.terminalController=terminalController;
+	}
 	
 
 	/**
@@ -524,5 +533,9 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'deleteOrder' request: " + e.getMessage());
 		}
 	}
+
+
+
+
 	
 }

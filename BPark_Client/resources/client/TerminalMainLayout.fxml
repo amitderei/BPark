@@ -15,24 +15,27 @@
         <ToolBar>
             <!-- Home button -->
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
-            <Pane HBox.hgrow="ALWAYS">
-            <children>
-               <Button fx:id="btnExit" layoutX="655.0" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="25.0" prefWidth="43.0" text="Exit" />
-               <Button fx:id="btnBack" layoutX="593.0" mnemonicParsing="false" text="🔙 Back" />
-            </children></Pane>
+            <Pane HBox.hgrow="ALWAYS" />
+            <!-- Logout button -->
+            <Button fx:id="btnBack" onAction="#handleBackClick" text="Back" />
         </ToolBar>
     </top>
+   <left>
+      <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="209.0" text="Sumbit Vehicle" />
+            <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
+            <Button mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Check Availability Spots" />
+            <AnchorPane prefHeight="332.0" prefWidth="199.0">
+               <children>
+                  <Button fx:id="btnExit" layoutY="293.0" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="40.0" prefWidth="199.0" text="Exit" />
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </left>
    <center>
       <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
    </center>
-   <bottom>
-      <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
-         <children>
-            <Button fx:id="btnViewActiveParkingInfo" mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Show Available Spots" />
-            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="210.0" text="Submit Vehicle" />
-            <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
-         </children>
-      </VBox>
-   </bottom>
 
 </BorderPane>

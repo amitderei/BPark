@@ -2,6 +2,10 @@ package ui;
 
 import client.ClientController;
 import controllers.ClientAware;
+import controllers.GuestMainController;
+import controllers.LoginController;
+import controllers.MainController;
+import controllers.TerminalController;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,6 +21,8 @@ import javafx.stage.Stage;
 public final class UiUtils {
 
     private UiUtils() {}           // prevent instantiation
+    
+    public static ClientController client;
 
     /**
      * Updates the given label with a success / error style.
@@ -33,7 +39,16 @@ public final class UiUtils {
         });
     }
 
-    /**
+    
+   
+
+
+
+	
+
+
+
+	/**
      * Opens a modal alert dialog.
      *
      * @param title   Window title.
@@ -64,7 +79,7 @@ public final class UiUtils {
     public static void loadScreen(Button source,
                                   String fxmlPath,
                                   String title,
-                                  ClientController client) {
+                                  ClientController client1) {
 
         try {
             FXMLLoader loader = new FXMLLoader(UiUtils.class.getResource(fxmlPath));
@@ -72,9 +87,23 @@ public final class UiUtils {
 
             // Inject client into the new controller (if it implements ClientAware)
             Object ctrl = loader.getController();
-            if (client != null && ctrl instanceof ClientAware aware) {
-                aware.setClient(client);
+            if (ctrl instanceof TerminalController controller) {
+            	client.setTerminalController(controller);
+            	controller.setClient(client);            	
             }
+            if(ctrl instanceof MainController controller) {
+            	client.setMainController(controller);
+            	controller.setClient(client);
+            }
+            if(ctrl instanceof LoginController controller) {
+            	client.setLoginController(controller);
+            	controller.setClient(client);
+            }
+            if(ctrl instanceof GuestMainController controller) {
+            	client.setGuestMainController(controller);
+            	controller.setClient(client);
+            }
+            
 
             Stage stage = (Stage) source.getScene().getWindow();
             stage.setScene(new Scene(root));

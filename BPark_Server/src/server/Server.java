@@ -189,7 +189,6 @@ public class Server extends AbstractServer {
                 }
 
 				// Check parking availability: ["CheckParkingAvailability"]. ** Author - Ravid
-				// **
 				else if (data.length == 1 && "CheckParkingAvailability".equals(data[0])) {
 					int count = db.countAvailableSpots();
 					client.sendToClient(new ServerResponse(true, count, "Available spots: " + count));
@@ -264,7 +263,7 @@ public class Server extends AbstractServer {
 							new ServerResponse(true, null, "The confirmation code has entered successfully."));
 				}
 
-				// Expected format: {"IsThereFreeParkingSpace", lotName}
+				// Expected format: {"IsThereFreeParkingSpace"
 				else if (data.length == 2 && "IsThereFreeParkingSpace".equals(data[0])) {
 					String lotName = (String) data[1];
 

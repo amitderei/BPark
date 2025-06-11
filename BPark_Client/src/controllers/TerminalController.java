@@ -51,7 +51,7 @@ public class TerminalController implements ClientAware {
 	 */
 	@FXML
 	private void handleBackClick() {
-		UiUtils.loadScreen(btnBack,"/client/SelectionScreen.fxml", "Select User Type",client); 
+		loadScreen("/client/SelectionScreen.fxml"); 
 	}
 	
 	/**

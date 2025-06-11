@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import client.ClientController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
@@ -23,6 +24,9 @@ public class GuestMainController implements ClientAware {
     /** Button to return to the main welcome screen */
     @FXML
     private Button btnBack;
+    
+    @FXML
+    private Button btnExit;
     
   //Author: Ravid changes for autmoaticly availability
   	@FXML
@@ -47,11 +51,12 @@ public class GuestMainController implements ClientAware {
      *
      * @param client the client instance (may be null)
      */
-    @Override
-    public void setClient(ClientController client) {
-        this.client = client;
-        startAutoUpdate();
-    }
+  	@Override
+  	public void setClient(ClientController client) {
+  	    this.client = client;
+  	    client.setGuestMainController(this);
+  	    startAutoUpdate();
+  	}
 
     /**
      * Triggered when the "Home" button is clicked.
@@ -76,12 +81,24 @@ public class GuestMainController implements ClientAware {
                            "Select User Type",
                            client); 
     }
-
+    
     /**
-     * Triggered when the "Check Parking Availability" button is clicked.
-     */
-    @FXML
-    private void handleCheckAvailability() {
-        System.out.println("Checking parking availability...");
-    }
+	 * Disconnects from the server and exits the application.
+	 */
+	@FXML
+	private void handleExitClick() {
+
+		try {
+			if (client != null && client.isConnected()) {
+				client.sendToServer(new Object[] { "disconnect" });
+				client.closeConnection();
+				System.out.println("Client disconnected successfully.");
+			}
+		} catch (Exception e) {
+			System.err.println("Failed to disconnect client: " + e.getMessage());
+		}
+		Platform.exit();
+		System.exit(0);
+	}
+
 }

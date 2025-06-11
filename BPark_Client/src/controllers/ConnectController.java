@@ -67,6 +67,7 @@ public class ConnectController implements ClientAware {
 	@Override
 	public void setClient(ClientController client) {
 		this.client = client;
+		
 
 		if (client == null) {
 			UiUtils.setStatus(statusLabel, "No connection to server. Please connect first.", false);
@@ -112,6 +113,7 @@ public class ConnectController implements ClientAware {
 			UiUtils.setStatus(statusLabel, "Connected successfully to server at " + ip + ":5555", true);
 			connectButton.setText("Connected");
 			connectButton.setDisable(true);
+			UiUtils.client=client;
 
 			// Load main screen (Login + Guest)
 			UiUtils.loadScreen(connectButton, "/client/SelectionScreen.fxml", "BPARK - Welcome", client);

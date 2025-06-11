@@ -70,6 +70,7 @@ public class MainLayoutController {
 	 * Handles the "Exit" button click. Gracefully disconnects from the server and
 	 * terminates the application.
 	 */
+	
 
 	@FXML
 	private void handleExitClick() {
@@ -168,7 +169,6 @@ public class MainLayoutController {
 	 * @param fxml (String of fxml)
 	 * @param order
 	 */
-
 	public void loadScreen(String fxml, Order order) {
 		try {
 			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
