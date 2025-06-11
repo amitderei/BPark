@@ -99,10 +99,6 @@ public class MainLayoutController implements ClientAware{
 		UiUtils.loadScreen(btnRetrieveVehicle, "/client/VehiclePickupScreen.fxml", "BPARK – Vehicle Pickup", client);
 	}
 
-	@FXML
-	private void handleParkingReservation() {
-		System.out.println("Reserving parking…");
-	}
 
 	@FXML
 	private void handleMyReservations() {
