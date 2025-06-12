@@ -41,13 +41,6 @@ public final class UiUtils {
 
     
    
-
-
-
-	
-
-
-
 	/**
      * Opens a modal alert dialog.
      *

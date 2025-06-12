@@ -232,6 +232,8 @@ public class ClientController extends AbstractClient {
 				return;
 			}
 			
+			
+			
 			// General error message popup (only if not handled before)
 			if (!response.isSucceed()) {
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
@@ -262,6 +264,14 @@ public class ClientController extends AbstractClient {
 				ArrayList<Order> orders = (ArrayList<Order>) dataList;
 				if (watchAndCancelOrdersController != null) {
 					watchAndCancelOrdersController.displayOrders(orders);
+				}
+				return;
+			}
+			
+			else if(response.isSucceed()&&response.getMsg().equals("No orders.")) {
+				if (watchAndCancelOrdersController != null) {
+					watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
+					UiUtils.showAlert(response.getMsg(), response.getMsg(), Alert.AlertType.INFORMATION);
 				}
 				return;
 			}

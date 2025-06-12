@@ -69,7 +69,7 @@ public class Server extends AbstractServer {
 				else if (data.length==2 && "askForReservations".equals(data[0])){
 					ArrayList<Order> orders=db.returnReservationOfSubscriber((Subscriber)data[1]);
 					if (orders.isEmpty()) {
-						client.sendToClient(new ServerResponse(false, null, "No orders."));
+						client.sendToClient(new ServerResponse(true, null, "No orders."));
 					} else {
 						client.sendToClient(new ServerResponse(true, orders, "Orders of subscriber displayed successfully."));
 					}
