@@ -14,6 +14,7 @@ import common.Subscriber;
 import common.User;
 import db.DBController;
 import mailService.MailService;
+import mailService.TypeOfMail;
 
 /**
  * Represents the BPARK server. Handles client connections and dispatches
@@ -114,8 +115,8 @@ public class Server extends AbstractServer {
 						String[] emailAndPhone=db.getEmailAndPhoneNumber((int) data[1]);
 						String email=emailAndPhone[0];
 						String phone=emailAndPhone[1];
-				       
-				        sendEmail.sendEmail(email, "11111");
+						ParkingEvent parkingEvent=db.getActiveParkingEvent((new Subscriber((int)data[1])));
+				        sendEmail.sendEmail(email, parkingEvent.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
 				        client.sendToClient(new ServerResponse(true, null, "The code was sent to your email."));
 				    } catch(Exception e) {
 				        e.printStackTrace();

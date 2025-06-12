@@ -24,6 +24,10 @@ public class Subscriber implements Serializable {
 		this.username = username;
 		this.tagId = tagId;
 	}
+	
+	public Subscriber(int subscriberCode) {
+		this.subscriberCode = subscriberCode;
+	}
 
 	public Subscriber() {
 
