@@ -241,9 +241,8 @@ public class DBController {
 	 * 
 	 * Allowed duration is up to 4 hours normally, or 8 hours if extended.
 	 * 
-	 * If the parking duration exceeds the allowed time, a delay is recorded,
-	 * and a notification is sent to the subscriber (email + SMS), but the
-	 * vehicle is still released.
+	 * If the parking duration exceeds the allowed time, a delay is recorded.
+	 * A notification is printed to the console (email/SMS sent by the server).
 	 *
 	 * @param subscriberCode the subscriber's code
 	 * @param parkingCode the parking code provided by the subscriber
@@ -274,8 +273,7 @@ public class DBController {
 	        int allowedHours = event.isWasExtended() ? 8 : 4;
 
 	        if (hours > allowedHours) {
-	            sendNotification(subscriberCode,
-	                "You have exceeded the allowed parking duration (" + hours + " hours). A delay was recorded.");
+	            System.out.println("[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
 	            return new ServerResponse(true, null,
 	                "Pickup successful with delay. A notification was sent.");
 	        }
@@ -288,6 +286,7 @@ public class DBController {
 	        return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
 	    }
 	}
+
 
 	/**
 	 * Finalizes a parking event by: - Setting exitDate and exitHour. - Marking the
@@ -357,74 +356,7 @@ public class DBController {
 		}
 	}
 
-	/**
-	 * Sends the active parking code to the subscriber by retrieving it from the
-	 * latest open parkingEvent and "sending" it to email and SMS.
-	 *
-	 * @param subscriberCode the subscriber's code
-	 * @return ServerResponse with success or failure message
-	 */
-	public ServerResponse sendParkingCodeToSubscriber(int subscriberCode) {
-		String query = """
-				SELECT e.parkingCode, s.email, s.phoneNumber
-				FROM parkingEvent e
-				JOIN subscriber s ON e.subscriberCode = s.subscriberCode
-				WHERE e.subscriberCode = ? AND e.exitDate IS NULL
-				ORDER BY e.eventId DESC
-				LIMIT 1
-				  """;
-
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, subscriberCode);
-			ResultSet rs = stmt.executeQuery();
-
-			if (rs.next()) {
-				int parkingCode = rs.getInt("parkingCode");
-
-				// Send notification to subscriber with the parking code
-				sendNotification(subscriberCode, "Your parking code is " + parkingCode);
-
-				return new ServerResponse(true, null, "Parking code sent to your email and phone.");
-			} else {
-				// No open event found for this subscriber
-				return new ServerResponse(false, null, "No active parking session found.");
-			}
-
-		} catch (SQLException e) {
-			// Database error occurred
-			System.err.println("Error sending parking code: " + e.getMessage());
-			return new ServerResponse(false, null, "An error occurred while retrieving your parking code.");
-		}
-	}
-
-	/**
-	 * Simulates sending a message to the subscriber via email and SMS.
-	 *
-	 * @param subscriberCode the subscriber to notify
-	 * @param message        the message content to send
-	 */
-	private void sendNotification(int subscriberCode, String message) {
-		String notifyQuery = """
-				SELECT email, phoneNumber
-				FROM subscriber
-				WHERE subscriberCode = ?
-				  """;
-
-		try (PreparedStatement stmt = conn.prepareStatement(notifyQuery)) {
-			stmt.setInt(1, subscriberCode);
-			ResultSet rs = stmt.executeQuery();
-
-			if (rs.next()) {
-				String email = rs.getString("email");
-				String phone = rs.getString("phoneNumber");
-
-				System.out.println("EMAIL to " + email + ": " + message);
-				System.out.println("SMS to " + phone + ": " + message);
-			}
-		} catch (SQLException e) {
-			System.err.println("Error sending notification: " + e.getMessage());
-		}
-	}
+	
 
 	/**
 	 * Retrieves the names of all parking lots from the database.

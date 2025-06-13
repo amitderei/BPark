@@ -226,19 +226,7 @@ public class Server extends AbstractServer {
 				}
 
 
-				// Resend parking code: ["sendLostCode", subscriberCode]
-				else if (data.length == 2 && "sendLostCode".equals(data[0])) {
-					int subCode = (int) data[1];
-					try {
-						ServerResponse response = db.sendParkingCodeToSubscriber(subCode);
-						client.sendToClient(response);
-					} catch (Exception e) {
-						client.sendToClient(new ServerResponse(false, null,
-								"An error occurred while sending your parking code."));
-						System.err.println("Error: sendLostCode - " + e.getMessage());
-					}
-					return;
-				}
+
 
 				// Check parking availability: ["CheckParkingAvailability"]. ** Author - Ravid
 				// **
