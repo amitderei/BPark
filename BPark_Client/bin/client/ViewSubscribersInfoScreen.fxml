@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controllers.ViewSubscribersInfoController"
+            prefWidth="600.0" prefHeight="453.0">
+
+    <top>
+        <Label text="Subscribers List"
+               BorderPane.alignment="CENTER"
+               styleClass="headline"/>
+    </top>
+
+    <center>
+        <TableView fx:id="subscriberTable"
+                   prefWidth="580.0" prefHeight="410.0">
+
+            <columns>
+                <TableColumn fx:id="colCode"     text="Code"      prefWidth="50.0"/>
+                <TableColumn fx:id="colId"       text="ID"        prefWidth="75.0"/>
+                <TableColumn fx:id="colName"     text="Name"      prefWidth="110.0"/>
+                <TableColumn fx:id="colUsername" text="Username"  prefWidth="100.0"/>
+                <TableColumn fx:id="colPhone"    text="Phone"     prefWidth="90.0"/>
+                <TableColumn fx:id="colEmail"    text="Email"     prefWidth="120.0"/>
+                <TableColumn fx:id="colLate"     text="Late #"    prefWidth="50.0"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controllers.ViewActiveParkingsController"
+            prefWidth="600.0" prefHeight="453.0">
+
+    <top>
+        <Label text="Active Parkings"
+               BorderPane.alignment="CENTER"
+               styleClass="headline" />
+    </top>
+
+    <center>
+        <TableView fx:id="parkingTable"
+                   prefWidth="580.0" prefHeight="400.0">
+            <columns>
+                <TableColumn fx:id="colEventId"     text="Event ID"        prefWidth="60.0"/>
+                <TableColumn fx:id="colSubscriber"  text="Subscriber"      prefWidth="80.0"/>
+                <TableColumn fx:id="colVehicleId"   text="Vehicle ID"      prefWidth="80.0"/>
+                <TableColumn fx:id="colParkingCode" text="Parking Code"    prefWidth="80.0"/>
+                <TableColumn fx:id="colLot"         text="Parking Lot"     prefWidth="90.0"/>
+                <TableColumn fx:id="colSpace"       text="Space #"         prefWidth="50.0"/>
+                <TableColumn fx:id="colEntryDate"   text="Entry Date"      prefWidth="70.0"/>
+                <TableColumn fx:id="colEntryTime"   text="Entry Time"      prefWidth="70.0"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

@@ -73,7 +73,7 @@ public class SubscriberMainLayoutController implements ClientAware{
 
 	@FXML
 	private void handleViewParkingHistory() {
-		loadScreen("/client/viewSubscriberHistoryScreen.fxml");
+		loadScreen("/client/ViewSubscriberHistoryScreen.fxml");
 	}
 
 	@FXML
@@ -207,7 +207,7 @@ public class SubscriberMainLayoutController implements ClientAware{
 
 	public void handleGoToCreateOrder() {
 		try {
-			loadScreen("/client/Placing_an_order_view.fxml"); // load the Placing_an_order_view.fxml after search on resources
+			loadScreen("/client/PlacingAnOrderView.fxml"); // load the Placing_an_order_view.fxml after search on resources
 			
 		} catch (Exception e) {
 			System.out.println("Error:" + e.getMessage());
