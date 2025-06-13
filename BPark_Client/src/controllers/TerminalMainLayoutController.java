@@ -16,18 +16,13 @@ import ui.UiUtils;
 
 public class TerminalMainLayoutController implements ClientAware {
 
-	@FXML 
-	private Button btnExit;
-	@FXML 
-	private Button btnBack;
-	@FXML 
-	private Button btnHome;
-	@FXML
-	private Button btnSubmitVehicle;
-	@FXML
-	private Button btnRetrieveVehicle;
-	@FXML
-	private AnchorPane center;
+	@FXML private Button btnExit;
+	@FXML private Button btnBack;
+	@FXML private Button btnHome;
+	@FXML private Button btnSubmitVehicle;
+	@FXML private Button btnRetrieveVehicle;
+	@FXML private Button btnCheckAvailability;
+	@FXML private AnchorPane center;
 
 	private ClientController client;
 	
@@ -94,7 +89,12 @@ public class TerminalMainLayoutController implements ClientAware {
 	private void handleRetrieveVehicle() {
 		loadScreen("/client/VehiclePickupScreen.fxml");
 	}
-
+	
+	@FXML
+	private void handleCheckAvailability() {
+		//צריך לממש
+		//לדעתי יש ליצור מסך עבור סטטוס חניות זמינות
+	}
 
 
 	/**
@@ -128,10 +128,7 @@ public class TerminalMainLayoutController implements ClientAware {
 				controller.setClient(client);
 				client.setDeliveryController(controller);
 			}
-			// Do NOT set client for TerminalMainController – it's static, no communication required
-			else if (ctrl instanceof TerminalMainController) {
-				// No action needed, this screen doesn't require client access
-			}
+
 
 			center.getChildren().clear();
 			center.getChildren().add(content);

@@ -25,7 +25,7 @@
          <children>
             <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="209.0" text="Submit Vehicle" />
             <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
-            <Button mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Check Availability Spots" />
+			<Button fx:id="btnCheckAvailability" mnemonicParsing="false" onAction="#handleCheckAvailability" prefHeight="44.0" prefWidth="209.0" text="Check Availability Spots" />
             <AnchorPane prefHeight="332.0" prefWidth="199.0">
                <children>
                   <Button fx:id="btnExit" layoutY="293.0" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="40.0" prefWidth="199.0" text="Exit" />
