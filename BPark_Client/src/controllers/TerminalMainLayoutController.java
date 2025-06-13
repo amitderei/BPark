@@ -14,7 +14,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import ui.UiUtils;
 
-public class TerminalController implements ClientAware {
+public class TerminalMainLayoutController implements ClientAware {
 
 	@FXML 
 	private Button btnExit;
@@ -37,6 +37,12 @@ public class TerminalController implements ClientAware {
 	public void setClient(ClientController client) {
 		this.client=client;
 	}
+	
+	@FXML
+	public void initialize() {
+		handleHomeClick(); // Automatically load the terminal home screen
+	}
+
 
 	/**
 	 * Loads the main terminal screen into the center pane.
@@ -78,63 +84,61 @@ public class TerminalController implements ClientAware {
 	 */
 	@FXML
 	public void handleGoToDelivery() {
-	
-	    try {
-	    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Vehicle_delivery_screen.fxml"));
-			Parent root = loader.load();
-			VehicleDeliveryController controller = loader.getController();
-			controller.setClient(client); 
-			client.setDeliveryController(controller);
-
-	        Stage stage = (Stage) btnSubmitVehicle.getScene().getWindow();
-	        Scene scene = new Scene(root);
-	        
-	        System.out.println("✔ Vehicle_delivery_screen.fxml loaded successfully");
-
-	        stage.setScene(scene);
-	        stage.show();
-	    } catch (Exception e) {
-	        System.out.println("Error: " + e.getMessage());
-	    }
+		loadScreen("/client//VehicleDeliveryScreen.fxml");
 	}
 
-	
 	/**
 	 * Opens the vehicle-pickup screen when the user clicks “Retrieve Vehicle”.
 	 */
 	@FXML
 	private void handleRetrieveVehicle() {
-		UiUtils.loadScreen(btnRetrieveVehicle, "/client/VehiclePickupScreen.fxml", "BPARK – Vehicle Pickup", client);
+		loadScreen("/client/VehiclePickupScreen.fxml");
 	}
 
+
+
 	/**
-	 * load screen in the center of borderPane
-	 * @param fxml
+	 * Loads a screen into the center of the terminal layout.
+	 * Skips client injection for simple terminal screens like TerminalMainScreen.
+	 *
+	 * @param fxml the path to the FXML file to load
 	 */
 	public void loadScreen(String fxml) {
 		try {
-			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
-			Parent content=loader.load();
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+			Parent content = loader.load();
 
-			Object ctrl=loader.getController();
-			
-			if(ctrl instanceof CreateNewOrderViewController controller) {
-				client.setNewOrderController(controller); // for act functions
+			Object ctrl = loader.getController();
+
+			if (ctrl instanceof CreateNewOrderViewController controller) {
+				client.setNewOrderController(controller);
 				controller.setClient(client);
 				controller.initializeCombo();
 			}
-			if(ctrl instanceof WatchAndCancelOrdersController controller) {
+			else if (ctrl instanceof WatchAndCancelOrdersController controller) {
 				client.setWatchAndCancelOrdersController(controller);
 				controller.setClient(client);
 				controller.defineTable();
 			}
-
+			else if (ctrl instanceof VehiclePickupController controller) {
+				controller.setClient(client);
+				client.setPickupController(controller);
+			}
+			else if (ctrl instanceof VehicleDeliveryController controller) {
+				controller.setClient(client);
+				client.setDeliveryController(controller);
+			}
+			// Do NOT set client for TerminalMainController – it's static, no communication required
+			else if (ctrl instanceof TerminalMainController) {
+				// No action needed, this screen doesn't require client access
+			}
 
 			center.getChildren().clear();
 			center.getChildren().add(content);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 
 }

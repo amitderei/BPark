@@ -72,7 +72,7 @@ public class EditSubscriberDetailsController implements ClientAware{
 
 	private Subscriber subscriber;
 	private String passwordStr;
-	private MainLayoutController mainLayoutController; 
+	private SubscriberMainLayoutController mainLayoutController; 
 
 	/**
 	 * initialize the field with text and disable some of them

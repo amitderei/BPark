@@ -5,7 +5,7 @@ import controllers.ClientAware;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.MainController;
-import controllers.TerminalController;
+import controllers.TerminalMainLayoutController;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -80,7 +80,7 @@ public final class UiUtils {
 
             // Inject client into the new controller (if it implements ClientAware)
             Object ctrl = loader.getController();
-            if (ctrl instanceof TerminalController controller) {
+            if (ctrl instanceof TerminalMainLayoutController controller) {
             	client.setTerminalController(controller);
             	controller.setClient(client);            	
             }

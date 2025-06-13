@@ -55,26 +55,12 @@ public class ModeSelectionController implements ClientAware {
 	/** Opens the Terminal screen. */
 	@FXML
 	public void handleTerminal() {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/TerminalMainLayout.fxml"));
-			Parent root = loader.load();
-
-			// Pass client to controller
-			Object ctrl = loader.getController();
-			if (ctrl instanceof ClientAware aware) {
-				aware.setClient(client);
-			}
-
-			// Set scene
-			btnTerminal.getScene().getWindow().hide();
-			Stage stage = (Stage) btnTerminal.getScene().getWindow();  
-			UiUtils.setScene(stage, root, "BPARK – Terminal");
-
-		} catch (Exception e) {
-			UiUtils.showAlert("BPARK – Error", "Failed to load terminal screen:\n" + e.getMessage(), Alert.AlertType.ERROR);
-			e.printStackTrace();
-		}
+		UiUtils.loadScreen(btnTerminal,
+				"/client/TerminalMainLayout.fxml",
+				"BPARK – Terminal",
+				null);  // No client needed for terminal mode
 	}
+
 
 	
 	@FXML

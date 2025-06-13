@@ -64,7 +64,7 @@ public class CreateNewOrderViewController implements ClientAware{
 	@FXML
 	private Button reserveNowButton; // update button
 	
-	private MainLayoutController mainLayoutController; 
+	private SubscriberMainLayoutController mainLayoutController; 
 
 	private ClientController client;
 	

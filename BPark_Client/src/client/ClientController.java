@@ -10,10 +10,10 @@ import controllers.EditSubscriberDetailsController;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.MainController;
-import controllers.MainLayoutController;
+import controllers.SubscriberMainLayoutController;
 import controllers.ParkingReservationSummaryController;
 import controllers.SubscriberMainController;
-import controllers.TerminalController;
+import controllers.TerminalMainLayoutController;
 import controllers.VehicleDeliveryController;
 import controllers.VehiclePickupController;
 import controllers.ViewActiveParkingInfoController;
@@ -48,7 +48,7 @@ public class ClientController extends AbstractClient {
 	private ParkingReservationSummaryController summaryController;
 	private SubscriberMainController subscriberMainController;
 	private VehicleDeliveryController newDeliveryController;
-	private MainLayoutController mainLayoutController;
+	private SubscriberMainLayoutController mainLayoutController;
 	private WatchAndCancelOrdersController watchAndCancelOrdersController;
 	private ViewSubscriberDetailsController viewSubscriberDetailsController;
 	private EditSubscriberDetailsController editSubscriberDetailsController;
@@ -56,7 +56,7 @@ public class ClientController extends AbstractClient {
 	private ViewSubscribersInfoController viewSubscribersInfoController;
 	private ViewActiveParkingsController viewActiveParkingsController;
 	private ViewActiveParkingInfoController viewActiveParkingInfoController;
-	private TerminalController terminalController;
+	private TerminalMainLayoutController terminalController;
 	private MainController mainController;
 
 	private Subscriber subscriber;
@@ -103,7 +103,7 @@ public class ClientController extends AbstractClient {
 		this.mainController=mainController;
 	}
 	
-	public void setTerminalController(TerminalController terminalController) {
+	public void setTerminalController(TerminalMainLayoutController terminalController) {
 		this.terminalController=terminalController;
 	}
 
@@ -167,12 +167,12 @@ public class ClientController extends AbstractClient {
 		this.newOrderController = controller;
 	}
 
-	public void setMainLayoutController(MainLayoutController controller) {
+	public void setMainLayoutController(SubscriberMainLayoutController controller) {
 		this.mainLayoutController = controller;
 
 	}
 
-	public MainLayoutController getMainLayoutController() {
+	public SubscriberMainLayoutController getMainLayoutController() {
 		return mainLayoutController;
 	}
 

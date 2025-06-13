@@ -13,7 +13,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import ui.UiUtils;
 
-public class MainLayoutController implements ClientAware{
+public class SubscriberMainLayoutController implements ClientAware{
 	@FXML
 	private Button btnHome;
 	@FXML
@@ -92,7 +92,7 @@ public class MainLayoutController implements ClientAware{
 	}
 	
 	public void handleGoToDelivery() {
-		loadScreen("/client//Vehicle_delivery_screen.fxml");
+		loadScreen("/client//VehicleDeliveryScreen.fxml");
 	}
 
 	/**

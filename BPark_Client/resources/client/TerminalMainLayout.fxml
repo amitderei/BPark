@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TerminalController">
+<BorderPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TerminalMainLayoutController">
 
     <!-- Top toolbar -->
     <top>
@@ -23,7 +23,7 @@
    <left>
       <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="209.0" text="Sumbit Vehicle" />
+            <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="209.0" text="Submit Vehicle" />
             <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" text="Retrieve Vehicle" />
             <Button mnemonicParsing="false" prefHeight="44.0" prefWidth="209.0" text="Check Availability Spots" />
             <AnchorPane prefHeight="332.0" prefWidth="199.0">

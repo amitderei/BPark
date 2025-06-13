@@ -65,7 +65,7 @@ public class ViewSubscriberDetailsController implements ClientAware{
 	
 	private Subscriber subscriber;
 	private String passwordStr;
-	private MainLayoutController mainLayoutController; 
+	private SubscriberMainLayoutController mainLayoutController; 
 	
 	public void setLabels() {
 		subscriberCodeDetail.setText(((Integer)subscriber.getSubscriberCode()).toString());

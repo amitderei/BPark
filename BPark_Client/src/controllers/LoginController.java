@@ -123,11 +123,11 @@ public class LoginController implements ClientAware {
 			Parent root = loader.load();
 			Object ctrl = loader.getController();
 
-			if(ctrl instanceof MainLayoutController) {
-				client.setMainLayoutController((MainLayoutController)ctrl);
-				((MainLayoutController)ctrl).setClient(client);
-				((MainLayoutController)ctrl).setSubscriberName(username.getText().trim());
-				((MainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
+			if(ctrl instanceof SubscriberMainLayoutController) {
+				client.setMainLayoutController((SubscriberMainLayoutController)ctrl);
+				((SubscriberMainLayoutController)ctrl).setClient(client);
+				((SubscriberMainLayoutController)ctrl).setSubscriberName(username.getText().trim());
+				((SubscriberMainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
 				client.setPassword(password);
 			}
 			// Extra data per role
