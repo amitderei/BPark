@@ -1141,4 +1141,33 @@ public class DBController {
 		return null;
 	}
 	
+	/**
+	 * Marks the parking session as extended for the given parking code.
+	 * Assumes extension means setting wasExtended = TRUE without changing the time.
+	 *
+	 * @param parkingCode the parking code identifying the active parking session
+	 * @return a ServerResponse indicating success or failure
+	 */
+	public ServerResponse extendParkingSession(int parkingCode) {
+	    final String sql =
+	        "UPDATE bpark.parkingEvent " +
+	        "SET wasExtended = TRUE " +
+	        "WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, parkingCode);
+	        int rowsAffected = stmt.executeUpdate();
+
+	        if (rowsAffected > 0) {
+	            return new ServerResponse(true, null, "Parking session extended successfully.");
+	        } else {
+	            return new ServerResponse(false, null, "No active parking session found with this code.");
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return new ServerResponse(false, null, "Database error: " + e.getMessage());
+	    }
+	}
+
+	
 }

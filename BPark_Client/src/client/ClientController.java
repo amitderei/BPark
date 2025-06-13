@@ -7,6 +7,7 @@ import common.Subscriber;
 import common.User;
 import controllers.CreateNewOrderViewController;
 import controllers.EditSubscriberDetailsController;
+import controllers.ExtendParkingController;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.MainController;
@@ -60,6 +61,8 @@ public class ClientController extends AbstractClient {
 	private TerminalMainLayoutController terminalController;
 	private MainController mainController;
 	private StaffMainLayoutController staffMainLayoutController;
+	private ExtendParkingController extendParkingController;
+
 
 
 	private Subscriber subscriber;
@@ -113,6 +116,11 @@ public class ClientController extends AbstractClient {
 	public void setStaffMainLayoutController(StaffMainLayoutController controller) {
 	    this.staffMainLayoutController = controller;
 	}
+	
+	public void setExtendParkingController(ExtendParkingController controller) {
+		this.extendParkingController = controller;
+	}
+
 
 
 	/**
@@ -382,6 +390,28 @@ public class ClientController extends AbstractClient {
 
 			    return; // handled
 			}
+			
+			// Handle extension response (ExtendParkingController)
+			if (response.getMsg() != null &&
+				    (response.getMsg().toLowerCase().contains("extension") ||
+				     response.getMsg().toLowerCase().contains("already extended") ||
+				     response.getMsg().toLowerCase().contains("no active session") ||
+				     response.getMsg().toLowerCase().contains("successfully"))) {
+
+				    if (pickupController != null) {
+				        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+				    }
+
+				    if (extendParkingController != null) {
+				        extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
+				    }
+
+				    return;
+				}
+
+
+			
+			
 
 			// Vehicle delivery screen updates
 			if (newDeliveryController != null) {
@@ -556,18 +586,7 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	/**
-	 * Sends a request to extend the current parking session.
-	 *
-	 * @param subscriberCode the subscriber code
-	 */
-	public void requestExtension(int subscriberCode) {
-		try {
-			sendToServer(new Object[] { "extendParking", subscriberCode });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
-		}
-	}
+
 
 
 	/**
@@ -691,4 +710,18 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'getDetailsOfActiveInfo' request: " + e.getMessage());
 		}
     }
+    
+    /**
+     * Sends a request to extend the parking session based on parking code.
+     *
+     * @param parkingCode the parking code entered by the subscriber
+     */
+    public void extendParking(int parkingCode) {
+        try {
+            sendToServer(new Object[] { "extendParking", parkingCode });
+        } catch (IOException e) {
+            System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+        }
+    }
+
 }

@@ -83,7 +83,7 @@ public class SubscriberMainLayoutController implements ClientAware{
 
 	@FXML
 	private void handleExtendParkingTime() {
-		System.out.println("Extending parking time…");
+		loadScreen("/client/ExtendParkingScreen.fxml");
 	}
 
 	@FXML
@@ -165,8 +165,11 @@ public class SubscriberMainLayoutController implements ClientAware{
 				controller.setClient(client);
 				client.setDeliveryController(controller);
 			}
-
-
+			
+			if (ctrl instanceof ExtendParkingController controller) {
+			    controller.setClient(client);
+			    client.setExtendParkingController(controller);
+			}
 			
 			
 			center.getChildren().clear();
