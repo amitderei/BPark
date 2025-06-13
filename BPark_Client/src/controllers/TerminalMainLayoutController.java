@@ -57,7 +57,7 @@ public class TerminalMainLayoutController implements ClientAware {
 	 */
 	@FXML
 	private void handleBackClick() {
-		loadScreen("/client/SelectionScreen.fxml"); 
+		loadScreen("/client/TerminalMainScreen.fxml"); 
 	}
 	
 	/**

@@ -58,7 +58,7 @@ public class ModeSelectionController implements ClientAware {
 		UiUtils.loadScreen(btnTerminal,
 				"/client/TerminalMainLayout.fxml",
 				"BPARK – Terminal",
-				null);  // No client needed for terminal mode
+				client);  // No client needed for terminal mode
 	}
 
 
