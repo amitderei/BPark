@@ -35,12 +35,26 @@ public class ViewSubscribersInfoController implements ClientAware {
     private final ObservableList<Subscriber> data = FXCollections.observableArrayList();
     private Map<Subscriber,Integer> lateLookup = new HashMap<>();
 
-    /* ---------- ClientAware implementation ---------- */
+    /**
+     * Injects the ClientController instance.
+     * Note: actual DB call is deferred until explicitly requested.
+     */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
-        client.setViewSubscribersInfoController(this);
-        requestSubscribers();
+        if (client != null) {
+            client.setViewSubscribersInfoController(this);
+        }
+    }
+
+    /**
+     * Called by StaffMainLayoutController AFTER setClient, to initiate request.
+     */
+    public void requestSubscribers() {
+        if (client != null) {
+            System.out.println("[DEBUG] Sending requestAllSubscribers() to server...");
+            client.requestAllSubscribers();
+        }
     }
 
     /**
@@ -49,8 +63,8 @@ public class ViewSubscribersInfoController implements ClientAware {
      */
     public void onSubscribersReceived(List<Subscriber> subs,
                                       Map<Subscriber,Integer> lateMap) {
-    	System.out.println("[DEBUG] onSubscribersReceived called. Total subs = " + subs.size());
-    	System.out.println("[DEBUG] lateLookup map size = " + lateMap.size());
+        System.out.println("[DEBUG] onSubscribersReceived called. Total subs = " + subs.size());
+        System.out.println("[DEBUG] lateLookup map size = " + lateMap.size());
 
         Platform.runLater(() -> {
             this.lateLookup = lateMap;
@@ -59,43 +73,29 @@ public class ViewSubscribersInfoController implements ClientAware {
         });
     }
 
-
-    private void requestSubscribers() {
-        System.out.println("[DEBUG] Sending requestAllSubscribers() to server...");
-        client.requestAllSubscribers();
-    }
-
-
     @FXML
     private void initialize() {
-        // Column “Code” → subscriberCode getter
         colCode.setCellValueFactory(cell ->
             new ReadOnlyObjectWrapper<>(cell.getValue().getSubscriberCode()));
 
-        // Column “ID” → userId getter
         colId.setCellValueFactory(cell ->
             new ReadOnlyStringWrapper(cell.getValue().getUserId()));
 
-        // Column “Name” → firstName + " " + lastName
         colName.setCellValueFactory(cell -> {
             Subscriber s = cell.getValue();
             String fullName = s.getFirstName() + " " + s.getLastName();
             return new ReadOnlyStringWrapper(fullName);
         });
 
-        // Column “Username” → username getter
         colUsername.setCellValueFactory(cell ->
             new ReadOnlyStringWrapper(cell.getValue().getUsername()));
 
-        // Column “Phone” → phoneNum getter
         colPhone.setCellValueFactory(cell ->
             new ReadOnlyStringWrapper(cell.getValue().getPhoneNum()));
 
-        // Column “Email” → email getter
         colEmail.setCellValueFactory(cell ->
             new ReadOnlyStringWrapper(cell.getValue().getEmail()));
 
-        // Column “Late #” → lookup in lateLookup map
         colLate.setCellValueFactory(cell -> {
             int count = lateLookup.getOrDefault(cell.getValue(), 0);
             return new ReadOnlyObjectWrapper<>(count);

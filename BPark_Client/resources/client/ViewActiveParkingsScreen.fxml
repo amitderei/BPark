@@ -5,26 +5,26 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ViewActiveParkingsController"
-            prefWidth="800.0" prefHeight="500.0">
+            prefWidth="600.0" prefHeight="453.0">
 
     <top>
         <Label text="Active Parkings"
                BorderPane.alignment="CENTER"
-               styleClass="headline"/>
+               styleClass="headline" />
     </top>
 
     <center>
         <TableView fx:id="parkingTable"
-                   prefWidth="780.0" prefHeight="440.0">
+                   prefWidth="580.0" prefHeight="400.0">
             <columns>
-                <TableColumn fx:id="colEventId"     text="Event ID"        prefWidth="80.0"/>
-                <TableColumn fx:id="colSubscriber"  text="Subscriber"      prefWidth="120.0"/>
-                <TableColumn fx:id="colVehicleId"   text="Vehicle ID"      prefWidth="100.0"/>
-                <TableColumn fx:id="colParkingCode" text="Parking Code"    prefWidth="100.0"/>
-                <TableColumn fx:id="colLot"         text="Parking Lot"     prefWidth="120.0"/>
-                <TableColumn fx:id="colSpace"       text="Space #"         prefWidth="80.0"/>
-                <TableColumn fx:id="colEntryDate"   text="Entry Date"      prefWidth="90.0"/>
-                <TableColumn fx:id="colEntryTime"   text="Entry Time"      prefWidth="90.0"/>
+                <TableColumn fx:id="colEventId"     text="Event ID"        prefWidth="60.0"/>
+                <TableColumn fx:id="colSubscriber"  text="Subscriber"      prefWidth="80.0"/>
+                <TableColumn fx:id="colVehicleId"   text="Vehicle ID"      prefWidth="80.0"/>
+                <TableColumn fx:id="colParkingCode" text="Parking Code"    prefWidth="80.0"/>
+                <TableColumn fx:id="colLot"         text="Parking Lot"     prefWidth="90.0"/>
+                <TableColumn fx:id="colSpace"       text="Space #"         prefWidth="50.0"/>
+                <TableColumn fx:id="colEntryDate"   text="Entry Date"      prefWidth="70.0"/>
+                <TableColumn fx:id="colEntryTime"   text="Entry Time"      prefWidth="70.0"/>
             </columns>
         </TableView>
     </center>

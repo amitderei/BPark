@@ -5,7 +5,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ViewSubscribersInfoController"
-            prefWidth="800.0" prefHeight="500.0">
+            prefWidth="600.0" prefHeight="453.0">
 
     <top>
         <Label text="Subscribers List"
@@ -15,16 +15,16 @@
 
     <center>
         <TableView fx:id="subscriberTable"
-                   prefWidth="780.0" prefHeight="440.0">
+                   prefWidth="580.0" prefHeight="410.0">
 
             <columns>
-                <TableColumn fx:id="colCode"     text="Code"      prefWidth="60.0"/>
-                <TableColumn fx:id="colId"       text="ID"        prefWidth="90.0"/>
-                <TableColumn fx:id="colName"     text="Name"      prefWidth="120.0"/>
-                <TableColumn fx:id="colUsername" text="Username"  prefWidth="120.0"/>
-                <TableColumn fx:id="colPhone"    text="Phone"     prefWidth="100.0"/>
-                <TableColumn fx:id="colEmail"    text="Email"     prefWidth="180.0"/>
-                <TableColumn fx:id="colLate"     text="Late #"    prefWidth="60.0"/>
+                <TableColumn fx:id="colCode"     text="Code"      prefWidth="50.0"/>
+                <TableColumn fx:id="colId"       text="ID"        prefWidth="75.0"/>
+                <TableColumn fx:id="colName"     text="Name"      prefWidth="110.0"/>
+                <TableColumn fx:id="colUsername" text="Username"  prefWidth="100.0"/>
+                <TableColumn fx:id="colPhone"    text="Phone"     prefWidth="90.0"/>
+                <TableColumn fx:id="colEmail"    text="Email"     prefWidth="120.0"/>
+                <TableColumn fx:id="colLate"     text="Late #"    prefWidth="50.0"/>
             </columns>
         </TableView>
     </center>

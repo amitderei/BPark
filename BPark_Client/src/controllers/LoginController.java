@@ -110,7 +110,7 @@ public class LoginController implements ClientAware {
 			client.subscriberDetails(user);
 			break;
 		case Attendant, Manager:
-			fxml = "/client/StaffMainScreen.fxml";
+			fxml = "/client/StaffMainLayout.fxml";
 			break;
 		default:
 			UiUtils.showAlert("BPARK – Error", "Unknown role: " + role, Alert.AlertType.ERROR);
@@ -131,7 +131,7 @@ public class LoginController implements ClientAware {
 				client.setPassword(password);
 			}
 			// Extra data per role
-			if (ctrl instanceof StaffMainController staff) {
+			if (ctrl instanceof StaffMainLayoutController staff) {
 				staff.setUser(user);
 			}
 		

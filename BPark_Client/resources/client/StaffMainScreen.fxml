@@ -1,45 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.StaffMainController"
-            prefWidth="800.0" prefHeight="500.0">
+<BorderPane prefHeight="453.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.StaffMainController">
 
-    <top>
-        <ToolBar>
-            <Button text="🏠 Home" onAction="#handleHomeClick" />
-            <Pane HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnLogout" text="🔓 Logout" onAction="#handleLogoutClick" />
-        </ToolBar>
-    </top>
-
-    <!-- center -->
     <center>
-        <VBox alignment="CENTER" spacing="15.0">
+        <VBox alignment="CENTER" spacing="15">
             <padding>
                 <Insets top="20" bottom="20" left="20" right="20"/>
             </padding>
-
-            <Label fx:id="welcomeLabel" text="Welcome, Staff!" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
-
-            <!-- manager & attendant -->
-            <Button text="Register Users" onAction="#handleRegisterUsers" />
-			<Button fx:id="btnViewSubscriberInfo"
-			        text="View Subscriber Info"
-			        onAction="#handleViewSubscriberInfo"/>
-
-			<Button fx:id="btnViewActiveParkings"
-			        text="View Active Parkings"
-			        onAction="#handleViewActiveParkings"/>
-
-            <!-- manager only  -->
-            <Button fx:id="parkingReportButton" text="View Parking Time Report" onAction="#handleViewParkingReport" />
-            <Button fx:id="subscriberReportButton" text="View Subscriber Status Report" onAction="#handleViewSubscriberReport" />
-
+            <Label fx:id="welcomeLabel" text="Welcome, Staff!" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
         </VBox>
     </center>
-</BorderPane>
 
+</BorderPane>

@@ -25,7 +25,7 @@ public class ViewActiveParkingsController implements ClientAware {
     @FXML private TableColumn<ParkingEvent, Integer> colEventId;
     @FXML private TableColumn<ParkingEvent, Integer> colSubscriber;
     @FXML private TableColumn<ParkingEvent, String>  colVehicleId;
-    @FXML private TableColumn<ParkingEvent, String>  colParkingCode;  // FIXED: Changed from Integer to String
+    @FXML private TableColumn<ParkingEvent, String>  colParkingCode;
     @FXML private TableColumn<ParkingEvent, String>  colLot;
     @FXML private TableColumn<ParkingEvent, Integer> colSpace;
     @FXML private TableColumn<ParkingEvent, String>  colEntryDate;
@@ -36,15 +36,14 @@ public class ViewActiveParkingsController implements ClientAware {
     private final ObservableList<ParkingEvent> data = FXCollections.observableArrayList();
 
     /**
-     * Called automatically after the FXML is loaded.
-     * Sets up table columns.
+     * Sets up table columns after FXML is loaded.
      */
     @FXML
     private void initialize() {
         colEventId.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getEventId()));
         colSubscriber.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getSubscriberCode()));
         colVehicleId.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getVehicleId()));
-        colParkingCode.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getParkingCode())); // FIXED
+        colParkingCode.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getParkingCode()));
         colLot.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getNameParkingLot()));
         colSpace.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getParkingSpace()));
 
@@ -60,13 +59,25 @@ public class ViewActiveParkingsController implements ClientAware {
     }
 
     /**
-     * Injects the ClientController instance and triggers data fetch.
+     * Injects the ClientController instance. Does not trigger DB call directly.
+     * Use requestActiveParkingEvents() separately after setClient is complete.
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
-        client.setViewActiveParkingsController(this);
-        client.requestActiveParkingEvents();
+        if (client != null) {
+            client.setViewActiveParkingsController(this);
+        }
+    }
+
+    /**
+     * Triggers a request to the server for active parking data.
+     * Should be called after setClient.
+     */
+    public void requestActiveParkingEvents() {
+        if (client != null) {
+            client.requestActiveParkingEvents();
+        }
     }
 
     /**

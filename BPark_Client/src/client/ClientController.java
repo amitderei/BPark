@@ -12,6 +12,7 @@ import controllers.LoginController;
 import controllers.MainController;
 import controllers.SubscriberMainLayoutController;
 import controllers.ParkingReservationSummaryController;
+import controllers.StaffMainLayoutController;
 import controllers.SubscriberMainController;
 import controllers.TerminalMainLayoutController;
 import controllers.VehicleDeliveryController;
@@ -58,6 +59,8 @@ public class ClientController extends AbstractClient {
 	private ViewActiveParkingInfoController viewActiveParkingInfoController;
 	private TerminalMainLayoutController terminalController;
 	private MainController mainController;
+	private StaffMainLayoutController staffMainLayoutController;
+
 
 	private Subscriber subscriber;
 
@@ -106,6 +109,11 @@ public class ClientController extends AbstractClient {
 	public void setTerminalController(TerminalMainLayoutController terminalController) {
 		this.terminalController=terminalController;
 	}
+	
+	public void setStaffMainLayoutController(StaffMainLayoutController controller) {
+	    this.staffMainLayoutController = controller;
+	}
+
 
 	/**
 	 * Sets the login screen controller.
