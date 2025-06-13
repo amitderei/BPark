@@ -90,13 +90,17 @@ public class MainLayoutController implements ClientAware{
 	private void handleSubmitVehicle() {
 		System.out.println("Submitting vehicle…");
 	}
+	
+	public void handleGoToDelivery() {
+		loadScreen("/client//Vehicle_delivery_screen.fxml");
+	}
 
 	/**
 	 * Opens the vehicle-pickup screen when the user clicks “Retrieve Vehicle”.
 	 */
 	@FXML
 	private void handleRetrieveVehicle() {
-		UiUtils.loadScreen(btnRetrieveVehicle, "/client/VehiclePickupScreen.fxml", "BPARK – Vehicle Pickup", client);
+		loadScreen("/client/VehiclePickupScreen.fxml");
 	}
 
 
@@ -152,6 +156,18 @@ public class MainLayoutController implements ClientAware{
 				controller.getDetailsOfActiveInfo();
 			}
 			
+			if (ctrl instanceof VehiclePickupController controller) {
+				controller.setClient(client);
+				client.setPickupController(controller);
+			}
+			
+			if (ctrl instanceof VehicleDeliveryController controller) {
+				controller.setClient(client);
+				client.setDeliveryController(controller);
+			}
+
+
+			
 			
 			center.getChildren().clear();
 			center.getChildren().add(content);
@@ -196,29 +212,6 @@ public class MainLayoutController implements ClientAware{
 		}
 	}
 
-	public void handleGoToDelivery() {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/Vehicle_delivery_screen.fxml")); // load
-																												// the
-																												// Placing_an_order_view.fxml
-																												// after
-																												// search
-																												// on
-																												// resources
-			Parent root = loader.load();
-
-			VehicleDeliveryController controller = loader.getController(); // after loading the fxml- get the controller
-			controller.setClient(client);// move the client to the new controller
-			client.setDeliveryController(controller); // for act functions
-
-			Stage stage = (Stage) btnParkingReservation.getScene().getWindow(); // get the stage
-			Scene scene = new Scene(root); // create new scene
-			stage.setScene(scene);
-			stage.show();
-		} catch (Exception e) {
-			System.out.println("Error:" + e.getMessage());
-		}
-	}
 	
 	public void setClient(ClientController client) {
 		this.client=client;

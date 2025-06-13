@@ -561,18 +561,6 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	/**
-	 * Sends a request to resend the parking code (SMS + email).
-	 *
-	 * @param subscriberCode the subscriber code
-	 */
-	public void sendLostParkingCode(int subscriberCode) {
-		try {
-			sendToServer(new Object[] { "sendLostCode", subscriberCode });
-		} catch (IOException e) {
-			System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
-		}
-	}
 
 	/**
 	 * Sends a request to the server to check how many parking spots are currently

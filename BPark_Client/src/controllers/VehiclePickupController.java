@@ -57,15 +57,22 @@ public class VehiclePickupController implements ClientAware {
      */
     @FXML
     public void validateSubscriber() {
+        if (client == null) {
+            UiUtils.setStatus(lblStatus, "Client not initialized.", false);
+            UiUtils.showAlert("System Error", "Client was not connected. Please try again.", javafx.scene.control.Alert.AlertType.ERROR);
+            return;
+        }
+
         try {
             int code = Integer.parseInt(txtSubscriberCode.getText());
             client.validateSubscriber(code);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Subscriber code must be a number.", false);
-            UiUtils.showAlert("BPARK - Error", "Subscriber code must be a number.",
-                    javafx.scene.control.Alert.AlertType.ERROR);
+            UiUtils.showAlert("BPARK - Error", "Subscriber code must be a number.", javafx.scene.control.Alert.AlertType.ERROR);
         }
     }
+
+
 
     /**
      * Called when "Identify by Tag" is clicked.
@@ -94,6 +101,39 @@ public class VehiclePickupController implements ClientAware {
 
         lockAfterValidation();
     }
+    
+    /**
+     * Collect car logic using subscriberCode + parkingCode
+     */
+    @FXML
+    public void collectCar() {
+        try {
+            int parkingCode = Integer.parseInt(txtParkingCode.getText());
+            client.collectCar(validatedSubscriberCode, parkingCode);
+        } catch (NumberFormatException e) {
+            UiUtils.setStatus(lblStatus, "Parking code must be numeric.", false);
+            UiUtils.showAlert("BPARK - Error", "Parking code must be numeric.",
+                    javafx.scene.control.Alert.AlertType.ERROR);
+        } catch (Exception ex) {
+            UiUtils.setStatus(lblStatus, "An error occurred while trying to collect the vehicle.", false);
+        }
+    }
+
+    /**
+     * Sends a request to resend the confirmation code.
+     */
+    @FXML 
+    public void forgotMyCode() {
+        try {
+        	client.forgotMyParkingCode(validatedSubscriberCode);
+        } catch (Exception e) {
+            UiUtils.setStatus(lblStatus, "An error occurred while requesting your code.", false);
+        }
+    }
+    
+
+    
+    
 
     /**
      * Called after successful validation via Tag.
@@ -127,34 +167,6 @@ public class VehiclePickupController implements ClientAware {
         UiUtils.setStatus(lblStatus, "Subscriber verified. Please enter your parking code.", true);
     }
 
-    /**
-     * Collect car logic using subscriberCode + parkingCode
-     */
-    @FXML
-    public void collectCar() {
-        try {
-            int parkingCode = Integer.parseInt(txtParkingCode.getText());
-            client.collectCar(validatedSubscriberCode, parkingCode);
-        } catch (NumberFormatException e) {
-            UiUtils.setStatus(lblStatus, "Parking code must be numeric.", false);
-            UiUtils.showAlert("BPARK - Error", "Parking code must be numeric.",
-                    javafx.scene.control.Alert.AlertType.ERROR);
-        } catch (Exception ex) {
-            UiUtils.setStatus(lblStatus, "An error occurred while trying to collect the vehicle.", false);
-        }
-    }
-
-    /**
-     * Sends a request to resend the confirmation code.
-     */
-    @FXML 
-    public void sendLostCode() {
-        try {
-            client.sendLostParkingCode(validatedSubscriberCode);
-        } catch (Exception e) {
-            UiUtils.setStatus(lblStatus, "An error occurred while requesting your code.", false);
-        }
-    }
 
     /**
      * Disables controls after successful vehicle pickup.
@@ -165,8 +177,5 @@ public class VehiclePickupController implements ClientAware {
         btnLostCode.setDisable(true);
     }
     
-    public void forgotMyCode() {
-    	client.forgotMyParkingCode(validatedSubscriberCode);
-    }
 }
 
