@@ -431,15 +431,14 @@ public class VehicleDeliveryController implements ClientAware{
 	 */
 	public void findMatchedSubToTheTag() {
 		try {
-			client.sendToServer(new Object[] {"FindMatchedSubToTheTag", tag});
-
+			client.sendToServer(new Object[] {"findMatchedSubToTheTag", tag});
+			
 			// Initialize the CompletableFutures
 			subCodeFuture = new CompletableFuture<>();
-
+						
 			// When we have the tag, we will seek for the subscriber code
 			subCodeFuture.thenAccept(codeInt -> {
 				this.codeInt = codeInt;
-
 				// After gathering the subscriber code we will go and check whether there are free space in our parking lot
 				isThereFreeParkingSpace();
 			});
@@ -696,6 +695,7 @@ public class VehicleDeliveryController implements ClientAware{
 		// Setting the label for showing the parking code to the subscriber
 		parkingCodeLabel.setText("Your Parking Code is : " + parkingCode);
 		parkingCodeLabel.setStyle("-fx-text-fill: green;");
+		parkingCodeLabel.setVisible(true);
 
 	}
 
