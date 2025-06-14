@@ -392,22 +392,19 @@ public class ClientController extends AbstractClient {
 			}
 			
 			// Handle extension response (ExtendParkingController)
-			if (response.getMsg() != null &&
-				    (response.getMsg().toLowerCase().contains("extension") ||
-				     response.getMsg().toLowerCase().contains("already extended") ||
-				     response.getMsg().toLowerCase().contains("no active session") ||
-				     response.getMsg().toLowerCase().contains("successfully"))) {
+			if (extendParkingController != null && response.getMsg() != null &&
+			    (response.getMsg().toLowerCase().contains("extension request successfully") ||
+			     response.getMsg().toLowerCase().contains("already extended") ||
+			     response.getMsg().toLowerCase().contains("no active session"))) {
 
-				    if (pickupController != null) {
-				        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
-				    }
+			    if (pickupController != null) {
+			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+			    }
 
-				    if (extendParkingController != null) {
-				        extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
-				    }
+			    extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
+			    return;
+			}
 
-				    return;
-				}
 
 
 			
