@@ -40,6 +40,8 @@ public class RegisterSubscriberController implements ClientAware {
      */
     @FXML
     private void handleRegisterClick() {
+        StringBuilder errors = new StringBuilder();
+
         String userId = txtUserId.getText().trim();
         String firstName = txtFirstName.getText().trim();
         String lastName = txtLastName.getText().trim();
@@ -47,36 +49,41 @@ public class RegisterSubscriberController implements ClientAware {
         String email = txtEmail.getText().trim();
         String username = txtUsername.getText().trim();
 
-        // Check required fields
-        if (userId.isEmpty() || firstName.isEmpty() || lastName.isEmpty()
-                || phone.isEmpty() || email.isEmpty() || username.isEmpty()) {
-            UiUtils.setStatus(lblStatus, "All fields must be filled.", false);
+        if (userId.isEmpty() || !userId.matches("\\d{9}")) {
+            errors.append("- ID must be exactly 9 digits.\n");
+        }
+
+        if (firstName.isEmpty()) {
+            errors.append("- First name is required.\n");
+        }
+
+        if (lastName.isEmpty()) {
+            errors.append("- Last name is required.\n");
+        }
+
+        if (phone.isEmpty() || !phone.matches("^05\\d{8}$")) {
+            errors.append("- Phone must start with 05 and be 10 digits.\n");
+        }
+
+        if (email.isEmpty() || !email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
+            errors.append("- Email format is invalid.\n");
+        }
+
+        if (username.isEmpty() || !username.matches("\\w{4,}")) {
+            errors.append("- Username must be at least 4 characters with no spaces.\n");
+        }
+
+        if (errors.length() > 0) {
+            UiUtils.setStatus(lblStatus, errors.toString().trim(), false);
             return;
         }
 
-        // Validate user ID: must be 9 digits
-        if (!userId.matches("\\d{9}")) {
-            UiUtils.setStatus(lblStatus, "ID must be exactly 9 digits.", false);
-            return;
-        }
-
-        // Validate username: at least 4 characters, no spaces
-        if (!username.matches("\\w{4,}")) {
-            UiUtils.setStatus(lblStatus, "Username must be at least 4 characters with no spaces.", false);
-            return;
-        }
-
-        // Validate email format
-        if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
-            UiUtils.setStatus(lblStatus, "Email format is invalid.", false);
-            return;
-        }
-
-        // Build and send subscriber object
+        // If all good → register
         Subscriber subscriber = new Subscriber(0, userId, firstName, lastName, phone, email, username, null);
         client.registerSubscriber(subscriber);
         UiUtils.setStatus(lblStatus, "Registration request sent to server.", true);
     }
+
 
     /**
      * Displays server response on the status label.
