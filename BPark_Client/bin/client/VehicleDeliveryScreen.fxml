@@ -14,12 +14,11 @@
    <children>
       <GridPane layoutX="10.0" layoutY="9.0" prefHeight="433.0" prefWidth="580.0">
          <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="140.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="0.0" prefWidth="14.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="140.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="14.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="140.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.199951171875" minWidth="10.0" prefWidth="18.199993896484372" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="375.1999755859375" minWidth="10.0" prefWidth="267.0000061035156" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="143.39996337890625" minWidth="0.0" prefWidth="37.59998779296876" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="342.1999755859375" minWidth="10.0" prefWidth="250.4000122070313" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="141.39996337890625" minWidth="10.0" prefWidth="21.4000244140625" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -36,27 +35,27 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <TextField fx:id="subscriberCodeField" prefHeight="28.0" prefWidth="227.0" promptText="e.g. 1001" GridPane.rowIndex="3" />
-            <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="26.0" prefWidth="102.0" text="Verify Code" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+            <TextField fx:id="subscriberCodeField" prefHeight="28.0" prefWidth="227.0" promptText="e.g. 1001" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="26.0" prefWidth="102.0" text="Verify Code" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Vehicle Delivery : terminal" textAlignment="CENTER" wrappingWidth="293.5" GridPane.columnIndex="2" GridPane.halignment="CENTER">
                <font>
                   <Font name="Calibri" size="24.0" />
                </font>
             </Text>
-            <Label fx:id="subscriberCodeLabel" text=" " GridPane.rowIndex="4" />
-            <Label text=" Subscriber code :" GridPane.rowIndex="2" />
-            <Label fx:id="ReservationORRegularEnteranceLabel" prefHeight="18.0" prefWidth="250.0" text="Enter to the Parking Lot (based on free place)" visible="false" GridPane.rowIndex="6" />
-            <TextField fx:id="ReservationConfirmationCodeField" prefHeight="29.0" prefWidth="162.0" promptText="e.g. 100100" visible="false" GridPane.rowIndex="7" />
-            <Button fx:id="ReservationORRegularEnteranceButton" mnemonicParsing="false" onAction="#handleDelivery" prefHeight="26.0" prefWidth="102.0" text="Deliver Vehicle" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-            <Label fx:id="ReservationConfirmationCodeLabel" prefHeight="18.0" prefWidth="257.0" text=" " GridPane.rowIndex="8" />
-            <Label fx:id="deliverStatusUpdateLabel" prefHeight="18.0" prefWidth="244.0" text=" Status--Of--Parking--Lot" visible="false" GridPane.rowIndex="9" />
-            <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="244.0" text=" " visible="false" GridPane.rowIndex="10" />
-            <Label text=" Or scan your tag :" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <TextField fx:id="TagCodeField" prefHeight="28.0" prefWidth="127.0" promptText="e.g. TAG_001" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-            <Button fx:id="submitTagButton" mnemonicParsing="false" onAction="#handleTagDelivery" prefHeight="26.0" prefWidth="143.0" text="Verify Tag &amp; Deliver " GridPane.columnIndex="5" GridPane.rowIndex="3" />
-            <Label fx:id="TagStatusUpdateLabel" prefHeight="18.0" prefWidth="165.0" text=" " GridPane.columnIndex="3" GridPane.rowIndex="4" />
-            <Label fx:id="parkingCodeLabel" prefHeight="18.0" prefWidth="238.0" text=" " GridPane.columnIndex="2" GridPane.rowIndex="10" />
-            <Label fx:id="vehicleHasEnteredLabel" prefHeight="18.0" prefWidth="238.0" text="The vehicle is Already inside the parking lot!" textFill="RED" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+            <Label fx:id="subscriberCodeLabel" prefHeight="18.0" prefWidth="276.0" text="BLA BLA" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label text=" Subscriber code :" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label fx:id="ReservationORRegularEnteranceLabel" prefHeight="18.0" prefWidth="250.0" text="Enter to the Parking Lot (based on free place)" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <TextField fx:id="ReservationConfirmationCodeField" prefHeight="29.0" prefWidth="162.0" promptText="e.g. 100100" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Button fx:id="ReservationORRegularEnteranceButton" mnemonicParsing="false" onAction="#handleDelivery" prefHeight="26.0" prefWidth="102.0" text="Deliver Vehicle" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+            <Label fx:id="ReservationConfirmationCodeLabel" prefHeight="18.0" prefWidth="278.0" text=" BLA BLA" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+            <Label fx:id="deliverStatusUpdateLabel" prefHeight="18.0" prefWidth="277.0" text=" Status--Of--Parking--Lot" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+            <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="294.0" text=" SUCCESSFUL DELIVER" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+            <Label text=" Or scan your tag :" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <TextField fx:id="TagCodeField" prefHeight="28.0" prefWidth="127.0" promptText="e.g. TAG_001" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Button fx:id="submitTagButton" mnemonicParsing="false" onAction="#handleTagDelivery" prefHeight="26.0" prefWidth="131.0" text="Verify Tag &amp; Deliver " GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Label fx:id="TagStatusUpdateLabel" prefHeight="18.0" prefWidth="165.0" text=" BLA BLA" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+            <Label fx:id="parkingCodeLabel" prefHeight="18.0" prefWidth="238.0" text=" PARKING CODE : XXXXXX" GridPane.columnIndex="3" GridPane.rowIndex="9" />
+            <Label fx:id="vehicleHasEnteredLabel" prefHeight="18.0" prefWidth="238.0" text="The vehicle is Already inside the parking lot!" textFill="RED" GridPane.columnIndex="3" GridPane.rowIndex="8" />
          </children>
       </GridPane>
    </children>
