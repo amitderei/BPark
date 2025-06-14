@@ -25,8 +25,7 @@ public class TerminalMainLayoutController implements ClientAware {
 	@FXML private AnchorPane center;
 
 	private ClientController client;
-	private String currentScreen = "/client/TerminalMainScreen.fxml";
-	private String previousScreen = null;
+
 
 
 	
@@ -56,11 +55,7 @@ public class TerminalMainLayoutController implements ClientAware {
 	 */
 	@FXML
 	private void handleBackClick() {
-	    if (previousScreen != null) {
-	        loadScreen(previousScreen);
-	    } else {
-	        loadScreen("/client/TerminalMainScreen.fxml"); // fallback
-	    }
+		loadScreen("/client/SelectionScreen.fxml");
 	}
 	
 	/**
@@ -136,12 +131,7 @@ public class TerminalMainLayoutController implements ClientAware {
 				controller.setClient(client);
 				client.setDeliveryController(controller);
 			}
-			
-	        // Track navigation: update previousScreen before changing
-	        if (!fxml.equals(currentScreen)) {
-	            previousScreen = currentScreen;
-	            currentScreen = fxml;
-	        }
+		
 
 
 			center.getChildren().clear();

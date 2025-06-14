@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.RegisterSubscriberController"
+            prefWidth="600.0" prefHeight="453.0">
+
+    <VBox spacing="10" alignment="TOP_CENTER"
+          AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+
+        <Label text="📋 Register New Subscriber"
+               style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+        <TextField fx:id="txtUserId" promptText="User ID" />
+        <TextField fx:id="txtFirstName" promptText="First Name" />
+        <TextField fx:id="txtLastName" promptText="Last Name" />
+        <TextField fx:id="txtPhone" promptText="Phone Number" />
+        <TextField fx:id="txtEmail" promptText="Email Address" />
+        <TextField fx:id="txtUsername" promptText="Username" />
+
+        <Button fx:id="btnRegister" text="Register Subscriber"
+                onAction="#handleRegisterClick" maxWidth="200" />
+
+        <Label fx:id="lblStatus" textFill="green" wrapText="true" />
+    </VBox>
+
+</AnchorPane>

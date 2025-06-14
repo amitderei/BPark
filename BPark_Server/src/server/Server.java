@@ -433,6 +433,78 @@ public class Server extends AbstractServer {
 				    return;
 				}
 
+				// Register new subscriber: ["registerSubscriber", Subscriber]
+				else if (data.length == 2 && "registerSubscriber".equals(data[0])) {
+				    Subscriber receivedSub = (Subscriber) data[1];
+
+				    // Step 0: Check if username, email, phone or ID already exists
+				    if (db.usernameExists(receivedSub.getUsername())) {
+				        client.sendToClient(new ServerResponse(false, null, "Username already exists. Please choose another."));
+				        return;
+				    }
+				    if (db.emailExists(receivedSub.getEmail())) {
+				        client.sendToClient(new ServerResponse(false, null, "Email already registered. Use a different email."));
+				        return;
+				    }
+				    if (db.phoneExists(receivedSub.getPhoneNum())) {
+				        client.sendToClient(new ServerResponse(false, null, "Phone number already in use."));
+				        return;
+				    }
+				    if (db.idExists(receivedSub.getUserId())) {
+				        client.sendToClient(new ServerResponse(false, null, "ID already in use. Please verify the subscriber is not already registered."));
+				        return;
+				    }
+
+				    // Step 1: Generate subscriberCode and tagId
+				    int newCode = db.getNextSubscriberCode();
+				    String newTag = db.generateNextTagId();
+				    receivedSub.setSubscriberCode(newCode);
+				    receivedSub.setTagId(newTag);
+
+				    // Step 2: Generate random password
+				    String generatedPassword = generateRandomPassword();
+
+				    // Step 3: Insert user
+				    boolean userSuccess = db.insertUser(new User(
+				        receivedSub.getUsername(),
+				        generatedPassword,
+				        "Subscriber"
+				    ));
+
+				    if (!userSuccess) {
+				        client.sendToClient(new ServerResponse(false, null, "Failed to insert user. Try again later."));
+				        return;
+				    }
+
+				    // Step 4: Insert subscriber
+				    boolean subSuccess = db.insertSubscriber(receivedSub);
+
+				    if (subSuccess) {
+				        // Step 5: Send password to email
+				        String content = String.format("""
+				            Hello %s,
+
+				            Your registration to the BPARK system was successful!
+
+				            Login credentials:
+				            - Username: %s
+				            - Temporary Password: %s
+
+				            You can now log in using these credentials.
+
+				            Thank you,
+				            BPARK Team
+				            """, receivedSub.getFirstName(), receivedSub.getUsername(), generatedPassword);
+
+				        sendEmail.sendEmail(receivedSub.getEmail(), content, TypeOfMail.GENERIC_MESSAGE);
+
+				        client.sendToClient(new ServerResponse(true, receivedSub, "Subscriber registered successfully. Login details sent via email."));
+				    } else {
+				        client.sendToClient(new ServerResponse(false, null, "Failed to insert subscriber. Try again."));
+				    }
+				    return;
+				}
+
 
 
 			}
@@ -534,4 +606,20 @@ public class Server extends AbstractServer {
 
 		return list;
 	}
+	
+	/**
+	 * Generates a random 8-character alphanumeric password.
+	 *
+	 * @return random password
+	 */
+	private String generateRandomPassword() {
+	    String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	    StringBuilder sb = new StringBuilder();
+	    for (int i = 0; i < 8; i++) {
+	        int idx = (int) (Math.random() * chars.length());
+	        sb.append(chars.charAt(idx));
+	    }
+	    return sb.toString();
+	}
+
 }

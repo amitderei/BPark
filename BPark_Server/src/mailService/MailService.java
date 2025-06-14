@@ -41,6 +41,10 @@ public class MailService {
 						+ "If your vehicle has already been moved, please disregard this message.\n\n"
 						+ "Thank you for your cooperation,\nThe BPARK Team");
 				break;
+		    case GENERIC_MESSAGE:
+		        message.setSubject("BPARK Notification");
+		        message.setText(body);
+		        break;
 			}
 
 			// send message

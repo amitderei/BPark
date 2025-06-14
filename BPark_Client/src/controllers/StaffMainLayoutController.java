@@ -64,7 +64,7 @@ public class StaffMainLayoutController implements ClientAware {
 
     @FXML
     private void handleRegisterUsers() {
-        UiUtils.showAlert("Register", "Register users functionality.", Alert.AlertType.INFORMATION);
+    	loadScreen("/client/RegisterSubscriberScreen.fxml");
     }
 
     @FXML
@@ -109,6 +109,10 @@ public class StaffMainLayoutController implements ClientAware {
                 if (ctrl instanceof ViewActiveParkingsController controller) {
                     client.setViewActiveParkingsController(controller);
                     controller.requestActiveParkingEvents();
+                }
+                
+                if (ctrl instanceof RegisterSubscriberController controller) {
+                    client.setRegisterSubscriberController(controller);
                 }
             }
 

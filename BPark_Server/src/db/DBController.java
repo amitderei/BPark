@@ -1168,6 +1168,155 @@ public class DBController {
 	        return new ServerResponse(false, null, "Database error: " + e.getMessage());
 	    }
 	}
+	
+	/**
+	 * Returns the next available subscriber code (MAX + 1).
+	 * Starts from 1011 if table is empty.
+	 */
+	public int getNextSubscriberCode() {
+	    String query = "SELECT MAX(subscriberCode) FROM bpark.subscriber";
+	    try (PreparedStatement stmt = conn.prepareStatement(query);
+	         ResultSet rs = stmt.executeQuery()) {
+	        if (rs.next()) {
+	            int currentMax = rs.getInt(1);
+	            return (currentMax == 0 ? 1011 : currentMax + 1);
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error generating subscriber code: " + e.getMessage());
+	    }
+	    return 1011; // Fallback starting code
+	}
+
+	/**
+	 * Generates the next unique tag ID in the format TAG_XXX.
+	 */
+	public String generateNextTagId() {
+	    String query = "SELECT COUNT(*) FROM bpark.subscriber";
+	    try (PreparedStatement stmt = conn.prepareStatement(query);
+	         ResultSet rs = stmt.executeQuery()) {
+	        if (rs.next()) {
+	            int count = rs.getInt(1) + 1;
+	            return "TAG_" + String.format("%03d", count);
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error generating tag ID: " + e.getMessage());
+	    }
+	    return "TAG_999";
+	}
+
+	/**
+	 * Inserts a new subscriber into the database.
+	 *
+	 * @param s the subscriber object to insert
+	 * @return true if insertion succeeded
+	 */
+	public boolean insertSubscriber(Subscriber s) {
+	    String sql = "INSERT INTO bpark.subscriber " +
+	                 "(subscriberCode, userId, firstName, lastName, phoneNumber, email, username, tagId) " +
+	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, s.getSubscriberCode());
+	        stmt.setString(2, s.getUserId());
+	        stmt.setString(3, s.getFirstName());
+	        stmt.setString(4, s.getLastName());
+	        stmt.setString(5, s.getPhoneNum());
+	        stmt.setString(6, s.getEmail());
+	        stmt.setString(7, s.getUsername());
+	        stmt.setString(8, s.getTagId());
+	        return stmt.executeUpdate() == 1;
+	    } catch (SQLException e) {
+	        System.err.println("Error inserting subscriber: " + e.getMessage());
+	        return false;
+	    }
+	}
+
+	public boolean insertUser(User user) {
+	    String sql = "INSERT INTO bpark.user (username, password, role) VALUES (?, ?, ?)";
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setString(1, user.getUsername());
+	        stmt.setString(2, user.getPassword());
+	        stmt.setString(3, user.getRole().toString());
+	        return stmt.executeUpdate() == 1;
+	    } catch (SQLException e) {
+	        return false;
+	    }
+	}
+	
+	/**
+	 * Checks whether the provided email is already associated with an existing subscriber.
+	 *
+	 * @param email the email to check
+	 * @return true if the email exists, false otherwise
+	 */
+	public boolean emailExists(String email) {
+	    String query = "SELECT 1 FROM bpark.subscriber WHERE email = ? LIMIT 1";
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, email);
+	        ResultSet rs = stmt.executeQuery();
+	        return rs.next(); // true if exists
+	    } catch (SQLException e) {
+	        System.err.println("Error checking email existence: " + e.getMessage());
+	        return false;
+	    }
+	}
+	
+	/**
+	 * Checks whether the provided username is already taken.
+	 *
+	 * @param username the username to check
+	 * @return true if the username exists, false otherwise
+	 */
+	public boolean usernameExists(String username) {
+	    String query = "SELECT 1 FROM bpark.user WHERE username = ? LIMIT 1";
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, username);
+	        ResultSet rs = stmt.executeQuery();
+	        return rs.next(); // true if exists
+	    } catch (SQLException e) {
+	        System.err.println("Error checking username existence: " + e.getMessage());
+	        return false;
+	    }
+	}
+
+	/**
+	 * Checks if a phone number already exists in the subscriber table.
+	 *
+	 * @param phone the phone number to check
+	 * @return true if the phone exists, false otherwise
+	 */
+	public boolean phoneExists(String phone) {
+	    String query = "SELECT 1 FROM bpark.subscriber WHERE phoneNumber = ? LIMIT 1";
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, phone);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); // returns true if a row was found
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error checking if phone exists: " + e.getMessage());
+	        return false;
+	    }
+	}
+	
+	/**
+	 * Checks if a user ID (Teudat Zehut) already exists in the subscriber table.
+	 *
+	 * @param userId the ID to check
+	 * @return true if the ID exists, false otherwise
+	 */
+	public boolean idExists(String userId) {
+	    String query = "SELECT 1 FROM bpark.subscriber WHERE userId = ? LIMIT 1";
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, userId);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); // true if a row exists
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error checking if ID exists: " + e.getMessage());
+	        return false;
+	    }
+	}
+
+
 
 	
 }

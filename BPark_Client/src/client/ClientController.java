@@ -13,6 +13,7 @@ import controllers.LoginController;
 import controllers.MainController;
 import controllers.SubscriberMainLayoutController;
 import controllers.ParkingReservationSummaryController;
+import controllers.RegisterSubscriberController;
 import controllers.StaffMainLayoutController;
 import controllers.SubscriberMainController;
 import controllers.TerminalMainLayoutController;
@@ -62,6 +63,8 @@ public class ClientController extends AbstractClient {
 	private MainController mainController;
 	private StaffMainLayoutController staffMainLayoutController;
 	private ExtendParkingController extendParkingController;
+	private RegisterSubscriberController registerSubscriberController;
+
 
 
 
@@ -119,6 +122,10 @@ public class ClientController extends AbstractClient {
 	
 	public void setExtendParkingController(ExtendParkingController controller) {
 		this.extendParkingController = controller;
+	}
+	
+	public void setRegisterSubscriberController(RegisterSubscriberController controller) {
+	    this.registerSubscriberController = controller;
 	}
 
 
@@ -403,11 +410,19 @@ public class ClientController extends AbstractClient {
 				    return;
 				}
 
+			// Handle registration response
+			else if (response.getMsg().toLowerCase().contains("subscriber registered")
+			        || response.getMsg().toLowerCase().contains("failed to insert subscriber")
+			        || response.getMsg().toLowerCase().contains("insert user")) {
 
-
-
-			
-			
+			    if (registerSubscriberController != null) {
+			        registerSubscriberController.showStatusFromServer(response.getMsg(), response.isSucceed());
+			    } else {
+			        UiUtils.showAlert("Subscriber Registration", response.getMsg(),
+			            response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+			    }
+			    return;
+			}
 
 			// Vehicle delivery screen updates
 			if (newDeliveryController != null) {
@@ -717,6 +732,20 @@ public class ClientController extends AbstractClient {
             sendToServer(new Object[] { "extendParking", parkingCode });
         } catch (IOException e) {
             System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Sends a request to register a new subscriber.
+     * Subscriber code and tag ID will be assigned by the server.
+     *
+     * @param subscriber the subscriber to register (without code and tag)
+     */
+    public void registerSubscriber(Subscriber subscriber) {
+        try {
+            sendToServer(new Object[] { "registerSubscriber", subscriber });
+        } catch (IOException e) {
+            System.err.println("Failed to send 'registerSubscriber' request: " + e.getMessage());
         }
     }
 

@@ -29,6 +29,19 @@ public class User implements Serializable {
     	this.username=username;
     	this.password=password;
     }
+    
+    /**
+     * Constructs a new User with username, password, and role string.
+     *
+     * @param username the user's username
+     * @param password the user's password
+     * @param role     the role as string (e.g., "Subscriber")
+     */
+    public User(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = UserRole.valueOf(role);
+    }
 
     /**
      * Returns the user's username.
