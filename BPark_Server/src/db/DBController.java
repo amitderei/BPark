@@ -1143,16 +1143,18 @@ public class DBController {
 	
 	/**
 	 * Marks the parking session as extended for the given parking code.
-	 * Assumes extension means setting wasExtended = TRUE without changing the time.
+	 * Allows only a single extension per parking event.
 	 *
 	 * @param parkingCode the parking code identifying the active parking session
-	 * @return a ServerResponse indicating success or failure
+	 * @return a ServerResponse indicating success or a message if already extended
 	 */
 	public ServerResponse extendParkingSession(int parkingCode) {
 	    final String sql =
 	        "UPDATE bpark.parkingEvent " +
 	        "SET wasExtended = TRUE " +
-	        "WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL";
+	        "WHERE parkingCode = ? " +
+	        "AND exitDate IS NULL AND exitHour IS NULL " +
+	        "AND wasExtended = FALSE";
 
 	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 	        stmt.setInt(1, parkingCode);
@@ -1161,13 +1163,14 @@ public class DBController {
 	        if (rowsAffected > 0) {
 	            return new ServerResponse(true, null, "Parking session extended successfully.");
 	        } else {
-	            return new ServerResponse(false, null, "No active parking session found with this code.");
+	            return new ServerResponse(false, null, "This session has already been extended or is no longer active.");
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	        return new ServerResponse(false, null, "Database error: " + e.getMessage());
 	    }
 	}
+
 	
 	/**
 	 * Returns the next available subscriber code (MAX + 1).
