@@ -11,7 +11,7 @@ import javafx.stage.Stage;
  * Loads the connection screen and starts the server on the specified port.
  */
 public class ServerApp extends Application {
-
+	
     /**
      * Launches the JavaFX application.
      *
@@ -89,6 +89,7 @@ public class ServerApp extends Application {
 
         // Show the window to the user
         primaryStage.show();
+        
+       
     }
 }
-

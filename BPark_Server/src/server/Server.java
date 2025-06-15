@@ -24,8 +24,9 @@ public class Server extends AbstractServer {
 
 	/** Singleton DB controller used for all database operations */
 	private DBController db;
-	
-	private MailService sendEmail=new MailService();
+
+	private MailService sendEmail = new MailService();
+	private ParkingEventChecker parkingEventChecker = new ParkingEventChecker();
 
 	/**
 	 * Constructs a new server instance.
@@ -35,6 +36,8 @@ public class Server extends AbstractServer {
 	public Server(int port) {
 		super(port);
 		db = DBController.getInstance();
+		parkingEventChecker.setDaemon(true);
+		parkingEventChecker.start();
 	}
 
 	/**
@@ -44,6 +47,7 @@ public class Server extends AbstractServer {
 	protected void serverStarted() {
 		db.connectToDB();
 		System.out.println("Server started on port " + getPort());
+		
 	}
 
 	/**
@@ -345,22 +349,14 @@ public class Server extends AbstractServer {
 				else if (data.length == 2 && "DeliverVehicle".equals(data[0])) {
 					ParkingEvent parkingEvent = (ParkingEvent) data[1];
 					
-					synchronized(DBController.getInstance()) {
-					    System.out.println("[SERVER] DeliverVehicle: Thread " + Thread.currentThread().getName() + " entered sync block");
-					    try {
-					        Thread.sleep(3000); // Simulate delay inside synchronized block
-					    } catch (InterruptedException e) {
-					        Thread.currentThread().interrupt(); // Best practice: reset interrupted flag
-					        System.err.println("Thread interrupted: " + e.getMessage());
-					    }
+
 						// Inserting the parking event into the DB
 						db.addParkingEvent(parkingEvent);
 						// Updating the amount of occupied parking space by +1
 						db.addOccupiedParkingSpace();
 						// Updating the specific parking space on the 'parkingspaces' table
 						db.updateParkingSpaceOccupied(parkingEvent.getParkingSpace());
-					    System.out.println("[SERVER] DeliverVehicle: Thread " + Thread.currentThread().getName() + " exited sync block");
-					}
+
 					// The server sends the successful addition of parking event
 					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));
 					return;

@@ -1318,8 +1318,64 @@ public class DBController {
 	        return false;
 	    }
 	}
-
-
-
 	
+	/**
+	 * Retrieves all active (open) parking events that late for retrieve car and
+	 * doesn't receive mail from the database. Active events are those that have no
+	 * recorded exit date.
+	 *
+	 * @return a list of ParkingEvent objects
+	 */
+	public ArrayList<ParkingEvent> getActiveParkingEventsThatLateAndDoesntReceiveMail() {
+		
+		ArrayList<ParkingEvent> list = new ArrayList<>();
+		System.out.println("get list1");
+		String query = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND sendMsgForLating=FALSE";
+		
+		try (PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+			System.out.println("get list2");
+			while (rs.next()) {
+				ParkingEvent event = new ParkingEvent();
+				
+				event.setEventId(rs.getInt("eventId"));
+				event.setSubscriberCode(rs.getInt("subscriberCode"));
+				event.setParkingSpace(rs.getInt("parking_space"));
+				event.setEntryDate(rs.getDate("entryDate").toLocalDate());
+				event.setEntryTime(rs.getTime("entryHour").toLocalTime());
+				event.setWasExtended(rs.getBoolean("wasExtended"));
+				LocalDateTime dateTimeEntry = event.getEntryDate().atTime(event.getEntryHour());
+				if (event.isWasExtended()) {
+
+					dateTimeEntry = dateTimeEntry.plusHours(8);
+
+				} else {
+					dateTimeEntry = dateTimeEntry.plusHours(4);
+				}
+				event.setExitDate(dateTimeEntry.toLocalDate()); // expected date
+				event.setExitHour(dateTimeEntry.toLocalTime()); // expected time
+				event.setLot(rs.getString("nameParkingLot"));
+				event.setVehicleID(rs.getString("vehicleId"));
+				event.setParkingCode(rs.getString("parkingCode"));
+				list.add(event);
+				
+			}
+			return list;
+		} catch (SQLException e) {
+			System.err.println("Error retrieving active parking events: " + e.getMessage());
+			e.getStackTrace();
+		}
+
+		return list;
+	}
+
+	public void markSendMail(int subscriberCode) {
+		String query = "UPDATE parkingEvent SET sendMsgForLating=TRUE WHERE subscriberCode=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subscriberCode);
+			int rowsUpdated = stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.print(e.getMessage());
+			e.printStackTrace();
+		}
+	}
 }
