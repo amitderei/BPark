@@ -344,14 +344,23 @@ public class Server extends AbstractServer {
 				// Expected format: {"DeliverVehicle", parkingEvent}
 				else if (data.length == 2 && "DeliverVehicle".equals(data[0])) {
 					ParkingEvent parkingEvent = (ParkingEvent) data[1];
-
-					// Inserting the parking event into the DB
-					db.addParkingEvent(parkingEvent);
-					// Updating the amount of occupied parking space by +1
-					db.addOccupiedParkingSpace();
-					// Updating the specific parking space on the 'parkingspaces' table
-					db.updateParkingSpaceOccupied(parkingEvent.getParkingSpace());
-
+					
+					synchronized(DBController.getInstance()) {
+					    System.out.println("[SERVER] DeliverVehicle: Thread " + Thread.currentThread().getName() + " entered sync block");
+					    try {
+					        Thread.sleep(3000); // Simulate delay inside synchronized block
+					    } catch (InterruptedException e) {
+					        Thread.currentThread().interrupt(); // Best practice: reset interrupted flag
+					        System.err.println("Thread interrupted: " + e.getMessage());
+					    }
+						// Inserting the parking event into the DB
+						db.addParkingEvent(parkingEvent);
+						// Updating the amount of occupied parking space by +1
+						db.addOccupiedParkingSpace();
+						// Updating the specific parking space on the 'parkingspaces' table
+						db.updateParkingSpaceOccupied(parkingEvent.getParkingSpace());
+					    System.out.println("[SERVER] DeliverVehicle: Thread " + Thread.currentThread().getName() + " exited sync block");
+					}
 					// The server sends the successful addition of parking event
 					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));
 					return;
