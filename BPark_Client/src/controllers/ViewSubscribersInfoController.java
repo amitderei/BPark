@@ -34,7 +34,7 @@ public class ViewSubscribersInfoController implements ClientAware {
     /* ---------- runtime data ---------- */
     private ClientController client;
     private final ObservableList<Subscriber> data = FXCollections.observableArrayList();
-    private Map<Subscriber,Integer> lateLookup = new HashMap<>();   // subscriber → late count
+    private Map<Subscriber,Integer> lateLookup = new HashMap<>();   // subscriber -> late count
 
 
     /**
@@ -51,7 +51,7 @@ public class ViewSubscribersInfoController implements ClientAware {
 
     /**
      * Triggered by the parent layout once setClient() is done.
-     * Sends “get_all_subscribers” to the server.
+     * Sends "get_all_subscribers" to the server.
      */
     public void requestSubscribers() {
         if (client != null)
@@ -66,7 +66,7 @@ public class ViewSubscribersInfoController implements ClientAware {
      * Fills the table after the server returns data.
      *
      * @param subs     list of Subscriber objects
-     * @param lateMap  map subscriber → number of late pickups
+     * @param lateMap  map subscriber -> number of late pickups
      */
     public void onSubscribersReceived(List<Subscriber> subs,
                                       Map<Subscriber,Integer> lateMap) {

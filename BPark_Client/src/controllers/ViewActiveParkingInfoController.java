@@ -62,7 +62,7 @@ public class ViewActiveParkingInfoController implements ClientAware {
 
     /**
      * Copies all data from parkingEvent into the labels.
-     * Handles the “was extended” flag by adding 4 h or 8 h accordingly.
+     * Handles the "was extended" flag by adding 4 h or 8 h accordingly.
      * Call this after setParkingEvent().
      */
     public void setTexts() {

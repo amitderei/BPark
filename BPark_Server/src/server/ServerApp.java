@@ -44,7 +44,7 @@ public class ServerApp extends Application {
     }
 
     /**
-     * Loads the “Connect” window where the user types the port.
+     * Loads the "Connect" window where the user types the port.
      *
      * @param stage primary JavaFX window
      * @throws Exception when the FXML cannot be loaded

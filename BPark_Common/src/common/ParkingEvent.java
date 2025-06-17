@@ -33,18 +33,18 @@ public class ParkingEvent implements Serializable {
 	/**
 	 * Constructs a ParkingEvent with all required fields.
 	 *
-	 * @param eventId        the unique event ID
-	 * @param subscriberCode the subscriber code
-	 * @param parkingSpace   the parking space used during the event
-	 * @param entryDate      the entry date
-	 * @param entryHour      the entry time
-	 * @param exitDate       the exit date (nullable if still active)
-	 * @param exitHour       the exit time (nullable if still active)
-	 * @param wasExtended    whether the parking session was extended
-	 * @param nameParkingLot the name of the parking lot
-	 * @param vehicleId      the vehicle ID parked
-	 * @param parkingCode    the unique parking code assigned at entry
+	 * @param subscriberCode the subscriber's unique code
+	 * @param parkingSpace   the parking space used
+	 * @param entryDate      the date the vehicle entered
+	 * @param entryTime      the time the vehicle entered
+	 * @param exitDate       the date the vehicle exited (can be null)
+	 * @param exitTime       the time the vehicle exited (can be null)
+	 * @param wasExtended    true if the parking was extended, false otherwise
+	 * @param vehicleID2     the ID of the vehicle
+	 * @param lot            the name of the parking lot
+	 * @param parkingCode    the unique code given to the parking session
 	 */
+
 	public ParkingEvent(int subscriberCode, int parkingSpace, LocalDate entryDate, LocalTime entryTime,
 			LocalDate exitDate, LocalTime exitTime, boolean wasExtended, String vehicleID2, String lot,
 			String parkingCode) {

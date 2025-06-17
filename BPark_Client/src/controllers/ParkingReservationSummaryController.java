@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 /**
- * Shows a “Thank you” page after a reservation is confirmed.
+ * Shows a "Thank you" page after a reservation is confirmed.
  * Pulls data from the Order object and fills the summary labels so
  * the subscriber can screenshot or print the confirmation.
  */
@@ -74,7 +74,7 @@ public class ParkingReservationSummaryController implements ClientAware {
      * ===================================================== */
 
     /**
-     * Fills all “value” labels with data from the given Order.
+     * Fills all "value" labels with data from the given Order.
      * Call this immediately after navigating to the summary screen.
      *
      * @param order order to display

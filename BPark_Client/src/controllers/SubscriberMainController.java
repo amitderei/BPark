@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
  */
 public class SubscriberMainController implements ClientAware {
 
-    /** Label that displays “Welcome, <name>!” */
+    /** Label that displays "Welcome, <name>!" */
     @FXML
     private Label welcomeLabel;
 

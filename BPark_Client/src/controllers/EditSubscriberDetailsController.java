@@ -79,7 +79,7 @@ public class EditSubscriberDetailsController implements ClientAware {
 
     /**
      * Validates input, compares with old data and sends minimal update to server.
-     * Empty field or invalid format → popup + abort.
+     * Empty field or invalid format -> popup + abort.
      */
     public void saveChanges() {
 
@@ -150,7 +150,7 @@ public class EditSubscriberDetailsController implements ClientAware {
         return phone.matches("^05[0-9]{8}$");
     }
 
-    /** Returns to the read-only “View Details” screen. */
+    /** Returns to the read-only "View Details" screen. */
     public void handleGoToView() {
         try {
             mainLayoutController = client.getMainLayoutController();

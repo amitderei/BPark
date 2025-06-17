@@ -20,14 +20,14 @@ public class ClientApp extends Application {
     /**
      * Application entry point. Hands control to the JavaFX runtime.
      *
-     * @param args command-line arguments (unused)
+     * @param args command-line arguments
      */
     public static void main(String[] args) {
         launch(args);
     }
 
     /**
-     * Initializes the UI by loading {@code ConnectScreen.fxml}, wiring its
+     * Initializes the UI by loading ConnectScreen.fxml, wiring its
      * controller and showing the primary stage without window chrome.
      *
      * @param primaryStage the main window provided by JavaFX

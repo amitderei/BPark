@@ -9,7 +9,7 @@ import javafx.scene.control.Tooltip;
 import ui.UiUtils;
 
 /**
- * Handles the “Retrieve Vehicle” flow at the terminal.  
+ * Handles the "Retrieve Vehicle" flow at the terminal.  
  * Step 1 – subscriber proves identity (manual code or RFID tag).  
  * Step 2 – subscriber enters the six-digit parking code to release the car.
  */
@@ -60,7 +60,7 @@ public class VehiclePickupController implements ClientAware {
     }
 
     /**
-     * User pressed “Next” – validate by manual subscriber code.
+     * User pressed "Next" – validate by manual subscriber code.
      * Shows local error if the field is empty or not numeric.
      */
     @FXML

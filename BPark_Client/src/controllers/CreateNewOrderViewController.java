@@ -30,7 +30,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /**
- * Handles the “Create New Reservation” workflow for both subscribers
+ * Handles the "Create New Reservation" workflow for both subscribers
  * and guests. Collects date, time and subscriber code, checks
  * availability with the server, and finally builds an Order object.
  *
@@ -71,7 +71,7 @@ public class CreateNewOrderViewController implements ClientAware {
 
     /**
      * Populates the date picker and time combo-boxes.
-     * Sets allowed date range to “tomorrow through seven days ahead”.
+     * Sets allowed date range to "tomorrow through seven days ahead".
      * Must be called from the JavaFX initialise hook of the parent screen.
      */
     public void initializeCombo() {

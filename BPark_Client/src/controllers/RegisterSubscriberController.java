@@ -47,7 +47,7 @@ public class RegisterSubscriberController implements ClientAware {
      * ===================================================== */
 
     /**
-     * Fired by the “Register” button.
+     * Fired by the "Register" button.
      * Validates each field and, if all checks pass,
      * sends a Subscriber object to the server.
      */

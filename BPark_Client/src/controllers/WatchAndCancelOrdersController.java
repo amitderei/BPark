@@ -13,12 +13,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 /**
- * “My Reservations” table for a subscriber.  
+ * "My Reservations" table for a subscriber.  
  * Shows every future order and lets the user cancel one with a button.
  */
 public class WatchAndCancelOrdersController implements ClientAware {
 
-    /* ---------- headline label (“Watch & Cancel Orders”) ---------- */
+    /* ---------- headline label ("Watch & Cancel Orders") ---------- */
     @FXML private Label headline;
 
     /* ---------- TableView + columns ---------- */
@@ -34,7 +34,7 @@ public class WatchAndCancelOrdersController implements ClientAware {
 
     /**
      * Builds the table, then asks the server for the subscriber’s
-     * current reservations.  Also adds a “Cancel” button to each row.
+     * current reservations.  Also adds a "Cancel" button to each row.
      * Call once after setClient().
      */
     public void defineTable() {

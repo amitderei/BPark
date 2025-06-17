@@ -15,11 +15,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 /**
  * Shows the subscriber’s parking history—every past event
- * plus the current “Active” event (if one exists).
+ * plus the current "Active" event (if one exists).
  */
 public class ViewParkingHistoryController implements ClientAware {
 
-    /* headline label (“Parking History”) */
+    /* headline label ("Parking History") */
     @FXML private Label headline;
 
     /* ---------- table + columns ---------- */
@@ -68,7 +68,7 @@ public class ViewParkingHistoryController implements ClientAware {
             }
         });
 
-        // if exit date is null → “Active”
+        // if exit date is null -> "Active"
         exitDateColumn.setCellFactory(col -> new TableCell<>() {
             @Override protected void updateItem(LocalDate d, boolean empty) {
                 super.updateItem(d, empty);

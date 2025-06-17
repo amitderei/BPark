@@ -13,7 +13,7 @@ import javafx.scene.control.TextField;
 import ui.UiUtils;
 
 /**
- * Controller for the “Connect to Server” screen.
+ * Controller for the "Connect to Server" screen.
  * Lets the user type an IP, open a socket connection,
  * and exit the application if needed.
  */
@@ -79,7 +79,7 @@ public class ConnectController implements ClientAware {
     }
 
     /**
-     * Triggered by the “Connect” button.
+     * Triggered by the "Connect" button.
      * Checks the IP field, attempts to open the socket,
      * updates the UI, and loads the next screen on success.
      *
@@ -130,7 +130,7 @@ public class ConnectController implements ClientAware {
     }
 
     /**
-     * Triggered by the “Exit” button.
+     * Triggered by the "Exit" button.
      * Sends a graceful disconnect to the server (if connected)
      * and terminates the JVM.
      */

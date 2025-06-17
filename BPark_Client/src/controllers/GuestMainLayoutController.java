@@ -61,7 +61,7 @@ public class GuestMainLayoutController implements ClientAware {
      *  Toolbar actions
      * ===================================================== */
 
-    /** Loads the simple “Welcome, Guest” screen. */
+    /** Loads the simple "Welcome, Guest" screen. */
     @FXML
     private void handleHomeClick() {
         loadScreen("/client/GuestMainScreen.fxml");
@@ -98,7 +98,7 @@ public class GuestMainLayoutController implements ClientAware {
      *  Side-menu action
      * ===================================================== */
 
-    /** Opens the “Live Availability” screen. */
+    /** Opens the "Live Availability" screen. */
     @FXML
     private void handleCheckAvailability() {
         loadScreen("/client/AvailabilityScreen.fxml");

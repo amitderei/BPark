@@ -75,7 +75,7 @@ public class ViewSubscriberDetailsController implements ClientAware {
      *  navigation
      * ===================================================== */
 
-    /** Loads the “Edit Details” screen via the parent layout. */
+    /** Loads the "Edit Details" screen via the parent layout. */
     public void handleGoToEdit() {
         try {
             mainLayoutController = client.getMainLayoutController();

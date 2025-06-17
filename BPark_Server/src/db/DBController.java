@@ -1007,12 +1007,12 @@ public class DBController {
 	}
 	
 	/**
-	 * Returns every subscriber plus a computed “late” count.
+	 * Returns every subscriber plus a computed "late" count.
 	 *
 	 * Late =  (duration > 8 h)  OR  (duration > 4 h AND wasExtended = FALSE)
 	 *
 	 * @return List<Object[]> where
-	 *         index 0 → Subscriber,  index 1 → Integer lateCount
+	 *         index 0 -> Subscriber,  index 1 -> Integer lateCount
 	 */
 	public List<Object[]> getAllSubscribersWithLateCount() {
 	    final String sql =
@@ -1099,7 +1099,7 @@ public class DBController {
 	            event.setSubscriberCode(rs.getInt("subscriberCode"));
 	            event.setParkingSpace(rs.getInt("parking_space"));
 	            event.setEntryDate(rs.getDate("entryDate").toLocalDate());
-	            event.setEntryTime(rs.getTime("entryHour").toLocalTime()); // משתלב עם setEntryTime
+	            event.setEntryTime(rs.getTime("entryHour").toLocalTime());
 	            event.setWasExtended(rs.getBoolean("wasExtended"));
 	            event.setLot(rs.getString("nameParkingLot"));
 	            event.setVehicleID(rs.getString("vehicleId"));

@@ -14,10 +14,10 @@ import ui.UiUtils;
 public class MainController implements ClientAware {
 
     /* ---------- FXML buttons ---------- */
-    @FXML private Button guestBtn;   // “Enter as Guest”
-    @FXML private Button loginBtn;   // “Login”
-    @FXML private Button btnExit;    // “Exit”
-    @FXML private Button btnBack;    // “Back to previous”
+    @FXML private Button guestBtn;   // "Enter as Guest"
+    @FXML private Button loginBtn;   // "Login"
+    @FXML private Button btnExit;    // "Exit"
+    @FXML private Button btnBack;    // "Back to previous"
 
     /* ---------- runtime ---------- */
     private ClientController client;

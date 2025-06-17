@@ -141,7 +141,7 @@ public class Server extends AbstractServer {
 				            return;
 				        }
 
-				        // Step 3: Valid tag and active parking → send subscriber code for client use
+				        // Step 3: Valid tag and active parking -> send subscriber code for client use
 				        client.sendToClient(new ServerResponse(true, subscriberCode,
 				                "Subscriber verified successfully by tag."));
 				    } else {
@@ -415,7 +415,7 @@ public class Server extends AbstractServer {
 				    return;
 				}
 				
-				// “get_active_parkings” → returns List<ParkingEvent>
+				// "get_active_parkings" - returns List<ParkingEvent>
 				else if (data.length == 1 && "get_active_parkings".equals(data[0])) {
 				    List<ParkingEvent> events = db.getActiveParkingEvents();
 				    client.sendToClient(new ServerResponse(true, events, "active_parkings"));

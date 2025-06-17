@@ -15,14 +15,14 @@ import ui.UiUtils;
  *  1. User types the parking code.
  *  2. Controller validates that the field is not empty and is numeric.
  *  3. A request is sent to the server.  The server replies through
- *     ClientController → onExtensionResponse().
+ *     ClientController -> onExtensionResponse().
  */
 public class ExtendParkingController implements ClientAware {
 
     /** Input field for the numeric parking code */
     @FXML private TextField txtParkingCode;
 
-    /** “Extend” button */
+    /** "Extend" button */
     @FXML private Button btnExtend;
 
     /** Label used for success / error feedback */
@@ -42,7 +42,7 @@ public class ExtendParkingController implements ClientAware {
     }
 
     /**
-     * Fired by the “Extend” button.
+     * Fired by the "Extend" button.
      * Validates the text, converts to int, and sends the request.
      * Shows a local error if the code is missing or not numeric.
      */

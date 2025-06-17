@@ -31,7 +31,7 @@ public class StaffMainController implements ClientAware {
     /**
      * Updates the greeting text.
      *
-     * @param nameOrRole text to display after “Welcome,”
+     * @param nameOrRole text to display after "Welcome"
      */
     public void setWelcomeMessage(String nameOrRole) {
         if (welcomeLabel != null) {

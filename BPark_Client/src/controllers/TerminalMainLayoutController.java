@@ -15,8 +15,8 @@ import ui.UiUtils;
 /**
  * Root layout for the physical kiosk / terminal used by parking-lot staff.  
  * Fixed parts: top bar (Home / Back / Exit) and a small side-menu  
- * listing the two main flows – “Submit Vehicle” (delivery) and
- * “Retrieve Vehicle” (pickup) – plus a quick availability check.
+ * listing the two main flows – "Submit Vehicle" (delivery) and
+ * "Retrieve Vehicle" (pickup) – plus a quick availability check.
  *
  * Child screens are loaded into the centre pane by loadScreen().
  */
@@ -72,7 +72,7 @@ public class TerminalMainLayoutController implements ClientAware {
     }
 
     /**
-     * Goes back to the “Select User Type” screen
+     * Goes back to the "Select User Type" screen
      * (the very first screen shown after connection).
      */
     @FXML

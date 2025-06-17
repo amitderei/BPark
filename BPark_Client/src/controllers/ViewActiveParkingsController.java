@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * “Live Parked” table for staff.  
+ * "Live Parked" table for staff.  
  * Lists every vehicle that is currently inside the lot
  * (no exit time set). Populated by a single server call.
  */
@@ -78,7 +78,7 @@ public class ViewActiveParkingsController implements ClientAware {
      *  server request + callback
      * ===================================================== */
 
-    /** Sends “get_active_parkings” to the server. Call after setClient(). */
+    /** Sends "get_active_parkings" to the server. Call after setClient(). */
     public void requestActiveParkingEvents() {
         if (client != null)
             client.requestActiveParkingEvents();
