@@ -7,234 +7,185 @@ import common.Order;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import ui.UiUtils;
 
-public class SubscriberMainLayoutController implements ClientAware{
-	@FXML
-	private Button btnHome;
-	@FXML
-	private Button btnLogout;
+/**
+ * Main container for every subscriber screen.  
+ * Keeps the same top bar and side-menu while swapping the centre pane.
+ */
+public class SubscriberMainLayoutController implements ClientAware {
 
-	@FXML
-	private Button btnViewPersonalInfo;
-	@FXML
-	private Button btnViewParkingHistory;
-	@FXML
-	private Button btnViewActiveParkingInfo;
-	@FXML
-	private Button btnExtendParkingTime;
-	@FXML
-	private Button btnSubmitVehicle;
-	@FXML
-	private Button btnRetrieveVehicle;
-	@FXML
-	private Button btnParkingReservation;
-	@FXML
-	private Button btnMyReservations;
-	@FXML
-	private Button btnExit;
+    /* ---------- top bar ---------- */
+    @FXML private Button btnHome;
+    @FXML private Button btnLogout;
+    @FXML private Button btnExit;
 
-	
-	
-	
-	@FXML
-	private AnchorPane center;
-	
-	private ClientController client;
+    /* ---------- side-menu ---------- */
+    @FXML private Button btnViewPersonalInfo;
+    @FXML private Button btnViewParkingHistory;
+    @FXML private Button btnViewActiveParkingInfo;
+    @FXML private Button btnExtendParkingTime;
+    @FXML private Button btnParkingReservation;
+    @FXML private Button btnMyReservations;
 
-	
-	private String subscriberName;
+    /* ---------- centre pane ---------- */
+    @FXML private AnchorPane center;
 
-	public void setSubscriberName(String name) {
-	    this.subscriberName = name;
-	}
-	
-	/**
-	 * load the home page in the center
-	 */
-	@FXML
-	private void handleHomeClick() {
-		loadScreen("/client/SubscriberMainScreen.fxml");
-	}
+    /* ---------- state ---------- */
+    private ClientController client;     // shared socket handler
+    private String subscriberName;       // used by home screen for greeting
 
-	/** Logs out and returns to the entry screen. */
-	@FXML
-	private void handleLogoutClick() {
-		UiUtils.loadScreen(btnLogout, "/client/MainScreen.fxml", "BPARK – Welcome", client);
-	}
+    /* ======================================================
+     *  simple setters
+     * ====================================================== */
 
-	
+    /**
+     * Injects the shared client.
+     * @param client active client
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 
-	@FXML
-	public void handleViewPersonalInfo() {
-		loadScreen("/client/ViewSubscriberDetailsScreen.fxml");
-	}
+    /**
+     * Stores the subscriber’s name so we can greet them on the home screen.
+     * @param name subscriber first name
+     */
+    public void setSubscriberName(String name) {
+        this.subscriberName = name;
+    }
 
-	@FXML
-	private void handleViewParkingHistory() {
-		loadScreen("/client/ViewSubscriberHistoryScreen.fxml");
-	}
+    /* ======================================================
+     *  toolbar handlers
+     * ====================================================== */
 
-	@FXML
-	private void handleViewActiveParkingInfo() {
-		loadScreen("/client/ViewActiveParkingInfoScreen.fxml");
-	}
+    /** Loads the subscriber home screen. */
+    @FXML private void handleHomeClick() {
+        loadScreen("/client/SubscriberMainScreen.fxml");
+    }
 
-	@FXML
-	private void handleExtendParkingTime() {
-		loadScreen("/client/ExtendParkingScreen.fxml");
-	}
+    /** Logs out and returns to the entry screen. */
+    @FXML private void handleLogoutClick() {
+        UiUtils.loadScreen(btnLogout,
+                "/client/MainScreen.fxml",
+                "BPARK – Welcome",
+                client);
+    }
 
-	@FXML
-	private void handleSubmitVehicle() {
-		System.out.println("Submitting vehicle…");
-	}
-	
-	public void handleGoToDelivery() {
-		loadScreen("/client//VehicleDeliveryScreen.fxml");
-	}
+    /** Disconnects and quits. */
+    @FXML private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[]{"disconnect"});
+                client.closeConnection();
+            }
+        } catch (Exception ignored) { }
+        javafx.application.Platform.exit();
+        System.exit(0);
+    }
 
-	/**
-	 * Opens the vehicle-pickup screen when the user clicks “Retrieve Vehicle”.
-	 */
-	@FXML
-	private void handleRetrieveVehicle() {
-		loadScreen("/client/VehiclePickupScreen.fxml");
-	}
+    /* ======================================================
+     *  side-menu handlers (one-liners)
+     * ====================================================== */
 
+    @FXML private void handleViewPersonalInfo()      { loadScreen("/client/ViewSubscriberDetailsScreen.fxml"); }
+    @FXML private void handleViewParkingHistory()    { loadScreen("/client/ViewSubscriberHistoryScreen.fxml"); }
+    @FXML private void handleViewActiveParkingInfo() { loadScreen("/client/ViewActiveParkingInfoScreen.fxml"); }
+    @FXML private void handleExtendParkingTime()     { loadScreen("/client/ExtendParkingScreen.fxml"); }
+    @FXML private void handleMyReservations()        { loadScreen("/client/WatchAndCancelOrdersScreen.fxml"); }
 
-	@FXML
-	private void handleMyReservations() {
-		loadScreen("/client/WatchAndCancelOrdersScreen.fxml");
-	}
-	
-	/**
-	 * load screen in the center of borderPane
-	 * @param fxml
-	 */
-	public void loadScreen(String fxml) {
-		try {
-			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
-			Parent content=loader.load();
-			
-			Object ctrl=loader.getController();
-			if(ctrl instanceof SubscriberMainController controller) {
-				controller.setSubscriberName(subscriberName);
-			}
-			if(ctrl instanceof CreateNewOrderViewController controller) {
-				client.setNewOrderController(controller); // for act functions
-				controller.setClient(client);
-				controller.initializeCombo();
-			}
-			if(ctrl instanceof WatchAndCancelOrdersController controller) {
-				client.setWatchAndCancelOrdersController(controller);
-				controller.setClient(client);
-				controller.defineTable();
-			}
-			if(ctrl instanceof ViewSubscriberDetailsController controller) {
-				client.setViewSubscriberDetailsController(controller);
-				controller.setClient(client);
-				controller.setSubscriberAndPassword();
-				controller.setLabels();
-			}
-			if(ctrl instanceof EditSubscriberDetailsController controller) {
-				client.setEditSubscriberDetailsController(controller);
-				controller.setClient(client);
-				controller.setSubscriberAndPassword();
-				controller.setTextOnField();
-			}
-			if (ctrl instanceof ViewParkingHistoryController controller) {
-				client.setViewParkingHistoryController(controller);
-				controller.setClient(client);
-				controller.setTable();
-				
-			}
-			if (ctrl instanceof ViewActiveParkingInfoController controller) {
-				client.setViewActiveParkingInfoController(controller);
-				controller.setClient(client);
-				controller.getDetailsOfActiveInfo();
-			}
-			
-			if (ctrl instanceof VehiclePickupController controller) {
-				controller.setClient(client);
-				client.setPickupController(controller);
-			}
-			
-			if (ctrl instanceof VehicleDeliveryController controller) {
-				controller.setClient(client);
-				client.setDeliveryController(controller);
-			}
-			
-			if (ctrl instanceof ExtendParkingController controller) {
-			    controller.setClient(client);
-			    client.setExtendParkingController(controller);
-			}
-			
-			
-			center.getChildren().clear();
-			center.getChildren().add(content);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * load the summary screen with order details on the center of borderPane
-	 * @param fxml (String of fxml)
-	 * @param order
-	 */
-	public void loadScreen(String fxml, Order order) {
-		try {
-			FXMLLoader loader= new FXMLLoader(getClass().getResource(fxml));
-			Parent content=loader.load();
-			Object ctrl=loader.getController();
-			
-			if (ctrl instanceof ParkingReservationSummaryController controller) {
-				client.setSummaryController(controller);
-				controller.setClient(client);
-				controller.setLabels(order);
-			}
-			
-			center.getChildren().clear();
-			center.getChildren().add(content);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
-	}
+    /**
+     * Opens the first step of the reservation wizard.
+     * Connected to the button inside the reservation pane.
+     */
+    public void handleGoToCreateOrder() {
+        loadScreen("/client/PlacingAnOrderView.fxml");
+    }
 
-	public void handleGoToCreateOrder() {
-		try {
-			loadScreen("/client/PlacingAnOrderView.fxml"); // load the Placing_an_order_view.fxml after search on resources
-			
-		} catch (Exception e) {
-			System.out.println("Error:" + e.getMessage());
-			  e.printStackTrace();
-		}
-	}
+    /* ======================================================
+     *  screen loader helpers
+     * ====================================================== */
 
-	
-	public void setClient(ClientController client) {
-		this.client=client;
-	}
-	
-	@FXML
-	private void handleExitClick() {
-		try {
-			if (client != null && client.isConnected()) {
-				client.sendToServer(new Object[] { "disconnect" });
-				client.closeConnection();
-			}
-		} catch (Exception ignored) {
-			// Not critical – we're quitting anyway
-		}
-		javafx.application.Platform.exit();
-		System.exit(0);
-	}
+    /**
+     * Loads a child FXML into the centre pane
+     * and wires its controller for server callbacks.
+     *
+     * @param fxml path to FXML inside resources
+     */
+    public void loadScreen(String fxml) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxml));
+            Parent content = fxmlLoader.load();
+            Object ctrl = fxmlLoader.getController();
 
+            // welcome headline on the home screen
+            if (ctrl instanceof SubscriberMainController c)
+                c.setSubscriberName(subscriberName);
+
+            // each child that needs the client gets it here
+            if (ctrl instanceof ClientAware aware)
+                aware.setClient(client);
+
+            // extra initialisation for specific screens
+            if (ctrl instanceof CreateNewOrderViewController c) {
+                client.setNewOrderController(c);
+                c.initializeCombo();
+            }
+            if (ctrl instanceof WatchAndCancelOrdersController c) {
+                client.setWatchAndCancelOrdersController(c);
+                c.defineTable();
+            }
+            if (ctrl instanceof ViewSubscriberDetailsController c) {
+                client.setViewSubscriberDetailsController(c);
+                c.setSubscriberAndPassword();
+                c.setLabels();
+            }
+            if (ctrl instanceof EditSubscriberDetailsController c) {
+                client.setEditSubscriberDetailsController(c);
+                c.setSubscriberAndPassword();
+                c.setTextOnField();
+            }
+            if (ctrl instanceof ViewParkingHistoryController c) {
+                client.setViewParkingHistoryController(c);
+                c.setTable();
+            }
+            if (ctrl instanceof ViewActiveParkingInfoController c) {
+                client.setViewActiveParkingInfoController(c);
+                c.getDetailsOfActiveInfo();
+            }
+            if (ctrl instanceof ExtendParkingController c) {
+                client.setExtendParkingController(c);
+            }
+
+            center.getChildren().setAll(content);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads a summary screen that needs the Order object.
+     *
+     * @param fxml  summary FXML
+     * @param order reservation to display
+     */
+    public void loadScreen(String fxml, Order order) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+            Parent content = loader.load();
+
+            if (loader.getController() instanceof ParkingReservationSummaryController c) {
+                client.setSummaryController(c);
+                c.setLabels(order);
+            }
+            center.getChildren().setAll(content);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

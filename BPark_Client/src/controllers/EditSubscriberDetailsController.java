@@ -7,170 +7,157 @@ import client.ClientController;
 import common.Subscriber;
 import common.User;
 import javafx.fxml.FXML;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import ui.UiUtils;
 
-public class EditSubscriberDetailsController implements ClientAware{
-	@FXML
-	private Label headline;
+/**
+ * Lets a subscriber edit his personal details.  
+ * Locked fields: subscriber-code, user-ID and username  
+ * Editable fields: first / last name, phone, email, password
+ */
+public class EditSubscriberDetailsController implements ClientAware {
 
-	@FXML
-	private Label sunscriberCode;
+    /* ---------- captions + input fields ---------- */
+    @FXML private Label headline;
 
-	@FXML
-	private TextField subscriberCodeEdit;
+    @FXML private Label sunscriberCode;      @FXML private TextField subscriberCodeEdit;
+    @FXML private Label id;                 @FXML private TextField idEdit;
+    @FXML private Label firstName;          @FXML private TextField firstNameEdit;
+    @FXML private Label lastName;           @FXML private TextField lastNameEdit;
+    @FXML private Label username;           @FXML private TextField usernameEdit;
+    @FXML private Label password;           @FXML private TextField passwordEdit;
+    @FXML private Label email;              @FXML private TextField emailEdit;
+    @FXML private Label phoneNumber;        @FXML private TextField phoneNumberEdit;
 
-	@FXML
-	private Label id;
+    @FXML private Button saveChangesBtn;
 
-	@FXML
-	private TextField idEdit;
+    /* ---------- runtime ---------- */
+    private ClientController client;
+    private Subscriber       subscriber;   // original data
+    private String           passwordStr;  // original password
+    private SubscriberMainLayoutController mainLayoutController;
 
-	@FXML
-	private Label firstName;
+    // ------------------------------------------------------------------
+    // initial fill
+    // ------------------------------------------------------------------
 
-	@FXML
-	private TextField firstNameEdit;
+    /** Copies data into the text-fields and locks non-editable ones. */
+    public void setTextOnField() {
+        subscriberCodeEdit.setText(String.valueOf(subscriber.getSubscriberCode()));
+        idEdit           .setText(subscriber.getUserId());
+        firstNameEdit    .setText(subscriber.getFirstName());
+        lastNameEdit     .setText(subscriber.getLastName());
+        usernameEdit     .setText(subscriber.getUsername());
+        passwordEdit     .setText(passwordStr);
+        emailEdit        .setText(subscriber.getEmail());
+        phoneNumberEdit  .setText(subscriber.getPhoneNum());
 
-	@FXML
-	private Label lastName;
+        subscriberCodeEdit.setDisable(true);
+        usernameEdit     .setDisable(true);
+        idEdit           .setDisable(true);
+    }
 
-	@FXML
-	private TextField lastNameEdit;
+    /** Pulls the latest Subscriber + password from ClientController. */
+    public void setSubscriberAndPassword() {
+        this.subscriber   = client.getSubscriber();
+        this.passwordStr  = client.getPassword();
+    }
 
-	@FXML
-	private Label username;
+    // ------------------------------------------------------------------
+    // DI
+    // ------------------------------------------------------------------
 
-	@FXML
-	private TextField usernameEdit;
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 
-	@FXML
-	private Label password;
+    // ------------------------------------------------------------------
+    // save button logic
+    // ------------------------------------------------------------------
 
-	@FXML
-	private TextField passwordEdit;
+    /**
+     * Validates input, compares with old data and sends minimal update to server.
+     * Empty field or invalid format → popup + abort.
+     */
+    public void saveChanges() {
 
-	@FXML
-	private Label email;
+        // guard – no blanks
+        if (isAnyFieldBlank()) {
+            UiUtils.showAlert("Error", "One or more fields are empty.", AlertType.ERROR);
+            return;
+        }
+        // guard – email format
+        if (!isValidEmail(emailEdit.getText().trim())) {
+            UiUtils.showAlert("Error", "Email format is not valid.", AlertType.ERROR);
+            return;
+        }
+        // guard – phone format
+        if (!isValidPhone(phoneNumberEdit.getText().trim())) {
+            UiUtils.showAlert("Error", "Phone number format is not valid.", AlertType.ERROR);
+            return;
+        }
 
-	@FXML
-	private TextField emailEdit;
+        /* build a fresh Subscriber with new values */
+        Subscriber updated = new Subscriber(
+                subscriber.getSubscriberCode(),
+                subscriber.getUserId(),
+                firstNameEdit.getText(),
+                lastNameEdit.getText(),
+                phoneNumberEdit.getText(),
+                emailEdit.getText(),
+                subscriber.getUsername(),
+                subscriber.getTagId());
 
-	@FXML
-	private Label phoneNumber;
+        String newPassword = passwordEdit.getText();
+        boolean passwordChanged = !passwordStr.equals(newPassword);
 
-	@FXML
-	private TextField phoneNumberEdit;
+        // decide which parts actually changed
+        if (!Subscriber.equals(updated, subscriber)) {              // personal details changed
+            if (passwordChanged)
+                client.updateDetailsOfSubscriber(updated, new User(subscriber.getUsername(), newPassword));
+            else
+                client.updateDetailsOfSubscriber(updated, null);
+        } else if (passwordChanged) {                               // only password changed
+            client.updateDetailsOfSubscriber(null, new User(usernameEdit.getText(), newPassword));
+        } else {                                                    // nothing changed
+            handleGoToView();
+        }
+    }
 
-	@FXML
-	private Button saveChangesBtn;
+    // ------------------------------------------------------------------
+    // helpers
+    // ------------------------------------------------------------------
 
-	private ClientController client;
+    /** @return true if any editable text-field is blank */
+    private boolean isAnyFieldBlank() {
+        return firstNameEdit.getText().trim().isEmpty() ||
+               lastNameEdit .getText().trim().isEmpty() ||
+               passwordEdit .getText().trim().isEmpty() ||
+               emailEdit    .getText().trim().isEmpty() ||
+               phoneNumberEdit.getText().trim().isEmpty();
+    }
 
-	private Subscriber subscriber;
-	private String passwordStr;
-	private SubscriberMainLayoutController mainLayoutController; 
+    /** Simple regex for email validation. */
+    private static boolean isValidEmail(String email) {
+        String regex = "^[A-Za-z0-9_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        return Pattern.matches(regex, email);
+    }
 
-	/**
-	 * initialize the field with text and disable some of them
-	 */
-	public void setTextOnField() {
-		subscriberCodeEdit.setText(((Integer) subscriber.getSubscriberCode()).toString());
-		idEdit.setText(subscriber.getUserId());
-		firstNameEdit.setText(subscriber.getFirstName());
-		lastNameEdit.setText(subscriber.getLastName());
-		usernameEdit.setText(subscriber.getUsername());
-		passwordEdit.setText(passwordStr);
-		emailEdit.setText(subscriber.getEmail());
-		phoneNumberEdit.setText(subscriber.getPhoneNum());
+    /** Accepts Israeli mobile numbers starting with 05 + 8 digits. */
+    private static boolean isValidPhone(String phone) {
+        return phone.matches("^05[0-9]{8}$");
+    }
 
-		subscriberCodeEdit.setDisable(true);
-		usernameEdit.setDisable(true);
-		idEdit.setDisable(true);
-	}
-
-	/**
-	 * set subscriber details and password from client
-	 */
-	public void setSubscriberAndPassword() {
-		this.subscriber = client.getSubscriber();
-		this.passwordStr = client.getPassword();
-	}
-
-	public void setClient(ClientController client) {
-		this.client = client;
-	}
-
-	/**
-	 * check if there is a different between existed details to the details that user entered
-	 * if there is at least one field empty- it would show alert and the action doesn't success
-	 */
-	public void saveChanges() {
-		if(subscriberCodeEdit.getText().trim().isEmpty() || subscriberCodeEdit.getText().trim().isEmpty() || firstNameEdit.getText().trim().isEmpty() || lastNameEdit.getText().trim().isEmpty()|| passwordEdit.getText().trim().isEmpty() || emailEdit.getText().trim().isEmpty() || phoneNumberEdit.getText().trim().isEmpty()) {
-			UiUtils.showAlert("Error", "There is empty field.", AlertType.ERROR);
-			return;
-		}
-		if(!isValidEmail(emailEdit.getText().trim())) {
-			UiUtils.showAlert("Error", "Email format is not valid.", AlertType.ERROR);
-			return;
-		}
-		if(!isValidPhone(phoneNumberEdit.getText().trim())) {
-			UiUtils.showAlert("Error", "Phone number format is not valid.", AlertType.ERROR);
-			return;
-		}
-		Subscriber newDetails= new Subscriber(Integer.parseInt(subscriberCodeEdit.getText()), subscriber.getUserId(), firstNameEdit.getText(), lastNameEdit.getText(), phoneNumberEdit.getText(), emailEdit.getText(), usernameEdit.getText(), subscriber.getTagId());
-		String newPassword=passwordEdit.getText();
-		boolean passwordChange= passwordStr.equals(newPassword);
-		if(!Subscriber.equals(newDetails, subscriber)) {
-			if (!passwordChange) {
-				client.updateDetailsOfSubscriber(newDetails, new User(subscriber.getUsername(), newPassword));
-			}
-			else {
-				client.updateDetailsOfSubscriber(newDetails, null);
-			}
-		}
-		else if (!passwordChange) {
-			client.updateDetailsOfSubscriber(null, new User(usernameEdit.getText(), newPassword));
-		}
-		else {
-			handleGoToView();
-		}
-	}
-	
-	/**
-	 * check if the email is valid by regular expression
-	 * @param email (the email we need to check)
-	 * @return true if it belongs to language, else return false
-	 */
-	private static boolean isValidEmail(String email) {
-		String regulerExpression="^[A-Za-z0-9_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-		Pattern pattern=Pattern.compile(regulerExpression); //check the regular expression
-		Matcher matcher= pattern.matcher(email); //check is email match to regular expression(if email belongs to the language of regularExpression 
-		return matcher.matches(); 
-	}
-	
-	/**
-	 * check if the phone is valid by regular expression
-	 * @param phone (the phone we need to check)
-	 * @return true if it belongs to language, else return false
-	 */
-	private static boolean isValidPhone(String phone) {
-		String regularExpression="^05[0-9]{8}$";
-		Pattern pattern=Pattern.compile(regularExpression);
-		Matcher matcher=pattern.matcher(phone);
-		return matcher.matches();
-	}
-	
-	public void handleGoToView() {
-		  try {
-		    	mainLayoutController=client.getMainLayoutController();
-		    	mainLayoutController.loadScreen("/client/ViewSubscriberDetailsScreen.fxml");
-		    	
-		    } catch (Exception e) {
-		        System.out.println("Error:"+ e.getMessage());
-		    }
-	}
+    /** Returns to the read-only “View Details” screen. */
+    public void handleGoToView() {
+        try {
+            mainLayoutController = client.getMainLayoutController();
+            mainLayoutController.loadScreen("/client/ViewSubscriberDetailsScreen.fxml");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
 }
+

@@ -15,12 +15,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Displays all currently active parking events (no exit time).
- * Accessed from the staff menu.
+ * “Live Parked” table for staff.  
+ * Lists every vehicle that is currently inside the lot
+ * (no exit time set). Populated by a single server call.
  */
 public class ViewActiveParkingsController implements ClientAware {
 
-    /* ---------- FXML-injected UI elements ---------- */
+    /* ---------- FXML: table + columns ---------- */
     @FXML private TableView<ParkingEvent> parkingTable;
     @FXML private TableColumn<ParkingEvent, Integer> colEventId;
     @FXML private TableColumn<ParkingEvent, Integer> colSubscriber;
@@ -31,59 +32,62 @@ public class ViewActiveParkingsController implements ClientAware {
     @FXML private TableColumn<ParkingEvent, String>  colEntryDate;
     @FXML private TableColumn<ParkingEvent, String>  colEntryTime;
 
-    /* ---------- Runtime fields ---------- */
+    /* ---------- runtime ---------- */
     private ClientController client;
-    private final ObservableList<ParkingEvent> data = FXCollections.observableArrayList();
+    private final ObservableList<ParkingEvent> data =
+            FXCollections.observableArrayList();
 
-    /**
-     * Sets up table columns after FXML is loaded.
-     */
+    /* =====================================================
+     *  table setup
+     * ===================================================== */
+
+    /** Builds column value-factories once the FXML is loaded. */
     @FXML
     private void initialize() {
-        colEventId.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getEventId()));
-        colSubscriber.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getSubscriberCode()));
-        colVehicleId.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getVehicleId()));
-        colParkingCode.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getParkingCode()));
-        colLot.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getNameParkingLot()));
-        colSpace.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getParkingSpace()));
+        colEventId     .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getEventId()));
+        colSubscriber  .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getSubscriberCode()));
+        colVehicleId   .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getVehicleId()));
+        colParkingCode .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getParkingCode()));
+        colLot         .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNameParkingLot()));
+        colSpace       .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getParkingSpace()));
 
-        colEntryDate.setCellValueFactory(cell -> {
-            String formattedDate = cell.getValue().getEntryDate().format(DateTimeFormatter.ISO_DATE);
-            return new ReadOnlyStringWrapper(formattedDate);
-        });
+        colEntryDate.setCellValueFactory(c ->
+            new ReadOnlyStringWrapper(c.getValue().getEntryDate().format(DateTimeFormatter.ISO_DATE)));
 
-        colEntryTime.setCellValueFactory(cell -> {
-            String formattedTime = cell.getValue().getEntryHour().format(DateTimeFormatter.ofPattern("HH:mm"));
-            return new ReadOnlyStringWrapper(formattedTime);
-        });
+        colEntryTime.setCellValueFactory(c ->
+            new ReadOnlyStringWrapper(c.getValue().getEntryHour().format(DateTimeFormatter.ofPattern("HH:mm"))));
     }
 
+    /* =====================================================
+     *  client wiring
+     * ===================================================== */
+
     /**
-     * Injects the ClientController instance. Does not trigger DB call directly.
-     * Use requestActiveParkingEvents() separately after setClient is complete.
+     * Saves the ClientController and lets it call back with data.
+     *
+     * @param client active client instance
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
-        if (client != null) {
+        if (client != null)
             client.setViewActiveParkingsController(this);
-        }
     }
 
-    /**
-     * Triggers a request to the server for active parking data.
-     * Should be called after setClient.
-     */
+    /* =====================================================
+     *  server request + callback
+     * ===================================================== */
+
+    /** Sends “get_active_parkings” to the server. Call after setClient(). */
     public void requestActiveParkingEvents() {
-        if (client != null) {
+        if (client != null)
             client.requestActiveParkingEvents();
-        }
     }
 
     /**
-     * Called by ClientController when active parking events are received.
+     * Fills the table when the server responds.
      *
-     * @param events List of currently active ParkingEvent objects
+     * @param events list of current ParkingEvent objects
      */
     public void onActiveParkingsReceived(List<ParkingEvent> events) {
         Platform.runLater(() -> {
@@ -92,3 +96,4 @@ public class ViewActiveParkingsController implements ClientAware {
         });
     }
 }
+

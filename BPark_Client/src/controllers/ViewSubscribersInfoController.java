@@ -16,89 +16,98 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Lists all subscribers with contact details and late-pickup count.
+ * Staff-side table that shows every subscriber together with
+ * basic contact info and the number of late vehicle pickups.
  */
 public class ViewSubscribersInfoController implements ClientAware {
 
-    /* ---------- FXML-injected controls ---------- */
+    /* ---------- FXML controls ---------- */
     @FXML private TableView<Subscriber> subscriberTable;
-    @FXML private TableColumn<Subscriber, Integer> colCode;
-    @FXML private TableColumn<Subscriber, String>  colId;
-    @FXML private TableColumn<Subscriber, String>  colName;
-    @FXML private TableColumn<Subscriber, String>  colUsername;
-    @FXML private TableColumn<Subscriber, String>  colPhone;
-    @FXML private TableColumn<Subscriber, String>  colEmail;
-    @FXML private TableColumn<Subscriber, Integer> colLate;
+    @FXML private TableColumn<Subscriber,Integer> colCode;
+    @FXML private TableColumn<Subscriber,String>  colId;
+    @FXML private TableColumn<Subscriber,String>  colName;
+    @FXML private TableColumn<Subscriber,String>  colUsername;
+    @FXML private TableColumn<Subscriber,String>  colPhone;
+    @FXML private TableColumn<Subscriber,String>  colEmail;
+    @FXML private TableColumn<Subscriber,Integer> colLate;
 
-    /* ---------- Runtime fields ---------- */
+    /* ---------- runtime data ---------- */
     private ClientController client;
     private final ObservableList<Subscriber> data = FXCollections.observableArrayList();
-    private Map<Subscriber,Integer> lateLookup = new HashMap<>();
+    private Map<Subscriber,Integer> lateLookup = new HashMap<>();   // subscriber → late count
+
 
     /**
-     * Injects the ClientController instance.
-     * Note: actual DB call is deferred until explicitly requested.
+     * Saves the ClientController and lets it call back later.
+     *
+     * @param client active client instance
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
-        if (client != null) {
+        if (client != null)
             client.setViewSubscribersInfoController(this);
-        }
     }
 
     /**
-     * Called by StaffMainLayoutController AFTER setClient, to initiate request.
+     * Triggered by the parent layout once setClient() is done.
+     * Sends “get_all_subscribers” to the server.
      */
     public void requestSubscribers() {
-        if (client != null) {
-            System.out.println("[DEBUG] Sending requestAllSubscribers() to server...");
+        if (client != null)
             client.requestAllSubscribers();
-        }
     }
 
+    // -----------------------------------------------------------------
+    // server callback
+    // -----------------------------------------------------------------
+
     /**
-     * Called by ClientController once the server response arrives.
-     * Receives a list of Subscriber objects and a map of late-counts.
+     * Fills the table after the server returns data.
+     *
+     * @param subs     list of Subscriber objects
+     * @param lateMap  map subscriber → number of late pickups
      */
     public void onSubscribersReceived(List<Subscriber> subs,
                                       Map<Subscriber,Integer> lateMap) {
-        System.out.println("[DEBUG] onSubscribersReceived called. Total subs = " + subs.size());
-        System.out.println("[DEBUG] lateLookup map size = " + lateMap.size());
-
         Platform.runLater(() -> {
-            this.lateLookup = lateMap;
+            lateLookup = lateMap;
             data.setAll(subs);
             subscriberTable.setItems(data);
         });
     }
 
+    // -----------------------------------------------------------------
+    // table column setup
+    // -----------------------------------------------------------------
+
+    /** Builds column value factories once the FXML is loaded. */
     @FXML
     private void initialize() {
-        colCode.setCellValueFactory(cell ->
-            new ReadOnlyObjectWrapper<>(cell.getValue().getSubscriberCode()));
 
-        colId.setCellValueFactory(cell ->
-            new ReadOnlyStringWrapper(cell.getValue().getUserId()));
+        colCode.setCellValueFactory(c ->
+            new ReadOnlyObjectWrapper<>(c.getValue().getSubscriberCode()));
 
-        colName.setCellValueFactory(cell -> {
-            Subscriber s = cell.getValue();
-            String fullName = s.getFirstName() + " " + s.getLastName();
-            return new ReadOnlyStringWrapper(fullName);
+        colId.setCellValueFactory(c ->
+            new ReadOnlyStringWrapper(c.getValue().getUserId()));
+
+        colName.setCellValueFactory(c -> {
+            Subscriber s = c.getValue();
+            return new ReadOnlyStringWrapper(s.getFirstName() + " " + s.getLastName());
         });
 
-        colUsername.setCellValueFactory(cell ->
-            new ReadOnlyStringWrapper(cell.getValue().getUsername()));
+        colUsername.setCellValueFactory(c ->
+            new ReadOnlyStringWrapper(c.getValue().getUsername()));
 
-        colPhone.setCellValueFactory(cell ->
-            new ReadOnlyStringWrapper(cell.getValue().getPhoneNum()));
+        colPhone.setCellValueFactory(c ->
+            new ReadOnlyStringWrapper(c.getValue().getPhoneNum()));
 
-        colEmail.setCellValueFactory(cell ->
-            new ReadOnlyStringWrapper(cell.getValue().getEmail()));
+        colEmail.setCellValueFactory(c ->
+            new ReadOnlyStringWrapper(c.getValue().getEmail()));
 
-        colLate.setCellValueFactory(cell -> {
-            int count = lateLookup.getOrDefault(cell.getValue(), 0);
-            return new ReadOnlyObjectWrapper<>(count);
-        });
+        // late count looked up in a map populated by onSubscribersReceived()
+        colLate.setCellValueFactory(c ->
+            new ReadOnlyObjectWrapper<>(lateLookup.getOrDefault(c.getValue(), 0)));
     }
 }
+

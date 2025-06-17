@@ -12,77 +12,74 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class WatchAndCancelOrdersController implements ClientAware{
+/**
+ * “My Reservations” table for a subscriber.  
+ * Shows every future order and lets the user cancel one with a button.
+ */
+public class WatchAndCancelOrdersController implements ClientAware {
 
-	@FXML
-	private Label headline;
+    /* ---------- headline label (“Watch & Cancel Orders”) ---------- */
+    @FXML private Label headline;
 
-	@FXML
-	private TableView<Order> reservationTable;
+    /* ---------- TableView + columns ---------- */
+    @FXML private TableView<Order> reservationTable;
+    @FXML private TableColumn<Order,Integer> orderNumberColumn;
+    @FXML private TableColumn<Order,Date>    dateColumn;
+    @FXML private TableColumn<Order,Time>    timeColumn;
+    @FXML private TableColumn<Order,String>  confirmationCodeColumn;
+    @FXML private TableColumn<Order,Void>    cancelOrderColumn;
 
-	@FXML
-	private TableColumn<Order, Integer> orderNumberColumn;
+    /* shared socket handler */
+    private ClientController client;
 
-	@FXML
-	private TableColumn<Order, Date> dateColumn;
+    /**
+     * Builds the table, then asks the server for the subscriber’s
+     * current reservations.  Also adds a “Cancel” button to each row.
+     * Call once after setClient().
+     */
+    public void defineTable() {
 
-	@FXML
-	private TableColumn<Order, Time> timeColumn;
+        orderNumberColumn   .setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
+        dateColumn          .setCellValueFactory(new PropertyValueFactory<>("orderDate"));
+        timeColumn          .setCellValueFactory(new PropertyValueFactory<>("arrivalTime"));
+        confirmationCodeColumn.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
 
-	@FXML
-	private TableColumn<Order, String> confirmationCodeColumn;
+        // pull the data
+        client.askForReservations();
 
-	@FXML
-	private TableColumn<Order, Void> cancelOrderColumn;
+        // add a Cancel button per row
+        cancelOrderColumn.setCellFactory(col -> new TableCell<>() {
 
-	private ClientController client;
+            private final Button deleteBtn = new Button("Cancel");
 
-	/**
-	 * define the table and columns of tables, call for the function that bring the order to table,
-	 * add button for cancel order only where has row. in event call for delete order from SQL
-	 */
-	public void defineTable() {
-		orderNumberColumn.setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
-		dateColumn.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
-		timeColumn.setCellValueFactory(new PropertyValueFactory<>("arrivalTime"));
-		confirmationCodeColumn.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
-		//update reservations on table
-		client.askForReservations();
-		
-		cancelOrderColumn.setCellFactory(column->new TableCell<>(){
-			//define button
-			private Button deleteBtn= new Button("Cancel");
-			//define action of button
-			{
-				deleteBtn.setOnAction(e->{
-				Order orderToDelete=getTableView().getItems().get(getIndex());
-				int orderNumberToDelete= orderToDelete.getOrderNumber();
-				client.deleteOrder(orderNumberToDelete);
-			});
-			}
-			
-			protected void updateItem(Void item, boolean empty) {
-				super.updateItem(item, empty);
-				setGraphic(empty? null: deleteBtn);
-			}
-		});
-	}
+            {
+                deleteBtn.setOnAction(e -> {
+                    Order order = getTableView().getItems().get(getIndex());
+                    client.deleteOrder(order.getOrderNumber());
+                });
+            }
 
-	/**
-	 * display the orders on the table
-	 * @param orders
-	 */
-	public void displayOrders(ArrayList<Order> orders) {
-		ObservableList<Order> observableList = FXCollections.observableArrayList(orders);
-		reservationTable.setItems(observableList);
-	}
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : deleteBtn);
+            }
+        });
+    }
 
-	/**
-	 * set client on this screen
-	 * @param client
-	 */
-	public void setClient(ClientController client) {
-		this.client = client;
-	}
+    /**
+     * Populates the table after ClientController delivers the list.
+     *
+     * @param orders list of future orders
+     */
+    public void displayOrders(ArrayList<Order> orders) {
+        ObservableList<Order> rows = FXCollections.observableArrayList(orders);
+        reservationTable.setItems(rows);
+    }
 
+    /** Saves the ClientController reference. */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 }
