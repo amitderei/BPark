@@ -1340,11 +1340,9 @@ public class DBController {
 	public ArrayList<ParkingEvent> getActiveParkingEventsThatLateAndDoesntReceiveMail() {
 		
 		ArrayList<ParkingEvent> list = new ArrayList<>();
-		System.out.println("get list1");
 		String query = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND sendMsgForLating=FALSE";
 		
 		try (PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
-			System.out.println("get list2");
 			while (rs.next()) {
 				ParkingEvent event = new ParkingEvent();
 				
