@@ -81,7 +81,6 @@ public class GuestMainLayoutController implements ClientAware {
 
     @FXML
     private void handleCheckAvailability() {
-        // TODO: swap to the real screen once it exists
         loadScreen("/client/AvailabilityScreen.fxml");
     }
 
@@ -101,6 +100,12 @@ public class GuestMainLayoutController implements ClientAware {
             Object ctrl = loader.getController();
             if (ctrl instanceof ClientAware aware) {
                 aware.setClient(client);
+            }
+            
+            if (ctrl instanceof AvailabilityController controller) {
+                controller.setClient(client); 
+                client.setAvailabilityController(controller);
+                client.requestParkingAvailability(); 
             }
 
             center.getChildren().setAll(content);

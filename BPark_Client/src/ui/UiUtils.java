@@ -97,6 +97,10 @@ public final class UiUtils {
             	controller.setClient(client);
             }
             
+            if (ctrl instanceof ClientAware aware) {
+                aware.setClient(client1);
+            }
+            
 
             Stage stage = (Stage) source.getScene().getWindow();
             stage.setScene(new Scene(root));

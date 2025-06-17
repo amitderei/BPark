@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.AvailabilityController"
+            prefWidth="600.0" prefHeight="453.0">
+
+    <VBox spacing="20.0" alignment="CENTER"
+          AnchorPane.topAnchor="40.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+
+        <Label text="🚗 Parking Availability"
+               style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+
+        <Label fx:id="lblTotal" style="-fx-font-size: 16px;" />
+        <Label fx:id="lblOccupied" style="-fx-font-size: 16px;" />
+        <Label fx:id="lblAvailable" style="-fx-font-size: 16px;" />
+        <Label fx:id="lblStatus" style="-fx-font-size: 14px; -fx-text-fill: gray;" />
+    </VBox>
+</AnchorPane>
+

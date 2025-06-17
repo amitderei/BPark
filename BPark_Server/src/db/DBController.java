@@ -15,7 +15,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import common.*;
 
@@ -1356,4 +1358,54 @@ public class DBController {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Returns the total number of parking spots in the lot.
+	 *
+	 * @return total number of parkingSpaces
+	 */
+	public int getTotalSpots() {
+	    final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        if (rs.next()) {
+	            return rs.getInt(1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return 0;
+	}
+
+
+	/**
+	 * Returns the number of currently occupied parking spots.
+	 *
+	 * @return count of spots where is_occupied = TRUE
+	 */
+	public int getOccupiedSpots() {
+	    final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces WHERE is_occupied = TRUE";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        if (rs.next()) {
+	            return rs.getInt(1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return 0;
+	}
+
+
+
+	
+	
 }

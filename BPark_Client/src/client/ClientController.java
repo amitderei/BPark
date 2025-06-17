@@ -5,6 +5,7 @@ import common.ParkingEvent;
 import common.ServerResponse;
 import common.Subscriber;
 import common.User;
+import controllers.AvailabilityController;
 import controllers.CreateNewOrderViewController;
 import controllers.EditSubscriberDetailsController;
 import controllers.ExtendParkingController;
@@ -64,6 +65,8 @@ public class ClientController extends AbstractClient {
 	private StaffMainLayoutController staffMainLayoutController;
 	private ExtendParkingController extendParkingController;
 	private RegisterSubscriberController registerSubscriberController;
+	private AvailabilityController availabilityController;
+
 
 
 
@@ -126,6 +129,10 @@ public class ClientController extends AbstractClient {
 	
 	public void setRegisterSubscriberController(RegisterSubscriberController controller) {
 	    this.registerSubscriberController = controller;
+	}
+	
+	public void setAvailabilityController(AvailabilityController ctrl) {
+	    this.availabilityController = ctrl;
 	}
 
 
@@ -423,6 +430,18 @@ public class ClientController extends AbstractClient {
 			    }
 			    return;
 			}
+			
+			// parking_availability (Array of 3 ints)
+			if (response.isSucceed() &&
+			    "parking_availability".equals(response.getMsg()) &&
+			    response.getData() instanceof Object[] stats &&
+			    availabilityController != null) {
+
+			    availabilityController.updateAvailability(stats);
+			    return;
+			}
+
+
 
 			// Vehicle delivery screen updates
 			if (newDeliveryController != null) {
@@ -599,6 +618,7 @@ public class ClientController extends AbstractClient {
 
 
 
+
 	/**
 	 * send to server the user to get the subscriber details.
 	 * 
@@ -735,5 +755,18 @@ public class ClientController extends AbstractClient {
             System.err.println("Failed to send 'registerSubscriber' request: " + e.getMessage());
         }
     }
+    
+    /**
+     * Requests parking availability stats from the server.
+     * The response includes total, occupied, and available spots.
+     */
+    public void requestParkingAvailability() {
+        try {
+            sendToServer(new Object[] { "get_parking_availability" });
+        } catch (IOException e) {
+            System.err.println("Failed to send 'get_parking_availability' request: " + e.getMessage());
+        }
+    }
+
 
 }

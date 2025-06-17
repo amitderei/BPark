@@ -95,8 +95,7 @@ public class TerminalMainLayoutController implements ClientAware {
 	
 	@FXML
 	private void handleCheckAvailability() {
-		//צריך לממש
-		//לדעתי יש ליצור מסך עבור סטטוס חניות זמינות
+        loadScreen("/client/AvailabilityScreen.fxml");
 	}
 
 
@@ -131,6 +130,11 @@ public class TerminalMainLayoutController implements ClientAware {
 				controller.setClient(client);
 				client.setDeliveryController(controller);
 			}
+			else if (ctrl instanceof AvailabilityController controller) {
+                controller.setClient(client); 
+                client.setAvailabilityController(controller);
+                client.requestParkingAvailability(); 
+            }
 		
 
 

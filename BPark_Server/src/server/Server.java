@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import common.Order;
 import common.ParkingEvent;
@@ -420,6 +421,26 @@ public class Server extends AbstractServer {
 				    client.sendToClient(new ServerResponse(true, events, "active_parkings"));
 				    return;
 				}
+				
+				// Expected format: {"get_parking_availability"}
+				else if (data.length == 1 && "get_parking_availability".equals(data[0])) {
+				    System.out.println("[SERVER] Received availability request");
+
+				    try {
+				        int total = db.getTotalSpots();
+				        int occupied = db.getOccupiedSpots();
+				        int available = total - occupied;
+
+				        Object[] stats = new Object[] { total, occupied, available };
+				        client.sendToClient(new ServerResponse(true, stats, "parking_availability"));
+				    } catch (Exception e) {
+				        e.printStackTrace();
+				        client.sendToClient(new ServerResponse(false, null, "Failed to retrieve parking availability."));
+				    }
+				    return;
+				}
+
+
 				
 				// Expected format: {"extendParking", parkingCode}
 				else if (data.length == 2 && "extendParking".equals(data[0])) {
