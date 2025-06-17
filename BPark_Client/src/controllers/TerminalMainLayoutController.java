@@ -55,7 +55,7 @@ public class TerminalMainLayoutController implements ClientAware {
 	 */
 	@FXML
 	private void handleBackClick() {
-		loadScreen("/client/SelectionScreen.fxml");
+		UiUtils.loadScreen(btnBack, "/client/SelectionScreen.fxml", "BPARK – Welcome", client);
 	}
 	
 	/**
