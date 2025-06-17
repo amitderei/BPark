@@ -10,6 +10,7 @@ import java.util.Map;
 
 import common.Order;
 import common.ParkingEvent;
+import common.ParkingReport;
 import common.ServerResponse;
 import common.Subscriber;
 import common.User;
@@ -103,6 +104,19 @@ public class Server extends AbstractServer {
 					else {
 						client.sendToClient(new ServerResponse(true, history, "Parking history data loaded successfully."));
 					}
+				}
+				//return the parking report: expected format {"GetParkingReport", parkingReport}
+				else if(data.length==2 && "GetParkingReport".equals(data[0])) {
+					ParkingReport parkingReport=db.getParkingReport((Date)data[1]);
+					
+					if (parkingReport==null) {
+						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking report."));
+					}
+					else {
+						System.out.println(Integer.toString(parkingReport.getTotalEntries()));
+						client.sendToClient(new ServerResponse(true, parkingReport, "Parking report loaded."));
+					}
+					return;
 				}
 				
 				else if (data.length==2 && "getDetailsOfActiveInfo".equals(data[0])) {

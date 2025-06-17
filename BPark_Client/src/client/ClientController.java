@@ -2,6 +2,7 @@ package client;
 
 import common.Order;
 import common.ParkingEvent;
+import common.ParkingReport;
 import common.ServerResponse;
 import common.Subscriber;
 import common.User;
@@ -12,6 +13,7 @@ import controllers.ExtendParkingController;
 import controllers.GuestMainController;
 import controllers.LoginController;
 import controllers.MainController;
+import controllers.ParkingReportController;
 import controllers.SubscriberMainLayoutController;
 import controllers.ParkingReservationSummaryController;
 import controllers.RegisterSubscriberController;
@@ -66,6 +68,7 @@ public class ClientController extends AbstractClient {
 	private ExtendParkingController extendParkingController;
 	private RegisterSubscriberController registerSubscriberController;
 	private AvailabilityController availabilityController;
+	private ParkingReportController parkingReportController;
 
 
 
@@ -119,6 +122,10 @@ public class ClientController extends AbstractClient {
 		this.terminalController=terminalController;
 	}
 	
+	public void setParkingReportController(ParkingReportController parkingReportController) {
+		this.parkingReportController = parkingReportController;
+	}
+
 	public void setStaffMainLayoutController(StaffMainLayoutController controller) {
 	    this.staffMainLayoutController = controller;
 	}
@@ -256,6 +263,9 @@ public class ClientController extends AbstractClient {
 
 		Platform.runLater(() -> {
 
+			
+
+			
 			if (!response.isSucceed() && loginController != null
 					&& response.getMsg().toLowerCase().contains("invalid")) {
 				loginController.handleLoginFailure(response.getMsg());
@@ -263,10 +273,21 @@ public class ClientController extends AbstractClient {
 			}
 			
 			
-			
+			System.out.println("Server response msg: " + response.getMsg());
+			System.out.println("Success? " + response.isSucceed());
 			// General error message popup (only if not handled before)
 			if (!response.isSucceed()) {
+				
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+			}
+			
+			
+			if (response.isSucceed()&& "Parking report loaded.".equals(response.getMsg())) {
+				if(parkingReportController!=null) {
+					parkingReportController.setParkingReport((ParkingReport)response.getData());
+					parkingReportController.setChart();
+				}
+				return;
 			}
 			
 			else if (response.isSucceed() && response.getData() instanceof User user) {
@@ -283,11 +304,16 @@ public class ClientController extends AbstractClient {
 				}
 			}
 
+			
+			
 			else if (response.isSucceed() && response.getMsg().equals("Parking history data loaded successfully.")) {
 				if (viewParkingHistoryController != null) {
 					viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
 				}
 			}
+			
+		
+			
 			// display orders of subscriber in table
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
 					&& response.getMsg().equals("Orders of subscriber displayed successfully.")) {
@@ -297,6 +323,8 @@ public class ClientController extends AbstractClient {
 				}
 				return;
 			}
+			
+			
 			
 			else if(response.isSucceed()&&response.getMsg().equals("No orders.")) {
 				if (watchAndCancelOrdersController != null) {
@@ -767,5 +795,17 @@ public class ClientController extends AbstractClient {
         }
     }
 
+    /**
+     * request parking report data from server.
+     * @param date (of requested report) 
+     */
+    public void getParkingReport(Date date) {
+    	try {
+    		System.out.println("get1");
+            sendToServer(new Object[] { "GetParkingReport", date });
+        } catch (IOException e) {
+            System.err.println("Failed to send 'GetParkingReport' request: " + e.getMessage());
+        }
+    }
 
 }

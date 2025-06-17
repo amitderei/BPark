@@ -73,10 +73,6 @@ public class DBController {
 		}
 	}
 
-
-
-
-
 	/**
 	 * Closes the connection to the database.
 	 */
@@ -111,10 +107,6 @@ public class DBController {
 			return false;
 		}
 	}
-
-	
-
-	
 
 	/**
 	 * Authenticates a user using their username and password. If the credentials
@@ -243,52 +235,50 @@ public class DBController {
 	 * 
 	 * Allowed duration is up to 4 hours normally, or 8 hours if extended.
 	 * 
-	 * If the parking duration exceeds the allowed time, a delay is recorded.
-	 * A notification is printed to the console (email/SMS sent by the server).
+	 * If the parking duration exceeds the allowed time, a delay is recorded. A
+	 * notification is printed to the console (email/SMS sent by the server).
 	 *
 	 * @param subscriberCode the subscriber's code
-	 * @param parkingCode the parking code provided by the subscriber
+	 * @param parkingCode    the parking code provided by the subscriber
 	 * @return ServerResponse with success status and message to display
 	 */
 	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
-	    ParkingEvent event;
+		ParkingEvent event;
 
-	    try {
-	        event = getOpenParkingEvent(subscriberCode, parkingCode);
-	    } catch (SQLException e) {
-	        System.err.println("Error retrieving parking event: " + e.getMessage());
-	        return new ServerResponse(false, null, "An error occurred while retrieving your parking session.");
-	    }
+		try {
+			event = getOpenParkingEvent(subscriberCode, parkingCode);
+		} catch (SQLException e) {
+			System.err.println("Error retrieving parking event: " + e.getMessage());
+			return new ServerResponse(false, null, "An error occurred while retrieving your parking session.");
+		}
 
-	    if (event == null) {
-	        return new ServerResponse(false, null, "No active parking session found for the provided information.");
-	    }
+		if (event == null) {
+			return new ServerResponse(false, null, "No active parking session found for the provided information.");
+		}
 
-	    try {
-	        finalizeParkingEvent(event.getEventId());
+		try {
+			finalizeParkingEvent(event.getEventId());
 
-	        // Calculate time difference in hours
-	        LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
-	        long hours = (System.currentTimeMillis()
-	                - entryTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) / (1000 * 60 * 60);
+			// Calculate time difference in hours
+			LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+			long hours = (System.currentTimeMillis()
+					- entryTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) / (1000 * 60 * 60);
 
-	        int allowedHours = event.isWasExtended() ? 8 : 4;
+			int allowedHours = event.isWasExtended() ? 8 : 4;
 
-	        if (hours > allowedHours) {
-	            System.out.println("[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
-	            return new ServerResponse(true, null,
-	                "Pickup successful with delay. A notification was sent.");
-	        }
+			if (hours > allowedHours) {
+				System.out.println(
+						"[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
+				return new ServerResponse(true, null, "Pickup successful with delay. A notification was sent.");
+			}
 
-	        return new ServerResponse(true, null,
-	            "Vehicle pickup successful (" + hours + " hours).");
+			return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
 
-	    } catch (SQLException e) {
-	        System.err.println("Failed to finalize parking event: " + e.getMessage());
-	        return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
-	    }
+		} catch (SQLException e) {
+			System.err.println("Failed to finalize parking event: " + e.getMessage());
+			return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
+		}
 	}
-
 
 	/**
 	 * Finalizes a parking event by: - Setting exitDate and exitHour. - Marking the
@@ -358,8 +348,6 @@ public class DBController {
 		}
 	}
 
-	
-
 	/**
 	 * Retrieves the names of all parking lots from the database.
 	 *
@@ -381,8 +369,6 @@ public class DBController {
 
 		return parkingLotArrayList;
 	}
-
-
 
 	/**
 	 * 
@@ -439,12 +425,13 @@ public class DBController {
 		return false;
 	}
 
-    /**
-     * Updates the given Order object with its order number based on matching fields in the database.
-     * The match is done using order date, arrival time, and parking space.
-     *
-     * @param newOrder the Order object to update with its order number
-     */
+	/**
+	 * Updates the given Order object with its order number based on matching fields
+	 * in the database. The match is done using order date, arrival time, and
+	 * parking space.
+	 *
+	 * @param newOrder the Order object to update with its order number
+	 */
 	public void setOrderId(Order newOrder) {
 		String newQuery = "SELECT order_number FROM `order` WHERE order_date=? AND arrival_time=? AND parking_space=?";
 		try (PreparedStatement stmt = conn.prepareStatement(newQuery)) {
@@ -849,13 +836,13 @@ public class DBController {
 		}
 	}
 
-    /**
-     * Retrieves the full parking history of a given subscriber.
-     *
-     * @param subscriber the subscriber whose parking events are requested
-     * @return a list of ParkingEvent objects representing the subscriber's parking history,
-     *         or null if an error occurs during retrieval
-     */
+	/**
+	 * Retrieves the full parking history of a given subscriber.
+	 *
+	 * @param subscriber the subscriber whose parking events are requested
+	 * @return a list of ParkingEvent objects representing the subscriber's parking
+	 *         history, or null if an error occurs during retrieval
+	 */
 	public ArrayList<ParkingEvent> parkingHistoryOfSubscriber(Subscriber subscriber) {
 		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=?";
 		ArrayList<ParkingEvent> historyOfParking = new ArrayList<>();
@@ -869,9 +856,9 @@ public class DBController {
 					newParkingEvent.setParkingSpace(rs.getInt("parking_space"));
 					newParkingEvent.setEntryDate((rs.getDate("entryDate")).toLocalDate());
 					newParkingEvent.setEntryTime((rs.getTime("entryHour")).toLocalTime());
-					Date exitDate=rs.getDate("exitDate");
-					Time exitTime=rs.getTime("exitHour");
-					if (exitDate!=null && exitTime!=null) {
+					Date exitDate = rs.getDate("exitDate");
+					Time exitTime = rs.getTime("exitHour");
+					if (exitDate != null && exitTime != null) {
 						newParkingEvent.setExitDate(rs.getDate("exitDate").toLocalDate());
 						newParkingEvent.setExitHour(rs.getTime("exitHour").toLocalTime());
 					}
@@ -883,19 +870,17 @@ public class DBController {
 				}
 				return historyOfParking;
 			}
-			
-			
-			
+
 		} catch (Exception e) {
 			System.err.println("Error in parking history: " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Method that checks whether the tag exists in the DB or no
-	 * If yes then return true, false otherwise
+	 * Method that checks whether the tag exists in the DB or no If yes then return
+	 * true, false otherwise
 	 */
 	public boolean tagExists(String tag) {
 
@@ -909,7 +894,7 @@ public class DBController {
 			ps.setString(1, tag); // Inserting the tag
 
 			ResultSet rs = ps.executeQuery();
-			exists = rs.next();  // If the tag has been found it means that he will exists
+			exists = rs.next(); // If the tag has been found it means that he will exists
 
 			rs.close();
 			ps.close();
@@ -919,8 +904,7 @@ public class DBController {
 
 		return exists;
 	}
-	
-	
+
 	/**
 	 * Method that returns the subscriber through a matched tag-Id with the DB
 	 * Returns the subscriberCode, in case of an error returns -1
@@ -940,10 +924,10 @@ public class DBController {
 		}
 		return -1; // Subscriber code matching to the tag not found
 	}
-	
+
 	/**
-	 * Checks whether the subscriber already has entered his vehicle into the parking lot
-	 * If he entered already return true, otherwise return false
+	 * Checks whether the subscriber already has entered his vehicle into the
+	 * parking lot If he entered already return true, otherwise return false
 	 */
 	public boolean checkSubscriberEntered(int codeInt) {
 		String query = "SELECT * FROM bpark.parkingevent WHERE subscriberCode = ? AND exitHour IS NULL";
@@ -953,182 +937,173 @@ public class DBController {
 			ResultSet rs = stmt.executeQuery();
 			return rs.next(); // if any row is returned, subscriber is inside
 		} catch (SQLException e) {
-			// If there is no subscriber code in the table it means that he didn't entered yet and the method will return false
+			// If there is no subscriber code in the table it means that he didn't entered
+			// yet and the method will return false
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	
-	
-	
 	/**
-	 * Checks whether the vehicle that is matched to the tag-Id is already inside the parking lot
-	 * If he entered already return true, otherwise return false
+	 * Checks whether the vehicle that is matched to the tag-Id is already inside
+	 * the parking lot If he entered already return true, otherwise return false
 	 */
 	public boolean checkTagIDEntered(String tag) {
-		String query = "SELECT pe.* FROM bpark.parkingevent pe " +
-				"JOIN bpark.subscriber s ON pe.subscriberCode = s.subscriberCode " +
-				"WHERE s.tagId = ? AND pe.exitHour IS NULL";
+		String query = "SELECT pe.* FROM bpark.parkingevent pe "
+				+ "JOIN bpark.subscriber s ON pe.subscriberCode = s.subscriberCode "
+				+ "WHERE s.tagId = ? AND pe.exitHour IS NULL";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, tag);
 			ResultSet rs = stmt.executeQuery();
 			return rs.next(); // if any row is returned, tag is inside
 		} catch (SQLException e) {
-			// If there is no matched subscriberCode to the tagId in the table it means that he didn't entered yet and the method will return false
+			// If there is no matched subscriberCode to the tagId in the table it means that
+			// he didn't entered yet and the method will return false
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
-    /**
-     * Retrieves the email and phone number of a subscriber by their subscriber code.
-     *
-     * @param subscriberCode the unique code of the subscriber
-     * @return a String array where index 0 is email and index 1 is phone number,
-     *         or null if the subscriber was not found or an error occurred
-     */
+
+	/**
+	 * Retrieves the email and phone number of a subscriber by their subscriber
+	 * code.
+	 *
+	 * @param subscriberCode the unique code of the subscriber
+	 * @return a String array where index 0 is email and index 1 is phone number, or
+	 *         null if the subscriber was not found or an error occurred
+	 */
 	public String[] getEmailAndPhoneNumber(int subscriberCode) {
-		String query="SELECT phoneNumber, email FROM subscriber WHERE subscriberCode=?";
-		String[] arrayForPhoneAndEmail=new String[2];
+		String query = "SELECT phoneNumber, email FROM subscriber WHERE subscriberCode=?";
+		String[] arrayForPhoneAndEmail = new String[2];
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriberCode);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				arrayForPhoneAndEmail[0]= rs.getString("email");
-				arrayForPhoneAndEmail[1]=rs.getString("phoneNumber");
+				arrayForPhoneAndEmail[0] = rs.getString("email");
+				arrayForPhoneAndEmail[1] = rs.getString("phoneNumber");
 				return arrayForPhoneAndEmail;
 			}
 		} catch (SQLException e) {
-			System.out.println("Error finding email and phone number: "+e.getMessage());
+			System.out.println("Error finding email and phone number: " + e.getMessage());
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns every subscriber plus a computed "late" count.
 	 *
-	 * Late =  (duration > 8 h)  OR  (duration > 4 h AND wasExtended = FALSE)
+	 * Late = (duration > 8 h) OR (duration > 4 h AND wasExtended = FALSE)
 	 *
-	 * @return List<Object[]> where
-	 *         index 0 -> Subscriber,  index 1 -> Integer lateCount
+	 * @return List<Object[]> where index 0 -> Subscriber, index 1 -> Integer
+	 *         lateCount
 	 */
 	public List<Object[]> getAllSubscribersWithLateCount() {
-	    final String sql =
-	        """
-	        SELECT s.subscriberCode,
-	               s.userId,
-	               s.firstName,
-	               s.lastName,
-	               s.phoneNumber,
-	               s.email,
-	               s.username,
-	               s.tagId,
-	               COALESCE(l.late_cnt, 0) AS late_count
-	        FROM   bpark.subscriber AS s
-	        LEFT JOIN (
-	            SELECT subscriberCode,
-	                   COUNT(*) AS late_cnt
-	            FROM   bpark.parkingEvent
-	            WHERE  exitDate IS NOT NULL
-	              AND (
-	                   TIMESTAMPDIFF(
-	                     HOUR,
-	                     TIMESTAMP(entryDate, entryHour),
-	                     TIMESTAMP(exitDate, exitHour)
-	                   ) > 8
-	                 OR (
-	                     wasExtended = FALSE
-	                     AND TIMESTAMPDIFF(
-	                           HOUR,
-	                           TIMESTAMP(entryDate, entryHour),
-	                           TIMESTAMP(exitDate, exitHour)
-	                        ) > 4
-	                 )
-	              )
-	            GROUP BY subscriberCode
-	        ) AS l USING (subscriberCode)
-	        ORDER BY s.subscriberCode;
-	        """;
+		final String sql = """
+				SELECT s.subscriberCode,
+				       s.userId,
+				       s.firstName,
+				       s.lastName,
+				       s.phoneNumber,
+				       s.email,
+				       s.username,
+				       s.tagId,
+				       COALESCE(l.late_cnt, 0) AS late_count
+				FROM   bpark.subscriber AS s
+				LEFT JOIN (
+				    SELECT subscriberCode,
+				           COUNT(*) AS late_cnt
+				    FROM   bpark.parkingEvent
+				    WHERE  exitDate IS NOT NULL
+				      AND (
+				           TIMESTAMPDIFF(
+				             HOUR,
+				             TIMESTAMP(entryDate, entryHour),
+				             TIMESTAMP(exitDate, exitHour)
+				           ) > 8
+				         OR (
+				             wasExtended = FALSE
+				             AND TIMESTAMPDIFF(
+				                   HOUR,
+				                   TIMESTAMP(entryDate, entryHour),
+				                   TIMESTAMP(exitDate, exitHour)
+				                ) > 4
+				         )
+				      )
+				    GROUP BY subscriberCode
+				) AS l USING (subscriberCode)
+				ORDER BY s.subscriberCode;
+				""";
 
-	    List<Object[]> result = new ArrayList<>();
+		List<Object[]> result = new ArrayList<>();
 
-	    try (PreparedStatement ps = conn.prepareStatement(sql);
-	         ResultSet rs = ps.executeQuery()) {
+		try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-	        while (rs.next()) {
-	            Subscriber sub = new Subscriber(
-	                rs.getInt("subscriberCode"),
-	                rs.getString("userId"),
-	                rs.getString("firstName"),
-	                rs.getString("lastName"),
-	                rs.getString("phoneNumber"),
-	                rs.getString("email"),
-	                rs.getString("username"),
-	                rs.getString("tagId")
-	            );
+			while (rs.next()) {
+				Subscriber sub = new Subscriber(rs.getInt("subscriberCode"), rs.getString("userId"),
+						rs.getString("firstName"), rs.getString("lastName"), rs.getString("phoneNumber"),
+						rs.getString("email"), rs.getString("username"), rs.getString("tagId"));
 
-	            int lateCount = rs.getInt("late_count");
-	            result.add(new Object[] { sub, lateCount });
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace(); // replace with proper logging if required
-	    }
-	    return result;
+				int lateCount = rs.getInt("late_count");
+				result.add(new Object[] { sub, lateCount });
+			}
+		} catch (SQLException e) {
+			e.printStackTrace(); // replace with proper logging if required
+		}
+		return result;
 	}
-	
+
 	/**
-	 * Retrieves all active (open) parking events from the database.
-	 * Active events are those that have no recorded exit date/time.
+	 * Retrieves all active (open) parking events from the database. Active events
+	 * are those that have no recorded exit date/time.
 	 *
 	 * @return a list of ParkingEvent objects
 	 */
 	public List<ParkingEvent> getActiveParkingEvents() {
-	    List<ParkingEvent> list = new ArrayList<>();
+		List<ParkingEvent> list = new ArrayList<>();
 
-	    String sql = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND exitHour IS NULL";
+		String sql = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND exitHour IS NULL";
 
-	    try (PreparedStatement ps = conn.prepareStatement(sql);
-	         ResultSet rs = ps.executeQuery()) {
+		try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-	        while (rs.next()) {
-	            ParkingEvent event = new ParkingEvent();
+			while (rs.next()) {
+				ParkingEvent event = new ParkingEvent();
 
-	            event.setEventId(rs.getInt("eventId"));
-	            event.setSubscriberCode(rs.getInt("subscriberCode"));
-	            event.setParkingSpace(rs.getInt("parking_space"));
-	            event.setEntryDate(rs.getDate("entryDate").toLocalDate());
-	            event.setEntryTime(rs.getTime("entryHour").toLocalTime());
-	            event.setWasExtended(rs.getBoolean("wasExtended"));
-	            event.setLot(rs.getString("nameParkingLot"));
-	            event.setVehicleID(rs.getString("vehicleId"));
-	            event.setParkingCode(rs.getString("parkingCode"));
+				event.setEventId(rs.getInt("eventId"));
+				event.setSubscriberCode(rs.getInt("subscriberCode"));
+				event.setParkingSpace(rs.getInt("parking_space"));
+				event.setEntryDate(rs.getDate("entryDate").toLocalDate());
+				event.setEntryTime(rs.getTime("entryHour").toLocalTime());
+				event.setWasExtended(rs.getBoolean("wasExtended"));
+				event.setLot(rs.getString("nameParkingLot"));
+				event.setVehicleID(rs.getString("vehicleId"));
+				event.setParkingCode(rs.getString("parkingCode"));
 
-	            list.add(event);
-	        }
+				list.add(event);
+			}
 
-	    } catch (SQLException e) {
-	        System.err.println("Error retrieving active parking events: " + e.getMessage());
-	    }
+		} catch (SQLException e) {
+			System.err.println("Error retrieving active parking events: " + e.getMessage());
+		}
 
-	    return list;
+		return list;
 	}
-	
-    /**
-     * Retrieves the active parking event for a given subscriber.
-     * A parking event is considered active if it has no recorded exit time.
-     *
-     * @param subscriber the subscriber whose active parking event is requested
-     * @return the active ParkingEvent if found, or null if not found or error occurs
-     */
+
+	/**
+	 * Retrieves the active parking event for a given subscriber. A parking event is
+	 * considered active if it has no recorded exit time.
+	 *
+	 * @param subscriber the subscriber whose active parking event is requested
+	 * @return the active ParkingEvent if found, or null if not found or error
+	 *         occurs
+	 */
 	public ParkingEvent getActiveParkingEvent(Subscriber subscriber) {
-		String query="SELECT * FROM parkingEvent WHERE subscriberCode=? AND exitHour IS NULL";
+		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=? AND exitHour IS NULL";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriber.getSubscriberCode());
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				ParkingEvent newParkingEvent=new ParkingEvent();
+				ParkingEvent newParkingEvent = new ParkingEvent();
 				newParkingEvent.setEventId(rs.getInt("eventId"));
 				newParkingEvent.setSubscriberCode(rs.getInt("subscriberCode"));
 				newParkingEvent.setParkingSpace(rs.getInt("parking_space"));
@@ -1141,75 +1116,69 @@ public class DBController {
 				return newParkingEvent;
 			}
 		} catch (SQLException e) {
-			System.out.println("Error finding active parking info: "+e.getMessage());
+			System.out.println("Error finding active parking info: " + e.getMessage());
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Marks the parking session as extended for the given parking code.
-	 * Allows only a single extension per parking event.
+	 * Marks the parking session as extended for the given parking code. Allows only
+	 * a single extension per parking event.
 	 *
 	 * @param parkingCode the parking code identifying the active parking session
 	 * @return a ServerResponse indicating success or a message if already extended
 	 */
 	public ServerResponse extendParkingSession(int parkingCode) {
-	    final String sql =
-	        "UPDATE bpark.parkingEvent " +
-	        "SET wasExtended = TRUE " +
-	        "WHERE parkingCode = ? " +
-	        "AND exitDate IS NULL AND exitHour IS NULL " +
-	        "AND wasExtended = FALSE";
+		final String sql = "UPDATE bpark.parkingEvent " + "SET wasExtended = TRUE " + "WHERE parkingCode = ? "
+				+ "AND exitDate IS NULL AND exitHour IS NULL " + "AND wasExtended = FALSE";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setInt(1, parkingCode);
-	        int rowsAffected = stmt.executeUpdate();
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, parkingCode);
+			int rowsAffected = stmt.executeUpdate();
 
-	        if (rowsAffected > 0) {
-	            return new ServerResponse(true, null, "Parking session extended successfully.");
-	        } else {
-	            return new ServerResponse(false, null, "This session has already been extended or is no longer active.");
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        return new ServerResponse(false, null, "Database error: " + e.getMessage());
-	    }
+			if (rowsAffected > 0) {
+				return new ServerResponse(true, null, "Parking session extended successfully.");
+			} else {
+				return new ServerResponse(false, null,
+						"This session has already been extended or is no longer active.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return new ServerResponse(false, null, "Database error: " + e.getMessage());
+		}
 	}
 
-	
 	/**
-	 * Returns the next available subscriber code (MAX + 1).
-	 * Starts from 1011 if table is empty.
+	 * Returns the next available subscriber code (MAX + 1). Starts from 1011 if
+	 * table is empty.
 	 */
 	public int getNextSubscriberCode() {
-	    String query = "SELECT MAX(subscriberCode) FROM bpark.subscriber";
-	    try (PreparedStatement stmt = conn.prepareStatement(query);
-	         ResultSet rs = stmt.executeQuery()) {
-	        if (rs.next()) {
-	            int currentMax = rs.getInt(1);
-	            return (currentMax == 0 ? 1011 : currentMax + 1);
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error generating subscriber code: " + e.getMessage());
-	    }
-	    return 1011; // Fallback starting code
+		String query = "SELECT MAX(subscriberCode) FROM bpark.subscriber";
+		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+			if (rs.next()) {
+				int currentMax = rs.getInt(1);
+				return (currentMax == 0 ? 1011 : currentMax + 1);
+			}
+		} catch (SQLException e) {
+			System.err.println("Error generating subscriber code: " + e.getMessage());
+		}
+		return 1011; // Fallback starting code
 	}
 
 	/**
 	 * Generates the next unique tag ID in the format TAG_XXX.
 	 */
 	public String generateNextTagId() {
-	    String query = "SELECT COUNT(*) FROM bpark.subscriber";
-	    try (PreparedStatement stmt = conn.prepareStatement(query);
-	         ResultSet rs = stmt.executeQuery()) {
-	        if (rs.next()) {
-	            int count = rs.getInt(1) + 1;
-	            return "TAG_" + String.format("%03d", count);
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error generating tag ID: " + e.getMessage());
-	    }
-	    return "TAG_999";
+		String query = "SELECT COUNT(*) FROM bpark.subscriber";
+		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+			if (rs.next()) {
+				int count = rs.getInt(1) + 1;
+				return "TAG_" + String.format("%03d", count);
+			}
+		} catch (SQLException e) {
+			System.err.println("Error generating tag ID: " + e.getMessage());
+		}
+		return "TAG_999";
 	}
 
 	/**
@@ -1219,61 +1188,62 @@ public class DBController {
 	 * @return true if insertion succeeded
 	 */
 	public boolean insertSubscriber(Subscriber s) {
-	    String sql = "INSERT INTO bpark.subscriber " +
-	                 "(subscriberCode, userId, firstName, lastName, phoneNumber, email, username, tagId) " +
-	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setInt(1, s.getSubscriberCode());
-	        stmt.setString(2, s.getUserId());
-	        stmt.setString(3, s.getFirstName());
-	        stmt.setString(4, s.getLastName());
-	        stmt.setString(5, s.getPhoneNum());
-	        stmt.setString(6, s.getEmail());
-	        stmt.setString(7, s.getUsername());
-	        stmt.setString(8, s.getTagId());
-	        return stmt.executeUpdate() == 1;
-	    } catch (SQLException e) {
-	        System.err.println("Error inserting subscriber: " + e.getMessage());
-	        return false;
-	    }
+		String sql = "INSERT INTO bpark.subscriber "
+				+ "(subscriberCode, userId, firstName, lastName, phoneNumber, email, username, tagId) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, s.getSubscriberCode());
+			stmt.setString(2, s.getUserId());
+			stmt.setString(3, s.getFirstName());
+			stmt.setString(4, s.getLastName());
+			stmt.setString(5, s.getPhoneNum());
+			stmt.setString(6, s.getEmail());
+			stmt.setString(7, s.getUsername());
+			stmt.setString(8, s.getTagId());
+			return stmt.executeUpdate() == 1;
+		} catch (SQLException e) {
+			System.err.println("Error inserting subscriber: " + e.getMessage());
+			return false;
+		}
 	}
 
-    /**
-     * Inserts a new user into the database.
-     *
-     * @param user the user object containing username, password, and role
-     * @return true if the user was successfully inserted, false otherwise
-     */
-	public boolean insertUser(User user) {
-	    String sql = "INSERT INTO bpark.user (username, password, role) VALUES (?, ?, ?)";
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, user.getUsername());
-	        stmt.setString(2, user.getPassword());
-	        stmt.setString(3, user.getRole().toString());
-	        return stmt.executeUpdate() == 1;
-	    } catch (SQLException e) {
-	        return false;
-	    }
-	}
-	
 	/**
-	 * Checks whether the provided email is already associated with an existing subscriber.
+	 * Inserts a new user into the database.
+	 *
+	 * @param user the user object containing username, password, and role
+	 * @return true if the user was successfully inserted, false otherwise
+	 */
+	public boolean insertUser(User user) {
+		String sql = "INSERT INTO bpark.user (username, password, role) VALUES (?, ?, ?)";
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, user.getUsername());
+			stmt.setString(2, user.getPassword());
+			stmt.setString(3, user.getRole().toString());
+			return stmt.executeUpdate() == 1;
+		} catch (SQLException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks whether the provided email is already associated with an existing
+	 * subscriber.
 	 *
 	 * @param email the email to check
 	 * @return true if the email exists, false otherwise
 	 */
 	public boolean emailExists(String email) {
-	    String query = "SELECT 1 FROM bpark.subscriber WHERE email = ? LIMIT 1";
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setString(1, email);
-	        ResultSet rs = stmt.executeQuery();
-	        return rs.next(); // true if exists
-	    } catch (SQLException e) {
-	        System.err.println("Error checking email existence: " + e.getMessage());
-	        return false;
-	    }
+		String query = "SELECT 1 FROM bpark.subscriber WHERE email = ? LIMIT 1";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, email);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next(); // true if exists
+		} catch (SQLException e) {
+			System.err.println("Error checking email existence: " + e.getMessage());
+			return false;
+		}
 	}
-	
+
 	/**
 	 * Checks whether the provided username is already taken.
 	 *
@@ -1281,15 +1251,15 @@ public class DBController {
 	 * @return true if the username exists, false otherwise
 	 */
 	public boolean usernameExists(String username) {
-	    String query = "SELECT 1 FROM bpark.user WHERE username = ? LIMIT 1";
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setString(1, username);
-	        ResultSet rs = stmt.executeQuery();
-	        return rs.next(); // true if exists
-	    } catch (SQLException e) {
-	        System.err.println("Error checking username existence: " + e.getMessage());
-	        return false;
-	    }
+		String query = "SELECT 1 FROM bpark.user WHERE username = ? LIMIT 1";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, username);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next(); // true if exists
+		} catch (SQLException e) {
+			System.err.println("Error checking username existence: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -1299,18 +1269,18 @@ public class DBController {
 	 * @return true if the phone exists, false otherwise
 	 */
 	public boolean phoneExists(String phone) {
-	    String query = "SELECT 1 FROM bpark.subscriber WHERE phoneNumber = ? LIMIT 1";
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setString(1, phone);
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            return rs.next(); // returns true if a row was found
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error checking if phone exists: " + e.getMessage());
-	        return false;
-	    }
+		String query = "SELECT 1 FROM bpark.subscriber WHERE phoneNumber = ? LIMIT 1";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, phone);
+			try (ResultSet rs = stmt.executeQuery()) {
+				return rs.next(); // returns true if a row was found
+			}
+		} catch (SQLException e) {
+			System.err.println("Error checking if phone exists: " + e.getMessage());
+			return false;
+		}
 	}
-	
+
 	/**
 	 * Checks if a user ID (Teudat Zehut) already exists in the subscriber table.
 	 *
@@ -1318,18 +1288,18 @@ public class DBController {
 	 * @return true if the ID exists, false otherwise
 	 */
 	public boolean idExists(String userId) {
-	    String query = "SELECT 1 FROM bpark.subscriber WHERE userId = ? LIMIT 1";
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setString(1, userId);
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            return rs.next(); // true if a row exists
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error checking if ID exists: " + e.getMessage());
-	        return false;
-	    }
+		String query = "SELECT 1 FROM bpark.subscriber WHERE userId = ? LIMIT 1";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, userId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				return rs.next(); // true if a row exists
+			}
+		} catch (SQLException e) {
+			System.err.println("Error checking if ID exists: " + e.getMessage());
+			return false;
+		}
 	}
-	
+
 	/**
 	 * Retrieves all active (open) parking events that late for retrieve car and
 	 * doesn't receive mail from the database. Active events are those that have no
@@ -1338,14 +1308,14 @@ public class DBController {
 	 * @return a list of ParkingEvent objects
 	 */
 	public ArrayList<ParkingEvent> getActiveParkingEventsThatLateAndDoesntReceiveMail() {
-		
+
 		ArrayList<ParkingEvent> list = new ArrayList<>();
 		String query = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND sendMsgForLating=FALSE";
-		
+
 		try (PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				ParkingEvent event = new ParkingEvent();
-				
+
 				event.setEventId(rs.getInt("eventId"));
 				event.setSubscriberCode(rs.getInt("subscriberCode"));
 				event.setParkingSpace(rs.getInt("parking_space"));
@@ -1366,7 +1336,7 @@ public class DBController {
 				event.setVehicleID(rs.getString("vehicleId"));
 				event.setParkingCode(rs.getString("parkingCode"));
 				list.add(event);
-				
+
 			}
 			return list;
 		} catch (SQLException e) {
@@ -1377,12 +1347,12 @@ public class DBController {
 		return list;
 	}
 
-    /**
-     * Marks a subscriber as having been notified for being late.
-     * This sets the 'sendMsgForLating' flag to true for their active parking event.
-     *
-     * @param subscriberCode the code identifying the subscriber
-     */
+	/**
+	 * Marks a subscriber as having been notified for being late. This sets the
+	 * 'sendMsgForLating' flag to true for their active parking event.
+	 *
+	 * @param subscriberCode the code identifying the subscriber
+	 */
 	public void markSendMail(int subscriberCode) {
 		String query = "UPDATE parkingEvent SET sendMsgForLating=TRUE WHERE subscriberCode=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1393,29 +1363,27 @@ public class DBController {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Returns the total number of parking spots in the lot.
 	 *
 	 * @return total number of parkingSpaces
 	 */
 	public int getTotalSpots() {
-	    final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces";
+		final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql);
-	         ResultSet rs = stmt.executeQuery()) {
+		try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
-	        if (rs.next()) {
-	            return rs.getInt(1);
-	        }
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return 0;
+		return 0;
 	}
-
 
 	/**
 	 * Returns the number of currently occupied parking spots.
@@ -1423,20 +1391,87 @@ public class DBController {
 	 * @return count of spots where is_occupied = TRUE
 	 */
 	public int getOccupiedSpots() {
-	    final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces WHERE is_occupied = TRUE";
+		final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces WHERE is_occupied = TRUE";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql);
-	         ResultSet rs = stmt.executeQuery()) {
+		try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
-	        if (rs.next()) {
-	            return rs.getInt(1);
-	        }
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return 0;
+		return 0;
+	}
+
+	/**
+	 * get all the data that we need to save on parking report.
+	 * @param date
+	 * @return parking report
+	 */
+	private ParkingReport getDateForParkingReport(Date date) {
+		String query = "SELECT * FROM `bpark.parkingEvent` WHERE YEAR(entry_time)=? AND MONTH(entry_time)=?";
+		LocalDate local = date.toLocalDate();
+		int year = local.getYear();
+		int month = local.getMonthValue();
+		int totalExtends = 0;
+		int totalEntries = 0;
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, year);
+			stmt.setInt(2, month);
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				totalEntries++;
+				if (rs.getBoolean("wasExtended")) {
+					totalExtends++;
+				}
+			}
+			return new ParkingReport(totalEntries, totalExtends);
+		} catch (SQLException e) {
+			System.out.println("Error get data for parking report: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * create new parking report for the last month.
+	 * @param date
+	 */
+	public void createParkingReport(Date date) {
+		ParkingReport parkingReport=getDateForParkingReport(date);
+		String query="INSERT INTO bpark.parkingReport(dateOfParkingReport, totalEntries, totalExtends) VALUES (?, ?, ?);";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setDate(1, date);
+			stmt.setInt(2, parkingReport.getTotalEntries());
+			stmt.setInt(3, parkingReport.getTotalExtends());
+			stmt.executeUpdate();
+			System.out.println("Parking reoprt created!");
+		} catch (SQLException e) {
+			System.out.println("Error creating parking report: "+ e.getMessage());
+			e.printStackTrace();
+		}	
 	}
 	
+	/**
+	 * get the data from parking report schema of date that manager asked for.
+	 * @param date
+	 * @return parking report 
+	 */
+	public ParkingReport getParkingReport(Date date) {
+		String query="SELECT * FROM bpark.parkingReport WHERE dateOfParkingReport=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setDate(1, date);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				return new ParkingReport(rs.getInt("totalEntries"), rs.getInt("totalExtends"));
+			}
+		} catch (SQLException e) {
+			System.out.println("Error get parking report: "+ e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
