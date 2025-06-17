@@ -26,18 +26,15 @@
               style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;"
               BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="btnCheckAvailability" mnemonicParsing="false"
+                <Button fx:id="btnCheckAvailability"
                         onAction="#handleCheckAvailability"
                         prefHeight="44.0" prefWidth="209.0"
                         text="Check Availability"/>
-                <AnchorPane prefHeight="332.0" prefWidth="199.0">
-                    <children>
-                        <Button fx:id="btnExit" layoutY="293.0" mnemonicParsing="false"
-                                onAction="#handleExitClick"
-                                prefHeight="40.0" prefWidth="199.0"
-                                text="Exit"/>
-                    </children>
-                </AnchorPane>
+                <Pane VBox.vgrow="ALWAYS"/>
+                <Button fx:id="btnExit"
+                        onAction="#handleExitClick"
+                        prefHeight="40.0" prefWidth="199.0"
+                        text="Exit"/>
             </children>
         </VBox>
     </left>
@@ -48,3 +45,4 @@
     </center>
 
 </BorderPane>
+

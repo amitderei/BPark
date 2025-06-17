@@ -36,9 +36,9 @@ public class MainController implements ClientAware {
 	@FXML
 	public void handleGuest() {
 		UiUtils.loadScreen(guestBtn,
-				"/client/GuestMainScreen.fxml",
+				"/client/GuestMainLayout.fxml",
 				"BPARK – Guest",
-				client);               // client may be null for guest flow
+				client);               
 	}
 
 	/** Opens the login screen. */

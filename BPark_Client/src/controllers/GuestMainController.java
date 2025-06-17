@@ -1,19 +1,21 @@
 package controllers;
 
+import client.ClientController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 /**
- * Controller for the guest main screen.
- * Shows a greeting and keeps the live counter of free spots.
+ * Main screen for guest users – shows greeting and live free-spots counter.
  */
-public class GuestMainController {
+public class GuestMainController implements ClientAware {
 
     @FXML private Label welcomeLabel;
-    @FXML private Label availabilityLabel;   // ← תוודא שיש label כזה ב-FXML
+    @FXML private Label availabilityLabel;
 
-    /** Initializes the screen with a welcome message. */
+    /** reference to the network client (may be null if not injected). */
+    private ClientController client;
+
     @FXML
     public void initialize() {
         if (welcomeLabel != null) {
@@ -21,11 +23,17 @@ public class GuestMainController {
         }
     }
 
-    /**
-     * Updates the “Available spots” label.
-     *
-     * @param freeSpots current number of vacant parking spaces
-     */
+    /** Injects the client instance (called by layout loader). */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+        // register back so ClientController can push updates easily
+        if (client != null) {
+            client.setGuestMainController(this);
+        }
+    }
+
+    /** Updates the “Available spots” label. */
     public void updateAvailableSpots(int freeSpots) {
         Platform.runLater(() -> {
             if (availabilityLabel != null) {
