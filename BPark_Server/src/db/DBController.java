@@ -380,29 +380,7 @@ public class DBController {
 		return parkingLotArrayList;
 	}
 
-	/**
-	 * Counts the number of available (unoccupied) parking spots in a specific
-	 * parking lot. Currently supports "Braude" lot.
-	 *
-	 * @return number of available spots, or -1 if an error occurred
-	 */
-	public int countAvailableSpots() {
-		String query = "SELECT totalSpots, occupiedSpots FROM bpark.parkingLot WHERE NameParkingLot = 'Braude'";
 
-		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-
-			if (rs.next()) {
-				int total = rs.getInt("totalSpots");
-				int occupied = rs.getInt("occupiedSpots");
-				return total - occupied;
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Error counting available spots: " + e.getMessage());
-		}
-
-		return -1;
-	}
 
 	/**
 	 * 

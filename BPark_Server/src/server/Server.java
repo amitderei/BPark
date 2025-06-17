@@ -231,15 +231,6 @@ public class Server extends AbstractServer {
 
 
 
-
-				// Check parking availability: ["CheckParkingAvailability"]. ** Author - Ravid
-				// **
-				else if (data.length == 1 && "CheckParkingAvailability".equals(data[0])) {
-					int count = db.countAvailableSpots();
-					client.sendToClient(new ServerResponse(true, count, "Available spots: " + count));
-					return;
-				}
-
 				else if (data.length == 3 && "checkAvailability".equals(data[0])) {
 					System.out.println("checkAvailability-server");
 					boolean possible = db.parkingSpaceCheckingForNewOrder((Date) data[1], (Time) data[2]);

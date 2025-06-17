@@ -1,87 +1,36 @@
 package controllers;
 
-
-import javafx.scene.control.Label;
-import client.ClientController;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.util.Duration;
-import ui.UiUtils;
+import javafx.scene.control.Label;
 
 /**
  * Controller for the guest main screen.
- * Allows basic guest functionality like viewing availability,
- * and returning to the entry screen.
+ * Shows a greeting and keeps the live counter of free spots.
  */
-public class GuestMainController implements ClientAware {
+public class GuestMainController {
 
-    /** Reference to the client controller (may be null for guests) */
-    private ClientController client;
+    @FXML private Label welcomeLabel;
+    @FXML private Label availabilityLabel;   // ← תוודא שיש label כזה ב-FXML
 
-    /** Button to return to the main welcome screen */
+    /** Initializes the screen with a welcome message. */
     @FXML
-    private Button btnBack;
-    
-  //Author: Ravid changes for autmoaticly availability
-  	@FXML
-  	private Label availableSpotsLabel;
-
-  	private Timeline updateTimeline;
-
-  	
-  	private void startAutoUpdate() {
-  		updateTimeline = new Timeline(new KeyFrame(Duration.seconds(10), e -> client.requestAvailableSpots()));
-  		updateTimeline.setCycleCount(Timeline.INDEFINITE); //run in infinity loop
-  		updateTimeline.play(); //start timer
-  	}
-  	
-  	//server answer and this is update the label
-  	public void updateAvailableSpots(int count) {
-  	    availableSpotsLabel.setText("Free spots: " + count);
-  	}
-
-    /**
-     * Injects the active ClientController (even for guests, may be needed for back navigation).
-     *
-     * @param client the client instance (may be null)
-     */
-    @Override
-    public void setClient(ClientController client) {
-        this.client = client;
-        startAutoUpdate();
-    }
-
-    /**
-     * Triggered when the "Home" button is clicked.
-     * This is already the home screen for guests.
-     */
-    @FXML
-    private void handleHomeClick() {
-        System.out.println("Home button clicked (guest already on home screen).");
-    }
-
-    /**
-     * Triggered when the "Back" button is clicked.
-     * Returns to the user type selection screen.
-     */
-    @FXML
-    private void handleBackClick() {
-    	if (updateTimeline != null) {
-    		updateTimeline.stop();
+    public void initialize() {
+        if (welcomeLabel != null) {
+            welcomeLabel.setText("Welcome, Guest!");
         }
-        UiUtils.loadScreen(btnBack,
-                           "/client/MainScreen.fxml",
-                           "Select User Type",
-                           client); 
     }
 
     /**
-     * Triggered when the "Check Parking Availability" button is clicked.
+     * Updates the “Available spots” label.
+     *
+     * @param freeSpots current number of vacant parking spaces
      */
-    @FXML
-    private void handleCheckAvailability() {
-        System.out.println("Checking parking availability...");
+    public void updateAvailableSpots(int freeSpots) {
+        Platform.runLater(() -> {
+            if (availabilityLabel != null) {
+                availabilityLabel.setText("Available spots: " + freeSpots);
+            }
+        });
     }
 }
