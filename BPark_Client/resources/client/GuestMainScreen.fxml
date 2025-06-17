@@ -15,16 +15,9 @@
             <padding>
                 <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
-
-            <!-- Welcome -->
             <Label fx:id="welcomeLabel"
                    text="Welcome, Guest!"
                    style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-
-            <!-- Dynamic availability -->
-            <Label fx:id="availabilityLabel"
-                   text="Available spots: —"
-                   style="-fx-font-size: 16px;"/>
         </VBox>
     </center>
 
