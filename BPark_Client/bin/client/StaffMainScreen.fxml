@@ -9,7 +9,6 @@
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.StaffMainController">
-
     <center>
         <VBox alignment="CENTER" spacing="15">
             <padding>
@@ -18,5 +17,4 @@
             <Label fx:id="welcomeLabel" text="Welcome, Staff!" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
         </VBox>
     </center>
-
 </BorderPane>

@@ -12,8 +12,6 @@
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.TerminalMainLayoutController">
-
-    <!-- Top toolbar -->
     <top>
         <ToolBar>
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
@@ -21,8 +19,6 @@
             <Button fx:id="btnBack" onAction="#handleBackClick" text="Back" />
         </ToolBar>
     </top>
-
-    <!-- Side navigation -->
     <left>
         <VBox prefHeight="453.0" prefWidth="200.0"
               style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;"
@@ -33,21 +29,17 @@
                         onAction="#handleGoToDelivery"
                         prefHeight="44.0" prefWidth="209.0"
                         text="Submit Vehicle" />
-
                 <Button fx:id="btnRetrieveVehicle"
                         mnemonicParsing="false"
                         onAction="#handleRetrieveVehicle"
                         prefHeight="44.0" prefWidth="209.0"
                         text="Retrieve Vehicle" />
-
                 <Button fx:id="btnCheckAvailability"
                         mnemonicParsing="false"
                         onAction="#handleCheckAvailability"
                         prefHeight="44.0" prefWidth="209.0"
                         text="Check Availability Spots" />
-
-                <Pane VBox.vgrow="ALWAYS" /> <!-- Spacer -->
-
+                <Pane VBox.vgrow="ALWAYS" />
                 <Button fx:id="btnExit"
                         mnemonicParsing="false"
                         onAction="#handleExitClick"
@@ -56,13 +48,9 @@
             </children>
         </VBox>
     </left>
-
-    <!-- Dynamic content area -->
     <center>
         <AnchorPane fx:id="center"
                     prefHeight="453.0" prefWidth="600.0"
                     BorderPane.alignment="CENTER" />
     </center>
-
 </BorderPane>
-

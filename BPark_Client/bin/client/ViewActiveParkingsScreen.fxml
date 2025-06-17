@@ -6,13 +6,11 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ViewActiveParkingsController"
             prefWidth="600.0" prefHeight="453.0">
-
     <top>
         <Label text="Active Parkings"
                BorderPane.alignment="CENTER"
                styleClass="headline" />
     </top>
-
     <center>
         <TableView fx:id="parkingTable"
                    prefWidth="580.0" prefHeight="400.0">

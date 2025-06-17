@@ -6,17 +6,14 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ViewSubscribersInfoController"
             prefWidth="600.0" prefHeight="453.0">
-
     <top>
         <Label text="Subscribers List"
                BorderPane.alignment="CENTER"
                styleClass="headline"/>
     </top>
-
     <center>
         <TableView fx:id="subscriberTable"
                    prefWidth="580.0" prefHeight="410.0">
-
             <columns>
                 <TableColumn fx:id="colCode"     text="Code"      prefWidth="50.0"/>
                 <TableColumn fx:id="colId"       text="ID"        prefWidth="75.0"/>

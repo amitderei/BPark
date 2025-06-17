@@ -13,17 +13,14 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.OrderViewController">
-
     <top>
-		<HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10">
-		    <Label fx:id="connectionLabel" text="Checking connection..." />
-		    <Pane HBox.hgrow="ALWAYS" />
-		    <TextField fx:id="ipTextField" promptText="Enter server IP" />
-		    <Button fx:id="connectButton" onAction="#connectToServer" text="Connect to Server" />
-		</HBox>
-
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10">
+            <Label fx:id="connectionLabel" text="Checking connection..." />
+            <Pane HBox.hgrow="ALWAYS" />
+            <TextField fx:id="ipTextField" promptText="Enter server IP" />
+            <Button fx:id="connectButton" onAction="#connectToServer" text="Connect to Server" />
+        </HBox>
     </top>
-
     <center>
         <TableView fx:id="orderTable">
             <columns>
@@ -36,7 +33,6 @@
             </columns>
         </TableView>
     </center>
-
     <bottom>
         <VBox spacing="5" style="-fx-padding: 10">
             <HBox spacing="5">
@@ -45,12 +41,11 @@
                 <TextField fx:id="updateValue" promptText="New Value" />
                 <DatePicker fx:id="updateDatePicker" managed="false" promptText="New Date" visible="false" />
                 <Button fx:id="updateButton" disable="true" onAction="#updateOrder" text="Update" />
-            <Button fx:id="searchOrder" disable="true" onAction="#loadSpecificOrder" text="Search Order" />
+                <Button fx:id="searchOrder" disable="true" onAction="#loadSpecificOrder" text="Search Order" />
                 <Button fx:id="loadButton" disable="true" onAction="#loadOrders" text="Load All Orders" />
             </HBox>
             <Label fx:id="statusLabel" style="-fx-text-fill: green;" text="" />
             <Button fx:id="exitButton" onAction="#exitApplication" text="Exit" />
         </VBox>
     </bottom>
-
 </BorderPane>

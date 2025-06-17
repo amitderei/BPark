@@ -6,18 +6,14 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ExtendParkingController"
             prefWidth="600.0" prefHeight="453.0">
-
     <VBox alignment="CENTER" spacing="20" layoutX="50.0" layoutY="40.0" prefWidth="500.0">
         <Label text="Extend Parking Time"
                style="-fx-font-size: 22px; -fx-font-weight: bold;" />
-
         <Label text="Enter your parking code:" style="-fx-font-size: 14px;" />
         <TextField fx:id="txtParkingCode" promptText="e.g. 800101"
                    style="-fx-font-size: 14px; -fx-pref-width: 250px;" />
-
         <Button fx:id="btnExtend" text="Extend by 4 hours" onAction="#handleExtendClick"
                 style="-fx-font-size: 14px; -fx-padding: 6px 20px;" />
-
         <Label fx:id="lblStatus" text="" wrapText="true"
                style="-fx-text-fill: #2b5797; -fx-font-size: 13px;" />
     </VBox>

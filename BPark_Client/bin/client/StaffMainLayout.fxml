@@ -12,8 +12,6 @@
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.StaffMainLayoutController">
-
-    <!-- Toolbar -->
     <top>
         <ToolBar>
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
@@ -21,8 +19,6 @@
             <Button fx:id="btnLogout" onAction="#handleLogoutClick" text="🔓 Logout" />
         </ToolBar>
     </top>
-
-    <!-- Side navigation -->
     <left>
         <VBox prefHeight="453.0" prefWidth="200.0"
               style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;"
@@ -33,33 +29,27 @@
                         onAction="#handleRegisterUsers"
                         prefHeight="44.0" prefWidth="209.0"
                         text="Register Users" />
-
                 <Button fx:id="btnViewSubscriberInfo"
                         mnemonicParsing="false"
                         onAction="#handleViewSubscriberInfo"
                         prefHeight="44.0" prefWidth="209.0"
                         text="View Subscriber Info" />
-
                 <Button fx:id="btnViewActiveParkings"
                         mnemonicParsing="false"
                         onAction="#handleViewActiveParkings"
                         prefHeight="44.0" prefWidth="209.0"
                         text="View Active Parkings" />
-
                 <Button fx:id="btnViewParkingReport"
                         mnemonicParsing="false"
                         onAction="#handleViewParkingReport"
                         prefHeight="44.0" prefWidth="209.0"
                         text="View Parking Report" />
-
                 <Button fx:id="btnViewSubscriberReport"
                         mnemonicParsing="false"
                         onAction="#handleViewSubscriberReport"
                         prefHeight="44.0" prefWidth="209.0"
                         text="View Subscriber Report" />
-
-                <Pane VBox.vgrow="ALWAYS" /> <!-- Spacer -->
-
+                <Pane VBox.vgrow="ALWAYS" />
                 <Button fx:id="btnExit"
                         mnemonicParsing="false"
                         onAction="#handleExitClick"
@@ -68,12 +58,9 @@
             </children>
         </VBox>
     </left>
-
-    <!-- Dynamic content area -->
     <center>
         <AnchorPane fx:id="center"
                     prefHeight="453.0" prefWidth="600.0"
                     BorderPane.alignment="CENTER" />
     </center>
 </BorderPane>
-
