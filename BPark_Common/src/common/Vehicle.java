@@ -1,103 +1,64 @@
 package common;
 
 /**
- * Represents a vehicle in the system.
- * Each vehicle has a unique ID, an owner (subscriber), and a flag indicating whether it is currently parked.
+ * Tiny data-holder for a car that can enter BPARK.
+ * A vehicle is identified by a plate / RFID string.  
+ * We also keep who owns the car (a Subscriber) and
+ * whether the car is currently inside a lot.
+ *
  */
 public class Vehicle {
 
-    private String vehicleId;
-
-    // Uncomment this once the Subscriber class is implemented
-    /* private Subscriber owner; */
-
-    private boolean isParking;
+    private String      vehicleId;   // licence plate or RFID
+    private Subscriber  owner;       // the subscriber that registered the car
+    private boolean     parked;      // true ⇒ car is in the lot
 
     /**
-     * Constructor to initialize a vehicle with its ID and parking status.
+     * Full constructor – sets all fields.
      *
-     * @param vehicleId The unique ID of the vehicle.
-     * @param isParking True if the vehicle is currently parked, false otherwise.
-     *
-     * // @param owner The subscriber who owns the vehicle. (Enable once Subscriber class is ready)
+     * @param vehicleId unique vehicle identifier
+     * @param owner     subscriber that owns the vehicle
+     * @param parked    current parking state (true = inside)
      */
-    public Vehicle(String vehicleId, /* Subscriber owner, */ boolean isParking) {
+    public Vehicle(String vehicleId, Subscriber owner, boolean parked) {
         this.vehicleId = vehicleId;
-        // this.owner = owner; // Uncomment when ready
-        this.isParking = isParking;
+        this.owner     = owner;
+        this.parked    = parked;
     }
 
     /**
-     * Gets the ID of the vehicle.
+     * Convenience constructor when the owner is not yet known.
      *
-     * @return The vehicle's unique ID.
+     * @param vehicleId unique vehicle identifier
+     * @param parked    current parking state (true = inside)
      */
-    public String getVehicleId() {
-        return vehicleId;
+    public Vehicle(String vehicleId, boolean parked) {
+        this(vehicleId, null, parked);
     }
 
-    /**
-     * Sets the ID of the vehicle.
-     *
-     * @param vehicleId The vehicle's new ID.
-     */
-    public void setVehicleId(String vehicleId) {
-        this.vehicleId = vehicleId;
-    }
+    /* ───────── getters / setters ───────── */
 
-    // Uncomment these methods after implementing the Subscriber class
+    public String getVehicleId()          { return vehicleId; }
+    public void   setVehicleId(String id) { this.vehicleId = id; }
 
-    /*
-    /**
-     * Gets the owner (subscriber) of the vehicle.
-     *
-     * @return The subscriber who owns the vehicle.
-     */
-    /*
-    public Subscriber getOwner() {
-        return owner;
-    }
-    */
+    public Subscriber getOwner()                { return owner; }
+    public void       setOwner(Subscriber s)    { this.owner = s; }
 
-    /*
-    /**
-     * Sets the owner (subscriber) of the vehicle.
-     *
-     * @param owner The subscriber to set as the owner.
-     */
-    /*
-    public void setOwner(Subscriber owner) {
-        this.owner = owner;
-    }
-    */
+    public boolean isParked()               { return parked; }
+    public void    setParked(boolean state) { this.parked = state; }
+
+    /* ───────── utility ───────── */
 
     /**
-     * Checks if the vehicle is currently parked.
+     * Simple one-line dump for logs / debugging.
      *
-     * @return True if parked, false otherwise.
-     */
-    public boolean isParking() {
-        return isParking;
-    }
-
-    /**
-     * Sets the vehicle's parking status.
-     *
-     * @param isParking True if the vehicle is parked, false otherwise.
-     */
-    public void setParking(boolean isParking) {
-        this.isParking = isParking;
-    }
-    
-    /**
-     * Returns a string representation of the Vehicle object.
-     * The format typically includes the vehicle ID and parking status.
-     * This method is useful for logging, debugging, or displaying the vehicle information.
-     *
-     * @return a string describing the vehicle.
+     * @return human-readable description
      */
     @Override
     public String toString() {
-        return "Vehicle [vehicleId=" + vehicleId + /*", owner=" *+ owner + */", + isParking=" + isParking + "]";
+        return "Vehicle{id='" + vehicleId + "', owner=" +
+               (owner != null ? owner.getSubscriberCode() : "none") +
+               ", parked=" + parked + '}';
     }
 }
+

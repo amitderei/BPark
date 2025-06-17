@@ -439,6 +439,12 @@ public class DBController {
 		return false;
 	}
 
+    /**
+     * Updates the given Order object with its order number based on matching fields in the database.
+     * The match is done using order date, arrival time, and parking space.
+     *
+     * @param newOrder the Order object to update with its order number
+     */
 	public void setOrderId(Order newOrder) {
 		String newQuery = "SELECT order_number FROM `order` WHERE order_date=? AND arrival_time=? AND parking_space=?";
 		try (PreparedStatement stmt = conn.prepareStatement(newQuery)) {
@@ -843,6 +849,13 @@ public class DBController {
 		}
 	}
 
+    /**
+     * Retrieves the full parking history of a given subscriber.
+     *
+     * @param subscriber the subscriber whose parking events are requested
+     * @return a list of ParkingEvent objects representing the subscriber's parking history,
+     *         or null if an error occurs during retrieval
+     */
 	public ArrayList<ParkingEvent> parkingHistoryOfSubscriber(Subscriber subscriber) {
 		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=?";
 		ArrayList<ParkingEvent> historyOfParking = new ArrayList<>();
@@ -969,7 +982,13 @@ public class DBController {
 		}
 	}
 	
-	
+    /**
+     * Retrieves the email and phone number of a subscriber by their subscriber code.
+     *
+     * @param subscriberCode the unique code of the subscriber
+     * @return a String array where index 0 is email and index 1 is phone number,
+     *         or null if the subscriber was not found or an error occurred
+     */
 	public String[] getEmailAndPhoneNumber(int subscriberCode) {
 		String query="SELECT phoneNumber, email FROM subscriber WHERE subscriberCode=?";
 		String[] arrayForPhoneAndEmail=new String[2];
@@ -1096,7 +1115,13 @@ public class DBController {
 	    return list;
 	}
 	
-	
+    /**
+     * Retrieves the active parking event for a given subscriber.
+     * A parking event is considered active if it has no recorded exit time.
+     *
+     * @param subscriber the subscriber whose active parking event is requested
+     * @return the active ParkingEvent if found, or null if not found or error occurs
+     */
 	public ParkingEvent getActiveParkingEvent(Subscriber subscriber) {
 		String query="SELECT * FROM parkingEvent WHERE subscriberCode=? AND exitHour IS NULL";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1213,6 +1238,12 @@ public class DBController {
 	    }
 	}
 
+    /**
+     * Inserts a new user into the database.
+     *
+     * @param user the user object containing username, password, and role
+     * @return true if the user was successfully inserted, false otherwise
+     */
 	public boolean insertUser(User user) {
 	    String sql = "INSERT INTO bpark.user (username, password, role) VALUES (?, ?, ?)";
 	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1348,6 +1379,12 @@ public class DBController {
 		return list;
 	}
 
+    /**
+     * Marks a subscriber as having been notified for being late.
+     * This sets the 'sendMsgForLating' flag to true for their active parking event.
+     *
+     * @param subscriberCode the code identifying the subscriber
+     */
 	public void markSendMail(int subscriberCode) {
 		String query = "UPDATE parkingEvent SET sendMsgForLating=TRUE WHERE subscriberCode=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1403,9 +1440,5 @@ public class DBController {
 
 	    return 0;
 	}
-
-
-
-	
 	
 }

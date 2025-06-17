@@ -7,89 +7,60 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Main entry point for launching the BPARK server application.
- * Loads the connection screen and starts the server on the specified port.
+ * Launches the BPARK server GUI and starts the socket server
+ * after the user enters a port.
  */
 public class ServerApp extends Application {
-	
+
     /**
-     * Launches the JavaFX application.
+     * Program entry-point.
      *
-     * @param args command-line arguments (not used)
+     * @param args command-line arguments (unused)
+     * @throws Exception if JavaFX fails to start
      */
     public static void main(String[] args) throws Exception {
-        launch(args);  // Starts JavaFX, calls start() below
+        launch(args);
     }
 
     /**
-     * Starts the server on the provided port.
-     * Converts the port from String to integer and starts listening for clients.
-     * Returns the server instance for further use in the controller.
+     * Creates a Server on the given port and starts listening.
      *
-     * @param p the port number as a String
-     * @return the started Server instance, or null if failed
+     * @param portStr the port number as text
+     * @return the running server, or null if startup failed
      */
-    public Server runServer(String p) {
+    public Server runServer(String portStr) {
         try {
-            // Convert the port input from String to integer
-            int port = Integer.parseInt(p);
-
-            // Create a Server instance with the specified port
+            int    port   = Integer.parseInt(portStr);
             Server server = new Server(port);
-
-            // Start listening for client connections
-            server.listen();
-
-            // Log server status to console
+            server.listen();                       // open socket
             System.out.println("Server started on port " + port);
-
-            // Return the created server instance
             return server;
-
-        } catch (NumberFormatException e) {
-            // Handle invalid port input (not a number)
-            System.out.println("ERROR - Invalid port number.");
-        } catch (Exception e) {
-            // Handle any other error that occurs when starting the server
-            System.out.println("Server error: " + e.getMessage());
+        } catch (NumberFormatException nfe) {
+            System.out.println("ERROR – port must be numeric.");
+        } catch (Exception ex) {
+            System.out.println("Server error: " + ex.getMessage());
         }
-
-        // Return null if failed to start the server
         return null;
     }
 
     /**
-     * Loads and displays the server connection screen (GUI).
-     * This allows the user to enter the port before starting the server.
+     * Loads the “Connect” window where the user types the port.
      *
-     * @param primaryStage the primary window of the JavaFX application
-     * @throws Exception if loading the FXML file fails
+     * @param stage primary JavaFX window
+     * @throws Exception when the FXML cannot be loaded
      */
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        // Load the connection screen layout from FXML
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/server/ConnectionToServerView.fxml"));
-        Parent root = loader.load();
+    public void start(Stage stage) throws Exception {
+        FXMLLoader fxml = new FXMLLoader(
+                getClass().getResource("/server/ConnectionToServerView.fxml"));
+        Parent root = fxml.load();
 
-        // Get the controller instance associated with the FXML
-        ServerController controller = loader.getController();
+        // give the controller a handle back to this class
+        ServerController ctrl = fxml.getController();
+        ctrl.setApp(this);
 
-        // Link this ServerApp instance to the controller
-        controller.setApp(this);
-        
-
-        // Create a scene using the loaded layout
-        Scene scene = new Scene(root);
-
-        // Set the window title
-        primaryStage.setTitle("BPark Server");
-
-        // Set the scene to the window
-        primaryStage.setScene(scene);
-
-        // Show the window to the user
-        primaryStage.show();
-        
-       
+        stage.setTitle("BPARK – Server");
+        stage.setScene(new Scene(root));
+        stage.show();
     }
 }
