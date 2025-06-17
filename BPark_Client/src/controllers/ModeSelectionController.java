@@ -1,82 +1,69 @@
 package controllers;
 
-
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
-import javafx.fxml.FXMLLoader;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import client.ClientApp;
 import client.ClientController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import ui.UiUtils;
 
 /**
- * Controller for BPARK's entry screen.
- * Lets the user choose between Application and Termial.
+ * First screen shown after network connection: lets the user decide
+ * whether to run the full application (guest / login flow) or open
+ * the simplified terminal interface used by parking-lot attendants.
  */
 public class ModeSelectionController implements ClientAware {
 
-	@FXML 
-	private Button btnApp;   // will open app fxml
-	@FXML 
-	private Button btnTerminal;   // will open terminal fxml
-	@FXML
-	private Button btnExit;
+    /* ---------- FXML buttons ---------- */
+    @FXML private Button btnApp;      // Opens full application mode
+    @FXML private Button btnTerminal; // Opens terminal (kiosk) mode
+    @FXML private Button btnExit;     // Exits the program
 
-	private ClientController client;
+    /* ---------- runtime ---------- */
+    private ClientController client;
 
-	/** Injects the active client and registers callback for login result. */
-	@Override
-	public void setClient(ClientController client) {
-		this.client = client;
-	}
+    /**
+     * Receives the shared ClientController so it can be forwarded
+     * to whichever mode the user selects.
+     *
+     * @param client active client instance (may be null before connection)
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 
+    /* =====================================================
+     *  Button actions
+     * ===================================================== */
 
-	/** Opens the Application screen. */
-	@FXML
-	public void handleApp() {
-		UiUtils.loadScreen(btnApp,
-				"/client/MainScreen.fxml",
-				"BPARK – Guest",
-				client);          
-	}
+    /** Loads the main GUI application (guest / login choice). */
+    @FXML
+    public void handleApp() {
+        UiUtils.loadScreen(btnApp,
+                "/client/MainScreen.fxml",
+                "BPARK – Welcome",
+                client);
+    }
 
-	/** Opens the Terminal screen. */
-	@FXML
-	public void handleTerminal() {
-		UiUtils.loadScreen(btnTerminal,
-				"/client/TerminalMainLayout.fxml",
-				"BPARK – Terminal",
-				client);  // No client needed for terminal mode
-	}
+    /** Loads the attendant terminal interface. */
+    @FXML
+    public void handleTerminal() {
+        UiUtils.loadScreen(btnTerminal,
+                "/client/TerminalMainLayout.fxml",
+                "BPARK – Terminal",
+                client);
+    }
 
-
-	
-	@FXML
-	private void handleExitClick() {
-
-		try {
-			if (client != null && client.isConnected()) {
-				client.sendToServer(new Object[] { "disconnect" });
-				client.closeConnection();
-				System.out.println("Client disconnected successfully.");
-			}
-		} catch (Exception e) {
-			System.err.println("Failed to disconnect client: " + e.getMessage());
-		}
-		Platform.exit();
-		System.exit(0);
-	}
-
+    /** Disconnects from server (if connected) and quits the program. */
+    @FXML
+    private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[] { "disconnect" });
+                client.closeConnection();
+            }
+        } catch (Exception ignored) { }
+        Platform.exit();
+        System.exit(0);
+    }
 }

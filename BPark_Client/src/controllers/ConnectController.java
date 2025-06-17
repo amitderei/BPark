@@ -13,146 +13,153 @@ import javafx.scene.control.TextField;
 import ui.UiUtils;
 
 /**
- * Controller for the Connect screen in the BPARK client application. Allows
- * users to input a server IP, connect to the server, and exit the application
- * safely.
+ * Controller for the “Connect to Server” screen.
+ * Lets the user type an IP, open a socket connection,
+ * and exit the application if needed.
  */
 public class ConnectController implements ClientAware {
 
-	/** Reference to the main JavaFX application instance */
-	private ClientApp app;
+    /** Main JavaFX application, used later for scene changes */
+    private ClientApp app;
 
-	/** Displays the connected hostname and IP address */
-	@FXML
-	private Label connectionLabel;
+    /** Shows local host name and IP once a connection is active */
+    @FXML private Label connectionLabel;
 
-	/** Label for the screen's main title */
-	@FXML
-	private Label connectHeadline;
+    @FXML private Label connectHeadline;
+    @FXML private Label statusLabel;
+    @FXML private Button connectButton;
+    @FXML private Button exitButton;
 
-	/** Label for displaying connection status messages */
-	@FXML
-	private Label statusLabel;
+    /** Text field where the user types or edits the server IP */
+    @FXML private TextField ipTextField;
 
-	/** Button that initiates the connection to the server */
-	@FXML
-	private Button connectButton;
+    /** Shared client instance that owns the socket connection */
+    private ClientController client;
 
-	/** Button that closes the application */
-	@FXML
-	private Button exitButton;
+    /**
+     * Stores the reference to the main JavaFX application.
+     *
+     * @param app main application instance
+     */
+    public void setApp(ClientApp app) {
+        this.app = app;
+    }
 
-	/** Text field for entering the server's IP address */
-	@FXML
-	private TextField ipTextField;
+    /**
+     * Supplies the active client instance and prints local
+     * host details on screen when possible.
+     *
+     * @param client an already-connected ClientController,
+     *               or null before a connection exists
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
 
-	/** Client controller for managing the connection to the server */
-	private ClientController client;
+        if (client == null) {
+            UiUtils.setStatus(statusLabel,
+                    "No connection to server. Please connect first.", false);
+            UiUtils.showAlert("BPARK - Message",
+                    "No connection to server. Please connect first.",
+                    Alert.AlertType.WARNING);
+            return;
+        }
 
-	/**
-	 * Injects the reference to the main JavaFX application.
-	 *
-	 * @param app the main client application instance
-	 */
-	public void setApp(ClientApp app) {
-		this.app = app;
-	}
+        try {
+            String host = InetAddress.getLocalHost().getHostName();
+            String ip   = InetAddress.getLocalHost().getHostAddress();
+            connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
+        } catch (Exception e) {
+            UiUtils.setStatus(statusLabel,
+                    "Could not retrieve network information.", false);
+            UiUtils.showAlert("BPARK - Message",
+                    "Could not retrieve network information: " + e.getMessage(),
+                    Alert.AlertType.WARNING);
+        }
+    }
 
-	/**
-	 * Sets the connected client instance and displays local host information. If
-	 * client is null, shows an appropriate warning to the user.
-	 *
-	 * @param client the connected ClientController instance
-	 */
-	@Override
-	public void setClient(ClientController client) {
-		this.client = client;
+    /**
+     * Triggered by the “Connect” button.
+     * Checks the IP field, attempts to open the socket,
+     * updates the UI, and loads the next screen on success.
+     *
+     * @throws IllegalStateException if the IP field is empty
+     */
+    @FXML
+    public void connectToServer() {
+        if (ipTextField == null || ipTextField.getText().trim().isEmpty()) {
+            UiUtils.setStatus(statusLabel,
+                    "Please enter the server IP address.", false);
+            UiUtils.showAlert("BPARK - Message",
+                    "Please enter the server IP address.",
+                    Alert.AlertType.WARNING);
+            return;
+        }
 
-		if (client == null) {
-			UiUtils.setStatus(statusLabel, "No connection to server. Please connect first.", false);
-			UiUtils.showAlert("BPARK - Message", "No connection to server. Please connect first.",
-					Alert.AlertType.WARNING);
-			return;
-		}
+        try {
+            String ip = ipTextField.getText().trim();
 
-		try {
-			String host = InetAddress.getLocalHost().getHostName();
-			String ip = InetAddress.getLocalHost().getHostAddress();
-			connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
-		} catch (Exception e) {
-			UiUtils.setStatus(statusLabel, "Could not retrieve network information.", false);
-			UiUtils.showAlert("BPARK - Message", "Could not retrieve network information: " + e.getMessage(),
-					Alert.AlertType.WARNING);
-		}
-	}
+            // Create a fresh client controller and open the socket on port 5555
+            ClientController newClient = new ClientController(ip, 5555);
+            newClient.openConnection();
 
-	/**
-	 * Handles the "Connect to Server" button click. Validates the IP input,
-	 * attempts to open a connection, and if successful, navigates to the
-	 * MainScreen.
-	 */
-	@FXML
-	public void connectToServer() {
-		if (ipTextField == null || ipTextField.getText().trim().isEmpty()) {
-			UiUtils.setStatus(statusLabel, "Please enter the server IP address.", false);
-			UiUtils.showAlert("BPARK - Message", "Please enter the server IP address.", Alert.AlertType.WARNING);
-			return;
-		}
+            this.client = newClient;
+            setClient(newClient); // reuse existing UI update logic
 
-		try {
-			String ip = ipTextField.getText().trim();
+            UiUtils.setStatus(statusLabel,
+                    "Connected successfully to server at " + ip + ":5555", true);
+            connectButton.setText("Connected");
+            connectButton.setDisable(true);
 
-			// Establish connection to server on port 5555
-			ClientController newClient = new ClientController(ip, 5555);
-			newClient.openConnection();
+            // Store globally so other controllers can fetch it
+            UiUtils.client = this.client;
 
-			this.client = newClient;
-			setClient(newClient);
+            // Switch to the selection screen (login / guest choice)
+            UiUtils.loadScreen(connectButton,
+                    "/client/SelectionScreen.fxml", null, client);
 
-			UiUtils.setStatus(statusLabel, "Connected successfully to server at " + ip + ":5555", true);
-			connectButton.setText("Connected");
-			connectButton.setDisable(true);
-			UiUtils.client=this.client;
+        } catch (Exception e) {
+            UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);
+            UiUtils.showAlert("Connection Failed",
+                    "Could not connect to the server. "
+                    + "Please check the IP address and try again.",
+                    Alert.AlertType.ERROR);
 
-			// Load main screen (Login + Guest)
-			UiUtils.loadScreen(connectButton, "/client/SelectionScreen.fxml", null, client);
+            System.err.println("[ERROR] Server connection failed: " + e.getMessage());
+        }
+    }
 
-		} catch (Exception e) {
-			UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);
-			UiUtils.showAlert("Connection Failed",
-					"Could not connect to the server. Please check the IP address and try again.",
-					Alert.AlertType.ERROR);
+    /**
+     * Triggered by the “Exit” button.
+     * Sends a graceful disconnect to the server (if connected)
+     * and terminates the JVM.
+     */
+    @FXML
+    public void exitApplication() {
+        try {
+            if (client != null && client.isConnected()) {
+                // Inform server before closing the socket
+                client.sendToServer(new Object[] { "disconnect" });
+                client.closeConnection();
+                System.out.println("Client disconnected successfully.");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to disconnect client: " + e.getMessage());
+        }
+        System.exit(0);
+    }
 
-			// Optionally log internal error to console for debugging (not shown to user)
-			System.err.println("[ERROR] Server connection failed: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Handles the "Exit" button click. Gracefully disconnects from the server and
-	 * terminates the application.
-	 */
-	@FXML
-	public void exitApplication() {
-		try {
-			if (client != null && client.isConnected()) {
-				client.sendToServer(new Object[] { "disconnect" });
-				client.closeConnection();
-				System.out.println("Client disconnected successfully.");
-			}
-		} catch (Exception e) {
-			System.err.println("Failed to disconnect client: " + e.getMessage());
-		}
-
-		System.exit(0);
-	}
-
-	public void initialize() {
-		try {
-			String ip = InetAddress.getLocalHost().getHostAddress();
-			ipTextField.setText(ip);
-		} catch (UnknownHostException e) {
-			ipTextField.setText("");
-		}
-	}
+    /**
+     * JavaFX initialise hook.
+     * Prefills the IP field with the local machine address so the user
+     * can copy-paste it easily when testing on the same PC.
+     */
+    public void initialize() {
+        try {
+            String ip = InetAddress.getLocalHost().getHostAddress();
+            ipTextField.setText(ip);
+        } catch (UnknownHostException e) {
+            ipTextField.setText("");
+        }
+    }
 }

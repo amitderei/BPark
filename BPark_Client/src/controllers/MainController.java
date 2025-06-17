@@ -3,75 +3,81 @@ package controllers;
 import client.ClientController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
- * Controller for BPARK's entry screen.
- * Lets the user choose between Guest mode and Login.
+ * Entry screen of BPARK.
+ * Presents two choices: continue as guest or log in.
+ * Also includes Exit and Back buttons for navigation.
  */
 public class MainController implements ClientAware {
 
-	
-	@FXML private Button guestBtn;   // “Enter as Guest”
-	@FXML private Button loginBtn;   // “Login”
-	@FXML private Button btnExit;
-	@FXML private Button btnBack;
+    /* ---------- FXML buttons ---------- */
+    @FXML private Button guestBtn;   // “Enter as Guest”
+    @FXML private Button loginBtn;   // “Login”
+    @FXML private Button btnExit;    // “Exit”
+    @FXML private Button btnBack;    // “Back to previous”
 
-	private ClientController client;
+    /* ---------- runtime ---------- */
+    private ClientController client;
 
-	/** Injects the active client. */
-	@Override
-	public void setClient(ClientController client) {
-		this.client = client;
-	}
+    /**
+     * Receives the shared ClientController so this screen
+     * can pass it along when loading child views.
+     *
+     * @param client active client instance
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 
+    /* =====================================================
+     *  Button actions
+     * ===================================================== */
 
+    /** Loads the guest layout and switches the window title. */
+    @FXML
+    public void handleGuest() {
+        UiUtils.loadScreen(guestBtn,
+                "/client/GuestMainLayout.fxml",
+                "BPARK – Guest",
+                client);
+    }
 
-	/** Opens the guest interface. */
-	@FXML
-	public void handleGuest() {
-		UiUtils.loadScreen(guestBtn,
-				"/client/GuestMainLayout.fxml",
-				"BPARK – Guest",
-				client);               
-	}
+    /** Opens the login screen for registered users. */
+    @FXML
+    public void handleLogin() {
+        UiUtils.loadScreen(loginBtn,
+                "/client/LoginScreen.fxml",
+                "BPARK – Login",
+                client);
+    }
 
-	/** Opens the login screen. */
-	@FXML
-	public void handleLogin() {
-		UiUtils.loadScreen(loginBtn,
-				"/client/LoginScreen.fxml",
-				"BPARK – Login",
-				client);
-	}
+    /**
+     * Disconnects from the server (if needed) and closes the application.
+     * Attached to the Exit button.
+     */
+    @FXML
+    private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[] { "disconnect" });
+                client.closeConnection();
+            }
+        } catch (Exception ignored) { }
+        Platform.exit();
+        System.exit(0);
+    }
 
-	@FXML
-	private void handleExitClick() {
-
-		try {
-			if (client != null && client.isConnected()) {
-				client.sendToServer(new Object[] { "disconnect" });
-				client.closeConnection();
-				System.out.println("Client disconnected successfully.");
-			}
-		} catch (Exception e) {
-			System.err.println("Failed to disconnect client: " + e.getMessage());
-		}
-		Platform.exit();
-		System.exit(0);
-	}
-
-	@FXML
-	private void handleBackClick() {
-		UiUtils.loadScreen(btnBack,
-				"/client/SelectionScreen.fxml",
-				"Select User Type",
-				client); 
-	}
+    /** Returns to the previous selection screen. */
+    @FXML
+    private void handleBackClick() {
+        UiUtils.loadScreen(btnBack,
+                "/client/SelectionScreen.fxml",
+                "Select User Type",
+                client);
+    }
 }
 

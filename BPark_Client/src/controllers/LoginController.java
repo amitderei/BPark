@@ -2,7 +2,6 @@ package controllers;
 
 import client.ClientController;
 import common.User;
-import common.Subscriber;
 import common.UserRole;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -14,147 +13,153 @@ import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
- * Controller for the login screen of the BPARK system. Handles input
- * validation, login request, and post-login navigation.
+ * Handles the login workflow:
+ *  • Validates username / password fields  
+ *  • Sends a login request to the server  
+ *  • Reacts to success or failure callbacks from ClientController  
+ *  • Routes the user to the correct main layout according to role
  */
 public class LoginController implements ClientAware {
 
+    /* ---------- FXML controls ---------- */
+    @FXML private TextField username;
+    @FXML private PasswordField code;
+    @FXML private Button submit;
+    @FXML private Label lblError;
+    @FXML private Button backButton;
+    @FXML private Button btnExit;
 
-	@FXML
-	private TextField username;
-	@FXML
-	private PasswordField code;
-	@FXML
-	private Button submit;
-	@FXML
-	private Label lblError;
-	@FXML
-	private Button backButton;
-	@FXML
-	private Button btnExit;
+    /* ---------- runtime ---------- */
+    private ClientController client;
+    private String password;   // cached so we can forward to SubscriberMain
 
-	private ClientController client;
-	private String password;
+    /**
+     * Saves the ClientController reference and
+     * registers this object as the callback target for login events.
+     *
+     * @param client active client instance, injected by the parent screen
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+        client.setLoginController(this);
+    }
 
-	/** Injects the active client and registers callback for login result. */
-	@Override
-	public void setClient(ClientController client) {
-		this.client = client;
-		client.setLoginController(this);
-	}
+    /* =====================================================
+     *  UI event handlers
+     * ===================================================== */
 
+    /** Reads the fields, validates, and fires a login request. */
+    @FXML
+    private void handleLoginClick() {
+        String user = username.getText();
+        password    = code.getText();
 
+        if (user.isEmpty() || password.isEmpty()) {
+            lblError.setText("Please enter both username and password.");
+            return;
+        }
+        try {
+            client.requestLogin(user, password);
+        } catch (Exception ex) {
+            lblError.setText("Failed to send login request.");
+            ex.printStackTrace();
+        }
+    }
 
-	/** Triggered when the user clicks “Login”. */
-	@FXML
-	private void handleLoginClick() {
-		String user = username.getText();
-		password = code.getText();
+    /** Server confirmed credentials – route to the proper main screen. */
+    public void handleLoginSuccess(User user) {
+        System.out.println("[DEBUG] Login successful, role = " + user.getRole());
+        navigateToHome(user);
+    }
 
-		if (user.isEmpty() || password.isEmpty()) {
-			lblError.setText("Please enter both username and password.");
-			return;
-		}
-		try {
-			client.requestLogin(user, password);
-		} catch (Exception ex) {
-			lblError.setText("Failed to send login request.");
-			ex.printStackTrace();
-		}
-	}
+    /** Server rejected credentials – show the reason. */
+    public void handleLoginFailure(String msg) {
+        lblError.setText(msg);
+        System.err.println("[DEBUG] Login failed: " + msg);
+    }
 
-	/** Called by ClientController on successful authentication. */
-	public void handleLoginSuccess(User user) {
-		System.out.println("[DEBUG] Login successful, role = " + user.getRole());
-		navigateToHome(user);
-	}
+    /** Disconnects and quits the application. */
+    @FXML
+    private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[] { "disconnect" });
+                client.closeConnection();
+            }
+        } catch (Exception ignored) { }
+        Platform.exit();
+        System.exit(0);
+    }
 
-	/** Called by ClientController on failed authentication. */
-	public void handleLoginFailure(String msg) {
-		lblError.setText(msg);
-		System.err.println("[DEBUG] Login failed: " + msg);
-	}
+    /** Returns to the entry screen (Guest / Login choice). */
+    @FXML
+    private void handleBack() {
+        UiUtils.loadScreen(backButton,
+                           "/client/MainScreen.fxml",
+                           "BPARK – Welcome",
+                           client);
+    }
 
-	/**
-	 * Handles the "Exit" button click. Gracefully disconnects from the server and
-	 * terminates the application.
-	 */
-	
-	@FXML
-	private void handleExitClick() {
+    /* =====================================================
+     *  Private helpers
+     * ===================================================== */
 
-			try {
-				if (client != null && client.isConnected()) {
-					client.sendToServer(new Object[] { "disconnect" });
-					client.closeConnection();
-					System.out.println("Client disconnected successfully.");
-				}
-			} catch (Exception e) {
-				System.err.println("Failed to disconnect client: " + e.getMessage());
-			}
-			Platform.exit();
-			System.exit(0);
-		}
+    /**
+     * Loads the main layout that matches the user’s role
+     * and transfers required objects to that controller.
+     *
+     * @param user authenticated user returned by the server
+     */
+    private void navigateToHome(User user) {
 
-	/**
-	 * Loads the appropriate main screen according to the user's role, injecting
-	 * both ClientController and User where needed.
-	 */
-	private void navigateToHome(User user) {
-		String fxml;
-		UserRole role = user.getRole();
+        String fxml;
+        UserRole role = user.getRole();
 
-		switch (role) {
-		case Subscriber:
-			fxml = "/client/SubscriberMainLayout.fxml";
-			client.subscriberDetails(user);
-			break;
-		case Attendant, Manager:
-			fxml = "/client/StaffMainLayout.fxml";
-			break;
-		default:
-			UiUtils.showAlert("BPARK – Error", "Unknown role: " + role, Alert.AlertType.ERROR);
-			return;
-		}
-		
+        switch (role) {
+            case Subscriber -> {
+                fxml = "/client/SubscriberMainLayout.fxml";
+                client.subscriberDetails(user);   // fetch full subscriber info
+            }
+            case Attendant, Manager -> fxml = "/client/StaffMainLayout.fxml";
+            default -> {
+                UiUtils.showAlert("BPARK – Error",
+                                   "Unknown role: " + role,
+                                   Alert.AlertType.ERROR);
+                return;
+            }
+        }
 
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
-			Parent root = loader.load();
-			Object ctrl = loader.getController();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+            Parent root = loader.load();
+            Object ctrl = loader.getController();
 
-			if(ctrl instanceof SubscriberMainLayoutController) {
-				client.setMainLayoutController((SubscriberMainLayoutController)ctrl);
-				((SubscriberMainLayoutController)ctrl).setClient(client);
-				((SubscriberMainLayoutController)ctrl).setSubscriberName(username.getText().trim());
-				((SubscriberMainLayoutController)ctrl).loadScreen("/client/SubscriberMainScreen.fxml");
-				client.setPassword(password);
-			}
-			// Extra data per role
-			if (ctrl instanceof StaffMainLayoutController staff) {
-				staff.setClient(client);
-				staff.setUser(user);
-			}
-		
-			
-			
+            /* --- role-specific wiring --- */
+            if (ctrl instanceof SubscriberMainLayoutController sub) {
+                client.setMainLayoutController(sub);
+                sub.setClient(client);
+                sub.setSubscriberName(username.getText().trim());
+                sub.loadScreen("/client/SubscriberMainScreen.fxml");
+                client.setPassword(password);   // cache for later edits
+            }
 
-			Stage stage = (Stage) submit.getScene().getWindow();
-			stage.setScene(new Scene(root));
-			stage.setTitle("BPARK – " + role);
-			stage.show();
+            if (ctrl instanceof StaffMainLayoutController staff) {
+                staff.setClient(client);
+                staff.setUser(user);
+            }
 
-		} catch (Exception ex) {
-			UiUtils.showAlert("BPARK – Error", "Failed to load " + role + " screen.", Alert.AlertType.ERROR);
-			ex.printStackTrace();
-		}
-	}
+            /* --- swap scene --- */
+            Stage stage = (Stage) submit.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("BPARK – " + role);
+            stage.show();
 
-	/**
-	 * Returns to the entry screen (Guest / Login choice)
-	 */
-	@FXML
-	private void handleBack() {
-		UiUtils.loadScreen(backButton, "/client/MainScreen.fxml", "BPARK – Welcome", client);
-	}
+        } catch (Exception ex) {
+            UiUtils.showAlert("BPARK – Error",
+                              "Failed to load " + role + " screen.",
+                              Alert.AlertType.ERROR);
+            ex.printStackTrace();
+        }
+    }
 }

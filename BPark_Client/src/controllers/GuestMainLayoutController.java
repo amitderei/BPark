@@ -12,27 +12,34 @@ import javafx.scene.layout.AnchorPane;
 import ui.UiUtils;
 
 /**
- * Layout controller for guest users.
- * Puts the regular toolbar on top and a tiny side-menu with one action:
- * checking spot availability.
+ * Main layout for a guest session.
+ * Top – standard toolbar (Home / Back / Exit).  
+ * Left – small side-menu with a single action: spot availability lookup.  
+ * Center – switches between guest screens according to user actions.
  */
 public class GuestMainLayoutController implements ClientAware {
 
-    // ---------- FXML ----------
-
+    /* ---------- FXML toolbar buttons ---------- */
     @FXML private Button btnExit;
     @FXML private Button btnBack;
     @FXML private Button btnHome;
+
+    /* ---------- FXML side-menu button ---------- */
     @FXML private Button btnCheckAvailability;
+
+    /* ---------- Central placeholder pane ---------- */
     @FXML private AnchorPane center;
 
-    // ---------- runtime ----------
-
+    /* ---------- Client reference (injected) ---------- */
     private ClientController client;
 
+    /* =====================================================
+     *  Framework hooks
+     * ===================================================== */
+
     /**
-     * Called by the framework right after the FXML is loaded.
-     * We show the guest home screen straight away.
+     * JavaFX initialise hook – runs automatically once the FXML is loaded.
+     * Immediately loads the guest home screen into the centre pane.
      */
     @FXML
     public void initialize() {
@@ -40,21 +47,27 @@ public class GuestMainLayoutController implements ClientAware {
     }
 
     /**
-     * Gives the controller a live reference to the client object
-     * so we can talk to the server when needed.
+     * Supplies the shared ClientController so this layout
+     * can pass it to child screens that implement ClientAware.
+     *
+     * @param client active client instance, null before connection
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
-    // ---------- toolbar buttons ----------
+    /* =====================================================
+     *  Toolbar actions
+     * ===================================================== */
 
+    /** Loads the simple “Welcome, Guest” screen. */
     @FXML
     private void handleHomeClick() {
         loadScreen("/client/GuestMainScreen.fxml");
     }
 
+    /** Returns to the selection screen (login / guest). */
     @FXML
     private void handleBackClick() {
         UiUtils.loadScreen(btnBack,
@@ -63,6 +76,10 @@ public class GuestMainLayoutController implements ClientAware {
                            client);
     }
 
+    /**
+     * Gracefully disconnects from the server (if connected)
+     * and closes the JavaFX application.
+     */
     @FXML
     private void handleExitClick() {
         try {
@@ -71,46 +88,57 @@ public class GuestMainLayoutController implements ClientAware {
                 client.closeConnection();
             }
         } catch (Exception ignored) {
-            // not critical – we're quitting anyway
+            // not critical – we are exiting anyway
         }
         Platform.exit();
         System.exit(0);
     }
 
-    // ---------- side-menu button ----------
+    /* =====================================================
+     *  Side-menu action
+     * ===================================================== */
 
+    /** Opens the “Live Availability” screen. */
     @FXML
     private void handleCheckAvailability() {
         loadScreen("/client/AvailabilityScreen.fxml");
     }
 
-    // ---------- helpers ----------
+    /* =====================================================
+     *  Internal helper
+     * ===================================================== */
 
     /**
-     * Loads the given FXML into the center pane.
+     * Replaces the content of the centre pane with the given FXML screen.
+     * If the loaded controller implements ClientAware it receives the
+     * client reference automatically.
      *
-     * @param fxml path to the FXML resource
+     * @param fxml path to the FXML resource inside the classpath
      */
     private void loadScreen(String fxml) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             Parent content = loader.load();
 
-            // if the loaded controller needs a client, pass it on
+            // Pass client reference to child controllers that need it
             Object ctrl = loader.getController();
             if (ctrl instanceof ClientAware aware) {
                 aware.setClient(client);
             }
-            
-            if (ctrl instanceof AvailabilityController controller) {
-                controller.setClient(client); 
-                client.setAvailabilityController(controller);
-                client.requestParkingAvailability(); 
+
+            // Special case: Availability screen needs immediate data refresh
+            if (ctrl instanceof AvailabilityController ac) {
+                ac.setClient(client);
+                client.setAvailabilityController(ac);
+                client.requestParkingAvailability();
             }
 
             center.getChildren().setAll(content);
+
         } catch (IOException e) {
+            // In production we would log this; for now print the stacktrace.
             e.printStackTrace();
         }
     }
 }
+

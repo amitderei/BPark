@@ -349,7 +349,6 @@ public class ClientController extends AbstractClient {
 			if (response.getData() instanceof Integer && guestMainController != null) {
 				int count = (int) response.getData();
 				System.out.println(((Integer) count).toString());
-				guestMainController.updateAvailableSpots(count); // call method to update
 			}
 
 			if (response.isSucceed() && response.getData() instanceof Order) {

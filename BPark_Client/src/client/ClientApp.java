@@ -3,77 +3,72 @@ package client;
 import controllers.ConnectController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * Entry point for launching the client-side application of BPARK. This class
- * sets up the JavaFX UI and initializes the client-server connection.
+ * Launches the BPARK client application. Sets up the first connection screen
+ * and ensures the socket is closed on exit.
  */
 public class ClientApp extends Application {
 
-	// Instance-level client used for communication with the server
-	private ClientController client;
+    /** Active controller that handles communication with the server. */
+    private ClientController client;
 
-	/**
-	 * Called when the JavaFX application starts. Loads the client UI and waits for
-	 * the user to initiate the server connection.
-	 *
-	 * @param primaryStage the primary window of the JavaFX application.
-	 * @throws Exception if loading the FXML file fails.
-	 */
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-	    // 1. Load ConnectScreen.fxml
-	    FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ConnectScreen.fxml"));
-	    Parent root = loader.load();
+    /**
+     * Application entry point. Hands control to the JavaFX runtime.
+     *
+     * @param args command-line arguments (unused)
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }
 
-	    // 2. Get controller and inject ClientApp
-	    ConnectController controller = loader.getController();
-	    controller.setApp(this);
+    /**
+     * Initializes the UI by loading {@code ConnectScreen.fxml}, wiring its
+     * controller and showing the primary stage without window chrome.
+     *
+     * @param primaryStage the main window provided by JavaFX
+     * @throws Exception if the FXML file cannot be loaded
+     */
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ConnectScreen.fxml"));
+        Parent root = loader.load();
 
-	    //remove the top lane of app
-	    primaryStage.initStyle(StageStyle.UNDECORATED);
-	    
-	    // 3. Show the scene
-	    primaryStage.setTitle("BPARK Client");
-	    primaryStage.setScene(new Scene(root));
-	    primaryStage.show();
-	}
+        // Give the controller a reference to this application
+        ConnectController controller = loader.getController();
+        controller.setApp(this);
 
-	/**
-	 * Called automatically when the JavaFX application exits. Closes the connection
-	 * to the server gracefully if it was opened.
-	 */
-	@Override
-	public void stop() {
-		if (client != null) { // Check if client is connected
-			try {
-				client.closeConnection();
-				System.out.println("Connection to server closed.");
-			} catch (Exception e) {
-				System.err.println("Failed to close connection: " + e.getMessage());
-			}
-		}
-	}
+        primaryStage.initStyle(StageStyle.UNDECORATED);
+        primaryStage.setTitle("BPARK Client");
+        primaryStage.setScene(new Scene(root));
+        primaryStage.show();
+    }
 
-	/**
-	 * Main entry point of the application. Starts the JavaFX application by calling
-	 * the start() method.
-	 *
-	 * @param args command-line arguments (not used in this application).
-	 */
-	public static void main(String[] args) {
-		launch(args);
-	}
+    /**
+     * Shuts down the client‑server connection if it is still open when the
+     * application exits.
+     */
+    @Override
+    public void stop() {
+        if (client != null) {
+            try {
+                client.closeConnection();
+            } catch (Exception e) {
+                System.err.println("Couldn't close connection: " + e.getMessage());
+            }
+        }
+    }
 
-	/**
-	 * Allows setting the client instance, for example from a controller. This
-	 * enables dynamic client management without relying on static state.
-	 */
-	public void setClient(ClientController client) {
-		this.client = client;
-	}
+    /**
+     * Injects the ClientController after a successful connection.
+     *
+     * @param client the connected controller instance
+     */
+    public void setClient(ClientController client) {
+        this.client = client;
+    }
 }

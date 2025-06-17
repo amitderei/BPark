@@ -8,25 +8,33 @@ import javafx.scene.control.TextField;
 import ui.UiUtils;
 
 /**
- * Controller for the "Extend Parking Time" screen.
- * Allows subscribers to extend their active parking session by 4 hours,
- * provided they have an ongoing parking event and haven't extended before.
+ * Screen that lets a subscriber extend an active parking session
+ * (adds four hours) as long as the session has not been extended before.
  *
- * Expected input: subscriber enters their parking code.
- * The system validates the code and attempts the extension via the server.
+ * Flow:
+ *  1. User types the parking code.
+ *  2. Controller validates that the field is not empty and is numeric.
+ *  3. A request is sent to the server.  The server replies through
+ *     ClientController → onExtensionResponse().
  */
 public class ExtendParkingController implements ClientAware {
 
+    /** Input field for the numeric parking code */
     @FXML private TextField txtParkingCode;
+
+    /** “Extend” button */
     @FXML private Button btnExtend;
+
+    /** Label used for success / error feedback */
     @FXML private Label lblStatus;
 
+    /** Shared client used to talk with the server */
     private ClientController client;
 
     /**
-     * Sets the client controller reference, allowing communication with the server.
+     * Injects the ClientController so this screen can send requests.
      *
-     * @param client the main ClientController instance
+     * @param client active client instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -34,12 +42,13 @@ public class ExtendParkingController implements ClientAware {
     }
 
     /**
-     * Called when the "Extend" button is clicked.
-     * Sends a request to the server to extend the parking session
-     * corresponding to the entered parking code.
+     * Fired by the “Extend” button.
+     * Validates the text, converts to int, and sends the request.
+     * Shows a local error if the code is missing or not numeric.
      */
     @FXML
     private void handleExtendClick() {
+
         String codeText = txtParkingCode.getText().trim();
 
         if (codeText.isEmpty()) {
@@ -48,7 +57,6 @@ public class ExtendParkingController implements ClientAware {
         }
 
         int parkingCode;
-
         try {
             parkingCode = Integer.parseInt(codeText);
         } catch (NumberFormatException e) {
@@ -56,18 +64,18 @@ public class ExtendParkingController implements ClientAware {
             return;
         }
 
-        // Send extension request to server
+        // Forward the request to the server
         client.extendParking(parkingCode);
     }
 
     /**
-     * Called by the ClientController after receiving server response.
-     * Displays success/failure message on screen.
+     * Callback used by ClientController after the server responds.
      *
-     * @param success true if the extension was applied, false otherwise
-     * @param message message from the server to display to the user
+     * @param success true if the extension was successful
+     * @param message explanatory text returned by the server
      */
     public void onExtensionResponse(boolean success, String message) {
         UiUtils.setStatus(lblStatus, message, success);
     }
 }
+
