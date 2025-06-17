@@ -24,6 +24,7 @@ public class StaffMainLayoutController implements ClientAware {
     @FXML private Button btnViewActiveParkings;
     @FXML private Button btnViewParkingReport;
     @FXML private Button btnViewSubscriberReport;
+    @FXML private Button btnExit;
 
     @FXML private AnchorPane center;
 
@@ -122,6 +123,23 @@ public class StaffMainLayoutController implements ClientAware {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Terminates the application gracefully when 'Exit' is clicked.
+     */
+    @FXML
+    private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[]{"disconnect"});
+                client.closeConnection();
+            }
+        } catch (Exception e) {
+            // Optional: log error
+        }
+        javafx.application.Platform.exit();
+        System.exit(0);
     }
 }
 

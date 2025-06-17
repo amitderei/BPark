@@ -35,6 +35,9 @@ public class SubscriberMainLayoutController implements ClientAware{
 	private Button btnParkingReservation;
 	@FXML
 	private Button btnMyReservations;
+	@FXML
+	private Button btnExit;
+
 	
 	
 	
@@ -219,4 +222,19 @@ public class SubscriberMainLayoutController implements ClientAware{
 	public void setClient(ClientController client) {
 		this.client=client;
 	}
+	
+	@FXML
+	private void handleExitClick() {
+		try {
+			if (client != null && client.isConnected()) {
+				client.sendToServer(new Object[] { "disconnect" });
+				client.closeConnection();
+			}
+		} catch (Exception ignored) {
+			// Not critical – we're quitting anyway
+		}
+		javafx.application.Platform.exit();
+		System.exit(0);
+	}
+
 }

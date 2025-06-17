@@ -13,36 +13,42 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.GuestMainLayoutController">
 
+    <!-- Toolbar -->
     <top>
         <ToolBar>
-            <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home"/>
-            <Pane HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnBack" onAction="#handleBackClick" text="Back"/>
+            <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnBack" onAction="#handleBackClick" text="Back" />
         </ToolBar>
     </top>
 
+    <!-- Side navigation -->
     <left>
         <VBox prefHeight="453.0" prefWidth="200.0"
               style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;"
               BorderPane.alignment="CENTER">
             <children>
                 <Button fx:id="btnCheckAvailability"
+                        mnemonicParsing="false"
                         onAction="#handleCheckAvailability"
                         prefHeight="44.0" prefWidth="209.0"
-                        text="Check Availability"/>
-                <Pane VBox.vgrow="ALWAYS"/>
+                        text="Check Availability" />
+
+                <Pane VBox.vgrow="ALWAYS" /> <!-- Spacer -->
+
                 <Button fx:id="btnExit"
+                        mnemonicParsing="false"
                         onAction="#handleExitClick"
-                        prefHeight="40.0" prefWidth="199.0"
-                        text="Exit"/>
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="Exit" />
             </children>
         </VBox>
     </left>
 
+    <!-- Dynamic content area -->
     <center>
-        <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0"
-                    BorderPane.alignment="CENTER"/>
+        <AnchorPane fx:id="center"
+                    prefHeight="453.0" prefWidth="600.0"
+                    BorderPane.alignment="CENTER" />
     </center>
-
 </BorderPane>
-

@@ -8,8 +8,12 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubscriberMainLayoutController">
+<BorderPane prefHeight="500.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.SubscriberMainLayoutController">
 
+    <!-- Toolbar -->
     <top>
         <ToolBar>
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
@@ -18,21 +22,64 @@
         </ToolBar>
     </top>
 
+    <!-- Side navigation -->
     <left>
-        <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
+        <VBox prefHeight="453.0" prefWidth="200.0"
+              style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;"
+              BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="btnViewPersonalInfo" mnemonicParsing="false" onAction="#handleViewPersonalInfo" prefHeight="44.0" prefWidth="209.0" text="View Personal Info" />
-                <Button fx:id="btnViewParkingHistory" mnemonicParsing="false" onAction="#handleViewParkingHistory" prefHeight="44.0" prefWidth="209.0" text="View Parking History" />
-                <Button fx:id="btnViewActiveParkingInfo" mnemonicParsing="false" onAction="#handleViewActiveParkingInfo" prefHeight="44.0" prefWidth="209.0" text="View Active Parking Info" />
-                <Button fx:id="btnExtendParkingTime" mnemonicParsing="false" onAction="#handleExtendParkingTime" prefHeight="44.0" prefWidth="209.0" text="Extend Parking Time" />
-                <Button fx:id="btnParkingReservation" mnemonicParsing="false" onAction="#handleGoToCreateOrder" prefHeight="44.0" prefWidth="209.0" text="Parking Reservation" />
-                <Button fx:id="btnMyReservations" mnemonicParsing="false" onAction="#handleMyReservations" prefHeight="44.0" prefWidth="209.0" text="My Reservations" />
+                <Button fx:id="btnViewPersonalInfo"
+                        mnemonicParsing="false"
+                        onAction="#handleViewPersonalInfo"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="View Personal Info" />
+
+                <Button fx:id="btnViewParkingHistory"
+                        mnemonicParsing="false"
+                        onAction="#handleViewParkingHistory"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="View Parking History" />
+
+                <Button fx:id="btnViewActiveParkingInfo"
+                        mnemonicParsing="false"
+                        onAction="#handleViewActiveParkingInfo"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="View Active Parking Info" />
+
+                <Button fx:id="btnExtendParkingTime"
+                        mnemonicParsing="false"
+                        onAction="#handleExtendParkingTime"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="Extend Parking Time" />
+
+                <Button fx:id="btnParkingReservation"
+                        mnemonicParsing="false"
+                        onAction="#handleGoToCreateOrder"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="Parking Reservation" />
+
+                <Button fx:id="btnMyReservations"
+                        mnemonicParsing="false"
+                        onAction="#handleMyReservations"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="My Reservations" />
+
+                <Pane VBox.vgrow="ALWAYS" /> <!-- Spacer -->
+
+                <Button fx:id="btnExit"
+                        mnemonicParsing="false"
+                        onAction="#handleExitClick"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="Exit" />
             </children>
         </VBox>
     </left>
 
+    <!-- Dynamic content area -->
     <center>
-        <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+        <AnchorPane fx:id="center"
+                    prefHeight="453.0" prefWidth="600.0"
+                    BorderPane.alignment="CENTER" />
     </center>
-
 </BorderPane>
+

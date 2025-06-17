@@ -57,6 +57,14 @@
                         onAction="#handleViewSubscriberReport"
                         prefHeight="44.0" prefWidth="209.0"
                         text="View Subscriber Report" />
+
+                <Pane VBox.vgrow="ALWAYS" /> <!-- Spacer -->
+
+                <Button fx:id="btnExit"
+                        mnemonicParsing="false"
+                        onAction="#handleExitClick"
+                        prefHeight="44.0" prefWidth="209.0"
+                        text="Exit" />
             </children>
         </VBox>
     </left>
@@ -68,3 +76,4 @@
                     BorderPane.alignment="CENTER" />
     </center>
 </BorderPane>
+
