@@ -761,9 +761,9 @@ public class ClientController extends AbstractClient {
      *
      * @param parkingCode the parking code entered by the subscriber
      */
-    public void extendParking(int parkingCode) {
+    public void extendParking(int parkingCode, String subscriberCode) {
         try {
-            sendToServer(new Object[] { "extendParking", parkingCode });
+        	sendToServer(new Object[] { "extendParking", parkingCode, subscriberCode });
         } catch (IOException e) {
             System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
         }

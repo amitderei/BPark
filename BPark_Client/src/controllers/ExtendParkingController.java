@@ -65,7 +65,8 @@ public class ExtendParkingController implements ClientAware {
         }
 
         // Forward the request to the server
-        client.extendParking(parkingCode);
+        String subscriberCode = String.valueOf(client.getSubscriber().getSubscriberCode());
+        client.extendParking(parkingCode, subscriberCode);
     }
 
     /**

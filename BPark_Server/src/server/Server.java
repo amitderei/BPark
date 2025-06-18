@@ -456,10 +456,12 @@ public class Server extends AbstractServer {
 
 
 				
-				// Expected format: {"extendParking", parkingCode}
-				else if (data.length == 2 && "extendParking".equals(data[0])) {
+				// Expected format: {"extendParking", parkingCode, subscriberCode}
+				else if (data.length == 3 && "extendParking".equals(data[0])) {
 				    int parkingCode = (int) data[1];
-				    ServerResponse response = db.extendParkingSession(parkingCode);
+				    String subscriberCode = (String) data[2];
+
+				    ServerResponse response = db.extendParkingSession(parkingCode, subscriberCode);
 				    client.sendToClient(response);
 				    return;
 				}

@@ -1122,30 +1122,40 @@ public class DBController {
 	}
 
 	/**
-	 * Marks the parking session as extended for the given parking code. Allows only
-	 * a single extension per parking event.
+	 * Attempts to extend an active parking session for a given parking code and subscriber.
+	 * The extension is only allowed if:
+	 * - The parking session has not yet ended (exitDate and exitHour are NULL)
+	 * - The session has not been extended before (wasExtended = FALSE)
+	 * - The session belongs to the provided subscriber code
 	 *
-	 * @param parkingCode the parking code identifying the active parking session
-	 * @return a ServerResponse indicating success or a message if already extended
+	 * @param parkingCode    the code of the parking session to extend
+	 * @param subscriberCode the code identifying the subscriber attempting the extension
+	 * @return a {@link ServerResponse} indicating whether the extension was successful,
+	 *         including a message explaining the result
 	 */
-	public ServerResponse extendParkingSession(int parkingCode) {
-		final String sql = "UPDATE bpark.parkingEvent " + "SET wasExtended = TRUE " + "WHERE parkingCode = ? "
-				+ "AND exitDate IS NULL AND exitHour IS NULL " + "AND wasExtended = FALSE";
+	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
+	    final String sql =
+	        "UPDATE bpark.parkingEvent " +
+	        "SET wasExtended = TRUE " +
+	        "WHERE parkingCode = ? " +
+	        "AND subscriberCode = ? " +
+	        "AND exitDate IS NULL AND exitHour IS NULL " +
+	        "AND wasExtended = FALSE";
 
-		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setInt(1, parkingCode);
-			int rowsAffected = stmt.executeUpdate();
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, parkingCode);
+	        stmt.setString(2, subscriberCode);
+	        int rowsAffected = stmt.executeUpdate();
 
-			if (rowsAffected > 0) {
-				return new ServerResponse(true, null, "Parking session extended successfully.");
-			} else {
-				return new ServerResponse(false, null,
-						"This session has already been extended or is no longer active.");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return new ServerResponse(false, null, "Database error: " + e.getMessage());
-		}
+	        if (rowsAffected > 0) {
+	            return new ServerResponse(true, null, "Parking session extended successfully.");
+	        } else {
+	            return new ServerResponse(false, null, "This session has already been extended or does not belong to you.");
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return new ServerResponse(false, null, "Database error: " + e.getMessage());
+	    }
 	}
 
 	/**
