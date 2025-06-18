@@ -1150,7 +1150,7 @@ public class DBController {
 	        if (rowsAffected > 0) {
 	            return new ServerResponse(true, null, "Parking session extended successfully.");
 	        } else {
-	            return new ServerResponse(false, null, "This session has already been extended or does not belong to you.");
+	            return new ServerResponse(false, null, "Invalid code.");
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
