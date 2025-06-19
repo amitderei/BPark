@@ -49,7 +49,7 @@ public class Server extends AbstractServer {
 	protected void serverStarted() {
 		db.connectToDB();
 		System.out.println("Server started on port " + getPort());
-		
+
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class Server extends AbstractServer {
 				//return the parking report: expected format {"GetParkingReport", parkingReport}
 				else if(data.length==2 && "GetParkingReport".equals(data[0])) {
 					ParkingReport parkingReport=db.getParkingReport((Date)data[1]);
-					
+
 					if (parkingReport==null) {
 						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking report."));
 					}
@@ -118,7 +118,7 @@ public class Server extends AbstractServer {
 					}
 					return;
 				}
-				
+
 				else if (data.length==2 && "getDetailsOfActiveInfo".equals(data[0])) {
 					ParkingEvent parkingEvent=db.getActiveParkingEvent((Subscriber)data[1]);
 					if (parkingEvent==null) {
@@ -128,64 +128,64 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, parkingEvent, "Active parking info loaded successfully."));
 					}
 				}
-				
+
 				else if(data.length==2 && "forgotMyParkingCode".equals(data[0])) {
 					try {
 						String[] emailAndPhone=db.getEmailAndPhoneNumber((int) data[1]);
 						String email=emailAndPhone[0];
 						String phone=emailAndPhone[1];
 						ParkingEvent parkingEvent=db.getActiveParkingEvent((new Subscriber((int)data[1])));
-				        sendEmail.sendEmail(email, parkingEvent.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
-				        client.sendToClient(new ServerResponse(true, null, "The code was sent to your email."));
-				    } catch(Exception e) {
-				        e.printStackTrace();
-				        client.sendToClient(new ServerResponse(false, null, "Failed to send email. Please try again later."));
-				    }
+						sendEmail.sendEmail(email, parkingEvent.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
+						client.sendToClient(new ServerResponse(true, null, "The code was sent to your email."));
+					} catch(Exception e) {
+						e.printStackTrace();
+						client.sendToClient(new ServerResponse(false, null, "Failed to send email. Please try again later."));
+					}
 				}
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
 				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
-				    String tagId = (String) data[1];
-				    int subscriberCode = db.getSubscriberCodeByTag(tagId);
+					String tagId = (String) data[1];
+					int subscriberCode = db.getSubscriberCodeByTag(tagId);
 
-				    // Step 1: Check if tag is known
-				    if (subscriberCode > 0) {
-				        // Step 2: Ensure that the vehicle associated with this tag is inside the parking lot
-				        if (!db.checkSubscriberEntered(subscriberCode)) {
-				            client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
-				            return;
-				        }
+					// Step 1: Check if tag is known
+					if (subscriberCode > 0) {
+						// Step 2: Ensure that the vehicle associated with this tag is inside the parking lot
+						if (!db.checkSubscriberEntered(subscriberCode)) {
+							client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+							return;
+						}
 
-				        // Step 3: Valid tag and active parking -> send subscriber code for client use
-				        client.sendToClient(new ServerResponse(true, subscriberCode,
-				                "Subscriber verified successfully by tag."));
-				    } else {
-				        client.sendToClient(new ServerResponse(false, null,
-				                "Tag ID not recognized. Please try again."));
-				    }
-				    return;
+						// Step 3: Valid tag and active parking -> send subscriber code for client use
+						client.sendToClient(new ServerResponse(true, subscriberCode,
+								"Subscriber verified successfully by tag."));
+					} else {
+						client.sendToClient(new ServerResponse(false, null,
+								"Tag ID not recognized. Please try again."));
+					}
+					return;
 				}
 
 
 
 				// Validate subscriber by numeric code: ["validateSubscriber", subscriberCode]
 				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
-				    int subscriberCode = (int) data[1];
+					int subscriberCode = (int) data[1];
 
-				    // Step 1: Verify that subscriber exists in DB
-				    if (!db.subscriberExists(subscriberCode)) {
-				        client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
-				        return;
-				    }
+					// Step 1: Verify that subscriber exists in DB
+					if (!db.subscriberExists(subscriberCode)) {
+						client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
+						return;
+					}
 
-				    // Step 2: Check that the subscriber's vehicle is currently parked (active session)
-				    if (!db.checkSubscriberEntered(subscriberCode)) {
-				        client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
-				        return;
-				    }
+					// Step 2: Check that the subscriber's vehicle is currently parked (active session)
+					if (!db.checkSubscriberEntered(subscriberCode)) {
+						client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+						return;
+					}
 
-				    // Step 3: If both checks pass, approve validation
-				    client.sendToClient(new ServerResponse(true, null, "Subscriber verified"));
-				    return;
+					// Step 3: If both checks pass, approve validation
+					client.sendToClient(new ServerResponse(true, null, "Subscriber verified"));
+					return;
 				}
 
 
@@ -266,6 +266,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, "reservation not succeed!"));
 					}
 				}
+
 				// Expected format: {"subscriberExists", codeInt }
 				else if (data.length == 2 && "subscriberExists".equals(data[0])) {
 					int codeInt = (int) data[1];
@@ -317,27 +318,16 @@ public class Server extends AbstractServer {
 				// Expected format: {"IsThereFreeParkingSpace", lotName}
 				else if (data.length == 2 && "IsThereFreeParkingSpace".equals(data[0])) {
 					String lotName = (String) data[1];
+					int parkingSpaceInt = db.hasAvailableSpots(lotName);
 
-					if (!db.hasAvailableSpots(lotName)) {
-						// If the Lot is full we would let the user know that he can't deliver his
-						// vehicle right now.
+					// If the method hasAvaliableSpots returns -1 it means that the parking lot is full
+					if (parkingSpaceInt == -1) {
 						client.sendToClient(new ServerResponse(false, null, "The Parking Lot is Full"));
 						return;
 					}
-					// Letting the user know that he can deliver his vehicle successfully
-					client.sendToClient(new ServerResponse(true, null, "There is free parking space"));
-				}
 
-				// Expected format: {"FindFreeParkingSpace"}
-				else if (data.length == 1 && "FindFreeParkingSpace".equals(data[0])) {
-
-					// Seeking for a parking space from the DB
-					int parkingSpaceInt = db.findParkingSpace();
-
-					// If the Lot is full we would let the user know that he can't deliver his
-					// vehicle right now.
-					client.sendToClient(new ServerResponse(true, parkingSpaceInt, "Found free parking space"));
-					return;
+					// Else, we will sent the parking space to the client controller 
+					client.sendToClient(new ServerResponse(true, parkingSpaceInt, "There is free parking space"));
 				}
 
 				// Expected format: {"getVehicleID", codeInt}
@@ -354,14 +344,9 @@ public class Server extends AbstractServer {
 				// Expected format: {"DeliverVehicle", parkingEvent}
 				else if (data.length == 2 && "DeliverVehicle".equals(data[0])) {
 					ParkingEvent parkingEvent = (ParkingEvent) data[1];
-					
 
-						// Inserting the parking event into the DB
-						db.addParkingEvent(parkingEvent);
-						// Updating the amount of occupied parking space by +1
-						db.addOccupiedParkingSpace();
-						// Updating the specific parking space on the 'parkingspaces' table
-						db.updateParkingSpaceOccupied(parkingEvent.getParkingSpace());
+					// Inserting the parking event into the DB
+					db.addParkingEvent(parkingEvent);
 
 					// The server sends the successful addition of parking event
 					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));
@@ -420,122 +405,122 @@ public class Server extends AbstractServer {
 					client.sendToClient(new ServerResponse(false, null, "The vehicle is Already inside the parking lot"));
 					return;
 				}
-				
+
 				// return all subscribers and their late pickup counts
 				else if (data.length == 1 && "get_all_subscribers".equals(data[0])) {
-				    System.out.println("[SERVER] Received get_all_subscribers request");
-				    ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
-				    client.sendToClient(new ServerResponse(true, rows, "all_subscribers"));
-				    return;
+					System.out.println("[SERVER] Received get_all_subscribers request");
+					ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
+					client.sendToClient(new ServerResponse(true, rows, "all_subscribers"));
+					return;
 				}
-				
+
 				// "get_active_parkings" - returns List<ParkingEvent>
 				else if (data.length == 1 && "get_active_parkings".equals(data[0])) {
-				    List<ParkingEvent> events = db.getActiveParkingEvents();
-				    client.sendToClient(new ServerResponse(true, events, "active_parkings"));
-				    return;
+					List<ParkingEvent> events = db.getActiveParkingEvents();
+					client.sendToClient(new ServerResponse(true, events, "active_parkings"));
+					return;
 				}
-				
+
 				// Expected format: {"get_parking_availability"}
 				else if (data.length == 1 && "get_parking_availability".equals(data[0])) {
-				    System.out.println("[SERVER] Received availability request");
+					System.out.println("[SERVER] Received availability request");
 
-				    try {
-				        int total = db.getTotalSpots();
-				        int occupied = db.getOccupiedSpots();
-				        int available = total - occupied;
+					try {
+						int total = db.getTotalSpots();
+						int occupied = db.getOccupiedSpots();
+						int available = total - occupied;
 
-				        Object[] stats = new Object[] { total, occupied, available };
-				        client.sendToClient(new ServerResponse(true, stats, "parking_availability"));
-				    } catch (Exception e) {
-				        e.printStackTrace();
-				        client.sendToClient(new ServerResponse(false, null, "Failed to retrieve parking availability."));
-				    }
-				    return;
+						Object[] stats = new Object[] { total, occupied, available };
+						client.sendToClient(new ServerResponse(true, stats, "parking_availability"));
+					} catch (Exception e) {
+						e.printStackTrace();
+						client.sendToClient(new ServerResponse(false, null, "Failed to retrieve parking availability."));
+					}
+					return;
 				}
 
 
-				
+
 				// Expected format: {"extendParking", parkingCode, subscriberCode}
 				else if (data.length == 3 && "extendParking".equals(data[0])) {
-				    int parkingCode = (int) data[1];
-				    String subscriberCode = (String) data[2];
+					int parkingCode = (int) data[1];
+					String subscriberCode = (String) data[2];
 
-				    ServerResponse response = db.extendParkingSession(parkingCode, subscriberCode);
-				    client.sendToClient(response);
-				    return;
+					ServerResponse response = db.extendParkingSession(parkingCode, subscriberCode);
+					client.sendToClient(response);
+					return;
 				}
 
 				// Register new subscriber: ["registerSubscriber", Subscriber]
 				else if (data.length == 2 && "registerSubscriber".equals(data[0])) {
-				    Subscriber receivedSub = (Subscriber) data[1];
+					Subscriber receivedSub = (Subscriber) data[1];
 
-				    // Step 0: Check if username, email, phone or ID already exists
-				    if (db.usernameExists(receivedSub.getUsername())) {
-				        client.sendToClient(new ServerResponse(false, null, "Username already exists. Please choose another."));
-				        return;
-				    }
-				    if (db.emailExists(receivedSub.getEmail())) {
-				        client.sendToClient(new ServerResponse(false, null, "Email already registered. Use a different email."));
-				        return;
-				    }
-				    if (db.phoneExists(receivedSub.getPhoneNum())) {
-				        client.sendToClient(new ServerResponse(false, null, "Phone number already in use."));
-				        return;
-				    }
-				    if (db.idExists(receivedSub.getUserId())) {
-				        client.sendToClient(new ServerResponse(false, null, "ID already in use. Please verify the subscriber is not already registered."));
-				        return;
-				    }
+					// Step 0: Check if username, email, phone or ID already exists
+					if (db.usernameExists(receivedSub.getUsername())) {
+						client.sendToClient(new ServerResponse(false, null, "Username already exists. Please choose another."));
+						return;
+					}
+					if (db.emailExists(receivedSub.getEmail())) {
+						client.sendToClient(new ServerResponse(false, null, "Email already registered. Use a different email."));
+						return;
+					}
+					if (db.phoneExists(receivedSub.getPhoneNum())) {
+						client.sendToClient(new ServerResponse(false, null, "Phone number already in use."));
+						return;
+					}
+					if (db.idExists(receivedSub.getUserId())) {
+						client.sendToClient(new ServerResponse(false, null, "ID already in use. Please verify the subscriber is not already registered."));
+						return;
+					}
 
-				    // Step 1: Generate subscriberCode and tagId
-				    int newCode = db.getNextSubscriberCode();
-				    String newTag = db.generateNextTagId();
-				    receivedSub.setSubscriberCode(newCode);
-				    receivedSub.setTagId(newTag);
+					// Step 1: Generate subscriberCode and tagId
+					int newCode = db.getNextSubscriberCode();
+					String newTag = db.generateNextTagId();
+					receivedSub.setSubscriberCode(newCode);
+					receivedSub.setTagId(newTag);
 
-				    // Step 2: Generate random password
-				    String generatedPassword = generateRandomPassword();
+					// Step 2: Generate random password
+					String generatedPassword = generateRandomPassword();
 
-				    // Step 3: Insert user
-				    boolean userSuccess = db.insertUser(new User(
-				        receivedSub.getUsername(),
-				        generatedPassword,
-				        "Subscriber"
-				    ));
+					// Step 3: Insert user
+					boolean userSuccess = db.insertUser(new User(
+							receivedSub.getUsername(),
+							generatedPassword,
+							"Subscriber"
+							));
 
-				    if (!userSuccess) {
-				        client.sendToClient(new ServerResponse(false, null, "Failed to insert user. Try again later."));
-				        return;
-				    }
+					if (!userSuccess) {
+						client.sendToClient(new ServerResponse(false, null, "Failed to insert user. Try again later."));
+						return;
+					}
 
-				    // Step 4: Insert subscriber
-				    boolean subSuccess = db.insertSubscriber(receivedSub);
+					// Step 4: Insert subscriber
+					boolean subSuccess = db.insertSubscriber(receivedSub);
 
-				    if (subSuccess) {
-				        // Step 5: Send password to email
-				        String content = String.format("""
-				            Hello %s,
+					if (subSuccess) {
+						// Step 5: Send password to email
+						String content = String.format("""
+								Hello %s,
 
-				            Your registration to the BPARK system was successful!
+								Your registration to the BPARK system was successful!
 
-				            Login credentials:
-				            - Username: %s
-				            - Temporary Password: %s
+								Login credentials:
+								- Username: %s
+								- Temporary Password: %s
 
-				            You can now log in using these credentials.
+								You can now log in using these credentials.
 
-				            Thank you,
-				            BPARK Team
-				            """, receivedSub.getFirstName(), receivedSub.getUsername(), generatedPassword);
+								Thank you,
+								BPARK Team
+								""", receivedSub.getFirstName(), receivedSub.getUsername(), generatedPassword);
 
-				        sendEmail.sendEmail(receivedSub.getEmail(), content, TypeOfMail.GENERIC_MESSAGE);
+						sendEmail.sendEmail(receivedSub.getEmail(), content, TypeOfMail.GENERIC_MESSAGE);
 
-				        client.sendToClient(new ServerResponse(true, receivedSub, "Subscriber registered successfully. Login details sent via email."));
-				    } else {
-				        client.sendToClient(new ServerResponse(false, null, "Failed to insert subscriber. Try again."));
-				    }
-				    return;
+						client.sendToClient(new ServerResponse(true, receivedSub, "Subscriber registered successfully. Login details sent via email."));
+					} else {
+						client.sendToClient(new ServerResponse(false, null, "Failed to insert subscriber. Try again."));
+					}
+					return;
 				}
 
 
@@ -572,7 +557,7 @@ public class Server extends AbstractServer {
 		}
 	}
 
-	
+
 
 	/**
 	 * Logs new client connections.
@@ -639,20 +624,20 @@ public class Server extends AbstractServer {
 
 		return list;
 	}
-	
+
 	/**
 	 * Generates a random 8-character alphanumeric password.
 	 *
 	 * @return random password
 	 */
 	private String generateRandomPassword() {
-	    String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	    StringBuilder sb = new StringBuilder();
-	    for (int i = 0; i < 8; i++) {
-	        int idx = (int) (Math.random() * chars.length());
-	        sb.append(chars.charAt(idx));
-	    }
-	    return sb.toString();
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 8; i++) {
+			int idx = (int) (Math.random() * chars.length());
+			sb.append(chars.charAt(idx));
+		}
+		return sb.toString();
 	}
 
 }

@@ -77,7 +77,7 @@ public class ClientController extends AbstractClient {
 	private Subscriber subscriber;
 
 	private String password;
-	
+
 
 	/**
 	 * Constructs a new ClientController instance.
@@ -113,33 +113,33 @@ public class ClientController extends AbstractClient {
 	public void setViewParkingHistoryController(ViewParkingHistoryController viewParkingHistoryController) {
 		this.viewParkingHistoryController = viewParkingHistoryController;
 	}
-	
+
 	public void setMainController(MainController mainController) {
 		this.mainController=mainController;
 	}
-	
+
 	public void setTerminalController(TerminalMainLayoutController terminalController) {
 		this.terminalController=terminalController;
 	}
-	
+
 	public void setParkingReportController(ParkingReportController parkingReportController) {
 		this.parkingReportController = parkingReportController;
 	}
 
 	public void setStaffMainLayoutController(StaffMainLayoutController controller) {
-	    this.staffMainLayoutController = controller;
+		this.staffMainLayoutController = controller;
 	}
-	
+
 	public void setExtendParkingController(ExtendParkingController controller) {
 		this.extendParkingController = controller;
 	}
-	
+
 	public void setRegisterSubscriberController(RegisterSubscriberController controller) {
-	    this.registerSubscriberController = controller;
+		this.registerSubscriberController = controller;
 	}
-	
+
 	public void setAvailabilityController(AvailabilityController ctrl) {
-	    this.availabilityController = ctrl;
+		this.availabilityController = ctrl;
 	}
 
 
@@ -160,13 +160,13 @@ public class ClientController extends AbstractClient {
 	public void setSubscriberMainController(SubscriberMainController controller) {
 		this.subscriberMainController = controller;
 	}
-	
+
 	public void setViewActiveParkingsController(ViewActiveParkingsController controller) {
-	    this.viewActiveParkingsController = controller;
+		this.viewActiveParkingsController = controller;
 	}
-	
+
 	public void setViewSubscribersInfoController(ViewSubscribersInfoController c) {
-	    this.viewSubscribersInfoController = c;
+		this.viewSubscribersInfoController = c;
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class ClientController extends AbstractClient {
 		this.newDeliveryController = controller;
 
 	}
-	
+
 	public void setViewActiveParkingInfoController(ViewActiveParkingInfoController viewActiveParkingInfoController) {
 		this.viewActiveParkingInfoController = viewActiveParkingInfoController;
 	}
@@ -263,25 +263,25 @@ public class ClientController extends AbstractClient {
 
 		Platform.runLater(() -> {
 
-			
 
-			
+
+
 			if (!response.isSucceed() && loginController != null
 					&& response.getMsg().toLowerCase().contains("invalid")) {
 				loginController.handleLoginFailure(response.getMsg());
 				return;
 			}
-			
-			
+
+
 			System.out.println("Server response msg: " + response.getMsg());
 			System.out.println("Success? " + response.isSucceed());
 			// General error message popup (only if not handled before)
 			if (!response.isSucceed()) {
-				
+
 				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
 			}
-			
-			
+
+
 			if (response.isSucceed()&& "Parking report loaded.".equals(response.getMsg())) {
 				if(parkingReportController!=null) {
 					parkingReportController.setParkingReport((ParkingReport)response.getData());
@@ -289,7 +289,7 @@ public class ClientController extends AbstractClient {
 				}
 				return;
 			}
-			
+
 			else if (response.isSucceed() && response.getData() instanceof User user) {
 				if (loginController != null) {
 					loginController.handleLoginSuccess(user);
@@ -304,16 +304,16 @@ public class ClientController extends AbstractClient {
 				}
 			}
 
-			
-			
+
+
 			else if (response.isSucceed() && response.getMsg().equals("Parking history data loaded successfully.")) {
 				if (viewParkingHistoryController != null) {
 					viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
 				}
 			}
-			
-		
-			
+
+
+
 			// display orders of subscriber in table
 			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
 					&& response.getMsg().equals("Orders of subscriber displayed successfully.")) {
@@ -323,9 +323,9 @@ public class ClientController extends AbstractClient {
 				}
 				return;
 			}
-			
-			
-			
+
+
+
 			else if(response.isSucceed()&&response.getMsg().equals("No orders.")) {
 				if (watchAndCancelOrdersController != null) {
 					watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
@@ -389,31 +389,31 @@ public class ClientController extends AbstractClient {
 			if (response.isSucceed() && response.getData() instanceof Subscriber) {
 				setSubscriber((Subscriber) response.getData());
 			}
-			
+
 			// "all_subscribers"  rows = List<Object[]> { [0]=Subscriber , [1]=Integer lateCount }
 			if (response.isSucceed() && "all_subscribers".equals(response.getMsg())) {
 
-			    ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
+				ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
 
-			    System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
+				System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
 
-			    List<Subscriber> subs = new ArrayList<>();
-			    Map<Subscriber, Integer> lateMap = new HashMap<>();
+				List<Subscriber> subs = new ArrayList<>();
+				Map<Subscriber, Integer> lateMap = new HashMap<>();
 
-			    for (Object[] r : rows) {
-			        Subscriber s = (Subscriber) r[0];
-			        int late = (Integer) r[1];
-			        subs.add(s);
-			        lateMap.put(s, late);
-			        System.out.println(" -> " + s.getUsername() + ", late: " + late);
-			    }
+				for (Object[] r : rows) {
+					Subscriber s = (Subscriber) r[0];
+					int late = (Integer) r[1];
+					subs.add(s);
+					lateMap.put(s, late);
+					System.out.println(" -> " + s.getUsername() + ", late: " + late);
+				}
 
-			    if (viewSubscribersInfoController != null)
-			        viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
+				if (viewSubscribersInfoController != null)
+					viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
 
-			    return; // handled
+				return; // handled
 			}
-			
+
 			else if (response.isSucceed()&&response.getMsg().equals("Active parking info loaded successfully.")) {
 				if(viewActiveParkingInfoController!=null) {
 					viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
@@ -421,51 +421,51 @@ public class ClientController extends AbstractClient {
 				}
 				return;
 			}
-			
+
 			// staff -view current active parking events
 			if (response.isSucceed() && "active_parkings".equals(response.getMsg())) {
-			    ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
+				ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
 
-			    if (viewActiveParkingsController != null)
-			        viewActiveParkingsController.onActiveParkingsReceived(events);
+				if (viewActiveParkingsController != null)
+					viewActiveParkingsController.onActiveParkingsReceived(events);
 
-			    return; // handled
+				return; // handled
 			}
-			
+
 			// Handle extension response (ExtendParkingController)
 			if (response.getMsg() != null &&
-				    (response.getMsg().toLowerCase().contains("parking session extended successfully") ||
-				     response.getMsg().toLowerCase().contains("no active parking session found"))) {
+					(response.getMsg().toLowerCase().contains("parking session extended successfully") ||
+							response.getMsg().toLowerCase().contains("no active parking session found"))) {
 
-				    if (extendParkingController != null) {
-				        extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
-				    }
-
-				    return;
+				if (extendParkingController != null) {
+					extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
 				}
+
+				return;
+			}
 
 			// Handle registration response
 			else if (response.getMsg().toLowerCase().contains("subscriber registered")
-			        || response.getMsg().toLowerCase().contains("failed to insert subscriber")
-			        || response.getMsg().toLowerCase().contains("insert user")) {
+					|| response.getMsg().toLowerCase().contains("failed to insert subscriber")
+					|| response.getMsg().toLowerCase().contains("insert user")) {
 
-			    if (registerSubscriberController != null) {
-			        registerSubscriberController.showStatusFromServer(response.getMsg(), response.isSucceed());
-			    } else {
-			        UiUtils.showAlert("Subscriber Registration", response.getMsg(),
-			            response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
-			    }
-			    return;
+				if (registerSubscriberController != null) {
+					registerSubscriberController.showStatusFromServer(response.getMsg(), response.isSucceed());
+				} else {
+					UiUtils.showAlert("Subscriber Registration", response.getMsg(),
+							response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+				}
+				return;
 			}
-			
+
 			// parking_availability (Array of 3 ints)
 			if (response.isSucceed() &&
-			    "parking_availability".equals(response.getMsg()) &&
-			    response.getData() instanceof Object[] stats &&
-			    availabilityController != null) {
+					"parking_availability".equals(response.getMsg()) &&
+					response.getData() instanceof Object[] stats &&
+					availabilityController != null) {
 
-			    availabilityController.updateAvailability(stats);
-			    return;
+				availabilityController.updateAvailability(stats);
+				return;
 			}
 
 
@@ -504,62 +504,60 @@ public class ClientController extends AbstractClient {
 				}
 
 				// 7 - handle no free parking spaces
-				if (response.getMsg().toLowerCase().contains("the Parking Lot is Full")) {
+				if (response.getMsg().toLowerCase().contains("the parking lot is full")) {
 					newDeliveryController.setParkingLotStatus(false);
 				}
 
 				// 8 - handle there's free parking space
 				if (response.getMsg().toLowerCase().contains("there is free parking space")) {
+					// gathering the available parking space
+					int parkingSpace = (int) response.getData();
+					// setting the gathered parking space in the delivery controller
+					newDeliveryController.setParkingSpace(parkingSpace);
+					// setting the status of the parking lot to not be full
 					newDeliveryController.setParkingLotStatus(true);
 				}
 
-				// 9 - handle a parking space that is found
-				if (response.getMsg().toLowerCase().contains("found free parking space")) {
-					// gathering the available parking space
-					int parkingSpace = (int) response.getData();
-					newDeliveryController.parkingSpaceFuture.complete(parkingSpace);
-				}
-
-				// 10 - handle a matched vehicleID to the asked subscriber
+				// 9 - handle a matched vehicleID to the asked subscriber
 				if (response.getMsg().toLowerCase().contains("found matched vehicle")) {
 					// gathering the matched vehicle
 					String vehicleID = (String) response.getData();
 					newDeliveryController.vehicleIdFuture.complete(vehicleID);
 				}
 
-				// 11 - handle successful addition of adding a parking event into the DB
+				// 10 - handle successful addition of adding a parking event into the DB
 				if (response.getMsg().toLowerCase().contains("added parking event successfully")) {
 					newDeliveryController.successfulDelivery();
 				}
 
-				// 12 - handle existing tag
+				// 11 - handle existing tag
 				if (response.getMsg().toLowerCase().contains("tag exists")) {
 					newDeliveryController.tagFound();
 				}
 
-				// 13 - handle tag doesn't exists
+				// 12 - handle tag doesn't exists
 				if (response.getMsg().toLowerCase().contains("tag does not exists")) {
 					newDeliveryController.tagNotFound();
 				}
 
-				// 14 - handle subscriber found by a tag, deliver the vehicle with a parking
+				// 13 - handle subscriber found by a tag, deliver the vehicle with a parking
 				// event creation
 				if (response.getMsg().toLowerCase().contains("subscriber with matching tag has been found")) {
 					int subCode = (int) response.getData();
 					newDeliveryController.subCodeFuture.complete(subCode);
 				}
 
-				// 15 - handle subscriber isn't inside the parking lot
+				// 14 - handle subscriber isn't inside the parking lot
 				if (response.getMsg().toLowerCase().contains("the subscriber didn't entered his vehicle yet")) {
 					newDeliveryController.checkIfTheresReservation();
 				}
 
-				// 16 - handle vehicle with the matched tagId isn't inside the parking lot
+				// 15 - handle vehicle with the matched tagId isn't inside the parking lot
 				if (response.getMsg().toLowerCase().contains("the tag isn't inside")) {
 					newDeliveryController.findMatchedSubToTheTag();
 				}
 
-				// 17 - handle subscriber is already inside the parking lot
+				// 16 - handle subscriber is already inside the parking lot
 				if (response.getMsg().toLowerCase().contains("the vehicle is already inside the parking lot")) {
 					newDeliveryController.vehicleIsAlreadyInside();
 				}
@@ -708,7 +706,7 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}
 	}
-	
+
 	public void forgotMyParkingCode(int validatedSubscriberCode) {
 		try {
 			sendToServer(new Object[] { "forgotMyParkingCode", validatedSubscriberCode });
@@ -716,96 +714,96 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}
 	}
-	
-    /**
-     * Requests a list of all subscribers and their late pickup counts.
-     * Used in staff views for monitoring subscriber activity.
-     */
-    public void requestAllSubscribers() {
 
-	    try {
-	        System.out.println("[DEBUG] Sending 'get_all_subscribers' to server");
-	        sendToServer(new Object[] { "get_all_subscribers" });
-	    } catch (IOException e) {
-	        System.err.println("Failed to send 'get_all_subscribers' request: " + e.getMessage());
-	    }
+	/**
+	 * Requests a list of all subscribers and their late pickup counts.
+	 * Used in staff views for monitoring subscriber activity.
+	 */
+	public void requestAllSubscribers() {
+
+		try {
+			System.out.println("[DEBUG] Sending 'get_all_subscribers' to server");
+			sendToServer(new Object[] { "get_all_subscribers" });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'get_all_subscribers' request: " + e.getMessage());
+		}
 	}
-	
-    /**
-     * Requests a list of all active parking events (vehicles currently inside).
-     * Used by staff to monitor current parking activity.
-     */
-    public void requestActiveParkingEvents() {
-	    try {
-	        sendToServer(new Object[] { "get_active_parkings" });
-	    } catch (IOException e) {
-	        System.err.println("Failed to send request for active parking events.");
-	        e.printStackTrace();
-	    }
+
+	/**
+	 * Requests a list of all active parking events (vehicles currently inside).
+	 * Used by staff to monitor current parking activity.
+	 */
+	public void requestActiveParkingEvents() {
+		try {
+			sendToServer(new Object[] { "get_active_parkings" });
+		} catch (IOException e) {
+			System.err.println("Failed to send request for active parking events.");
+			e.printStackTrace();
+		}
 	}
-    
-    /**
-     * Requests all active parking events of subscriber
-     * Used by subscriber
-     */
-    public void getDetailsOfActiveInfo() {
+
+	/**
+	 * Requests all active parking events of subscriber
+	 * Used by subscriber
+	 */
+	public void getDetailsOfActiveInfo() {
 		try {
 			sendToServer(new Object[] { "getDetailsOfActiveInfo", subscriber });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'getDetailsOfActiveInfo' request: " + e.getMessage());
 		}
-    }
-    
-    /**
-     * Sends a request to extend the parking session based on parking code.
-     *
-     * @param parkingCode the parking code entered by the subscriber
-     */
-    public void extendParking(int parkingCode, String subscriberCode) {
-        try {
-        	sendToServer(new Object[] { "extendParking", parkingCode, subscriberCode });
-        } catch (IOException e) {
-            System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Sends a request to register a new subscriber.
-     * Subscriber code and tag ID will be assigned by the server.
-     *
-     * @param subscriber the subscriber to register (without code and tag)
-     */
-    public void registerSubscriber(Subscriber subscriber) {
-        try {
-            sendToServer(new Object[] { "registerSubscriber", subscriber });
-        } catch (IOException e) {
-            System.err.println("Failed to send 'registerSubscriber' request: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Requests parking availability stats from the server.
-     * The response includes total, occupied, and available spots.
-     */
-    public void requestParkingAvailability() {
-        try {
-            sendToServer(new Object[] { "get_parking_availability" });
-        } catch (IOException e) {
-            System.err.println("Failed to send 'get_parking_availability' request: " + e.getMessage());
-        }
-    }
+	}
 
-    /**
-     * request parking report data from server.
-     * @param date (of requested report) 
-     */
-    public void getParkingReport(Date date) {
-    	try {
-    		System.out.println("get1");
-            sendToServer(new Object[] { "GetParkingReport", date });
-        } catch (IOException e) {
-            System.err.println("Failed to send 'GetParkingReport' request: " + e.getMessage());
-        }
-    }
+	/**
+	 * Sends a request to extend the parking session based on parking code.
+	 *
+	 * @param parkingCode the parking code entered by the subscriber
+	 */
+	public void extendParking(int parkingCode, String subscriberCode) {
+		try {
+			sendToServer(new Object[] { "extendParking", parkingCode, subscriberCode });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Sends a request to register a new subscriber.
+	 * Subscriber code and tag ID will be assigned by the server.
+	 *
+	 * @param subscriber the subscriber to register (without code and tag)
+	 */
+	public void registerSubscriber(Subscriber subscriber) {
+		try {
+			sendToServer(new Object[] { "registerSubscriber", subscriber });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'registerSubscriber' request: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Requests parking availability stats from the server.
+	 * The response includes total, occupied, and available spots.
+	 */
+	public void requestParkingAvailability() {
+		try {
+			sendToServer(new Object[] { "get_parking_availability" });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'get_parking_availability' request: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * request parking report data from server.
+	 * @param date (of requested report) 
+	 */
+	public void getParkingReport(Date date) {
+		try {
+			System.out.println("get1");
+			sendToServer(new Object[] { "GetParkingReport", date });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'GetParkingReport' request: " + e.getMessage());
+		}
+	}
 
 }

@@ -84,7 +84,7 @@ public class VehicleDeliveryController implements ClientAware{
 	/**IF VEHICLE IS ENTERED ALREADY WILL VISIBILITY TOGGLINGS**/
 	@FXML
 	private Label vehicleHasEnteredLabel; // Label for showing whether the vehicle is already inside or not
-	
+
 	/**AFTER PRESSING DELIVER VIA SUBSCRIBER CODE OR VERIFY TAG AND DELIVER => FOR STATUS**/
 	@FXML
 	private Label deliverStatusUpdateLabel;  // Label for confirming whether the delivery happened successfully or not
@@ -120,11 +120,11 @@ public class VehicleDeliveryController implements ClientAware{
 	// The string will be holding the tag-id
 	private String tag;
 
+	// THe integer will be holding the parkingSpace
+	private int parkingSpace;
+
 	// The boolean will be holding true if there's a free space or false if no
 	public boolean parkingLotStatus = false;
-
-	// This parameter waits until there will be a value received for parkingSpace
-	public CompletableFuture<Integer> parkingSpaceFuture;
 
 	// This parameter waits until there will be a value received for vehicleID
 	public CompletableFuture<String> vehicleIdFuture;
@@ -330,7 +330,7 @@ public class VehicleDeliveryController implements ClientAware{
 
 		TagCodeField.setDisable(true);
 		submitTagButton.setVisible(false);
-		
+
 		// Sets up the label that will tell the user that the vehicle is already inside
 		vehicleHasEnteredLabel.setVisible(true);
 		vehicleHasEnteredLabel.setStyle("-fx-text-fill: red;");
@@ -432,10 +432,10 @@ public class VehicleDeliveryController implements ClientAware{
 	public void findMatchedSubToTheTag() {
 		try {
 			client.sendToServer(new Object[] {"findMatchedSubToTheTag", tag});
-			
+
 			// Initialize the CompletableFutures
 			subCodeFuture = new CompletableFuture<>();
-						
+
 			// When we have the tag, we will seek for the subscriber code
 			subCodeFuture.thenAccept(codeInt -> {
 				this.codeInt = codeInt;
@@ -454,7 +454,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * else, it processes to a regular delivery.
 	 */
 	@FXML
-	public void handleDelivery() {
+	public synchronized void handleDelivery() {
 		if(hasReservation) {handleDeliveryViaReservation();}
 
 		// If there's no reservation, we will check if we can enter the vehicle on a regular
@@ -567,6 +567,13 @@ public class VehicleDeliveryController implements ClientAware{
 	}
 
 	/**
+	 * A setter for the parking space ID
+	 */
+	public void setParkingSpace(int parkingSpace) {
+		this.parkingSpace = parkingSpace;
+	}
+
+	/**
 	 * Updates the internal parking lot status based on server response, if there is no free space then the labels will show the status.
 	 * If there is free space inside the parking lot then the method will continue to the vehicle delivery.
 	 */
@@ -578,6 +585,25 @@ public class VehicleDeliveryController implements ClientAware{
 			deliverStatusUpdateLabel.setText("The Parking Lot is Full!");
 			deliverStatusUpdateLabel.setStyle("-fx-text-fill: red;");
 			deliverStatusUpdateLabel.setVisible(true);
+
+			subscriberCodeField.setDisable(true);
+			TagCodeField.setDisable(true);
+
+			submitButton.setVisible(false);
+			submitTagButton.setVisible(false);
+
+
+			subscriberCodeLabel.setVisible(false);
+			ReservationORRegularEnteranceLabel.setVisible(false);
+			ReservationConfirmationCodeField.setVisible(false);
+			ReservationORRegularEnteranceButton.setVisible(false);
+			ReservationConfirmationCodeLabel.setVisible(false);
+			InsertionUpdateLabel.setVisible(false);
+			TagStatusUpdateLabel.setVisible(false);
+			parkingCodeLabel.setVisible(false);
+			vehicleHasEnteredLabel.setVisible(false);
+
+
 		}
 		else {
 			///////////////////////////////////////////
@@ -589,20 +615,6 @@ public class VehicleDeliveryController implements ClientAware{
 		// Starting the deliver vehicle process after knowing whether there is free space or no
 		deliverVehicle();
 
-	}
-
-	/**
-	 * Sends a request to the server to find an available parking space.
-	 * The server will respond with a specific free parking spot if one exists.
-	 */
-	private void searchingForFreeParkingSpace() {
-		try {
-			client.sendToServer(new Object[] {"FindFreeParkingSpace"});
-
-		} catch (IOException e) {
-			//Log the error if the update request fails to send
-			System.err.println("Failed to send 'FindFreeParkingSpace' request to server: " + e.getMessage());
-		}
 	}
 
 	/**
@@ -632,44 +644,38 @@ public class VehicleDeliveryController implements ClientAware{
 		// If there are no free space then we won't allow anyone to park in the parking lot
 		if(!parkingLotStatus) {return;}
 
-		// Seeking for a specific parking space for the subscriber's vehicle
-		searchingForFreeParkingSpace();
-
 		// Generating parking code
 		parkingCode = createParkingCode();
 
-		// Initialize the CompletableFutures
-		parkingSpaceFuture = new CompletableFuture<>();
+		// Initialize the CompletableFuture of the vehicleID
 		vehicleIdFuture = new CompletableFuture<>();
 
-		// When parkingSpace is received, we will seek for the vehicleID
-		parkingSpaceFuture.thenAccept(parkingSpace -> {
-			seekVehicleID();
+		// We will seek for the vehicleID before going and making the parking event object
 
-			// When vehicle ID is received, create the ParkingEvent and send it
-			vehicleIdFuture.thenAcceptAsync(vehicleID -> {
-				// Get the current date and time in Israel
+		seekVehicleID();
 
-
-				ZonedDateTime nowInIsrael = ZonedDateTime.now(ZoneId.of("Asia/Jerusalem"));
-				LocalDate entryDate = nowInIsrael.toLocalDate();
-				LocalTime entryTime = nowInIsrael.toLocalTime();
-
-				// Creating a ParkingEvent entity, will send the object to the server
-				ParkingEvent parkingEvent = new ParkingEvent(codeInt, parkingSpace, entryDate, entryTime, null, null, false, vehicleID, "Braude", parkingCode);
+		// When vehicle ID is received, create the ParkingEvent and send it
+		vehicleIdFuture.thenAcceptAsync(vehicleID -> {
+			// Get the current date and time in Israel
 
 
-				// Sending to the Server Parking Event that contains every field except exitDate and exitHour: we can't tell by now which values they'll hold
-				// both of these fields will hold null
-				try {
-					client.sendToServer(new Object[] {"DeliverVehicle", parkingEvent});
-				} catch (IOException e) {
-					//Log the error if the update request fails to send
-					System.err.println("Failed to send 'DeliverVehicle' request to server: " + e.getMessage());
-				}
-			});
+			ZonedDateTime nowInIsrael = ZonedDateTime.now(ZoneId.of("Asia/Jerusalem"));
+			LocalDate entryDate = nowInIsrael.toLocalDate();
+			LocalTime entryTime = nowInIsrael.toLocalTime();
+
+			// Creating a ParkingEvent entity, will send the object to the server
+			ParkingEvent parkingEvent = new ParkingEvent(codeInt, parkingSpace, entryDate, entryTime, null, null, false, vehicleID, "Braude", parkingCode);
+
+
+			// Sending to the Server Parking Event that contains every field except exitDate and exitHour: we can't tell by now which values they'll hold
+			// both of these fields will hold null
+			try {
+				client.sendToServer(new Object[] {"DeliverVehicle", parkingEvent});
+			} catch (IOException e) {
+				//Log the error if the update request fails to send
+				System.err.println("Failed to send 'DeliverVehicle' request to server: " + e.getMessage());
+			}
 		});
-
 	}
 
 	/**
@@ -723,3 +729,4 @@ public class VehicleDeliveryController implements ClientAware{
 	}
 
 }
+

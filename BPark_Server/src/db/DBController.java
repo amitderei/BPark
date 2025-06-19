@@ -612,21 +612,41 @@ public class DBController {
 	 * @return true if there are available spots (occupied < total), false
 	 *         otherwise.
 	 */
-	public boolean hasAvailableSpots(String parkingLotName) {
+	public synchronized int hasAvailableSpots(String parkingLotName) {
 		String query = "SELECT totalSpots, occupiedSpots FROM bpark.parkinglot WHERE NameParkingLot = ?";
+
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, parkingLotName);
 
 			ResultSet rs = stmt.executeQuery();
-
 			if (rs.next()) {
 				int totalSpots = rs.getInt("totalSpots");
 				int occupiedSpots = rs.getInt("occupiedSpots");
 
+				if(occupiedSpots < totalSpots) {
+					// Updating the amount of occupied parking space by +1
+					addOccupiedParkingSpace();
+
+					// Searching for a free parking space
+					int parkingSpace = findParkingSpace();
+
+					// Updating the parking space itself to be on a occupied status
+					updateParkingSpaceOccupied(parkingSpace);
+
+					// Returning the parking space that has been found
+					return parkingSpace;
+				}
+
 				// return true if there are more parking spots that occupied spots, false
-				// otherwise
-				return occupiedSpots < totalSpots;
+				// otherwise false
+				return -1;
 			}
 
 		} catch (SQLException e) {
@@ -634,9 +654,8 @@ public class DBController {
 		}
 
 		System.out.println("error");
-		return false; // Return false if parking lot not found or error occurred
+		return -1; // Return false if parking lot not found or error occurred
 	}
-
 	/**
 	 * Finds the first available parking space that is not currently occupied.
 	 *
@@ -645,7 +664,7 @@ public class DBController {
 	 *
 	 * @return the parking space number if available, if not found then -1.
 	 */
-	public int findParkingSpace() {
+	private int findParkingSpace() {
 		String query = "SELECT parking_space FROM parkingspaces WHERE is_occupied = 0 LIMIT 1";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
@@ -693,7 +712,7 @@ public class DBController {
 	 * Increments the number of occupied parking spots in the 'parkinglot' table by
 	 * 1.
 	 */
-	public void addOccupiedParkingSpace() {
+	private void addOccupiedParkingSpace() {
 		String query = "UPDATE bpark.parkinglot SET occupiedSpots = occupiedSpots + 1 WHERE NameParkingLot = 'Braude'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -710,7 +729,7 @@ public class DBController {
 	 * @param parkingSpace The parking space number to mark as occupied (as a
 	 *                     String).
 	 */
-	public void updateParkingSpaceOccupied(int parkingSpace) {
+	private void updateParkingSpaceOccupied(int parkingSpace) {
 		String query = "UPDATE bpark.parkingspaces SET is_occupied = 1 WHERE parking_space = ?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1134,28 +1153,28 @@ public class DBController {
 	 *         including a message explaining the result
 	 */
 	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
-	    final String sql =
-	        "UPDATE bpark.parkingEvent " +
-	        "SET wasExtended = TRUE " +
-	        "WHERE parkingCode = ? " +
-	        "AND subscriberCode = ? " +
-	        "AND exitDate IS NULL AND exitHour IS NULL " +
-	        "AND wasExtended = FALSE";
+		final String sql =
+				"UPDATE bpark.parkingEvent " +
+						"SET wasExtended = TRUE " +
+						"WHERE parkingCode = ? " +
+						"AND subscriberCode = ? " +
+						"AND exitDate IS NULL AND exitHour IS NULL " +
+						"AND wasExtended = FALSE";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setInt(1, parkingCode);
-	        stmt.setString(2, subscriberCode);
-	        int rowsAffected = stmt.executeUpdate();
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, parkingCode);
+			stmt.setString(2, subscriberCode);
+			int rowsAffected = stmt.executeUpdate();
 
-	        if (rowsAffected > 0) {
-	            return new ServerResponse(true, null, "Parking session extended successfully.");
-	        } else {
-	            return new ServerResponse(false, null, "Invalid code.");
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        return new ServerResponse(false, null, "Database error: " + e.getMessage());
-	    }
+			if (rowsAffected > 0) {
+				return new ServerResponse(true, null, "Parking session extended successfully.");
+			} else {
+				return new ServerResponse(false, null, "Invalid code.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return new ServerResponse(false, null, "Database error: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -1464,7 +1483,7 @@ public class DBController {
 			e.printStackTrace();
 		}	
 	}
-	
+
 	/**
 	 * get the data from parking report schema of date that manager asked for.
 	 * @param date
