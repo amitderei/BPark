@@ -1375,6 +1375,7 @@ public class DBController {
 
 		return list;
 	}
+	
 
 	/**
 	 * Marks a subscriber as having been notified for being late. This sets the
@@ -1440,13 +1441,14 @@ public class DBController {
 	 * @param date
 	 * @return parking report
 	 */
-	private ParkingReport getDateForParkingReport(Date date) {
-		String query = "SELECT * FROM `bpark.parkingEvent` WHERE YEAR(entry_time)=? AND MONTH(entry_time)=?";
+	private ParkingReport getDataForParkingReport(Date date) {
+		String query = "SELECT * FROM parkingEvent WHERE YEAR(entryDate)=? AND MONTH(entryDate)=?";
 		LocalDate local = date.toLocalDate();
 		int year = local.getYear();
 		int month = local.getMonthValue();
 		int totalExtends = 0;
 		int totalEntries = 0;
+		int totalLates=0;
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, year);
 			stmt.setInt(2, month);
@@ -1456,8 +1458,11 @@ public class DBController {
 				if (rs.getBoolean("wasExtended")) {
 					totalExtends++;
 				}
+				if(rs.getBoolean("sendMsgForLating")) {
+					totalLates++;
+				}
 			}
-			return new ParkingReport(totalEntries, totalExtends);
+			return new ParkingReport(totalEntries, totalExtends, totalLates);
 		} catch (SQLException e) {
 			System.out.println("Error get data for parking report: " + e.getMessage());
 			e.printStackTrace();
@@ -1470,18 +1475,39 @@ public class DBController {
 	 * @param date
 	 */
 	public void createParkingReport(Date date) {
-		ParkingReport parkingReport=getDateForParkingReport(date);
-		String query="INSERT INTO bpark.parkingReport(dateOfParkingReport, totalEntries, totalExtends) VALUES (?, ?, ?);";
+		ParkingReport parkingReport=getDataForParkingReport(date);
+		String query="INSERT INTO parkingReport(dateOfParkingReport, totalEntries, totalExtends, totalLates) VALUES (?, ?, ?, ?);";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setDate(1, date);
 			stmt.setInt(2, parkingReport.getTotalEntries());
 			stmt.setInt(3, parkingReport.getTotalExtends());
+			stmt.setInt(4, parkingReport.getTotalLates());
 			stmt.executeUpdate();
 			System.out.println("Parking reoprt created!");
 		} catch (SQLException e) {
 			System.out.println("Error creating parking report: "+ e.getMessage());
 			e.printStackTrace();
 		}	
+	}
+	
+	/**
+	 * check existence of parking report on database for creating only the missing reports.
+	 * @param date (of month that we want to check)
+	 * @return true if exists. false if doesn't.
+	 */
+	public boolean parkingReportExists(Date date) {
+		String query="SELECT * FROM parkingReport WHERE dateOfParkingReport=?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setDate(1, date);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				return true;
+			}
+		} catch (SQLException e) {
+			System.out.println("Error check existence of parking report: "+ e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
@@ -1495,7 +1521,7 @@ public class DBController {
 			stmt.setDate(1, date);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				return new ParkingReport(rs.getInt("totalEntries"), rs.getInt("totalExtends"));
+				return new ParkingReport(rs.getInt("totalEntries"), rs.getInt("totalExtends"), rs.getInt("totalLates"));
 			}
 		} catch (SQLException e) {
 			System.out.println("Error get parking report: "+ e.getMessage());

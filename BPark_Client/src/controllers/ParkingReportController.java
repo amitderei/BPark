@@ -17,6 +17,9 @@ public class ParkingReportController implements ClientAware{
 	
 	@FXML
 	private PieChart parkingPieChart;
+	
+	@FXML
+	private PieChart latesPieChart;
 		
 	private ClientController client;
 	private ParkingReport parkingReport;
@@ -30,12 +33,20 @@ public class ParkingReportController implements ClientAware{
 	}
 	
 	public void setChart() {
-		ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
+		ObservableList<PieChart.Data> extendsChartData = FXCollections.observableArrayList(
 		        new PieChart.Data("Extends parking time", parkingReport.getTotalExtends()),
 		        new PieChart.Data("Not extends parking time", parkingReport.getTotalEntries()-parkingReport.getTotalExtends())
 		        );
-		parkingPieChart.setData(pieChartData);
+		ObservableList<PieChart.Data> latesChartData = FXCollections.observableArrayList(
+		        new PieChart.Data("Extends parking time", parkingReport.getTotalLates()),
+		        new PieChart.Data("Not extends parking time", parkingReport.getTotalEntries()-parkingReport.getTotalLates())
+		        );
+		parkingPieChart.setData(extendsChartData);
 		parkingPieChart.setTitle("Monthly Extends Pie");
+		latesPieChart.setData(latesChartData);
+		latesPieChart.setTitle("Monthly Lates Pie");
+		parkingPieChart.setLegendVisible(true);
+		latesPieChart.setLegendVisible(true);
 	}
 	
 	public void getParkingReportFromServer() {

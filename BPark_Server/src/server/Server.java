@@ -1,6 +1,8 @@
 package server;
 
 import ocsf.server.*;
+import reportService.MonthlyReportScheduler;
+
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
@@ -40,6 +42,7 @@ public class Server extends AbstractServer {
 		db = DBController.getInstance();
 		parkingEventChecker.setDaemon(true);
 		parkingEventChecker.start();
+		
 	}
 
 	/**
@@ -49,7 +52,7 @@ public class Server extends AbstractServer {
 	protected void serverStarted() {
 		db.connectToDB();
 		System.out.println("Server started on port " + getPort());
-
+		MonthlyReportScheduler.start();
 	}
 
 	/**
