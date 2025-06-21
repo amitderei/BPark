@@ -3,18 +3,16 @@ package controllers;
 import client.ClientController;
 
 /**
- * Marker for any JavaFX controller that needs a reference to the
- * central ClientController so it can communicate with the server.
- *
- * Implementations get the reference during their initialization
- * and keep it for later use.
+ * Interface for JavaFX controllers that need access to the ClientController.
+ * Classes that implement this interface will receive the ClientController
+ * during screen loading and can use it to communicate with the server.
  */
 public interface ClientAware {
 
     /**
-     * Injects the shared ClientController instance.
+     * Injects the active ClientController instance into the implementing class.
      *
-     * @param client the connected client controller
+     * @param client the client controller used for communication with the server
      */
     void setClient(ClientController client);
 }

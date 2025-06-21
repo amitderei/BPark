@@ -5,23 +5,24 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 /**
- * Dashboard header for staff roles (attendant / manager).
- * Presents a personalized greeting; more staff-specific
- * widgets can be added later.
+ * Dashboard header for staff roles (Attendant / Manager).
+ * Presents a personalized greeting on login.
+ * Additional widgets or metrics can be added in the future.
  */
 public class StaffMainController implements ClientAware {
 
-    /* ---------- FXML label ---------- */
-    @FXML private Label welcomeLabel;
+    /** Label that displays the personalized welcome message */
+    @FXML
+    private Label welcomeLabel;
 
-    /* ---------- runtime ---------- */
+    /** Reference to the shared client controller used for server communication */
     private ClientController client;
 
     /**
-     * Supplies the shared ClientController so the staff
-     * dashboard can trigger server actions when expanded.
+     * Injects the ClientController instance for server access.
+     * Used for future interactions or data retrieval.
      *
-     * @param client active client instance
+     * @param client the active client controller instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -29,9 +30,11 @@ public class StaffMainController implements ClientAware {
     }
 
     /**
-     * Updates the greeting text.
+     * Updates the welcome label with the staff member’s name or role.
+     * This method ensures the label is not null before updating,
+     * which makes it safe to call even during non-GUI testing.
      *
-     * @param nameOrRole text to display after "Welcome"
+     * @param nameOrRole the text to show after "Welcome,"
      */
     public void setWelcomeMessage(String nameOrRole) {
         if (welcomeLabel != null) {

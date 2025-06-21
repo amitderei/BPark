@@ -13,33 +13,37 @@ import ui.UiUtils;
 
 /**
  * Main layout for a guest session.
- * Top – standard toolbar (Home / Back / Exit).  
- * Left – small side-menu with a single action: spot availability lookup.  
- * Center – switches between guest screens according to user actions.
+ * Top – standard toolbar (Home / Back / Exit).<br>
+ * Left – side-menu with a single action: spot availability lookup.<br>
+ * Center – dynamically switches content based on user actions.
  */
 public class GuestMainLayoutController implements ClientAware {
 
-    /* ---------- FXML toolbar buttons ---------- */
+    /** Exit button – disconnects and closes the application */
     @FXML private Button btnExit;
+
+    /** Back button – returns to the selection screen */
     @FXML private Button btnBack;
+
+    /** Home button – loads the guest home screen */
     @FXML private Button btnHome;
 
-    /* ---------- FXML side-menu button ---------- */
+    /** Button that loads the live spot availability screen */
     @FXML private Button btnCheckAvailability;
 
-    /* ---------- Central placeholder pane ---------- */
+    /** Central placeholder where child screens are loaded */
     @FXML private AnchorPane center;
 
-    /* ---------- Client reference (injected) ---------- */
+    /** Reference to the shared client, used to communicate with the server */
     private ClientController client;
 
-    /* =====================================================
-     *  Framework hooks
-     * ===================================================== */
+    // =====================================================
+    // Framework hooks
+    // =====================================================
 
     /**
-     * JavaFX initialise hook – runs automatically once the FXML is loaded.
-     * Immediately loads the guest home screen into the centre pane.
+     * Runs automatically after the FXML file is loaded.
+     * Loads the guest home screen into the center pane.
      */
     @FXML
     public void initialize() {
@@ -47,44 +51,48 @@ public class GuestMainLayoutController implements ClientAware {
     }
 
     /**
-     * Supplies the shared ClientController so this layout
-     * can pass it to child screens that implement ClientAware.
+     * Receives the shared ClientController so it can be passed to
+     * dynamically loaded child screens.
      *
-     * @param client active client instance, null before connection
+     * @param client active client instance
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
-    /* =====================================================
-     *  Toolbar actions
-     * ===================================================== */
+    // =====================================================
+    // Toolbar actions
+    // =====================================================
 
-    /** Loads the simple "Welcome, Guest" screen. */
+    /**
+     * Loads the static "Welcome, Guest" screen into the center pane.
+     */
     @FXML
     private void handleHomeClick() {
         loadScreen("/client/GuestMainScreen.fxml");
     }
 
-    /** Returns to the selection screen (login / guest). */
+    /**
+     * Navigates back to the user-type selection screen (guest / login).
+     */
     @FXML
     private void handleBackClick() {
         UiUtils.loadScreen(btnBack,
-                           "/client/SelectionScreen.fxml",
-                           "BPARK – Welcome",
-                           client);
+                "/client/SelectionScreen.fxml",
+                "BPARK – Welcome",
+                client);
     }
 
     /**
-     * Gracefully disconnects from the server (if connected)
-     * and closes the JavaFX application.
+     * Disconnects from the server if connected, and closes the app.
+     * Triggered by the Exit button.
      */
     @FXML
     private void handleExitClick() {
         try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[] { "disconnect" });
+                client.sendToServer(new Object[]{"disconnect"});
                 client.closeConnection();
             }
         } catch (Exception ignored) {
@@ -94,39 +102,41 @@ public class GuestMainLayoutController implements ClientAware {
         System.exit(0);
     }
 
-    /* =====================================================
-     *  Side-menu action
-     * ===================================================== */
+    // =====================================================
+    // Side-menu actions
+    // =====================================================
 
-    /** Opens the "Live Availability" screen. */
+    /**
+     * Loads the live availability screen showing number of free spots.
+     */
     @FXML
     private void handleCheckAvailability() {
         loadScreen("/client/AvailabilityScreen.fxml");
     }
 
-    /* =====================================================
-     *  Internal helper
-     * ===================================================== */
+    // =====================================================
+    // Internal helper
+    // =====================================================
 
     /**
-     * Replaces the content of the centre pane with the given FXML screen.
-     * If the loaded controller implements ClientAware it receives the
-     * client reference automatically.
+     * Loads the specified FXML screen into the center pane and
+     * injects the ClientController into the child controller
+     * if it implements ClientAware.
      *
-     * @param fxml path to the FXML resource inside the classpath
+     * @param fxml path to the FXML file within the classpath
      */
     private void loadScreen(String fxml) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             Parent content = loader.load();
 
-            // Pass client reference to child controllers that need it
             Object ctrl = loader.getController();
-            if (ctrl instanceof ClientAware aware) {
-                aware.setClient(client);
-            }
 
-            // Special case: Availability screen needs immediate data refresh
+            // Automatically wire client to child controllers
+            if (ctrl instanceof ClientAware aware)
+                aware.setClient(client);
+
+            // Special handling for availability screen
             if (ctrl instanceof AvailabilityController ac) {
                 ac.setClient(client);
                 client.setAvailabilityController(ac);
@@ -136,9 +146,8 @@ public class GuestMainLayoutController implements ClientAware {
             center.getChildren().setAll(content);
 
         } catch (IOException e) {
-            // In production we would log this; for now print the stacktrace.
+            // For production: replace with logging
             e.printStackTrace();
         }
     }
 }
-

@@ -9,18 +9,18 @@ import javafx.scene.control.Label;
  */
 public class TerminalMainController {
 
-    /** Label that shows the greeting text */
+    /** Label that shows the greeting text on the terminal welcome screen */
     @FXML
     private Label welcomeLabel;
 
     /**
-     * Runs automatically after the FXML is loaded.
-     * Sets a static welcome line for attendant use.
+     * Called automatically by JavaFX after the FXML is loaded.
+     * Sets a static greeting message for the terminal operator.
      */
     @FXML
     public void initialize() {
         if (welcomeLabel != null) {
-            welcomeLabel.setText("Welcome, Terminal Operator!");
+            welcomeLabel.setText("Welcome to the Terminal!");
         }
     }
 }

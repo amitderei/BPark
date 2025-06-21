@@ -16,31 +16,53 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Staff-side table that shows every subscriber together with
- * basic contact info and the number of late vehicle pickups.
+ * Controller for the staff screen that displays a full list of subscribers.
+ * Each subscriber row includes contact info and the number of times
+ * they were late in picking up their vehicle.
  */
 public class ViewSubscribersInfoController implements ClientAware {
 
-    /* ---------- FXML controls ---------- */
+    /* ---------- UI Controls from FXML ---------- */
+
+    /** Table showing all subscribers */
     @FXML private TableView<Subscriber> subscriberTable;
-    @FXML private TableColumn<Subscriber,Integer> colCode;
-    @FXML private TableColumn<Subscriber,String>  colId;
-    @FXML private TableColumn<Subscriber,String>  colName;
-    @FXML private TableColumn<Subscriber,String>  colUsername;
-    @FXML private TableColumn<Subscriber,String>  colPhone;
-    @FXML private TableColumn<Subscriber,String>  colEmail;
-    @FXML private TableColumn<Subscriber,Integer> colLate;
 
-    /* ---------- runtime data ---------- */
+    /** Column: subscriber code (unique ID in system) */
+    @FXML private TableColumn<Subscriber, Integer> colCode;
+
+    /** Column: Israeli national ID */
+    @FXML private TableColumn<Subscriber, String> colId;
+
+    /** Column: full name (first + last) */
+    @FXML private TableColumn<Subscriber, String> colName;
+
+    /** Column: username used for login */
+    @FXML private TableColumn<Subscriber, String> colUsername;
+
+    /** Column: mobile phone number */
+    @FXML private TableColumn<Subscriber, String> colPhone;
+
+    /** Column: email address */
+    @FXML private TableColumn<Subscriber, String> colEmail;
+
+    /** Column: number of late vehicle pickups */
+    @FXML private TableColumn<Subscriber, Integer> colLate;
+
+    /* ---------- Runtime Data ---------- */
+
+    /** Main client instance used for communication with the server */
     private ClientController client;
-    private final ObservableList<Subscriber> data = FXCollections.observableArrayList();
-    private Map<Subscriber,Integer> lateLookup = new HashMap<>();   // subscriber -> late count
 
+    /** Observable list of subscriber rows */
+    private final ObservableList<Subscriber> data = FXCollections.observableArrayList();
+
+    /** Lookup table that holds how many times each subscriber was late */
+    private Map<Subscriber, Integer> lateLookup = new HashMap<>();
 
     /**
-     * Saves the ClientController and lets it call back later.
+     * Injects the client and registers this controller in it for callbacks.
      *
-     * @param client active client instance
+     * @param client the connected ClientController
      */
     @Override
     public void setClient(ClientController client) {
@@ -50,40 +72,37 @@ public class ViewSubscribersInfoController implements ClientAware {
     }
 
     /**
-     * Triggered by the parent layout once setClient() is done.
-     * Sends "get_all_subscribers" to the server.
+     * Sends a request to the server to get the full list of subscribers.
+     * This is triggered externally by the parent layout after setClient().
      */
     public void requestSubscribers() {
         if (client != null)
             client.requestAllSubscribers();
     }
 
-    // -----------------------------------------------------------------
-    // server callback
-    // -----------------------------------------------------------------
-
     /**
-     * Fills the table after the server returns data.
+     * Called by the client when the server returns the subscriber data.
+     * Updates the UI table and stores the late-count lookup map.
      *
-     * @param subs     list of Subscriber objects
-     * @param lateMap  map subscriber -> number of late pickups
+     * @param subs    list of Subscriber objects
+     * @param lateMap map of Subscriber → number of late pickups
      */
     public void onSubscribersReceived(List<Subscriber> subs,
-                                      Map<Subscriber,Integer> lateMap) {
+                                      Map<Subscriber, Integer> lateMap) {
         Platform.runLater(() -> {
             lateLookup = lateMap;
-            data.setAll(subs);
+            data.setAll(subs); // replace current list
             subscriberTable.setItems(data);
         });
     }
 
-    // -----------------------------------------------------------------
-    // table column setup
-    // -----------------------------------------------------------------
-
-    /** Builds column value factories once the FXML is loaded. */
+    /**
+     * Initializes the column mappings after FXML is loaded.
+     * This method is automatically called by JavaFX.
+     */
     @FXML
     private void initialize() {
+        // Bind each column to the relevant field in Subscriber
 
         colCode.setCellValueFactory(c ->
             new ReadOnlyObjectWrapper<>(c.getValue().getSubscriberCode()));
@@ -105,9 +124,8 @@ public class ViewSubscribersInfoController implements ClientAware {
         colEmail.setCellValueFactory(c ->
             new ReadOnlyStringWrapper(c.getValue().getEmail()));
 
-        // late count looked up in a map populated by onSubscribersReceived()
+        // Number of times the subscriber was late (from lookup map)
         colLate.setCellValueFactory(c ->
             new ReadOnlyObjectWrapper<>(lateLookup.getOrDefault(c.getValue(), 0)));
     }
 }
-

@@ -22,24 +22,24 @@ import java.util.Map;
 import common.*;
 
 /**
- * DBController handles all DB operations for the 'Order' table in the bpark
- * database. Uses Singleton pattern to ensure only one active DB connection
- * exists during runtime.
+ * DBController handles all DB operations related to the BPARK database.
+ * This class implements the Singleton pattern to ensure a single shared
+ * connection to the database throughout the runtime of the application.
  */
 public class DBController {
 
-	// Singleton instance (static so it's shared among all classes using this)
-	private static DBController instance = null;
+    /** Singleton instance shared across all classes */
+    private static DBController instance = null;
 
-	// JDBC connection object
-	private static Connection conn;
+    /** JDBC connection object used for all queries */
+    private static Connection conn;
 
-	/**
-	 * Singleton accessor - returns the unique instance of the controller. Creates
-	 * one if it doesn't exist yet.
-	 *
-	 * @return DBController singleton instance
-	 */
+    /**
+     * Returns the single instance of the DBController.
+     * If it doesn't exist, creates a new one.
+     *
+     * @return the singleton instance
+     */
 	public static DBController getInstance() {
 		if (instance == null) {
 			instance = new DBController(); // initialization
@@ -47,10 +47,10 @@ public class DBController {
 		return instance;
 	}
 
-	/**
-	 * Establishes connection to the MySQL database. Sets up the JDBC driver and
-	 * opens the connection.
-	 */
+    /**
+     * Establishes connection to the MySQL database.
+     * Loads the JDBC driver and connects to the local DB.
+     */
 	public static void connectToDB() {
 		try {
 			// Loads and initializes the MySQL JDBC driver class
@@ -879,7 +879,7 @@ public class DBController {
 					Time exitTime = rs.getTime("exitHour");
 					if (exitDate != null && exitTime != null) {
 						newParkingEvent.setExitDate(rs.getDate("exitDate").toLocalDate());
-						newParkingEvent.setExitHour(rs.getTime("exitHour").toLocalTime());
+						newParkingEvent.setExitTime(rs.getTime("exitHour").toLocalTime());
 					}
 					newParkingEvent.setWasExtended(rs.getBoolean("wasExtended"));
 					newParkingEvent.setVehicleID(rs.getString("vehicleId"));
@@ -1360,7 +1360,7 @@ public class DBController {
 					dateTimeEntry = dateTimeEntry.plusHours(4);
 				}
 				event.setExitDate(dateTimeEntry.toLocalDate()); // expected date
-				event.setExitHour(dateTimeEntry.toLocalTime()); // expected time
+				event.setExitTime(dateTimeEntry.toLocalTime()); // expected time
 				event.setLot(rs.getString("nameParkingLot"));
 				event.setVehicleID(rs.getString("vehicleId"));
 				event.setParkingCode(rs.getString("parkingCode"));

@@ -3,25 +3,31 @@ package common;
 import java.io.Serializable;
 
 /**
- * Represents a standardized response object sent from the server to the client.
- * Used to communicate the result of an operation, any associated data, and a
- * user-readable message. Implements Serializable for network transmission via
- * OCSF.
+ * Represents a generic response sent from the server to the client.
+ * This object is used across the system to report whether an operation succeeded,
+ * return any related data (if applicable), and provide a user-friendly message
+ * to display in the UI or logs.
+ * Implements Serializable so it can be transferred over the network via OCSF.
  */
 public class ServerResponse implements Serializable {
 
-	
 	private static final long serialVersionUID = 1L;
-	private boolean succeed; // Indicates whether the operation succeeded
-	private Object data; // Data returned by the server
-	private String msg; // Message to display to the user (success or error message)
+
+	/** Whether the server-side operation succeeded */
+	private boolean succeed;
+
+	/** Optional data returned as part of the response (can be null) */
+	private Object data;
+
+	/** Message for the client (e.g., error, success info, etc.) */
+	private String msg;
 
 	/**
-	 * Constructs a ServerResponse object with specified fields.
+	 * Full constructor for ServerResponse.
 	 *
-	 * @param succeed Indicates if the operation was successful.
-	 * @param data    The data payload to return (can be null).
-	 * @param msg     A message describing the result (used in GUI or logs).
+	 * @param succeed whether the operation was successful
+	 * @param data    the object returned (can be null)
+	 * @param msg     message to display to user
 	 */
 	public ServerResponse(boolean succeed, Object data, String msg) {
 		this.succeed = succeed;
@@ -30,23 +36,30 @@ public class ServerResponse implements Serializable {
 	}
 
 	/**
-	 * @return true if the operation succeeded, false otherwise.
+	 * Returns whether the operation was successful.
+	 *
+	 * @return true if succeeded, false otherwise
 	 */
 	public boolean isSucceed() {
 		return succeed;
 	}
 
 	/**
-	 * @return The data object returned from the server (can be null).
+	 * Returns the data returned by the server, if any.
+	 *
+	 * @return the returned object (can be null)
 	 */
 	public Object getData() {
 		return data;
 	}
 
 	/**
-	 * @return A message string describing the result of the operation.
+	 * Returns a message summarizing the result of the operation.
+	 *
+	 * @return user-readable message
 	 */
 	public String getMsg() {
 		return msg;
 	}
 }
+

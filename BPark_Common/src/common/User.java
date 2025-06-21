@@ -4,38 +4,57 @@ import java.io.Serializable;
 
 /**
  * Represents a user in the BPARK system.
- * Contains only safe information to transfer between server and client.
+ * Each user has a username, password,
+ * and a role that defines their permissions in the system.
+ * This class is transferred between client and server,
+ * but contains only the necessary and safe fields.
  */
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String username;     // Unique username used for login
-    private UserRole role;       // User role (e.g., Subscriber, Manager, Attendant)
+    /** The username used for login (unique in the system) */
+    private String username;
+
+    /** The role of the user (e.g., Subscriber, Manager, Attendant) */
+    private UserRole role;
+
+    /** The user's password  */
     private String password;
 
+    // -------------------- Constructors --------------------
+
     /**
-     * Constructs a new User object.
+     * Constructor used when creating a user with a username and role only.
+     * Typically used when the password is not needed or already verified.
      *
-     * @param username the username of the user
-     * @param role     the user's role (enum)
+     * @param username the login username
+     * @param role     the user's role
      */
     public User(String username, UserRole role) {
         this.username = username;
         this.role = role;
     }
-    
-    public User(String username, String password) {
-    	this.username=username;
-    	this.password=password;
-    }
-    
+
     /**
-     * Constructs a new User with username, password, and role string.
+     * Constructor used when handling login credentials (username + password).
+     * Note: role is not included here.
+     *
+     * @param username the login username
+     * @param password the login password
+     */
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    /**
+     * Constructor that builds a user with username, password, and role as a string.
+     * Useful when role is received as a string (e.g., from the database).
      *
      * @param username the user's username
      * @param password the user's password
-     * @param role     the role as string (e.g., "Subscriber")
+     * @param role     the user's role (as a string)
      */
     public User(String username, String password, String role) {
         this.username = username;
@@ -43,8 +62,10 @@ public class User implements Serializable {
         this.role = UserRole.valueOf(role);
     }
 
+    // -------------------- Getters --------------------
+
     /**
-     * Returns the user's username.
+     * Returns the user's login username.
      *
      * @return the username
      */
@@ -53,25 +74,31 @@ public class User implements Serializable {
     }
 
     /**
-     * Returns the user's role.
+     * Returns the user's role in the system.
      *
-     * @return the UserRole (enum)
+     * @return the UserRole enum
      */
     public UserRole getRole() {
         return role;
     }
-    
-    
+
     /**
-     *  returns password of user.
-     * @return password of user
+     * Returns the user's password (if applicable).
+     * Note: this field may be null depending on context.
+     *
+     * @return the password
      */
     public String getPassword() {
-		return password;
-	}
+        return password;
+    }
 
-	/**
-     * String representation of the user for debugging/logging.
+    // -------------------- Utility --------------------
+
+    /**
+     * Returns a short string summary of the user,
+     * showing only the username and role (not the password).
+     *
+     * @return user details as a string
      */
     @Override
     public String toString() {
@@ -81,4 +108,3 @@ public class User implements Serializable {
                '}';
     }
 }
-

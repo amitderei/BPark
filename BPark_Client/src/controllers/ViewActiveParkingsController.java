@@ -15,33 +15,62 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * "Live Parked" table for staff.  
- * Lists every vehicle that is currently inside the lot
- * (no exit time set). Populated by a single server call.
+ * Controller for the staff-facing screen that displays all currently parked vehicles.
+ * 
+ * Shows active ParkingEvent objects (those without exit time).
+ * Data is requested once from the server and displayed in a table.
  */
 public class ViewActiveParkingsController implements ClientAware {
 
-    /* ---------- FXML: table + columns ---------- */
-    @FXML private TableView<ParkingEvent> parkingTable;
-    @FXML private TableColumn<ParkingEvent, Integer> colEventId;
-    @FXML private TableColumn<ParkingEvent, Integer> colSubscriber;
-    @FXML private TableColumn<ParkingEvent, String>  colVehicleId;
-    @FXML private TableColumn<ParkingEvent, String>  colParkingCode;
-    @FXML private TableColumn<ParkingEvent, String>  colLot;
-    @FXML private TableColumn<ParkingEvent, Integer> colSpace;
-    @FXML private TableColumn<ParkingEvent, String>  colEntryDate;
-    @FXML private TableColumn<ParkingEvent, String>  colEntryTime;
+    /* ================================
+     * FXML-bound UI components
+     * ================================ */
 
-    /* ---------- runtime ---------- */
+    /** Main table for displaying all active parking events */
+    @FXML private TableView<ParkingEvent> parkingTable;
+
+    /** Column for parking event ID */
+    @FXML private TableColumn<ParkingEvent, Integer> colEventId;
+
+    /** Column for subscriber code */
+    @FXML private TableColumn<ParkingEvent, Integer> colSubscriber;
+
+    /** Column for vehicle ID */
+    @FXML private TableColumn<ParkingEvent, String> colVehicleId;
+
+    /** Column for unique parking code */
+    @FXML private TableColumn<ParkingEvent, String> colParkingCode;
+
+    /** Column for name of the parking lot */
+    @FXML private TableColumn<ParkingEvent, String> colLot;
+
+    /** Column for parking space number */
+    @FXML private TableColumn<ParkingEvent, Integer> colSpace;
+
+    /** Column for entry date (formatted) */
+    @FXML private TableColumn<ParkingEvent, String> colEntryDate;
+
+    /** Column for entry time (formatted) */
+    @FXML private TableColumn<ParkingEvent, String> colEntryTime;
+
+    /* ================================
+     * Runtime data and dependencies
+     * ================================ */
+
+    /** Central client used to request data and receive callbacks */
     private ClientController client;
-    private final ObservableList<ParkingEvent> data =
-            FXCollections.observableArrayList();
+
+    /** Observable table data for live UI updates */
+    private final ObservableList<ParkingEvent> data = FXCollections.observableArrayList();
 
     /* =====================================================
-     *  table setup
+     * Table setup
      * ===================================================== */
 
-    /** Builds column value-factories once the FXML is loaded. */
+    /**
+     * Called automatically after the FXML is loaded.
+     * Sets up value factories for each column in the table.
+     */
     @FXML
     private void initialize() {
         colEventId     .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getEventId()));
@@ -51,21 +80,28 @@ public class ViewActiveParkingsController implements ClientAware {
         colLot         .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNameParkingLot()));
         colSpace       .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getParkingSpace()));
 
+        // Format entry date as "yyyy-MM-dd"
         colEntryDate.setCellValueFactory(c ->
-            new ReadOnlyStringWrapper(c.getValue().getEntryDate().format(DateTimeFormatter.ISO_DATE)));
+            new ReadOnlyStringWrapper(
+                c.getValue().getEntryDate().format(DateTimeFormatter.ISO_DATE)
+            ));
 
+        // Format entry time as "HH:mm"
         colEntryTime.setCellValueFactory(c ->
-            new ReadOnlyStringWrapper(c.getValue().getEntryHour().format(DateTimeFormatter.ofPattern("HH:mm"))));
+            new ReadOnlyStringWrapper(
+                c.getValue().getEntryHour().format(DateTimeFormatter.ofPattern("HH:mm"))
+            ));
     }
 
     /* =====================================================
-     *  client wiring
+     * Client wiring
      * ===================================================== */
 
     /**
-     * Saves the ClientController and lets it call back with data.
+     * Injects the active ClientController instance for server communication.
+     * Also registers this controller inside the client for callback access.
      *
-     * @param client active client instance
+     * @param client the connected client instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -75,19 +111,23 @@ public class ViewActiveParkingsController implements ClientAware {
     }
 
     /* =====================================================
-     *  server request + callback
+     * Server request + callback
      * ===================================================== */
 
-    /** Sends "get_active_parkings" to the server. Call after setClient(). */
+    /**
+     * Sends a one-time request to the server to fetch all currently active parking sessions.
+     * Should be called once after setClient().
+     */
     public void requestActiveParkingEvents() {
         if (client != null)
             client.requestActiveParkingEvents();
     }
 
     /**
-     * Fills the table when the server responds.
+     * Called by the client when the server responds with a list of current parking events.
+     * The method updates the table on the JavaFX Application Thread.
      *
-     * @param events list of current ParkingEvent objects
+     * @param events list of active ParkingEvent objects
      */
     public void onActiveParkingsReceived(List<ParkingEvent> events) {
         Platform.runLater(() -> {

@@ -15,33 +15,62 @@ import ui.UiUtils;
  */
 public class VehiclePickupController implements ClientAware {
 
-    /* ---------- identity step ---------- */
+    // ------------------------ Identity step ------------------------
+
+    /** Text field for entering the subscriber code manually */
     @FXML private TextField txtSubscriberCode;
+
+    /** Text field for entering the tag ID (RFID-based authentication) */
     @FXML private TextField txtTagId;
+
+    /** Button to proceed with subscriber code validation */
     @FXML private Button btnNext;
+
+    /** Button to validate using tag ID */
     @FXML private Button btnReadTag;
 
-    /* ---------- pickup step ---------- */
+    // ------------------------ Pickup step ------------------------
+
+    /** Text field for entering the parking code to retrieve the vehicle */
     @FXML private TextField txtParkingCode;
+
+    /** Button to collect the vehicle after entering a valid parking code */
     @FXML private Button btnCollectCar;
+
+    /** Button to request a resend of the parking code if lost */
     @FXML private Button btnLostCode;
 
-    /* ---------- misc UI ---------- */
+    // ------------------------ Misc UI ------------------------
+
+    /** Label that prompts the user to enter the parking code (step 2) */
     @FXML private Label lblParkingPrompt;
+
+    /** Label used to display live status messages (success/error) */
     @FXML private Label lblStatus;
 
-    /* ---------- runtime ---------- */
+    // ------------------------ Runtime ------------------------
+
+    /** Reference to the shared ClientController used for server communication */
     private ClientController client;
-    /** Stores the subscriber code once the user is verified. */
+
+    /** Holds the verified subscriber code after successful validation */
     private int validatedSubscriberCode = -1;
 
+    /**
+     * Injects the ClientController and registers this controller instance inside it.
+     *
+     * @param client active ClientController
+     */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
         client.setPickupController(this);
     }
 
-    /** Hides step-2 controls until the subscriber is verified. */
+    /**
+     * Initializes the screen – hides the second step (parking code input)
+     * until the subscriber is verified.
+     */
     @FXML
     public void initialize() {
         txtParkingCode.setVisible(false);
@@ -54,21 +83,22 @@ public class VehiclePickupController implements ClientAware {
         lblParkingPrompt.setManaged(false);
     }
 
-    /** @return the label used for live status messages */
+    /**
+     * @return the label used for showing system status messages
+     */
     public Label getStatusLabel() {
         return lblStatus;
     }
 
     /**
-     * User pressed "Next" – validate by manual subscriber code.
-     * Shows local error if the field is empty or not numeric.
+     * Triggered when the user clicks "Next" to verify their subscriber code.
+     * Performs local validation (numeric check) before sending the code to the server.
      */
     @FXML
     public void validateSubscriber() {
         if (client == null) {
             UiUtils.setStatus(lblStatus, "Client not initialized.", false);
-            UiUtils.showAlert("System Error",
-                    "Client was not connected. Please try again.",
+            UiUtils.showAlert("System Error", "Client was not connected. Please try again.",
                     javafx.scene.control.Alert.AlertType.ERROR);
             return;
         }
@@ -78,15 +108,14 @@ public class VehiclePickupController implements ClientAware {
             client.validateSubscriber(code);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Subscriber code must be a number.", false);
-            UiUtils.showAlert("BPARK - Error",
-                    "Subscriber code must be a number.",
+            UiUtils.showAlert("BPARK - Error", "Subscriber code must be a number.",
                     javafx.scene.control.Alert.AlertType.ERROR);
         }
     }
 
     /**
-     * Reads the tag ID typed by the operator and sends it for validation.
-     * Shows a red status if the field is empty.
+     * Triggered when the user clicks "Read Tag" to validate via RFID.
+     * Sends the tag ID to the server after checking that it’s not empty.
      */
     @FXML
     public void handleReadTag() {
@@ -100,7 +129,10 @@ public class VehiclePickupController implements ClientAware {
         client.validateSubscriberByTag(tagId);
     }
 
-    /** Called by ClientController after manual subscriber code is accepted. */
+    /**
+     * Called after the server confirms subscriber identity via manual code.
+     * Locks the first step and reveals the second.
+     */
     public void onSubscriberValidated() {
         try {
             validatedSubscriberCode = Integer.parseInt(txtSubscriberCode.getText());
@@ -109,8 +141,8 @@ public class VehiclePickupController implements ClientAware {
     }
 
     /**
-     * Sends the subscriber-code + parking-code combo to the server.
-     * Local validation: parking code must be numeric.
+     * Triggered when the user enters the parking code and clicks "Collect Car".
+     * Sends both the subscriber code and parking code to the server.
      */
     @FXML
     public void collectCar() {
@@ -119,19 +151,17 @@ public class VehiclePickupController implements ClientAware {
             client.collectCar(validatedSubscriberCode, parkingCode);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Parking code must be numeric.", false);
-            UiUtils.showAlert("BPARK - Error",
-                    "Parking code must be numeric.",
+            UiUtils.showAlert("BPARK - Error", "Parking code must be numeric.",
                     javafx.scene.control.Alert.AlertType.ERROR);
         } catch (Exception ex) {
             UiUtils.setStatus(lblStatus,
-                    "An error occurred while trying to collect the vehicle.",
-                    false);
+                    "An error occurred while trying to collect the vehicle.", false);
         }
     }
 
     /**
-     * Requests the system to resend the confirmation code
-     * (used when the subscriber forgot the parking code).
+     * Triggered when the user clicks "I Lost My Code".
+     * Sends a request to the server to resend the confirmation code.
      */
     @FXML
     public void forgotMyCode() {
@@ -139,13 +169,12 @@ public class VehiclePickupController implements ClientAware {
             client.forgotMyParkingCode(validatedSubscriberCode);
         } catch (Exception e) {
             UiUtils.setStatus(lblStatus,
-                    "An error occurred while requesting your code.",
-                    false);
+                    "An error occurred while requesting your code.", false);
         }
     }
 
     /**
-     * Server confirmed tag-based validation – subscriber code arrives as arg.
+     * Called when the server confirms RFID-based validation.
      *
      * @param subscriberCode numeric code returned by the server
      */
@@ -155,7 +184,9 @@ public class VehiclePickupController implements ClientAware {
         lockAfterValidation();
     }
 
-    /** Reveals step-2 controls and locks the identity fields. */
+    /**
+     * Unlocks the second step and disables the first step (identity fields).
+     */
     private void lockAfterValidation() {
         txtSubscriberCode.setDisable(true);
         txtTagId.setDisable(true);
@@ -180,11 +211,13 @@ public class VehiclePickupController implements ClientAware {
                 "Subscriber verified. Please enter your parking code.", true);
     }
 
-    /** Called when the server confirms a successful pickup. */
+    /**
+     * Called after successful vehicle pickup.
+     * Disables all controls to prevent reuse.
+     */
     public void disableAfterPickup() {
         txtParkingCode.setDisable(true);
         btnCollectCar.setDisable(true);
         btnLostCode.setDisable(true);
     }
 }
-

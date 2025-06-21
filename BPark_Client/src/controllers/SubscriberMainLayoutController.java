@@ -17,33 +17,58 @@ import ui.UiUtils;
  */
 public class SubscriberMainLayoutController implements ClientAware {
 
-    /* ---------- top bar ---------- */
+    // ======== Top toolbar buttons ========
+
+    /** Button to return to subscriber home screen */
     @FXML private Button btnHome;
+
+    /** Button to log out and return to login screen */
     @FXML private Button btnLogout;
+
+    /** Button to exit the application */
     @FXML private Button btnExit;
 
-    /* ---------- side-menu ---------- */
+    // ======== Side menu buttons ========
+
+    /** Button to view subscriber's personal information */
     @FXML private Button btnViewPersonalInfo;
+
+    /** Button to view full parking history */
     @FXML private Button btnViewParkingHistory;
+
+    /** Button to view the current active parking session */
     @FXML private Button btnViewActiveParkingInfo;
+
+    /** Button to request parking extension */
     @FXML private Button btnExtendParkingTime;
+
+    /** Button to place a new parking reservation */
     @FXML private Button btnParkingReservation;
+
+    /** Button to view and cancel existing reservations */
     @FXML private Button btnMyReservations;
 
-    /* ---------- centre pane ---------- */
+    // ======== Main content area ========
+
+    /** Center pane where child screens are dynamically loaded */
     @FXML private AnchorPane center;
 
-    /* ---------- state ---------- */
-    private ClientController client;     // shared socket handler
-    private String subscriberName;       // used by home screen for greeting
+    // ======== Runtime references ========
 
-    /* ======================================================
-     *  simple setters
-     * ====================================================== */
+    /** Shared client controller for server communication */
+    private ClientController client;
+
+    /** Subscriber's first name, used in greeting text */
+    private String subscriberName;
+
+    // ======================================================
+    // Setters
+    // ======================================================
 
     /**
-     * Injects the shared client.
-     * @param client active client
+     * Injects the shared ClientController instance.
+     * 
+     * @param client active client instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -51,23 +76,24 @@ public class SubscriberMainLayoutController implements ClientAware {
     }
 
     /**
-     * Stores the subscriber’s name so we can greet them on the home screen.
-     * @param name subscriber first name
+     * Stores the subscriber’s first name to be used for greetings.
+     * 
+     * @param name subscriber's first name
      */
     public void setSubscriberName(String name) {
         this.subscriberName = name;
     }
 
-    /* ======================================================
-     *  toolbar handlers
-     * ====================================================== */
+    // ======================================================
+    // Top toolbar button handlers
+    // ======================================================
 
-    /** Loads the subscriber home screen. */
+    /** Navigates to the subscriber's home screen. */
     @FXML private void handleHomeClick() {
         loadScreen("/client/SubscriberMainScreen.fxml");
     }
 
-    /** Logs out and returns to the entry screen. */
+    /** Logs the user out and returns to the main screen. */
     @FXML private void handleLogoutClick() {
         UiUtils.loadScreen(btnLogout,
                 "/client/MainScreen.fxml",
@@ -75,7 +101,7 @@ public class SubscriberMainLayoutController implements ClientAware {
                 client);
     }
 
-    /** Disconnects and quits. */
+    /** Gracefully disconnects and exits the application. */
     @FXML private void handleExitClick() {
         try {
             if (client != null && client.isConnected()) {
@@ -87,33 +113,51 @@ public class SubscriberMainLayoutController implements ClientAware {
         System.exit(0);
     }
 
-    /* ======================================================
-     *  side-menu handlers (one-liners)
-     * ====================================================== */
+    // ======================================================
+    // Side menu button handlers
+    // ======================================================
 
-    @FXML private void handleViewPersonalInfo()      { loadScreen("/client/ViewSubscriberDetailsScreen.fxml"); }
-    @FXML private void handleViewParkingHistory()    { loadScreen("/client/ViewSubscriberHistoryScreen.fxml"); }
-    @FXML private void handleViewActiveParkingInfo() { loadScreen("/client/ViewActiveParkingInfoScreen.fxml"); }
-    @FXML private void handleExtendParkingTime()     { loadScreen("/client/ExtendParkingScreen.fxml"); }
-    @FXML private void handleMyReservations()        { loadScreen("/client/WatchAndCancelOrdersScreen.fxml"); }
+    /** Loads the personal details view. */
+    @FXML private void handleViewPersonalInfo() {
+        loadScreen("/client/ViewSubscriberDetailsScreen.fxml");
+    }
+
+    /** Loads the parking history view. */
+    @FXML private void handleViewParkingHistory() {
+        loadScreen("/client/ViewSubscriberHistoryScreen.fxml");
+    }
+
+    /** Loads the current active parking session view. */
+    @FXML private void handleViewActiveParkingInfo() {
+        loadScreen("/client/ViewActiveParkingInfoScreen.fxml");
+    }
+
+    /** Loads the extend parking request screen. */
+    @FXML private void handleExtendParkingTime() {
+        loadScreen("/client/ExtendParkingScreen.fxml");
+    }
+
+    /** Loads the user's current reservations screen. */
+    @FXML private void handleMyReservations() {
+        loadScreen("/client/WatchAndCancelOrdersScreen.fxml");
+    }
 
     /**
-     * Opens the first step of the reservation wizard.
-     * Connected to the button inside the reservation pane.
+     * Loads the new reservation creation flow screen.
+     * Typically triggered from inside the reservation panel.
      */
     public void handleGoToCreateOrder() {
         loadScreen("/client/PlacingAnOrderView.fxml");
     }
 
-    /* ======================================================
-     *  screen loader helpers
-     * ====================================================== */
+    // ======================================================
+    // FXML loader helpers
+    // ======================================================
 
     /**
-     * Loads a child FXML into the centre pane
-     * and wires its controller for server callbacks.
+     * Loads a standard screen into the center pane.
      *
-     * @param fxml path to FXML inside resources
+     * @param fxml the path to the FXML file in the resource directory
      */
     public void loadScreen(String fxml) {
         try {
@@ -121,15 +165,17 @@ public class SubscriberMainLayoutController implements ClientAware {
             Parent content = fxmlLoader.load();
             Object ctrl = fxmlLoader.getController();
 
-            // welcome headline on the home screen
-            if (ctrl instanceof SubscriberMainController c)
+            // Inject the subscriber's name if it’s the home screen
+            if (ctrl instanceof SubscriberMainController c) {
                 c.setSubscriberName(subscriberName);
+            }
 
-            // each child that needs the client gets it here
-            if (ctrl instanceof ClientAware aware)
+            // Inject shared client controller
+            if (ctrl instanceof ClientAware aware) {
                 aware.setClient(client);
+            }
 
-            // extra initialisation for specific screens
+            // Register callbacks and init logic for specific screens
             if (ctrl instanceof CreateNewOrderViewController c) {
                 client.setNewOrderController(c);
                 c.initializeCombo();
@@ -168,10 +214,11 @@ public class SubscriberMainLayoutController implements ClientAware {
     }
 
     /**
-     * Loads a summary screen that needs the Order object.
+     * Loads a screen that needs a specific {@link Order} passed to it,
+     * such as a reservation summary page.
      *
-     * @param fxml  summary FXML
-     * @param order reservation to display
+     * @param fxml  FXML path of the target screen
+     * @param order the order to show in the summary view
      */
     public void loadScreen(String fxml, Order order) {
         try {
@@ -182,6 +229,7 @@ public class SubscriberMainLayoutController implements ClientAware {
                 client.setSummaryController(c);
                 c.setLabels(order);
             }
+
             center.getChildren().setAll(content);
 
         } catch (IOException e) {

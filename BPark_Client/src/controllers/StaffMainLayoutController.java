@@ -12,173 +12,177 @@ import javafx.scene.layout.AnchorPane;
 import ui.UiUtils;
 
 /**
- * Main layout for staff users (attendant / manager). Fixed parts: top bar and
- * side-menu. The centre pane swaps screens with loadScreen().
+ * Main layout for staff users (Attendant / Manager).
+ * Displays a fixed top bar and side menu.
+ * Swaps the center pane using loadScreen().
  */
 public class StaffMainLayoutController implements ClientAware {
 
-	/* ---------- top bar buttons ---------- */
-	@FXML
-	private Button btnHome;
-	@FXML
-	private Button btnLogout;
-	@FXML
-	private Button btnExit;
+    /** "Home" button in the top bar */
+    @FXML private Button btnHome;
 
-	/* ---------- side-menu buttons ---------- */
-	@FXML
-	private Button btnRegisterUsers;
-	@FXML
-	private Button btnViewSubscriberInfo;
-	@FXML
-	private Button btnViewActiveParkings;
-	@FXML
-	private Button btnViewParkingReport;
-	@FXML
-	private Button btnViewSubscriberReport;
+    /** "Logout" button in the top bar */
+    @FXML private Button btnLogout;
 
-	/* ---------- placeholder for child screens ---------- */
-	@FXML
-	private AnchorPane center;
+    /** "Exit" button in the top bar */
+    @FXML private Button btnExit;
 
-	/* ---------- runtime state ---------- */
-	private ClientController client; // shared socket handler
-	private User user; // logged-in staff account
+    /** Side-menu button to register new users */
+    @FXML private Button btnRegisterUsers;
 
-	/**
-	 * Injects the ClientController so child screens can talk to the server.
-	 *
-	 * @param client active client instance
-	 */
-	@Override
-	public void setClient(ClientController client) {
-		this.client = client;
-		client.setStaffMainLayoutController(this); // let the client call back
-	}
+    /** Side-menu button to view subscriber information */
+    @FXML private Button btnViewSubscriberInfo;
 
-	/**
-	 * Stores the staff user and hides manager-only buttons when the role is
-	 * Attendant.
-	 *
-	 * @param user authenticated staff account
-	 */
-	public void setUser(User user) {
-		this.user = user;
+    /** Side-menu button to view currently active parking events */
+    @FXML private Button btnViewActiveParkings;
 
-		// attendant has no access to the two report buttons
-		if (user.getRole() == UserRole.Attendant) {
-			btnViewSubscriberReport.setVisible(false);
-			btnViewParkingReport.setVisible(false);
-		}
-	}
+    /** Side-menu button to view parking report (visible to managers only) */
+    @FXML private Button btnViewParkingReport;
 
-	/* ---------- first load ---------- */
+    /** Side-menu button to view subscriber status report (visible to managers only) */
+    @FXML private Button btnViewSubscriberReport;
 
-	@FXML
-	private void initialize() {
-		loadScreen("/client/StaffMainScreen.fxml");
-	}
+    /** Placeholder pane that swaps child screens */
+    @FXML private AnchorPane center;
 
-	/* ---------- top-bar handlers ---------- */
+    /** Active client instance used for server communication */
+    private ClientController client;
 
-	@FXML
-	private void handleHomeClick() {
-		loadScreen("/client/StaffMainScreen.fxml");
-	}
+    /** Logged-in staff user (Manager or Attendant) */
+    private User user;
 
-	@FXML
-	private void handleLogoutClick() {
-		UiUtils.loadScreen(btnLogout, "/client/LoginScreen.fxml", "BPARK – Login", client);
-	}
+    /**
+     * Sets the shared client controller and registers this controller.
+     *
+     * @param client active client instance
+     */
+    @Override
+    public void setClient(ClientController client) {
+        this.client = client;
+        client.setStaffMainLayoutController(this);
+    }
 
-	/* ---------- side-menu handlers ---------- */
+    /**
+     * Sets the logged-in staff user and adjusts UI visibility
+     * based on the user's role.
+     *
+     * @param user staff user object (Manager or Attendant)
+     */
+    public void setUser(User user) {
+        this.user = user;
 
-	@FXML
-	private void handleRegisterUsers() {
-		loadScreen("/client/RegisterSubscriberScreen.fxml");
-	}
+        if (user.getRole() == UserRole.Attendant) {
+            btnViewSubscriberReport.setVisible(false);
+            btnViewParkingReport.setVisible(false);
+        }
+    }
 
-	@FXML
-	private void handleViewSubscriberInfo() {
-		loadScreen("/client/ViewSubscribersInfoScreen.fxml");
-	}
+    /**
+     * Automatically called after FXML is loaded.
+     * Loads the default screen into the center pane.
+     */
+    @FXML
+    private void initialize() {
+        loadScreen("/client/StaffMainScreen.fxml");
+    }
 
-	@FXML
-	private void handleViewActiveParkings() {
-		loadScreen("/client/ViewActiveParkingsScreen.fxml");
-	}
+    /** Handles the Home button press — loads the main staff screen. */
+    @FXML
+    private void handleHomeClick() {
+        loadScreen("/client/StaffMainScreen.fxml");
+    }
 
-	@FXML
-	private void handleViewParkingReport() {
-		loadScreen("/client/ParkingReportScreen.fxml");
-	}
+    /** Handles the Logout button press — navigates back to the login screen. */
+    @FXML
+    private void handleLogoutClick() {
+        UiUtils.loadScreen(btnLogout, "/client/LoginScreen.fxml", "BPARK – Login", client);
+    }
 
-	@FXML
-	private void handleViewSubscriberReport() {
-		UiUtils.showAlert("Report", "Viewing subscriber status report.", Alert.AlertType.INFORMATION);
-	}
+    /** Loads the Register Subscriber screen. */
+    @FXML
+    private void handleRegisterUsers() {
+        loadScreen("/client/RegisterSubscriberScreen.fxml");
+    }
 
-	/*
-	 * ===================================================== Screen loader
-	 * =====================================================
-	 */
+    /** Loads the screen showing all subscribers and their details. */
+    @FXML
+    private void handleViewSubscriberInfo() {
+        loadScreen("/client/ViewSubscribersInfoScreen.fxml");
+    }
 
-	/**
-	 * Replaces the center pane with the given FXML and passes the ClientController
-	 * to its controller when needed.
-	 *
-	 * @param fxml resource path of the child screen
-	 */
-	public void loadScreen(String fxml) {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
-			Parent content = loader.load();
+    /** Loads the screen showing currently parked vehicles. */
+    @FXML
+    private void handleViewActiveParkings() {
+        loadScreen("/client/ViewActiveParkingsScreen.fxml");
+    }
 
-			Object ctrl = loader.getController();
+    /** Loads the Parking Report screen for monthly stats. */
+    @FXML
+    private void handleViewParkingReport() {
+        loadScreen("/client/ParkingReportScreen.fxml");
+    }
 
-			// generic injection for any ClientAware screen
-			if (ctrl instanceof ClientAware aware)
-				aware.setClient(client);
+    /** Displays a basic alert with a placeholder message for subscriber report. */
+    @FXML
+    private void handleViewSubscriberReport() {
+        UiUtils.showAlert("Report", "Viewing subscriber status report.", Alert.AlertType.INFORMATION);
+    }
 
-			// register specific controllers for push-callbacks
-			if (ctrl instanceof ViewSubscribersInfoController vsic) {
-				client.setViewSubscribersInfoController(vsic);
-				vsic.requestSubscribers(); // pull data immediately
-			}
-			if (ctrl instanceof ViewActiveParkingsController vapc) {
-				client.setViewActiveParkingsController(vapc);
-				vapc.requestActiveParkingEvents();
-			}
-			if (ctrl instanceof RegisterSubscriberController rsc) {
-				client.setRegisterSubscriberController(rsc);
-			}
-			if(ctrl instanceof ParkingReportController prc) {
-				client.setParkingReportController(prc);
-				prc.getParkingReportFromServer();
-				
-			}
+    /**
+     * Loads a child screen into the center pane and injects the client.
+     * Also performs role-specific or controller-specific initial setup.
+     *
+     * @param fxml path to the FXML resource
+     */
+    public void loadScreen(String fxml) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+            Parent content = loader.load();
+            Object ctrl = loader.getController();
 
-			center.getChildren().setAll(content);
+            if (ctrl instanceof ClientAware aware)
+                aware.setClient(client);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            if (ctrl instanceof ViewSubscribersInfoController vsic) {
+                client.setViewSubscribersInfoController(vsic);
+                vsic.requestSubscribers();
+            }
 
-	/**
-	 * Disconnects from the server (if connected) and quits. Called by the Exit
-	 * button.
-	 */
-	@FXML
-	private void handleExitClick() {
-		try {
-			if (client != null && client.isConnected()) {
-				client.sendToServer(new Object[] { "disconnect" });
-				client.closeConnection();
-			}
-		} catch (Exception ignored) {
-		}
-		javafx.application.Platform.exit();
-		System.exit(0);
-	}
+            if (ctrl instanceof ViewActiveParkingsController vapc) {
+                client.setViewActiveParkingsController(vapc);
+                vapc.requestActiveParkingEvents();
+            }
+
+            if (ctrl instanceof RegisterSubscriberController rsc) {
+                client.setRegisterSubscriberController(rsc);
+            }
+
+            if (ctrl instanceof ParkingReportController prc) {
+                client.setParkingReportController(prc);
+                prc.getParkingReportFromServer();
+            }
+
+            center.getChildren().setAll(content);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles the Exit button press — disconnects from the server (if needed)
+     * and closes the application.
+     */
+    @FXML
+    private void handleExitClick() {
+        try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[] { "disconnect" });
+                client.closeConnection();
+            }
+        } catch (Exception ignored) {
+        }
+        javafx.application.Platform.exit();
+        System.exit(0);
+    }
 }

@@ -9,39 +9,42 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * Launches the BPARK client application. Sets up the first connection screen
- * and ensures the socket is closed on exit.
+ * Launches the BPARK client application.
+ * This class is the entry point for the JavaFX-based client UI.
+ * It loads the first screen (ConnectScreen.fxml) and handles connection lifecycle.
  */
 public class ClientApp extends Application {
 
-    /** Active controller that handles communication with the server. */
+    /** Active controller responsible for client-server communication */
     private ClientController client;
 
     /**
-     * Application entry point. Hands control to the JavaFX runtime.
+     * Main entry point. Launches the JavaFX runtime.
      *
-     * @param args command-line arguments
+     * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
         launch(args);
     }
 
     /**
-     * Initializes the UI by loading ConnectScreen.fxml, wiring its
-     * controller and showing the primary stage without window chrome.
+     * Initializes the JavaFX application.
+     * Loads the connection screen and links the ConnectController to this app instance.
      *
-     * @param primaryStage the main window provided by JavaFX
-     * @throws Exception if the FXML file cannot be loaded
+     * @param primaryStage the primary JavaFX window
+     * @throws Exception if the FXML file fails to load
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Load the connection screen layout
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/ConnectScreen.fxml"));
         Parent root = loader.load();
 
-        // Give the controller a reference to this application
+        // Give the controller access to this ClientApp instance
         ConnectController controller = loader.getController();
         controller.setApp(this);
 
+        // Set up the stage with no window borders
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setTitle("BPARK Client");
         primaryStage.setScene(new Scene(root));
@@ -49,8 +52,8 @@ public class ClientApp extends Application {
     }
 
     /**
-     * Shuts down the client‑server connection if it is still open when the
-     * application exits.
+     * Called automatically when the application is closed.
+     * Closes the client connection to the server, if it exists.
      */
     @Override
     public void stop() {
@@ -64,9 +67,10 @@ public class ClientApp extends Application {
     }
 
     /**
-     * Injects the ClientController after a successful connection.
+     * Sets the active ClientController for this application.
+     * This is called after the client successfully connects to the server.
      *
-     * @param client the connected controller instance
+     * @param client the connected client controller
      */
     public void setClient(ClientController client) {
         this.client = client;

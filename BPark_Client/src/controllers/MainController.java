@@ -8,36 +8,57 @@ import ui.UiUtils;
 
 /**
  * Entry screen of BPARK.
- * Presents two choices: continue as guest or log in.
- * Also includes Exit and Back buttons for navigation.
+ * 
+ * Allows the user to either continue as a guest or log in as a registered user.
+ * Also includes navigation controls to go back or exit the application.
  */
 public class MainController implements ClientAware {
 
-    /* ---------- FXML buttons ---------- */
-    @FXML private Button guestBtn;   // "Enter as Guest"
-    @FXML private Button loginBtn;   // "Login"
-    @FXML private Button btnExit;    // "Exit"
-    @FXML private Button btnBack;    // "Back to previous"
+    // ==============================
+    // FXML Buttons
+    // ==============================
 
-    /* ---------- runtime ---------- */
+    /** Button to enter the system as a guest (no login) */
+    @FXML private Button guestBtn;
+
+    /** Button to navigate to the login screen for registered users */
+    @FXML private Button loginBtn;
+
+    /** Button to exit the application */
+    @FXML private Button btnExit;
+
+    /** Button to go back to the previous screen (Mode Selection) */
+    @FXML private Button btnBack;
+
+    // ==============================
+    // Runtime Fields
+    // ==============================
+
+    /** Shared ClientController used to send requests to the server */
     private ClientController client;
 
+    // ==============================
+    // Dependency Injection
+    // ==============================
+
     /**
-     * Receives the shared ClientController so this screen
-     * can pass it along when loading child views.
+     * Injects the client controller used for server communication and screen transitions.
      *
-     * @param client active client instance
+     * @param client the active client instance
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
-    /* =====================================================
-     *  Button actions
-     * ===================================================== */
+    // ==============================
+    // Button Actions
+    // ==============================
 
-    /** Loads the guest layout and switches the window title. */
+    /**
+     * Loads the Guest layout and opens the main interface
+     * for unregistered users.
+     */
     @FXML
     public void handleGuest() {
         UiUtils.loadScreen(guestBtn,
@@ -46,7 +67,10 @@ public class MainController implements ClientAware {
                 client);
     }
 
-    /** Opens the login screen for registered users. */
+    /**
+     * Loads the login screen for registered users
+     * including Subscribers, Attendants, or Managers.
+     */
     @FXML
     public void handleLogin() {
         UiUtils.loadScreen(loginBtn,
@@ -56,8 +80,8 @@ public class MainController implements ClientAware {
     }
 
     /**
-     * Disconnects from the server (if needed) and closes the application.
-     * Attached to the Exit button.
+     * Disconnects from the server (if connected) and exits the application.
+     * Called when the user presses the Exit button.
      */
     @FXML
     private void handleExitClick() {
@@ -71,7 +95,10 @@ public class MainController implements ClientAware {
         System.exit(0);
     }
 
-    /** Returns to the previous selection screen. */
+    /**
+     * Loads the Mode Selection screen, allowing the user to choose
+     * between App mode and Terminal mode.
+     */
     @FXML
     private void handleBackClick() {
         UiUtils.loadScreen(btnBack,
@@ -80,4 +107,3 @@ public class MainController implements ClientAware {
                 client);
     }
 }
-

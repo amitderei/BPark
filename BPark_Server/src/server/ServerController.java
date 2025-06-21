@@ -6,7 +6,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,68 +14,73 @@ import javafx.scene.control.TextField;
 import javafx.util.Duration;
 
 /**
- * Controller for the server connection screen of BPARK. Handles user input for
- * port selection and starts the server.
+ * Controller for the BPARK server connection screen.
+ * Handles port input from the user, starts the server, and manages UI updates.
  */
 public class ServerController {
 
-	@FXML
-	private Button btnSend; // Button to trigger server start
-
-	@FXML
-	private TextField txtPort; // Text field for entering the server port
-
-	@FXML
-	private Label lblConnection; // Label for displaying connection status (currently not used)
-
-	@FXML
-	private Label lblEx; // Label for displaying static instructions
-	
+    /** Button to connect and start the server */
     @FXML
-    private TextArea txtConnectedClients; // TextArea to display connected clients
-    
-    @FXML
-    private Button btnExit; // Button to exit the server application
+    private Button btnSend;
 
-    // Instance of the server (to access connected clients)
+    /** Text field for entering the desired port */
+    @FXML
+    private TextField txtPort;
+
+    /** Label that shows server connection status */
+    @FXML
+    private Label lblConnection;
+
+    /** Label with static connection instructions */
+    @FXML
+    private Label lblEx;
+
+    /** Text area to display a list of connected clients */
+    @FXML
+    private TextArea txtConnectedClients;
+
+    /** Button to shut down the server application */
+    @FXML
+    private Button btnExit;
+
+    /** Instance of the running server */
     private Server serverInstance;
 
-    // Reference to the ServerApp instance to control server startup
+    /** Reference to the ServerApp, used to start the server */
     private ServerApp app;
 
-
+    /** Timeline for auto-refreshing the connected clients list */
     private Timeline clientUpdateTimeline;
 
     /**
-     * Sets the ServerApp instance to allow calling its methods from the controller.
+     * Links this controller with the ServerApp instance.
      *
-     * @param app the ServerApp instance to link with this controller
+     * @param app the ServerApp used to launch the server
      */
     public void setApp(ServerApp app) {
         this.app = app;
     }
 
-	/**
-	 * Retrieves the port number entered by the user.
-	 *
-	 * @return The port number as a String.
-	 */
-	private String getport() {
-		return txtPort.getText();
-	}
+    /**
+     * Reads the port value from the input field.
+     *
+     * @return the port number as a string
+     */
+    private String getport() {
+        return txtPort.getText();
+    }
 
     /**
-     * Triggered when the "Connect" button is clicked.
-     * Validates the port input, starts the server if valid,
-     * and updates the UI to reflect that the server is running.
+     * Called when the "Connect" button is clicked.
+     * Validates the port input and starts the server.
      *
-     * @param event The button click event.
-     * @throws Exception if server startup fails.
+     * @param event the button click event
+     * @throws Exception if server startup fails
      */
     public void connect(ActionEvent event) throws Exception {
-        String p = getport().trim();
+        String p = getport().trim(); // read and trim input
 
-        // Validate that the port field is not empty
+        // Check if input is empty
         if (p.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Connection Error", "You must enter a port number");
             return;
@@ -84,46 +88,46 @@ public class ServerController {
 
         int port;
 
-        // Validate that the port is a valid number
         try {
-            port = Integer.parseInt(p);
+            port = Integer.parseInt(p); // convert input to number
         } catch (NumberFormatException e) {
             showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be a number");
             return;
         }
 
-        // Validate that the port number is in the valid range (1024–65535)
+        // Validate port range (only 1024–65535 are allowed)
         if (port < 1024 || port > 65535) {
             showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be between 1024 and 65535");
             return;
         }
 
-        // Start the server with the validated port and store the instance for later use
+        // Launch the server and store its instance
         serverInstance = app.runServer(String.valueOf(port));
 
-        // UI feedback after successful server start
-        lblConnection.setText("Server is running on port " + port); // Update the connection label
-        txtPort.setDisable(true); // Disable the port input field
-        btnSend.setDisable(true); // Disable the connect button
+        // Update UI to reflect that the server is now running
+        lblConnection.setText("Server is running on port " + port);
+        txtPort.setDisable(true);
+        btnSend.setDisable(true);
+
+        // Start automatic refresh of connected clients list
         startAutoClientListUpdater();
     }
 
-	
-	/**
-     * Triggered when the "Show Connected Clients" button is clicked.
-     * Fetches the list of connected clients and displays them in the TextArea.
+    /**
+     * Shows the list of currently connected clients in the text area.
      */
     @FXML
     public void showConnectedClients() {
+        // Don't proceed if server hasn't started
         if (serverInstance == null) {
             showAlert(Alert.AlertType.WARNING, "Server Not Running", "Please start the server first.");
             return;
         }
 
-        // Get the list of connected client addresses
+        // Get list of connected clients
         ArrayList<String> clients = serverInstance.getConnectedClientInfoList();
 
-        // Build the display text
+        // Display client list or message if empty
         if (clients.isEmpty()) {
             txtConnectedClients.setText("No clients connected.");
         } else {
@@ -134,19 +138,19 @@ public class ServerController {
             txtConnectedClients.setText(builder.toString());
         }
     }
-    
+
     /**
-     * Triggered when the "Exit" button is clicked.
-     * Safely notifies clients, closes the server, and exits the application.
+     * Shuts down the server and closes the application.
+     * Notifies connected clients before exiting.
      */
     @FXML
     public void exitApplication() {
         try {
             if (serverInstance != null) {
-                // Notify all clients that the server is shutting down
+                // Notify all clients before closing the server
                 serverInstance.sendToAllClients("server_shutdown");
-                
-                // Close server after notifying clients
+
+                // Close the server
                 serverInstance.close();
                 System.out.println("Server stopped successfully.");
             }
@@ -154,35 +158,40 @@ public class ServerController {
             System.err.println("Failed to stop server: " + e.getMessage());
         }
 
-        // Exit the application
+        // Exit the entire application
         System.exit(0);
     }
 
+    /**
+     * Displays a JavaFX alert with a given message.
+     *
+     * @param type    the type of alert (INFO, WARNING, etc.)
+     * @param title   the title of the alert window
+     * @param message the message to show
+     */
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
-	/**
-	 * Utility method to display a customizable alert popup.
-	 *
-	 * @param type    The type of alert (e.g., INFORMATION, WARNING, ERROR).
-	 * @param title   The title of the popup window.
-	 * @param message The message to display in the popup.
-	 */
-	private void showAlert(Alert.AlertType type, String title, String message) {
-		Alert alert = new Alert(type);
-		alert.setTitle(title); // Set the alert title dynamically
-		alert.setHeaderText(null); // No header text for cleaner appearance
-		alert.setContentText(message); // Set the actual message content
-		alert.showAndWait(); // Display the alert and wait for user action
-	}
-	
-	private void startAutoClientListUpdater() {
-		clientUpdateTimeline=new Timeline(new KeyFrame(Duration.seconds(5), e->showConnectedClients()));
-		clientUpdateTimeline.setCycleCount(Timeline.INDEFINITE);
-		clientUpdateTimeline.play();
-	}
-	
-	@FXML
-	public void initialize() {
-		txtPort.setText("5555");
-	}
+    /**
+     * Starts a timeline that refreshes the client list every 5 seconds.
+     */
+    private void startAutoClientListUpdater() {
+        clientUpdateTimeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> showConnectedClients()));
+        clientUpdateTimeline.setCycleCount(Timeline.INDEFINITE);
+        clientUpdateTimeline.play();
+    }
 
+    /**
+     * JavaFX initialize method.
+     * Sets a default port value in the text field on load.
+     */
+    @FXML
+    public void initialize() {
+        txtPort.setText("5555");
+    }
 }

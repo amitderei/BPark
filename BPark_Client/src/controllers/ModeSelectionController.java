@@ -7,36 +7,59 @@ import javafx.scene.control.Button;
 import ui.UiUtils;
 
 /**
- * First screen shown after network connection: lets the user decide
- * whether to run the full application (guest / login flow) or open
- * the simplified terminal interface used by parking-lot attendants.
+ * Controller for the mode selection screen.
+ * 
+ * This is the first screen shown after a successful connection to the server.
+ * It allows the user to select one of the following options:
+ * - Full GUI application (guest or subscriber login)
+ * - Terminal interface for parking-lot staff
+ * - Exit the application
  */
 public class ModeSelectionController implements ClientAware {
 
-    /* ---------- FXML buttons ---------- */
-    @FXML private Button btnApp;      // Opens full application mode
-    @FXML private Button btnTerminal; // Opens terminal (kiosk) mode
-    @FXML private Button btnExit;     // Exits the program
+    // ==========================
+    // FXML Buttons
+    // ==========================
 
-    /* ---------- runtime ---------- */
+    /** Button to launch the full BPARK application (GUI flow for guests/subscribers) */
+    @FXML private Button btnApp;
+
+    /** Button to launch the simplified terminal interface (for parking-lot staff) */
+    @FXML private Button btnTerminal;
+
+    /** Button to exit the application */
+    @FXML private Button btnExit;
+
+    // ==========================
+    // Runtime fields
+    // ==========================
+
+    /** Reference to the shared client instance used to communicate with the server */
     private ClientController client;
 
+    // ==========================
+    // Dependency Injection
+    // ==========================
+
     /**
-     * Receives the shared ClientController so it can be forwarded
-     * to whichever mode the user selects.
+     * Stores the shared ClientController instance.
+     * This controller passes it to the next screen after a mode is selected.
      *
-     * @param client active client instance (may be null before connection)
+     * @param client the active client object
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
-    /* =====================================================
-     *  Button actions
-     * ===================================================== */
+    // ==========================
+    // Button Actions
+    // ==========================
 
-    /** Loads the main GUI application (guest / login choice). */
+    /**
+     * Called when the user selects the full GUI application.
+     * Loads the main screen that allows guest access or subscriber login.
+     */
     @FXML
     public void handleApp() {
         UiUtils.loadScreen(btnApp,
@@ -45,7 +68,10 @@ public class ModeSelectionController implements ClientAware {
                 client);
     }
 
-    /** Loads the attendant terminal interface. */
+    /**
+     * Called when the user selects terminal mode.
+     * Loads the FXML layout for the terminal/kiosk interface.
+     */
     @FXML
     public void handleTerminal() {
         UiUtils.loadScreen(btnTerminal,
@@ -54,7 +80,10 @@ public class ModeSelectionController implements ClientAware {
                 client);
     }
 
-    /** Disconnects from server (if connected) and quits the program. */
+    /**
+     * Closes the connection to the server (if active) and exits the application.
+     * Triggered when the user presses the "Exit" button.
+     */
     @FXML
     private void handleExitClick() {
         try {

@@ -14,15 +14,15 @@ import ui.UiUtils;
 
 /**
  * Controller for the "Connect to Server" screen.
- * Lets the user type an IP, open a socket connection,
- * and exit the application if needed.
+ * Allows the user to enter an IP address, attempt a socket connection,
+ * and move forward to the selection screen if successful.
  */
 public class ConnectController implements ClientAware {
 
-    /** Main JavaFX application, used later for scene changes */
+    /** Reference to the main JavaFX application, used for screen transitions */
     private ClientApp app;
 
-    /** Shows local host name and IP once a connection is active */
+    /** Label that displays connection status (e.g., IP + hostname) */
     @FXML private Label connectionLabel;
 
     @FXML private Label connectHeadline;
@@ -30,14 +30,15 @@ public class ConnectController implements ClientAware {
     @FXML private Button connectButton;
     @FXML private Button exitButton;
 
-    /** Text field where the user types or edits the server IP */
+    /** Input field for entering the server's IP address */
     @FXML private TextField ipTextField;
 
-    /** Shared client instance that owns the socket connection */
+    /** The client instance responsible for communication with the server */
     private ClientController client;
 
     /**
-     * Stores the reference to the main JavaFX application.
+     * Injects a reference to the main JavaFX application.
+     * This is used to switch scenes later.
      *
      * @param app main application instance
      */
@@ -46,17 +47,17 @@ public class ConnectController implements ClientAware {
     }
 
     /**
-     * Supplies the active client instance and prints local
-     * host details on screen when possible.
+     * Injects the ClientController and updates the UI with local host info.
+     * If the client is null, a warning message is shown.
      *
-     * @param client an already-connected ClientController,
-     *               or null before a connection exists
+     * @param client the active client, or null if not connected yet
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
 
         if (client == null) {
+            // No active connection
             UiUtils.setStatus(statusLabel,
                     "No connection to server. Please connect first.", false);
             UiUtils.showAlert("BPARK - Message",
@@ -66,6 +67,7 @@ public class ConnectController implements ClientAware {
         }
 
         try {
+            // Show local host details once connected
             String host = InetAddress.getLocalHost().getHostName();
             String ip   = InetAddress.getLocalHost().getHostAddress();
             connectionLabel.setText("Connected to: " + host + " (" + ip + ")");
@@ -79,14 +81,13 @@ public class ConnectController implements ClientAware {
     }
 
     /**
-     * Triggered by the "Connect" button.
-     * Checks the IP field, attempts to open the socket,
-     * updates the UI, and loads the next screen on success.
-     *
-     * @throws IllegalStateException if the IP field is empty
+     * Called when the "Connect" button is pressed.
+     * Validates the IP input, opens a socket connection,
+     * and transitions to the next screen if successful.
      */
     @FXML
     public void connectToServer() {
+        // Check if user entered an IP
         if (ipTextField == null || ipTextField.getText().trim().isEmpty()) {
             UiUtils.setStatus(statusLabel,
                     "Please enter the server IP address.", false);
@@ -99,26 +100,28 @@ public class ConnectController implements ClientAware {
         try {
             String ip = ipTextField.getText().trim();
 
-            // Create a fresh client controller and open the socket on port 5555
+            // Create and connect a new client to the given IP on port 5555
             ClientController newClient = new ClientController(ip, 5555);
             newClient.openConnection();
 
+            // Store client and update UI
             this.client = newClient;
-            setClient(newClient); // reuse existing UI update logic
+            setClient(newClient);
 
             UiUtils.setStatus(statusLabel,
                     "Connected successfully to server at " + ip + ":5555", true);
             connectButton.setText("Connected");
             connectButton.setDisable(true);
 
-            // Store globally so other controllers can fetch it
+            // Save globally in UiUtils so all controllers can use it
             UiUtils.client = this.client;
 
-            // Switch to the selection screen (login / guest choice)
+            // Load the selection screen (login / guest mode)
             UiUtils.loadScreen(connectButton,
                     "/client/SelectionScreen.fxml", null, client);
 
         } catch (Exception e) {
+            // Connection failed – show error
             UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);
             UiUtils.showAlert("Connection Failed",
                     "Could not connect to the server. "
@@ -130,15 +133,15 @@ public class ConnectController implements ClientAware {
     }
 
     /**
-     * Triggered by the "Exit" button.
-     * Sends a graceful disconnect to the server (if connected)
-     * and terminates the JVM.
+     * Called when the "Exit" button is pressed.
+     * If connected, informs the server before disconnecting.
+     * Then exits the entire application.
      */
     @FXML
     public void exitApplication() {
         try {
             if (client != null && client.isConnected()) {
-                // Inform server before closing the socket
+                // Notify server that we're disconnecting
                 client.sendToServer(new Object[] { "disconnect" });
                 client.closeConnection();
                 System.out.println("Client disconnected successfully.");
@@ -150,9 +153,8 @@ public class ConnectController implements ClientAware {
     }
 
     /**
-     * JavaFX initialise hook.
-     * Prefills the IP field with the local machine address so the user
-     * can copy-paste it easily when testing on the same PC.
+     * JavaFX initialize hook – called automatically on screen load.
+     * Prefills the IP field with the local machine IP for convenience.
      */
     public void initialize() {
         try {

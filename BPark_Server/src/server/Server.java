@@ -21,16 +21,20 @@ import mailService.MailService;
 import mailService.TypeOfMail;
 
 /**
- * Represents the BPARK server. Handles client connections and dispatches
- * requests using OCSF.
+ * Represents the BPARK server. Handles incoming client connections and
+ * dispatches requests using the OCSF framework.
+ * Also starts background threads such as email checking and monthly reporting.
  */
 public class Server extends AbstractServer {
 
-	/** Singleton DB controller used for all database operations */
-	private DBController db;
+    /** Singleton DB controller used for all database operations */
+    private DBController db;
 
-	private MailService sendEmail = new MailService();
-	private ParkingEventChecker parkingEventChecker = new ParkingEventChecker();
+    /** Mail service used for sending notifications */
+    private MailService sendEmail = new MailService();
+
+    /** Thread that monitors overdue parking sessions and sends alerts */
+    private ParkingEventChecker parkingEventChecker = new ParkingEventChecker();
 
 	/**
 	 * Constructs a new server instance.
@@ -45,15 +49,16 @@ public class Server extends AbstractServer {
 		
 	}
 
-	/**
-	 * Called automatically when the server starts. Connects to the database.
-	 */
-	@Override
-	protected void serverStarted() {
-		db.connectToDB();
-		System.out.println("Server started on port " + getPort());
-		MonthlyReportScheduler.start();
-	}
+    /**
+     * Called automatically when the server starts.
+     * Establishes DB connection and starts the monthly report scheduler.
+     */
+    @Override
+    protected void serverStarted() {
+        db.connectToDB();
+        System.out.println("Server started on port " + getPort());
+        MonthlyReportScheduler.start(); // schedule monthly reports
+    }
 
 	/**
 	 * Processes incoming messages from connected clients. Each message is expected

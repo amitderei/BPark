@@ -1,64 +1,107 @@
 package common;
 
 /**
- * Tiny data-holder for a car that can enter BPARK.
- * A vehicle is identified by a plate / RFID string.  
- * We also keep who owns the car (a Subscriber) and
- * whether the car is currently inside a lot.
- *
+ * Represents a vehicle that can enter and park in the BPARK system.
+ * Each vehicle has an identifier,
+ * an optional owner (a subscriber), and a flag that indicates
+ * whether the vehicle is currently parked.
  */
 public class Vehicle {
 
-    private String      vehicleId;   // licence plate or RFID
-    private Subscriber  owner;       // the subscriber that registered the car
-    private boolean     parked;      // true ⇒ car is in the lot
+    /** The vehicle's ID */
+    private String vehicleId;
+
+    /** The subscriber who owns the vehicle */
+    private Subscriber owner;
+
+    /** Indicates whether the vehicle is currently parked */
+    private boolean parked;
 
     /**
      * Full constructor – sets all fields.
      *
      * @param vehicleId unique vehicle identifier
      * @param owner     subscriber that owns the vehicle
-     * @param parked    current parking state (true = inside)
+     * @param parked    true if the vehicle is currently in the parking lot
      */
     public Vehicle(String vehicleId, Subscriber owner, boolean parked) {
         this.vehicleId = vehicleId;
-        this.owner     = owner;
-        this.parked    = parked;
+        this.owner = owner;
+        this.parked = parked;
     }
 
     /**
-     * Convenience constructor when the owner is not yet known.
+     * Constructor used when the vehicle has no owner registered yet.
      *
-     * @param vehicleId unique vehicle identifier
-     * @param parked    current parking state (true = inside)
+     * @param vehicleId vehicle's unique identifier
+     * @param parked    true if currently parked
      */
     public Vehicle(String vehicleId, boolean parked) {
         this(vehicleId, null, parked);
     }
 
-    /* ───────── getters / setters ───────── */
-
-    public String getVehicleId()          { return vehicleId; }
-    public void   setVehicleId(String id) { this.vehicleId = id; }
-
-    public Subscriber getOwner()                { return owner; }
-    public void       setOwner(Subscriber s)    { this.owner = s; }
-
-    public boolean isParked()               { return parked; }
-    public void    setParked(boolean state) { this.parked = state; }
-
-    /* ───────── utility ───────── */
+    // -------------------- Getters & Setters --------------------
 
     /**
-     * Simple one-line dump for logs / debugging.
+     * @return the vehicle's ID
+     */
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    /**
+     * Sets the vehicle's ID.
      *
-     * @return human-readable description
+     * @param id the new vehicle ID
+     */
+    public void setVehicleId(String id) {
+        this.vehicleId = id;
+    }
+
+    /**
+     * @return the subscriber who owns the vehicle
+     */
+    public Subscriber getOwner() {
+        return owner;
+    }
+
+    /**
+     * Sets the owner of the vehicle.
+     *
+     * @param s the subscriber who owns the vehicle
+     */
+    public void setOwner(Subscriber s) {
+        this.owner = s;
+    }
+
+    /**
+     * @return true if the vehicle is currently parked
+     */
+    public boolean isParked() {
+        return parked;
+    }
+
+    /**
+     * Sets the parking state of the vehicle.
+     *
+     * @param state true if parked, false otherwise
+     */
+    public void setParked(boolean state) {
+        this.parked = state;
+    }
+
+    // -------------------- Utility --------------------
+
+    /**
+     * Returns a short string summary of the vehicle.
+     * Useful for debugging or logs.
+     *
+     * @return formatted string with vehicle info
      */
     @Override
     public String toString() {
         return "Vehicle{id='" + vehicleId + "', owner=" +
-               (owner != null ? owner.getSubscriberCode() : "none") +
-               ", parked=" + parked + '}';
+                (owner != null ? owner.getSubscriberCode() : "none") +
+                ", parked=" + parked + '}';
     }
 }
-

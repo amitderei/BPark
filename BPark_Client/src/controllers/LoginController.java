@@ -13,31 +13,55 @@ import javafx.stage.Stage;
 import ui.UiUtils;
 
 /**
- * Handles the login workflow:
- *  • Validates username / password fields  
- *  • Sends a login request to the server  
- *  • Reacts to success or failure callbacks from ClientController  
- *  • Routes the user to the correct main layout according to role
+ * Controller for handling the login workflow.
+ * 
+ * This screen allows the user to enter credentials, send a login request,
+ * and get redirected to the appropriate screen based on their role
+ * (Subscriber, Attendant, or Manager).
  */
 public class LoginController implements ClientAware {
 
-    /* ---------- FXML controls ---------- */
+    // ==============================
+    // FXML Fields
+    // ==============================
+
+    /** Text field for entering username */
     @FXML private TextField username;
+
+    /** Password field for entering subscriber/staff code */
     @FXML private PasswordField code;
+
+    /** Button to submit the login form */
     @FXML private Button submit;
+
+    /** Label to show login errors or validation messages */
     @FXML private Label lblError;
+
+    /** Button to return to the previous screen */
     @FXML private Button backButton;
+
+    /** Button to exit the application */
     @FXML private Button btnExit;
 
-    /* ---------- runtime ---------- */
+    // ==============================
+    // Runtime Fields
+    // ==============================
+
+    /** Active client controller, used to communicate with the server */
     private ClientController client;
-    private String password;   // cached so we can forward to SubscriberMain
+
+    /** Cached password for future use (e.g., profile editing) */
+    private String password;
+
+    // ==============================
+    // Dependency Injection
+    // ==============================
 
     /**
-     * Saves the ClientController reference and
-     * registers this object as the callback target for login events.
+     * Injects the client controller and registers this controller
+     * as the login callback handler.
      *
-     * @param client active client instance, injected by the parent screen
+     * @param client active client instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -45,20 +69,27 @@ public class LoginController implements ClientAware {
         client.setLoginController(this);
     }
 
-    /* =====================================================
-     *  UI event handlers
-     * ===================================================== */
+    // ==============================
+    // FXML Event Handlers
+    // ==============================
 
-    /** Reads the fields, validates, and fires a login request. */
+    /**
+     * Called when the login button is clicked.
+     * Validates the fields and sends a login request to the server.
+     */
     @FXML
     private void handleLoginClick() {
+        // Read input values
         String user = username.getText();
         password    = code.getText();
 
+        // Validate input
         if (user.isEmpty() || password.isEmpty()) {
             lblError.setText("Please enter both username and password.");
             return;
         }
+
+        // Send login request to server
         try {
             client.requestLogin(user, password);
         } catch (Exception ex) {
@@ -67,19 +98,32 @@ public class LoginController implements ClientAware {
         }
     }
 
-    /** Server confirmed credentials – route to the proper main screen. */
+    /**
+     * Called when login is successful.
+     * Navigates the user to the appropriate main layout based on their role.
+     *
+     * @param user authenticated user object
+     */
     public void handleLoginSuccess(User user) {
         System.out.println("[DEBUG] Login successful, role = " + user.getRole());
         navigateToHome(user);
     }
 
-    /** Server rejected credentials – show the reason. */
+    /**
+     * Called when login fails.
+     * Displays an error message to the user.
+     *
+     * @param msg error message to show
+     */
     public void handleLoginFailure(String msg) {
         lblError.setText(msg);
         System.err.println("[DEBUG] Login failed: " + msg);
     }
 
-    /** Disconnects and quits the application. */
+    /**
+     * Disconnects from the server and exits the application.
+     * Triggered by the Exit button.
+     */
     @FXML
     private void handleExitClick() {
         try {
@@ -92,64 +136,68 @@ public class LoginController implements ClientAware {
         System.exit(0);
     }
 
-    /** Returns to the entry screen (Guest / Login choice). */
+    /**
+     * Navigates back to the welcome screen (Guest/Login choice).
+     */
     @FXML
     private void handleBack() {
         UiUtils.loadScreen(backButton,
-                           "/client/MainScreen.fxml",
-                           "BPARK – Welcome",
-                           client);
+                "/client/MainScreen.fxml",
+                "BPARK – Welcome",
+                client);
     }
 
-    /* =====================================================
-     *  Private helpers
-     * ===================================================== */
+    // ==============================
+    // Internal Helpers
+    // ==============================
 
     /**
-     * Loads the main layout that matches the user’s role
-     * and transfers required objects to that controller.
+     * Loads the appropriate main layout screen based on the user's role.
+     * Passes required references to the next controller.
      *
      * @param user authenticated user returned by the server
      */
     private void navigateToHome(User user) {
-
         String fxml;
         UserRole role = user.getRole();
 
+        // Determine target FXML based on role
         switch (role) {
             case Subscriber -> {
                 fxml = "/client/SubscriberMainLayout.fxml";
-                client.subscriberDetails(user);   // fetch full subscriber info
+                client.subscriberDetails(user); // Fetch full subscriber info from server
             }
             case Attendant, Manager -> fxml = "/client/StaffMainLayout.fxml";
             default -> {
                 UiUtils.showAlert("BPARK – Error",
-                                   "Unknown role: " + role,
-                                   Alert.AlertType.ERROR);
+                        "Unknown role: " + role,
+                        Alert.AlertType.ERROR);
                 return;
             }
         }
 
         try {
+            // Load the selected layout
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             Parent root = loader.load();
             Object ctrl = loader.getController();
 
-            /* --- role-specific wiring --- */
+            // If it's a subscriber, configure main layout and preload home screen
             if (ctrl instanceof SubscriberMainLayoutController sub) {
                 client.setMainLayoutController(sub);
                 sub.setClient(client);
                 sub.setSubscriberName(username.getText().trim());
                 sub.loadScreen("/client/SubscriberMainScreen.fxml");
-                client.setPassword(password);   // cache for later edits
+                client.setPassword(password); // Save password for reuse
             }
 
+            // If it's a staff member (attendant or manager), pass user info
             if (ctrl instanceof StaffMainLayoutController staff) {
                 staff.setClient(client);
                 staff.setUser(user);
             }
 
-            /* --- swap scene --- */
+            // Replace current scene
             Stage stage = (Stage) submit.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("BPARK – " + role);
@@ -157,8 +205,8 @@ public class LoginController implements ClientAware {
 
         } catch (Exception ex) {
             UiUtils.showAlert("BPARK – Error",
-                              "Failed to load " + role + " screen.",
-                              Alert.AlertType.ERROR);
+                    "Failed to load " + role + " screen.",
+                    Alert.AlertType.ERROR);
             ex.printStackTrace();
         }
     }

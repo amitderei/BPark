@@ -6,41 +6,73 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 /**
- * Read-only view of the subscriber’s personal details.  
- * Values are pulled from ClientController (which already
- * stores the logged-in Subscriber and the password).
+ * Controller for the screen that displays the subscriber's personal details.
+ * All fields are shown in read-only mode and populated using the
+ * ClientController, which holds the logged-in subscriber's data.
+ * The screen also provides a button that lets the user navigate to the
+ * "Edit Details" screen.
  */
 public class ViewSubscriberDetailsController implements ClientAware {
 
-    /* ---------- headline ---------- */
+    /* ================================
+     * Labels in the left-right layout
+     * ================================ */
+
+    /** Headline label ("Your Personal Details") */
     @FXML private Label headline;
 
-    /* ---------- left column captions + right column values ---------- */
-    @FXML private Label sunscriberCode;        @FXML private Label subscriberCodeDetail;
-    @FXML private Label id;                    @FXML private Label idDetail;
-    @FXML private Label firstName;             @FXML private Label firstNameDetail;
-    @FXML private Label lastName;              @FXML private Label lastNameDetail;
-    @FXML private Label username;              @FXML private Label usernameDetail;
-    @FXML private Label password;              @FXML private Label passwordDetail;
-    @FXML private Label email;                 @FXML private Label emailDetail;
-    @FXML private Label phoneNumber;           @FXML private Label phoneNumberDetail;
+    /** Caption: "Subscriber Code" */          @FXML private Label sunscriberCode;
+    /** Value: subscriberCode from DB */       @FXML private Label subscriberCodeDetail;
 
-    /* ---------- edit button ---------- */
+    /** Caption: "ID" */                        @FXML private Label id;
+    /** Value: Israeli national ID */           @FXML private Label idDetail;
+
+    /** Caption: "First Name" */                @FXML private Label firstName;
+    /** Value: subscriber’s first name */       @FXML private Label firstNameDetail;
+
+    /** Caption: "Last Name" */                 @FXML private Label lastName;
+    /** Value: subscriber’s last name */        @FXML private Label lastNameDetail;
+
+    /** Caption: "Username" */                  @FXML private Label username;
+    /** Value: username used for login */       @FXML private Label usernameDetail;
+
+    /** Caption: "Password" */                  @FXML private Label password;
+    /** Value: password retrieved from client */@FXML private Label passwordDetail;
+
+    /** Caption: "Email" */                     @FXML private Label email;
+    /** Value: subscriber’s email address */    @FXML private Label emailDetail;
+
+    /** Caption: "Phone Number" */              @FXML private Label phoneNumber;
+    /** Value: mobile phone number */           @FXML private Label phoneNumberDetail;
+
+    /** Button to switch to the edit screen */
     @FXML private Button editBtn;
 
-    /* ---------- runtime ---------- */
+    /* ================================
+     * Runtime fields
+     * ================================ */
+
+    /** Shared client used to access subscriber and screen switching */
     private ClientController client;
+
+    /** Logged-in subscriber */
     private Subscriber subscriber;
+
+    /** Password for display only (read from client) */
     private String passwordStr;
+
+    /** Layout controller used to switch to the edit screen */
     private SubscriberMainLayoutController mainLayoutController;
 
     /* =====================================================
-     *  data wiring
+     *  Setup methods
      * ===================================================== */
 
     /**
-     * Saves client ref so we can reach the cached subscriber
-     * and later switch screens.
+     * Injects the central ClientController used for retrieving
+     * subscriber data and navigating to other screens.
+     *
+     * @param client the connected controller instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -48,34 +80,38 @@ public class ViewSubscriberDetailsController implements ClientAware {
     }
 
     /**
-     * Pulls Subscriber object and password from ClientController.
-     * Call once before setLabels().
+     * Loads the Subscriber object and password string from the client.
+     * This method must be called before calling #setLabels().
      */
     public void setSubscriberAndPassword() {
-        this.subscriber   = client.getSubscriber();
-        this.passwordStr  = client.getPassword();
+        this.subscriber  = client.getSubscriber();
+        this.passwordStr = client.getPassword();
     }
 
     /**
-     * Fills all value labels with the subscriber’s details.
-     * Assumes setSubscriberAndPassword() was called first.
+     * Updates the screen labels with the subscriber's current details.
+     * Assumes #setSubscriberAndPassword() was called beforehand.
      */
     public void setLabels() {
         subscriberCodeDetail.setText(String.valueOf(subscriber.getSubscriberCode()));
-        idDetail       .setText(subscriber.getUserId());
-        firstNameDetail.setText(subscriber.getFirstName());
-        lastNameDetail .setText(subscriber.getLastName());
-        usernameDetail .setText(subscriber.getUsername());
-        passwordDetail .setText(passwordStr);
-        emailDetail    .setText(subscriber.getEmail());
-        phoneNumberDetail.setText(subscriber.getPhoneNum());
+        idDetail            .setText(subscriber.getUserId());
+        firstNameDetail     .setText(subscriber.getFirstName());
+        lastNameDetail      .setText(subscriber.getLastName());
+        usernameDetail      .setText(subscriber.getUsername());
+        passwordDetail      .setText(passwordStr);
+        emailDetail         .setText(subscriber.getEmail());
+        phoneNumberDetail   .setText(subscriber.getPhoneNum());
     }
 
     /* =====================================================
-     *  navigation
+     *  Navigation
      * ===================================================== */
 
-    /** Loads the "Edit Details" screen via the parent layout. */
+    /**
+     * Triggered when the user clicks the "Edit Details" button.
+     * Navigates to the EditSubscriberDetails screen via the
+     * SubscriberMainLayoutController.
+     */
     public void handleGoToEdit() {
         try {
             mainLayoutController = client.getMainLayoutController();

@@ -11,16 +11,22 @@ import javafx.scene.control.Label;
  */
 public class SubscriberMainController implements ClientAware {
 
-    /** Label that displays "Welcome, <name>!" */
+    /** 
+     * Label that displays a personalized greeting, e.g. "Welcome, John!".
+     * Bound to the FXML layout.
+     */
     @FXML
     private Label welcomeLabel;
 
-    /** Shared socket handler, injected by the parent. */
+    /** 
+     * Reference to the shared ClientController instance.
+     * Used for sending messages to the server if needed.
+     */
     private ClientController client;
 
     /**
-     * Saves the ClientController reference so this screen
-     * can talk to the server later if needed.
+     * Injects the shared ClientController so this screen
+     * can communicate with the server.
      *
      * @param client active client instance
      */
@@ -31,8 +37,7 @@ public class SubscriberMainController implements ClientAware {
 
     /**
      * Updates the welcome label with the subscriber’s first name.
-     * Guarded with a null-check because FXML fields may be null
-     * during unit tests that skip UI loading.
+     * Skips update if welcomeLabel is not yet loaded (e.g., during unit tests).
      *
      * @param name first name of the subscriber
      */

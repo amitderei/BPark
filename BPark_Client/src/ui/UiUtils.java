@@ -12,25 +12,26 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 /**
- * Small collection of static helper methods for JavaFX screens:
- * – Coloured status messages on labels  
- * – Standard alert pop-ups  
- * – Scene / screen switching with automatic ClientController injection
+ * A utility class that provides reusable methods for JavaFX UI management.
+ * This includes:
+ * - Setting status messages on labels with color
+ * - Displaying pop-up alerts
+ * - Switching between screens (FXML) while injecting the active ClientController
  */
 public final class UiUtils {
 
-    /** Shared client instance, mainly for static access inside loadScreen. */
+    /** Shared client instance for screen loading and controller access */
     public static ClientController client;
 
-    /** Utility class – prevent instantiation. */
-    private UiUtils() { }
+    /** Private constructor to prevent instantiation of this utility class */
+    private UiUtils() {}
 
     /**
-     * Styles a label green for success or red for error and sets the text.
+     * Updates a label with a message and sets its text color based on status.
      *
-     * @param label     label to update
-     * @param message   text to show
-     * @param isSuccess true ⇒ green, false ⇒ red
+     * @param label     the label to update
+     * @param message   the message to display
+     * @param isSuccess true for green (success), false for red (error)
      */
     public static void setStatus(Label label,
                                  String message,
@@ -43,11 +44,11 @@ public final class UiUtils {
     }
 
     /**
-     * Opens a modal alert dialog on the JavaFX thread.
+     * Displays a JavaFX alert pop-up.
      *
-     * @param title   dialog title
-     * @param content body text
-     * @param type    INFORMATION / WARNING / ERROR …
+     * @param title   the title of the dialog
+     * @param content the message body
+     * @param type    the type of alert (INFO, WARNING, ERROR, etc.)
      */
     public static void showAlert(String title,
                                  String content,
@@ -62,30 +63,27 @@ public final class UiUtils {
     }
 
     /**
-     * Loads an FXML file, injects a ClientController when the controller
-     * implements ClientAware, and swaps the current scene.
+     * Loads a new FXML screen and switches to it.
+     * Also injects the ClientController into any controller that implements ClientAware.
+     * Some known controllers also register themselves back to the ClientController.
      *
-     * @param source    node already attached to the active window
-     * @param fxmlPath  class-path location of the FXML
-     * @param title     new window title
-     * @param client1   active ClientController; may be null for guest screens
+     * @param source    the button (or any node) from the current scene
+     * @param fxmlPath  the path to the FXML file
+     * @param title     the new window title
+     * @param client1   the active client instance (can be null for guest mode)
      */
     public static void loadScreen(Button source,
                                   String fxmlPath,
                                   String title,
                                   ClientController client1) {
-
         try {
             FXMLLoader loader = new FXMLLoader(UiUtils.class.getResource(fxmlPath));
             Parent root = loader.load();
 
-            /* ------------------------------------------------------
-             *  Pass client reference to controllers that need it.
-             *  Some specific controllers also need to register
-             *  themselves inside ClientController for callbacks.
-             * ------------------------------------------------------ */
+            // Get the controller of the loaded FXML
             Object ctrl = loader.getController();
 
+            // Assign specific controller references (so client can send updates to them)
             if (ctrl instanceof TerminalMainLayoutController t) {
                 client.setTerminalController(t);
                 t.setClient(client);
@@ -103,14 +101,12 @@ public final class UiUtils {
                 g.setClient(client);
             }
 
-            // Generic injection for any other controller
+            // General injection for any controller that implements ClientAware
             if (ctrl instanceof ClientAware aware) {
                 aware.setClient(client1);
             }
 
-            /* ------------------------------------------------------
-             *  Swap scene
-             * ------------------------------------------------------ */
+            // Switch to the new screen
             Stage stage = (Stage) source.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle(title);
@@ -125,11 +121,11 @@ public final class UiUtils {
     }
 
     /**
-     * Convenience method for directly setting a scene with fixed width/height.
+     * Replaces the current scene with a new one, setting a fixed window size.
      *
-     * @param stage  target Stage
-     * @param root   root node for the new scene
-     * @param title  window title
+     * @param stage the JavaFX stage (window)
+     * @param root  the root node of the new scene
+     * @param title the title to display in the window
      */
     public static void setScene(Stage stage, Parent root, String title) {
         Scene scene = new Scene(root);
