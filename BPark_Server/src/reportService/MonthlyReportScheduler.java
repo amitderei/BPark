@@ -6,59 +6,46 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * A scheduler that automatically generates a monthly parking report
- * on the first day of each month at midnight.
- * When started, it also generates any missing reports from previous months.
+ * A unified scheduler that handles:
+ * 1. Generating all missing monthly reports (parking + subscriber) at startup.
+ * 2. Scheduling automatic generation of next reports on the 1st of every month at midnight.
  */
 public class MonthlyReportScheduler {
 
-    /** Instance used to create monthly reports */
-    private static MonthlyReportGenarator monthlyReportGenarator = new MonthlyReportGenarator();
+    /** Instance used to create all monthly reports */
+    private static final MonthlyReportGenarator generator = new MonthlyReportGenarator();
 
     /** Timer that manages the scheduling of report generation */
-    private static Timer timer = new Timer();
+    private static final Timer timer = new Timer("MonthlyReportTimer");
 
-    /**
-     * Starts the report scheduler.
-     * Generates missing reports from May 2025 up to the current month,
-     * and sets up a timer to automatically generate next month's report.
-     */
+    /** Starts the unified report scheduler. Call once from Server.serverStarted(). */
     public static void start() {
-        // Generate all past reports (if not already generated)
-        monthlyReportGenarator.generatePastReport();
-
-        // Schedule the next monthly report
-        scheduleNext();
+        generator.generatePastReports(); // Catch up on missing months
+        scheduleNext();                  // Schedule next execution
     }
 
-    /**
-     * Schedules the report generation task for the 1st of the next month at 00:00.
-     */
+    /** Schedules the next monthly report job at 1st of next month 00:00. */
     private static void scheduleNext() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
 
-        // Set the time to the 1st of the current month at 00:00
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-        // If that time has already passed, schedule for the next month
-        if (calendar.getTime().before(new Date())) {
-            calendar.add(Calendar.MONTH, 1);
+        // If time already passed for this month, go to next
+        if (cal.getTime().before(new Date())) {
+            cal.add(Calendar.MONTH, 1);
         }
 
-        Date nextRun = calendar.getTime();
-        System.out.println("Next report scheduled for: " + nextRun);
+        Date nextRun = cal.getTime();
+        System.out.println("Next monthly report scheduled for: " + nextRun);
 
-        // Schedule the report task
         timer.schedule(new TimerTask() {
+            @Override
             public void run() {
-                // Generate the current month's report
-                monthlyReportGenarator.generateNewReport();
-
-                // Reschedule for the next month
-                scheduleNext();
+                generator.generateNewReports(); // Parking + Subscriber
+                scheduleNext(); // Chain next month
             }
         }, nextRun);
     }

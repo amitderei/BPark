@@ -49,17 +49,29 @@ public class SubscriberStatusController implements ClientAware {
 
     private ClientController client;
 
-    /* ------------------------------------------------ initialize */
+    /* ---------- initialize (combo limits) ---------- */
     @FXML
     private void initialize() {
-        cmbMonth.setItems(FXCollections.observableArrayList(
-                IntStream.rangeClosed(1, 12).boxed().toList()));
+        int curMonth = java.time.LocalDate.now().getMonthValue();
+        int curYear  = Year.now().getValue();
+
+        /* year combo 2024..current */
         cmbYear.setItems(FXCollections.observableArrayList(
-                IntStream.rangeClosed(2024, Year.now().getValue()).boxed().toList()));
+                IntStream.rangeClosed(2024, curYear).boxed().toList()));
 
-        cmbMonth.getSelectionModel().select(java.time.LocalDate.now().getMonthValue() - 1);
-        cmbYear.getSelectionModel().selectLast();
+        /* adjust month list when year changes */
+        cmbYear.getSelectionModel().selectedItemProperty().addListener((obs, oldY, newY) -> {
+            int maxMonth = (newY == curYear) ? curMonth - 1 : 12;
+            cmbMonth.setItems(FXCollections.observableArrayList(
+                    IntStream.rangeClosed(1, maxMonth).boxed().toList()));
+            if (!cmbMonth.getItems().isEmpty())
+                cmbMonth.getSelectionModel().selectLast();
+        });
 
+        /* trigger initial fill */
+        cmbYear.getSelectionModel().select(Integer.valueOf(curYear));
+
+        /* table columns */
         colCode   .setCellValueFactory(new PropertyValueFactory<>("code"));
         colName   .setCellValueFactory(new PropertyValueFactory<>("name"));
         colEntries.setCellValueFactory(new PropertyValueFactory<>("totalEntries"));
@@ -81,16 +93,16 @@ public class SubscriberStatusController implements ClientAware {
         }
     }
 
-    /* ------------------------------------------------ send request */
+    /* ---------- sendRequest ---------- */
     private void sendRequest() {
-        int month = cmbMonth.getValue();
-        int year  = cmbYear.getValue();
+        Integer month = cmbMonth.getValue();
+        Integer year  = cmbYear.getValue();
+        if (month == null || year == null) return;      // nothing selected
         try {
-			client.sendToServer(new Object[]{"get_subscriber_status", month, year});
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            client.sendToServer(new Object[]{"get_subscriber_status", month, year});
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /* ------------------------------------------------ callback from ClientController */
@@ -114,6 +126,7 @@ public class SubscriberStatusController implements ClientAware {
                 .add(new XYChart.Data<>(r.getName(), r.getTotalHours())));
         barChart.getData().setAll(series);
         barChart.setTitle("Top-10 by Hours");
+        
 
         /* PieChart: Active vs Inactive */
         long active   = rows.stream().filter(r -> r.getTotalEntries() > 0).count();
@@ -123,4 +136,6 @@ public class SubscriberStatusController implements ClientAware {
                 new PieChart.Data("Inactive", inactive)));
         pieChart.setTitle("Active vs Inactive");
     }
+    
+    
 }

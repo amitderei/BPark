@@ -1681,6 +1681,29 @@ public class DBController {
 	    }
 	    return rows;
 	}
+	
+	/**
+	 * Returns true if at least one snapshot row exists for the given month+year.
+	 *
+	 * @param month calendar month (1-12)
+	 * @param year  four-digit year
+	 */
+	public boolean subscriberStatusReportExists(int month, int year) throws SQLException {
+
+	    String sql =
+	        "SELECT 1 FROM subscriberStatusReport " +
+	        "WHERE MONTH(reportMonth)=? AND YEAR(reportMonth)=? " +
+	        "LIMIT 1";
+
+	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setInt(1, month);
+	        ps.setInt(2, year);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            return rs.next();          // true → at least one row
+	        }
+	    }
+	}
+
 
 
 }

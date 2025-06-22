@@ -478,12 +478,28 @@ public class ClientController extends AbstractClient {
 			
 			/* subscriber-status report */
 			else if ("subscriber_status".equals(response.getMsg())) {
-			    if (subscriberStatusController != null && response.getData() instanceof List<?> listRaw) {
-			        List<SubscriberStatusRow> list = (List<SubscriberStatusRow>) listRaw;
-			        subscriberStatusController.onReportReceived(list);
+
+			    /* ----- success ----- */
+			    if (response.isSucceed()) {
+			        if (subscriberStatusController != null &&
+			            response.getData() instanceof List<?> listRaw)
+			        {
+			            @SuppressWarnings("unchecked")
+			            List<SubscriberStatusRow> list = (List<SubscriberStatusRow>) listRaw;
+			            subscriberStatusController.onReportReceived(list);
+			        }
+			        return;
 			    }
+
+			    /* ----- fail: no snapshot for that month ----- */
+			    UiUtils.showAlert(
+			            "Subscriber Report",
+			            response.getMsg(),              // e.g. "No snapshot available for 4/2025"
+			            Alert.AlertType.INFORMATION);
 			    return;
 			}
+
+
 
 
 
