@@ -1530,21 +1530,19 @@ public class DBController {
 		return null;
 	}
 	
-	/* ==============================================================
-	 *  Live aggregation: build the subscriber-status list on-the-fly
-	 *  (Used when the report for a month was not stored yet.)
-	 * ============================================================== */
+    /**
+     * Returns a list of subscriber statistics (entries, extends, lates, hours)
+     * for the selected month and year – calculated directly from parkingEvent.
+     * This method does NOT store anything in the database, it's used for
+     * real-time calculation only (read-only).
+     *
+     * @param month calendar month (1 = January, ..., 12 = December)
+     * @param year  full year (e.g. 2025)
+     * @return list of subscriber rows with usage data
+     * @throws SQLException if something goes wrong during the query
+     */
 
-	/**
-	 * Returns, in memory, the subscriber-status aggregation
-	 * for the given month and year. No insert – read-only.
-	 *
-	 * @param month calendar month (1-12)
-	 * @param year  4-digit calendar year
-	 * @return list of {@link common.SubscriberStatusRow}
-	 * @throws SQLException if the query blows up
-	 */
-	public List<SubscriberStatusRow> getSubscriberStatusLive(int month, int year)
+	public List<SubscriberStatusReport> getSubscriberStatusLive(int month, int year)
 	        throws SQLException {
 
 	    final String sql =
@@ -1569,14 +1567,14 @@ public class DBController {
 	        ORDER BY totalHours DESC;
 	        """;
 
-	    List<SubscriberStatusRow> rows = new ArrayList<>();
+	    List<SubscriberStatusReport> rows = new ArrayList<>();
 
 	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
 	        ps.setInt(1, year);
 	        ps.setInt(2, month);
 	        try (ResultSet rs = ps.executeQuery()) {
 	            while (rs.next()) {
-	                rows.add(new SubscriberStatusRow(
+	                rows.add(new SubscriberStatusReport(
 	                        rs.getInt("code"),
 	                        rs.getString("fullName"),
 	                        rs.getInt("totalEntries"),
@@ -1589,25 +1587,24 @@ public class DBController {
 	    return rows;
 	}
 
-	/* ==============================================================
-	 *  Persisted report: write one row per subscriber into the table
-	 *  Used by the monthly scheduler thread.
-	 * ============================================================== */
-
-	/**
-	 * Generates and stores the subscriber-status report for the
-	 * specified month. Existing rows for that month are deleted first
-	 * (safer re-run).
-	 *
-	 * @param month month to snapshot (1-12)
-	 * @param year  target year
-	 * @return number of rows inserted
-	 * @throws SQLException if anything fails
-	 */
+    /**
+     * Generates and stores a fixed snapshot of all subscribers’ activity
+     * for a given month+year. This method:
+     * Fetches fresh data using getSubscriberStatusLive()
+     * Deletes any existing snapshot for that month (if already exists)
+     * Inserts a new set of records into subscriberStatusReport
+     * 
+     * Used by the monthly report generator (automatic or manual).
+     *
+     * @param month calendar month to save (1-12)
+     * @param year  year to save (4-digit)
+     * @return number of rows inserted (equals number of subscribers)
+     * @throws SQLException if the DB insert fails
+     */
 	public int storeSubscriberStatusReport(int month, int year) throws SQLException {
 
 	    // 1. Build the list in memory
-	    List<SubscriberStatusRow> rows = getSubscriberStatusLive(month, year);
+	    List<SubscriberStatusReport> rows = getSubscriberStatusLive(month, year);
 
 	    // 2. Clear existing snapshot (if the thread ran twice)
 	    String deleteSQL =
@@ -1629,7 +1626,7 @@ public class DBController {
 	        java.sql.Date monthKey =
 	            java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month));
 
-	        for (SubscriberStatusRow r : rows) {
+	        for (SubscriberStatusReport r : rows) {
 	            ins.setDate   (1, monthKey);
 	            ins.setInt    (2, r.getCode());
 	            ins.setInt    (3, r.getTotalEntries());
@@ -1644,16 +1641,17 @@ public class DBController {
 	    return inserted;
 	}
 	
-	/**
-	 * Reads the stored subscriber-status snapshot from the
-	 * subscriberStatusReport table. Returns an empty list if
-	 * no rows exist for the requested month.
-	 *
-	 * @param month calendar month (1-12)
-	 * @param year  four-digit year
-	 * @return list of SubscriberStatusRow (possibly empty)
-	 */
-	public List<SubscriberStatusRow> getSubscriberStatusFromTable(int month, int year)
+    /**
+     * Reads the saved subscriber snapshot from the database for a given month+year.
+     * This is the version used when the report was already generated and stored
+     * (instead of calculating it again).
+     *
+     * @param month month of the report (1-12)
+     * @param year  year of the report (e.g. 2025)
+     * @return list of subscriber statistics for that period (can be empty)
+     * @throws SQLException if database access fails
+     */
+	public List<SubscriberStatusReport> getSubscriberStatusFromTable(int month, int year)
 	        throws SQLException {
 
 	    String sql =
@@ -1663,13 +1661,13 @@ public class DBController {
 	        "JOIN subscriber s USING (subscriberCode) " +
 	        "WHERE reportMonth = ?";
 
-	    List<SubscriberStatusRow> rows = new ArrayList<>();
+	    List<SubscriberStatusReport> rows = new ArrayList<>();
 
 	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
 	        ps.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
 	        try (ResultSet rs = ps.executeQuery()) {
 	            while (rs.next()) {
-	                rows.add(new SubscriberStatusRow(
+	                rows.add(new SubscriberStatusReport(
 	                        rs.getInt("subscriberCode"),
 	                        rs.getString("fullName"),
 	                        rs.getInt("totalEntries"),
@@ -1682,12 +1680,17 @@ public class DBController {
 	    return rows;
 	}
 	
-	/**
-	 * Returns true if at least one snapshot row exists for the given month+year.
-	 *
-	 * @param month calendar month (1-12)
-	 * @param year  four-digit year
-	 */
+    /**
+     * Checks if there is already at least one row in subscriberStatusReport
+     * for the given month and year.
+     * Used to prevent creating the same report twice.
+     *
+     * @param month month to check (1-12)
+     * @param year  year to check (4-digit)
+     * @return true if snapshot exists, false otherwise
+     * @throws SQLException if DB check fails
+     */
+
 	public boolean subscriberStatusReportExists(int month, int year) throws SQLException {
 
 	    String sql =
@@ -1699,7 +1702,7 @@ public class DBController {
 	        ps.setInt(1, month);
 	        ps.setInt(2, year);
 	        try (ResultSet rs = ps.executeQuery()) {
-	            return rs.next();          // true → at least one row
+	            return rs.next();     
 	        }
 	    }
 	}

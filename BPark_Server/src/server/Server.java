@@ -19,7 +19,7 @@ import common.ParkingEvent;
 import common.ParkingReport;
 import common.ServerResponse;
 import common.Subscriber;
-import common.SubscriberStatusRow;
+import common.SubscriberStatusReport;
 import common.User;
 import db.DBController;
 import mailService.MailService;
@@ -540,15 +540,15 @@ public class Server extends AbstractServer {
 					return;
 				}
 				
-				/* "get_subscriber_status" */
+				// "get_subscriber_status" 
 				else if (data.length == 3 && "get_subscriber_status".equals(data[0])) {
 				    int month = (int) data[1];
 				    int year  = (int) data[2];
 
 				    try {
-				        List<SubscriberStatusRow> rows = db.getSubscriberStatusFromTable(month, year);
+				        List<SubscriberStatusReport> rows = db.getSubscriberStatusFromTable(month, year);
 
-				        /* current open month? → build live if snapshot missing */
+				        /* current open month? -> build live if snapshot missing */
 				        LocalDate today = LocalDate.now();
 				        boolean isCurrent = (year == today.getYear() && month == today.getMonthValue());
 

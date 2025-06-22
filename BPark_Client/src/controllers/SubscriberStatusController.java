@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import client.ClientController;
-import common.SubscriberStatusRow;
+import common.SubscriberStatusReport;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,57 +21,85 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 /**
- * UI controller for the "Subscriber Status" report screen.
- * Sends a request to the server and visualises the result.
+ * This controller handles the Subscriber Status report screen.
+ * It lets the user pick a month and year, sends a request to the server,
+ * and shows the data in a table, a bar chart, and a pie chart.
  */
 public class SubscriberStatusController implements ClientAware {
 
-    /* ------------------------------------------------ FXML bindings */
+    /* ========================== FXML Elements ========================== */
+
+    /** Combo box to select the month */
     @FXML private ComboBox<Integer> cmbMonth;
+
+    /** Combo box to select the year */
     @FXML private ComboBox<Integer> cmbYear;
+
+    /** Button to load the report */
     @FXML private Button btnLoad;
 
-
+    /** Bar chart to show top subscribers by total hours */
     @FXML private BarChart<String, Number> barChart;
+
+    /** Pie chart to show active vs inactive subscribers */
     @FXML private PieChart pieChart;
 
-    @FXML private TableView<SubscriberStatusRow> tblReport;
-    @FXML private TableColumn<SubscriberStatusRow, Integer> colCode;
-    @FXML private TableColumn<SubscriberStatusRow, String>  colName;
-    @FXML private TableColumn<SubscriberStatusRow, Integer> colEntries;
-    @FXML private TableColumn<SubscriberStatusRow, Integer> colExtends;
-    @FXML private TableColumn<SubscriberStatusRow, Integer> colLates;
-    @FXML private TableColumn<SubscriberStatusRow, Double> colHours;
+    /** Table that displays all subscriber data */
+    @FXML private TableView<SubscriberStatusReport> tblReport;
 
-    /* ------------------------------------------------ internal data */
-    private final ObservableList<SubscriberStatusRow> rows =
+    /** Table column: subscriber code */
+    @FXML private TableColumn<SubscriberStatusReport, Integer> colCode;
+
+    /** Table column: subscriber name */
+    @FXML private TableColumn<SubscriberStatusReport, String> colName;
+
+    /** Table column: number of entries */
+    @FXML private TableColumn<SubscriberStatusReport, Integer> colEntries;
+
+    /** Table column: number of parking extensions */
+    @FXML private TableColumn<SubscriberStatusReport, Integer> colExtends;
+
+    /** Table column: number of late exits */
+    @FXML private TableColumn<SubscriberStatusReport, Integer> colLates;
+
+    /** Table column: total hours parked */
+    @FXML private TableColumn<SubscriberStatusReport, Double> colHours;
+
+    /* ========================== Internal State ========================== */
+
+    /** The list that holds the report rows to show in the table */
+    private final ObservableList<SubscriberStatusReport> rows =
             FXCollections.observableArrayList();
 
+    /** Reference to the active client (used to send requests) */
     private ClientController client;
 
-    /* ---------- initialize (combo limits) ---------- */
+    /**
+     * Called automatically when the screen is loaded.
+     * Sets up the combo boxes, table columns, and button listener.
+     */
     @FXML
     private void initialize() {
         int curMonth = java.time.LocalDate.now().getMonthValue();
         int curYear  = Year.now().getValue();
 
-        /* year combo 2024..current */
+        // Fill the year combo with 2024 up to current year
         cmbYear.setItems(FXCollections.observableArrayList(
                 IntStream.rangeClosed(2024, curYear).boxed().toList()));
 
-        /* adjust month list when year changes */
+        // When the user picks a year, limit the months (if it's the current year)
         cmbYear.getSelectionModel().selectedItemProperty().addListener((obs, oldY, newY) -> {
             int maxMonth = (newY == curYear) ? curMonth - 1 : 12;
             cmbMonth.setItems(FXCollections.observableArrayList(
                     IntStream.rangeClosed(1, maxMonth).boxed().toList()));
             if (!cmbMonth.getItems().isEmpty())
-                cmbMonth.getSelectionModel().selectLast();
+                cmbMonth.getSelectionModel().selectLast(); // select latest month
         });
 
-        /* trigger initial fill */
+        // Auto-select current year to trigger combo update
         cmbYear.getSelectionModel().select(Integer.valueOf(curYear));
 
-        /* table columns */
+        // Link table columns to SubscriberStatusRow fields
         colCode   .setCellValueFactory(new PropertyValueFactory<>("code"));
         colName   .setCellValueFactory(new PropertyValueFactory<>("name"));
         colEntries.setCellValueFactory(new PropertyValueFactory<>("totalEntries"));
@@ -79,12 +107,19 @@ public class SubscriberStatusController implements ClientAware {
         colLates .setCellValueFactory(new PropertyValueFactory<>("totalLates"));
         colHours .setCellValueFactory(new PropertyValueFactory<>("totalHours"));
 
+        // Bind data to table
         tblReport.setItems(rows);
 
+        // When the button is clicked, send request
         btnLoad.setOnAction(e -> sendRequest());
     }
 
-    /* ------------------------------------------------ ClientAware */
+    /**
+     * This method is called by the client to give this controller access.
+     * It also registers this controller inside the client for future use.
+     *
+     * @param client the active ClientController
+     */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
@@ -93,11 +128,15 @@ public class SubscriberStatusController implements ClientAware {
         }
     }
 
-    /* ---------- sendRequest ---------- */
+    /**
+     * Sends a request to the server to load the report
+     * for the selected month and year.
+     */
     private void sendRequest() {
         Integer month = cmbMonth.getValue();
         Integer year  = cmbYear.getValue();
-        if (month == null || year == null) return;      // nothing selected
+        if (month == null || year == null) return; // do nothing if empty
+
         try {
             client.sendToServer(new Object[]{"get_subscriber_status", month, year});
         } catch (IOException ex) {
@@ -105,17 +144,25 @@ public class SubscriberStatusController implements ClientAware {
         }
     }
 
-    /* ------------------------------------------------ callback from ClientController */
-    public void onReportReceived(List<SubscriberStatusRow> list) {
+    /**
+     * Called by the client when the report data arrives from the server.
+     * Updates the table and both charts with the new data.
+     *
+     * @param list the list of rows received from the server
+     */
+    public void onReportReceived(List<SubscriberStatusReport> list) {
         Platform.runLater(() -> {
             rows.setAll(list);
             updateCharts();
         });
     }
 
-    /* ------------------------------------------------ charts */
+    /**
+     * Refreshes both the bar chart and the pie chart
+     * using the current data inside `rows`.
+     */
     private void updateCharts() {
-        /* BarChart: top-10 by hours */
+        // BarChart: top 10 subscribers with most hours
         var top = rows.stream()
                       .sorted((a, b) -> Double.compare(b.getTotalHours(), a.getTotalHours()))
                       .limit(10)
@@ -126,9 +173,8 @@ public class SubscriberStatusController implements ClientAware {
                 .add(new XYChart.Data<>(r.getName(), r.getTotalHours())));
         barChart.getData().setAll(series);
         barChart.setTitle("Top-10 by Hours");
-        
 
-        /* PieChart: Active vs Inactive */
+        // PieChart: number of active vs inactive subscribers
         long active   = rows.stream().filter(r -> r.getTotalEntries() > 0).count();
         long inactive = rows.size() - active;
         pieChart.setData(FXCollections.observableArrayList(
@@ -136,6 +182,5 @@ public class SubscriberStatusController implements ClientAware {
                 new PieChart.Data("Inactive", inactive)));
         pieChart.setTitle("Active vs Inactive");
     }
-    
-    
 }
+

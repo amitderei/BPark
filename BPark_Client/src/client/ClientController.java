@@ -5,7 +5,7 @@ import common.ParkingEvent;
 import common.ParkingReport;
 import common.ServerResponse;
 import common.Subscriber;
-import common.SubscriberStatusRow;
+import common.SubscriberStatusReport;
 import common.User;
 import controllers.AvailabilityController;
 import controllers.CreateNewOrderViewController;
@@ -476,7 +476,7 @@ public class ClientController extends AbstractClient {
 				return;
 			}
 			
-			/* subscriber-status report */
+			// subscriber-status report 
 			else if ("subscriber_status".equals(response.getMsg())) {
 
 			    /* ----- success ----- */
@@ -485,7 +485,7 @@ public class ClientController extends AbstractClient {
 			            response.getData() instanceof List<?> listRaw)
 			        {
 			            @SuppressWarnings("unchecked")
-			            List<SubscriberStatusRow> list = (List<SubscriberStatusRow>) listRaw;
+			            List<SubscriberStatusReport> list = (List<SubscriberStatusReport>) listRaw;
 			            subscriberStatusController.onReportReceived(list);
 			        }
 			        return;

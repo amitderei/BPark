@@ -1,6 +1,5 @@
 package controllers;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import client.ClientController;
@@ -12,94 +11,147 @@ import javafx.scene.control.Alert.AlertType;
 import ui.UiUtils;
 
 /**
- * Lets a subscriber edit his personal details.  
- * Locked fields: subscriber-code, user-ID and username  
- * Editable fields: first / last name, phone, email, password
+ * Controller for editing a subscriber’s personal details.
+ * <p>
+ * Locked fields (cannot be edited): subscriber code, ID, username.<br>
+ * Editable fields: first name, last name, phone number, email, password.
  */
 public class EditSubscriberDetailsController implements ClientAware {
 
-    /* ---------- captions + input fields ---------- */
+    // =========================
+    // FXML fields (captions + inputs)
+    // =========================
+
+    /** Headline label at the top of the edit details screen */
     @FXML private Label headline;
 
-    @FXML private Label sunscriberCode;      @FXML private TextField subscriberCodeEdit;
-    @FXML private Label id;                 @FXML private TextField idEdit;
-    @FXML private Label firstName;          @FXML private TextField firstNameEdit;
-    @FXML private Label lastName;           @FXML private TextField lastNameEdit;
-    @FXML private Label username;           @FXML private TextField usernameEdit;
-    @FXML private Label password;           @FXML private TextField passwordEdit;
-    @FXML private Label email;              @FXML private TextField emailEdit;
-    @FXML private Label phoneNumber;        @FXML private TextField phoneNumberEdit;
+    /** Caption label for subscriber code (locked) */
+    @FXML private Label sunscriberCode;
+    /** Input field for subscriber code (locked) */
+    @FXML private TextField subscriberCodeEdit;
 
+    /** Caption label for user ID (locked) */
+    @FXML private Label id;
+    /** Input field for user ID (locked) */
+    @FXML private TextField idEdit;
+
+    /** Caption label for first name */
+    @FXML private Label firstName;
+    /** Editable input field for first name */
+    @FXML private TextField firstNameEdit;
+
+    /** Caption label for last name */
+    @FXML private Label lastName;
+    /** Editable input field for last name */
+    @FXML private TextField lastNameEdit;
+
+    /** Caption label for username (locked) */
+    @FXML private Label username;
+    /** Input field for username (locked) */
+    @FXML private TextField usernameEdit;
+
+    /** Caption label for password */
+    @FXML private Label password;
+    /** Editable input field for password */
+    @FXML private TextField passwordEdit;
+
+    /** Caption label for email address */
+    @FXML private Label email;
+    /** Editable input field for email address */
+    @FXML private TextField emailEdit;
+
+    /** Caption label for phone number */
+    @FXML private Label phoneNumber;
+    /** Editable input field for phone number */
+    @FXML private TextField phoneNumberEdit;
+
+    /** Button that triggers saving of edited details */
     @FXML private Button saveChangesBtn;
 
-    /* ---------- runtime ---------- */
+    // =========================
+    // Runtime variables
+    // =========================
+
+    /** Reference to the central ClientController */
     private ClientController client;
-    private Subscriber       subscriber;   // original data
-    private String           passwordStr;  // original password
+
+    /** Current subscriber object holding original (pre-edit) details */
+    private Subscriber subscriber;
+
+    /** Original subscriber’s password */
+    private String passwordStr;
+
+    /** Parent layout controller to navigate back to the detail view */
     private SubscriberMainLayoutController mainLayoutController;
 
-    // ------------------------------------------------------------------
-    // initial fill
-    // ------------------------------------------------------------------
+    // =========================
+    // Initialization methods
+    // =========================
 
-    /** Copies data into the text-fields and locks non-editable ones. */
+    /**
+     * Copies subscriber details into text fields and disables fields that cannot be edited.
+     */
     public void setTextOnField() {
         subscriberCodeEdit.setText(String.valueOf(subscriber.getSubscriberCode()));
-        idEdit           .setText(subscriber.getUserId());
-        firstNameEdit    .setText(subscriber.getFirstName());
-        lastNameEdit     .setText(subscriber.getLastName());
-        usernameEdit     .setText(subscriber.getUsername());
-        passwordEdit     .setText(passwordStr);
-        emailEdit        .setText(subscriber.getEmail());
-        phoneNumberEdit  .setText(subscriber.getPhoneNum());
+        idEdit.setText(subscriber.getUserId());
+        firstNameEdit.setText(subscriber.getFirstName());
+        lastNameEdit.setText(subscriber.getLastName());
+        usernameEdit.setText(subscriber.getUsername());
+        passwordEdit.setText(passwordStr);
+        emailEdit.setText(subscriber.getEmail());
+        phoneNumberEdit.setText(subscriber.getPhoneNum());
 
         subscriberCodeEdit.setDisable(true);
-        usernameEdit     .setDisable(true);
-        idEdit           .setDisable(true);
+        usernameEdit.setDisable(true);
+        idEdit.setDisable(true);
     }
 
-    /** Pulls the latest Subscriber + password from ClientController. */
+    /**
+     * Fetches the latest subscriber details and password from ClientController.
+     */
     public void setSubscriberAndPassword() {
-        this.subscriber   = client.getSubscriber();
-        this.passwordStr  = client.getPassword();
+        this.subscriber = client.getSubscriber();
+        this.passwordStr = client.getPassword();
     }
 
-    // ------------------------------------------------------------------
-    // DI
-    // ------------------------------------------------------------------
+    // =========================
+    // Dependency injection
+    // =========================
 
+    /**
+     * Injects the shared ClientController instance.
+     *
+     * @param client active client controller instance
+     */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
-    // ------------------------------------------------------------------
-    // save button logic
-    // ------------------------------------------------------------------
+    // =========================
+    // Save button logic
+    // =========================
 
     /**
-     * Validates input, compares with old data and sends minimal update to server.
-     * Empty field or invalid format -> popup + abort.
+     * Validates user inputs, detects changes compared to original data,
+     * and sends minimal updates to the server. Shows validation errors as alerts.
      */
     public void saveChanges() {
-
-        // guard – no blanks
         if (isAnyFieldBlank()) {
             UiUtils.showAlert("Error", "One or more fields are empty.", AlertType.ERROR);
             return;
         }
-        // guard – email format
+
         if (!isValidEmail(emailEdit.getText().trim())) {
             UiUtils.showAlert("Error", "Email format is not valid.", AlertType.ERROR);
             return;
         }
-        // guard – phone format
+
         if (!isValidPhone(phoneNumberEdit.getText().trim())) {
             UiUtils.showAlert("Error", "Phone number format is not valid.", AlertType.ERROR);
             return;
         }
 
-        /* build a fresh Subscriber with new values */
         Subscriber updated = new Subscriber(
                 subscriber.getSubscriberCode(),
                 subscriber.getUserId(),
@@ -113,44 +165,59 @@ public class EditSubscriberDetailsController implements ClientAware {
         String newPassword = passwordEdit.getText();
         boolean passwordChanged = !passwordStr.equals(newPassword);
 
-        // decide which parts actually changed
-        if (!Subscriber.equals(updated, subscriber)) {              // personal details changed
+        if (!Subscriber.equals(updated, subscriber)) {
             if (passwordChanged)
                 client.updateDetailsOfSubscriber(updated, new User(subscriber.getUsername(), newPassword));
             else
                 client.updateDetailsOfSubscriber(updated, null);
-        } else if (passwordChanged) {                               // only password changed
+        } else if (passwordChanged) {
             client.updateDetailsOfSubscriber(null, new User(usernameEdit.getText(), newPassword));
-        } else {                                                    // nothing changed
+        } else {
             handleGoToView();
         }
     }
 
-    // ------------------------------------------------------------------
-    // helpers
-    // ------------------------------------------------------------------
+    // =========================
+    // Helper methods
+    // =========================
 
-    /** @return true if any editable text-field is blank */
+    /**
+     * Checks whether any editable text field is left blank.
+     *
+     * @return true if at least one editable field is blank
+     */
     private boolean isAnyFieldBlank() {
-        return firstNameEdit.getText().trim().isEmpty() ||
-               lastNameEdit .getText().trim().isEmpty() ||
-               passwordEdit .getText().trim().isEmpty() ||
-               emailEdit    .getText().trim().isEmpty() ||
-               phoneNumberEdit.getText().trim().isEmpty();
+        return firstNameEdit.getText().trim().isEmpty()
+                || lastNameEdit.getText().trim().isEmpty()
+                || passwordEdit.getText().trim().isEmpty()
+                || emailEdit.getText().trim().isEmpty()
+                || phoneNumberEdit.getText().trim().isEmpty();
     }
 
-    /** Simple regex for email validation. */
+    /**
+     * Validates email address format using a regex.
+     *
+     * @param email the email address to validate
+     * @return true if email format is valid
+     */
     private static boolean isValidEmail(String email) {
         String regex = "^[A-Za-z0-9_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         return Pattern.matches(regex, email);
     }
 
-    /** Accepts Israeli mobile numbers starting with 05 + 8 digits. */
+    /**
+     * Validates Israeli mobile number format (must start with '05' followed by 8 digits).
+     *
+     * @param phone the phone number to validate
+     * @return true if phone number format is valid
+     */
     private static boolean isValidPhone(String phone) {
         return phone.matches("^05[0-9]{8}$");
     }
 
-    /** Returns to the read-only "View Details" screen. */
+    /**
+     * Navigates back to the read-only subscriber details view.
+     */
     public void handleGoToView() {
         try {
             mainLayoutController = client.getMainLayoutController();
