@@ -387,7 +387,7 @@ public class ClientController extends AbstractClient {
 				System.out.println(((Integer) count).toString());
 			}
 
-			if (response.isSucceed() && response.getData() instanceof Order) {
+			if (response.isSucceed() && response.getMsg().equals("reservation succeed!")) {
 				if (newOrderController != null) {
 					newOrderController.setOrderAndGoToNextPage((Order) response.getData());
 
@@ -475,6 +475,16 @@ public class ClientController extends AbstractClient {
 				availabilityController.updateAvailability(stats);
 				return;
 			}
+			
+			// Handle order making 
+						if (newOrderController != null) {
+							if(response.getMsg().equals("Can't make reservation")) {
+								newOrderController.makingReservation(false);
+							}
+							else if (response.getMsg().equals("Can make reservation")) {
+								newOrderController.makingReservation(true);
+							}
+						}
 			
 			// subscriber-status report 
 			else if ("subscriber_status".equals(response.getMsg())) {

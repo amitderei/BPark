@@ -407,8 +407,8 @@ public class DBController {
 	 * @param time,
 	 * @return true\false
 	 */
-	public boolean parkingSpaceCheckingForNewOrder(Date date, Time time) {
-		String query = "SELECT (100-COUNT(DISTINCT parking_space))>=40 AS canOrder FROM( SELECT parking_space, TIMESTAMP (order_date, arrival_time) AS startTime, DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime FROM bpark.order) AS orders WHERE startTime<? AND endTime>?";
+	public synchronized boolean parkingSpaceCheckingForNewOrder(Date date, Time time) {
+		String query = "SELECT (100-COUNT(DISTINCT parking_space))>40 AS canOrder FROM( SELECT parking_space, TIMESTAMP (order_date, arrival_time) AS startTime, DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime FROM bpark.order) AS orders WHERE startTime<? AND endTime>?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			Timestamp requestToStart = Timestamp.valueOf(date.toString() + " " + time.toString());
 			Timestamp requestToEnd = new Timestamp(requestToStart.getTime() + 46060 * 1000);

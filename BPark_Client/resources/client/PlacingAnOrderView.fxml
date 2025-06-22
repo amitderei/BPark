@@ -72,6 +72,7 @@
                      </GridPane.margin>
                   </Hyperlink>
                   <Button fx:id="reserveNowButton" mnemonicParsing="false" onAction="#addNewOrder" text="Reserve Now" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+                  <Label fx:id="notPossibleToOrder" prefHeight="18.0" prefWidth="182.0" text="Can't make an order on this time" textFill="#ff3a3a" visible="false" GridPane.rowIndex="4" />
                </children>
             </GridPane>
          </children>

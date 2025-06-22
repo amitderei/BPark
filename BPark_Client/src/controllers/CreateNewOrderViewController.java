@@ -48,6 +48,7 @@ public class CreateNewOrderViewController implements ClientAware {
     @FXML private Label betweenHourAndMinute;
     @FXML private Label subscriberCode;
     @FXML private TextField insertSubscriberCode;
+    @FXML private Label notPossibleToOrder;
     @FXML private DatePicker chooseDate;
     @FXML private ComboBox<String> hourCombo;
     @FXML private ComboBox<String> minuteCombo;
@@ -64,7 +65,12 @@ public class CreateNewOrderViewController implements ClientAware {
 
     /** Order instance created once all details are validated */
     public Order newOrder;
-
+    
+    /** Variables to save the information of the order*/
+    int subscriberNum;
+    Date selectedDate;
+    Time timeOfArrival;
+    
     /* =====================================================
      *  Initialisation helpers
      * ===================================================== */
@@ -177,14 +183,14 @@ public class CreateNewOrderViewController implements ClientAware {
         }
 
         // Read subscriber code
-        int subscriberNum = Integer.parseInt(insertSubscriberCode.getText().trim());
+        subscriberNum = Integer.parseInt(insertSubscriberCode.getText().trim());
 
         // Validate date
         if (chooseDate.getValue() == null) {
             showAlert("Please select a date and hour.", Alert.AlertType.WARNING);
             return;
         }
-        Date selectedDate = Date.valueOf(chooseDate.getValue());
+        selectedDate = Date.valueOf(chooseDate.getValue());
 
         // Validate time components
         if (hourCombo.getValue() == null || minuteCombo.getValue() == null) {
@@ -194,24 +200,37 @@ public class CreateNewOrderViewController implements ClientAware {
         LocalTime time     = LocalTime.of(
                 Integer.parseInt(hourCombo.getValue()),
                 Integer.parseInt(minuteCombo.getValue()));
-        Time timeOfArrival = Time.valueOf(time);
+        timeOfArrival = Time.valueOf(time);
 
         // Ask server if slot is still free
         client.checkAvailability(selectedDate, timeOfArrival);
 
-        // Build Order and send to server
-        int randomCode = new Random().nextInt(1_000_000);
-        String formattedCode = String.format("%06d", randomCode);
-        newOrder = new Order(
-                1,               // dummy order number (server assigns real PK)
-                55,              // parking lot ID (single lot in this project)
-                selectedDate,
-                timeOfArrival,
-                formattedCode,
-                subscriberNum,
-                Date.valueOf(LocalDate.now()));
+    }
+    
+    /**
+     *  Attempting to create a new parking order if allowed
+     */
+    public void makingReservation(boolean canOrder) {
+    	// If it's possible to make an order we will save the order in our DB 
+    	if(canOrder) {
+    		 // Build Order and send to server
+            int randomCode = new Random().nextInt(1_000_000);
+            String formattedCode = String.format("%06d", randomCode);
+            newOrder = new Order(
+                    1,               // dummy order number (server assigns real PK)
+                    55,              // parking lot ID (single lot in this project)
+                    selectedDate,
+                    timeOfArrival,
+                    formattedCode,
+                    subscriberNum,
+                    Date.valueOf(LocalDate.now()));
 
-        client.addNewOrder(newOrder);
+            notPossibleToOrder.setVisible(false);
+            client.addNewOrder(newOrder);
+    	}
+    	else {
+            notPossibleToOrder.setVisible(true);
+    	}
     }
 
     /* =====================================================
