@@ -5,6 +5,7 @@ import common.ParkingEvent;
 import common.ParkingReport;
 import common.ServerResponse;
 import common.Subscriber;
+import common.SubscriberStatusRow;
 import common.User;
 import controllers.AvailabilityController;
 import controllers.CreateNewOrderViewController;
@@ -15,6 +16,7 @@ import controllers.LoginController;
 import controllers.MainController;
 import controllers.ParkingReportController;
 import controllers.SubscriberMainLayoutController;
+import controllers.SubscriberStatusController;
 import controllers.ParkingReservationSummaryController;
 import controllers.RegisterSubscriberController;
 import controllers.StaffMainLayoutController;
@@ -69,6 +71,8 @@ public class ClientController extends AbstractClient {
 	private RegisterSubscriberController registerSubscriberController;
 	private AvailabilityController availabilityController;
 	private ParkingReportController parkingReportController;
+	private SubscriberStatusController subscriberStatusController;
+
 
 
 
@@ -167,6 +171,10 @@ public class ClientController extends AbstractClient {
 
 	public void setViewSubscribersInfoController(ViewSubscribersInfoController c) {
 		this.viewSubscribersInfoController = c;
+	}
+	
+	public void setSubscriberStatusController(SubscriberStatusController c) {
+	    this.subscriberStatusController = c;
 	}
 
 	/**
@@ -467,6 +475,17 @@ public class ClientController extends AbstractClient {
 				availabilityController.updateAvailability(stats);
 				return;
 			}
+			
+			/* subscriber-status report */
+			else if ("subscriber_status".equals(response.getMsg())) {
+			    if (subscriberStatusController != null && response.getData() instanceof List<?> listRaw) {
+			        List<SubscriberStatusRow> list = (List<SubscriberStatusRow>) listRaw;
+			        subscriberStatusController.onReportReceived(list);
+			    }
+			    return;
+			}
+
+
 
 
 

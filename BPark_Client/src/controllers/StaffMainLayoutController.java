@@ -125,7 +125,7 @@ public class StaffMainLayoutController implements ClientAware {
     /** Displays a basic alert with a placeholder message for subscriber report. */
     @FXML
     private void handleViewSubscriberReport() {
-        UiUtils.showAlert("Report", "Viewing subscriber status report.", Alert.AlertType.INFORMATION);
+        loadScreen("/client/SubscriberStatusScreen.fxml");
     }
 
     /**

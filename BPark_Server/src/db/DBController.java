@@ -1529,4 +1529,158 @@ public class DBController {
 		}
 		return null;
 	}
+	
+	/* ==============================================================
+	 *  Live aggregation: build the subscriber-status list on-the-fly
+	 *  (Used when the report for a month was not stored yet.)
+	 * ============================================================== */
+
+	/**
+	 * Returns, in memory, the subscriber-status aggregation
+	 * for the given month and year. No insert – read-only.
+	 *
+	 * @param month calendar month (1-12)
+	 * @param year  4-digit calendar year
+	 * @return list of {@link common.SubscriberStatusRow}
+	 * @throws SQLException if the query blows up
+	 */
+	public List<SubscriberStatusRow> getSubscriberStatusLive(int month, int year)
+	        throws SQLException {
+
+	    final String sql =
+	        """
+	        SELECT
+	            s.subscriberCode                                    AS code,
+	            CONCAT(s.firstName, ' ', s.lastName)               AS fullName,
+	            COUNT(pe.eventId)                                  AS totalEntries,
+	            COALESCE(SUM(pe.wasExtended), 0)                   AS totalExtends,
+	            COALESCE(SUM(pe.sendMsgForLating), 0)              AS totalLates,
+	            COALESCE(SUM(
+	                TIMESTAMPDIFF(MINUTE,
+	                              TIMESTAMP(pe.entryDate, pe.entryHour),
+	                              IFNULL(TIMESTAMP(pe.exitDate, pe.exitHour), NOW()))
+	            ), 0) / 60.0                                       AS totalHours
+	        FROM subscriber s
+	        LEFT JOIN parkingEvent pe
+	               ON s.subscriberCode = pe.subscriberCode
+	              AND YEAR(pe.entryDate)  = ?
+	              AND MONTH(pe.entryDate) = ?
+	        GROUP BY s.subscriberCode, fullName
+	        ORDER BY totalHours DESC;
+	        """;
+
+	    List<SubscriberStatusRow> rows = new ArrayList<>();
+
+	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setInt(1, year);
+	        ps.setInt(2, month);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                rows.add(new SubscriberStatusRow(
+	                        rs.getInt("code"),
+	                        rs.getString("fullName"),
+	                        rs.getInt("totalEntries"),
+	                        rs.getInt("totalExtends"),
+	                        rs.getInt("totalLates"),
+	                        rs.getDouble("totalHours")));
+	            }
+	        }
+	    }
+	    return rows;
+	}
+
+	/* ==============================================================
+	 *  Persisted report: write one row per subscriber into the table
+	 *  Used by the monthly scheduler thread.
+	 * ============================================================== */
+
+	/**
+	 * Generates and stores the subscriber-status report for the
+	 * specified month. Existing rows for that month are deleted first
+	 * (safer re-run).
+	 *
+	 * @param month month to snapshot (1-12)
+	 * @param year  target year
+	 * @return number of rows inserted
+	 * @throws SQLException if anything fails
+	 */
+	public int storeSubscriberStatusReport(int month, int year) throws SQLException {
+
+	    // 1. Build the list in memory
+	    List<SubscriberStatusRow> rows = getSubscriberStatusLive(month, year);
+
+	    // 2. Clear existing snapshot (if the thread ran twice)
+	    String deleteSQL =
+	        "DELETE FROM subscriberStatusReport " +
+	        "WHERE reportMonth = ?";
+	    try (PreparedStatement del = conn.prepareStatement(deleteSQL)) {
+	        del.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
+	        del.executeUpdate();
+	    }
+
+	    // 3. Insert fresh rows
+	    String insertSQL =
+	        "INSERT INTO subscriberStatusReport " +
+	        "(reportMonth, subscriberCode, totalEntries, totalExtends, totalLates, totalHours) " +
+	        "VALUES (?, ?, ?, ?, ?, ?)";
+
+	    int inserted = 0;
+	    try (PreparedStatement ins = conn.prepareStatement(insertSQL)) {
+	        java.sql.Date monthKey =
+	            java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month));
+
+	        for (SubscriberStatusRow r : rows) {
+	            ins.setDate   (1, monthKey);
+	            ins.setInt    (2, r.getCode());
+	            ins.setInt    (3, r.getTotalEntries());
+	            ins.setInt    (4, r.getTotalExtends());
+	            ins.setInt    (5, r.getTotalLates());
+	            ins.setDouble (6, r.getTotalHours());
+	            ins.addBatch();
+	            inserted++;
+	        }
+	        ins.executeBatch();
+	    }
+	    return inserted;
+	}
+	
+	/**
+	 * Reads the stored subscriber-status snapshot from the
+	 * subscriberStatusReport table. Returns an empty list if
+	 * no rows exist for the requested month.
+	 *
+	 * @param month calendar month (1-12)
+	 * @param year  four-digit year
+	 * @return list of SubscriberStatusRow (possibly empty)
+	 */
+	public List<SubscriberStatusRow> getSubscriberStatusFromTable(int month, int year)
+	        throws SQLException {
+
+	    String sql =
+	        "SELECT subscriberCode, totalEntries, totalExtends, totalLates, totalHours, " +
+	        "       CONCAT(s.firstName,' ',s.lastName) AS fullName " +
+	        "FROM subscriberStatusReport r " +
+	        "JOIN subscriber s USING (subscriberCode) " +
+	        "WHERE reportMonth = ?";
+
+	    List<SubscriberStatusRow> rows = new ArrayList<>();
+
+	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
+	        try (ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                rows.add(new SubscriberStatusRow(
+	                        rs.getInt("subscriberCode"),
+	                        rs.getString("fullName"),
+	                        rs.getInt("totalEntries"),
+	                        rs.getInt("totalExtends"),
+	                        rs.getInt("totalLates"),
+	                        rs.getDouble("totalHours")));
+	            }
+	        }
+	    }
+	    return rows;
+	}
+
+
 }

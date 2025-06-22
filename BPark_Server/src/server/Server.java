@@ -2,9 +2,11 @@ package server;
 
 import ocsf.server.*;
 import reportService.MonthlyReportScheduler;
+import reportService.MonthlySubscriberStatusScheduler;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import common.ParkingEvent;
 import common.ParkingReport;
 import common.ServerResponse;
 import common.Subscriber;
+import common.SubscriberStatusRow;
 import common.User;
 import db.DBController;
 import mailService.MailService;
@@ -58,6 +61,10 @@ public class Server extends AbstractServer {
         db.connectToDB();
         System.out.println("Server started on port " + getPort());
         MonthlyReportScheduler.start(); // schedule monthly reports
+        
+        /* Start automatic Subscriber-Status report scheduler */
+        MonthlySubscriberStatusScheduler.start();
+
     }
 
 	/**
@@ -530,6 +537,33 @@ public class Server extends AbstractServer {
 					}
 					return;
 				}
+				
+				/* -------------------------------------------------------------
+				 * "get_subscriber_status" – client requests monthly snapshot
+				 * data[] = { "get_subscriber_status", month(int), year(int) }
+				 * ------------------------------------------------------------- */
+				else if (data.length == 3 && "get_subscriber_status".equals(data[0])) {
+				    int month = (int) data[1];   // 1-12
+				    int year  = (int) data[2];   // e.g. 2025
+
+				    try {
+				        List<SubscriberStatusRow> rows = db.getSubscriberStatusFromTable(month, year);
+
+				        /* If no stored snapshot yet (current month) – build live */
+				        if (rows.isEmpty()) {
+				            rows = db.getSubscriberStatusLive(month, year);
+				        }
+
+				        client.sendToClient(new ServerResponse(true, rows, "subscriber_status"));
+				    } catch (SQLException ex) {
+				        /* Log the error and notify the client */
+				        ex.printStackTrace();
+				        client.sendToClient(new ServerResponse(false, null, "subscriber_status"));
+				    }
+				    return;
+				}
+
+
 
 
 

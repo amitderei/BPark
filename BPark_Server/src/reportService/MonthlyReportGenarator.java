@@ -49,7 +49,7 @@ public class MonthlyReportGenarator {
 
         // Build list of months to check, month by month
         while (!init.isAfter(end)) {
-            dates.add(Date.valueOf(init));
+            dates.add(Date.valueOf(init));	
             init = init.plusMonths(1);
         }
 
