@@ -30,8 +30,8 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /**
- * Handles the "Create New Reservation" workflow for both subscribers
- * and guests. Collects date, time and subscriber code, checks
+ * Handles the "Create New Reservation" workflow for subscribers
+ * Collects date, time and subscriber code, checks
  * availability with the server, and finally builds an Order object.
  *
  * Screen flow:
@@ -256,33 +256,70 @@ public class CreateNewOrderViewController implements ClientAware {
 
     /** Returns the full legal text shown in the terms dialog. */
     private String returnTermsOfUse() {
-        StringBuilder sb = new StringBuilder();
-        // (full text left unchanged for brevity)
-        return sb.toString();
-    }
+		StringBuilder strBuild=new StringBuilder();
+	    strBuild.append("Terms of Use – BPARK Automated Parking Lot\r\n\r\n");
+
+	    strBuild.append("Welcome to the BPARK automated parking lot (hereinafter: \"the Parking Lot\").\r\n");
+	    strBuild.append("Use of the parking lot services, including making a reservation and entering the facility,\r\n");
+	    strBuild.append("is subject to the following terms. By placing a reservation or using the parking lot,\r\n");
+	    strBuild.append("the user confirms that they have read, understood, and agreed to these terms in full.\r\n\r\n");
+
+	    strBuild.append("1. Definitions\r\n");
+	    strBuild.append("1.1 \"User\" – Any individual who reserves a parking space using the BPARK app.\r\n");
+	    strBuild.append("1.2 \"Reservation\" – Booking of a parking space for a specific date and time, via the app.\r\n");
+	    strBuild.append("1.3 \"Parking Lot\" – An automated facility without continuous human operation, where entry, parking, and exit are carried out using technological means.\r\n\r\n");
+
+	    strBuild.append("2. Usage and Reservations\r\n");
+	    strBuild.append("2.1 Use of the parking lot services is subject to a prior reservation via the BPARK app.\r\n");
+	    strBuild.append("2.2 The reservation is valid only for the selected date and time.\r\n");
+	    strBuild.append("2.3 A user who fails to arrive within 15 minutes of the scheduled reservation time will have their reservation automatically canceled.\r\n\r\n");
+
+	    strBuild.append("3. Liability Disclaimer\r\n");
+	    strBuild.append("3.1 BPARK is not liable for any damage to the vehicle, its contents, or the user, including theft, malfunction, or natural disaster.\r\n");
+	    strBuild.append("3.2 The user must ensure their vehicle is compatible with the automated system.\r\n\r\n");
+
+	    strBuild.append("4. Safety and Conduct Rules\r\n");
+	    strBuild.append("4.1 Follow instructions on the screen and in the app.\r\n");
+	    strBuild.append("4.2 Do not remain in the vehicle during automated parking.\r\n");
+	    strBuild.append("4.3 Do not bring hazardous or illegal materials into the parking lot.\r\n\r\n");
+
+	    strBuild.append("5. Privacy and Data Security\r\n");
+	    strBuild.append("5.1 Personal data is stored in accordance with BPARK’s privacy policy.\r\n");
+	    strBuild.append("5.2 BPARK cannot guarantee complete protection from data breaches or system failures.\r\n\r\n");
+
+	    strBuild.append("6. Governing Law and Jurisdiction\r\n");
+	    strBuild.append("6.1 These terms are governed by the laws of the State of Israel.\r\n");
+	    strBuild.append("6.2 Jurisdiction is granted to the competent court in the parking lot’s district.\r\n\r\n");
+
+	    strBuild.append("7. Miscellaneous\r\n");
+	    strBuild.append("7.1 BPARK may update these terms at any time.\r\n");
+	    strBuild.append("7.2 These terms are written in masculine form for convenience and apply to all users.\r\n");
+	    return strBuild.toString();
+	}
 
     /* =====================================================
      *  Navigation helpers
      * ===================================================== */
 
     /** Loads the reservation summary screen into the central layout. */
-    private void handleGoToOrderSummarry(Order order) {
-        try {
-            mainLayoutController = client.getMainLayoutController();
-            mainLayoutController.loadScreen("/client/ReservationSummary.fxml", order);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
+	private void handleGoToOrderSummarry(Order order) {
+	    try {
+	    	mainLayoutController=client.getMainLayoutController();
+	    	mainLayoutController.loadScreen("/client/ReservationSummary.fxml", order);
+	    	
+	    } catch (Exception e) {
+	        System.out.println("Error:"+ e.getMessage());
+	    }
+	}
 
     /**
      * Called by ClientController after the server confirms the Order.
      * Stores the order locally and advances to the next screen.
      */
-    public void setOrderAndGoToNextPage(Order order) {
-        this.newOrder = order;
-        handleGoToOrderSummarry(newOrder);
-    }
+	public void setOrderAndGoToNextPage(Order order) {
+		this.newOrder=order;
+		handleGoToOrderSummarry(newOrder);
+	}
 
     /* =====================================================
      *  Utility
