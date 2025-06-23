@@ -386,6 +386,12 @@ public class ClientController extends AbstractClient {
 				int count = (int) response.getData();
 				System.out.println(((Integer) count).toString());
 			}
+			
+			if (response.isSucceed() && response.getMsg().equals("Parking report dates loaded.")) {
+				if(parkingReportController!=null) {
+					parkingReportController.setDates((ArrayList<Date>)(response.getData()));
+				}
+			}
 
 			if (response.isSucceed() && response.getMsg().equals("reservation succeed!")) {
 				if (newOrderController != null) {
@@ -844,10 +850,20 @@ public class ClientController extends AbstractClient {
 	 */
 	public void getParkingReport(Date date) {
 		try {
-			System.out.println("get1");
 			sendToServer(new Object[] { "GetParkingReport", date });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'GetParkingReport' request: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * request parking report dates from server.
+	 */
+	public void getDatesOfReports() {
+		try {
+			sendToServer(new Object[] {"getDatesOfReports"});
+		}catch (IOException e) {
+			System.err.println("Failed to send 'getDatesOfReports' request: " + e.getMessage());
 		}
 	}
 

@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -1449,6 +1450,9 @@ public class DBController {
 		int totalExtends = 0;
 		int totalEntries = 0;
 		int totalLates=0;
+		int lessThanFourHours=0;
+		int betweenFourToEight=0;
+		int moreThanEight=0;
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, year);
 			stmt.setInt(2, month);
@@ -1461,8 +1465,25 @@ public class DBController {
 				if(rs.getBoolean("sendMsgForLating")) {
 					totalLates++;
 				}
+				
+				LocalDateTime entryDateTime = LocalDateTime.of(rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime());
+				LocalDateTime exitDateTime = LocalDateTime.of(rs.getDate("exitDate").toLocalDate(), rs.getTime("exitHour").toLocalTime());
+				
+				Duration duration = Duration.between(entryDateTime, exitDateTime);
+				
+				long minutes=duration.toMinutes();
+				
+				if(minutes/60 <4) {
+					lessThanFourHours++;
+				}
+				else if(minutes/60>=4 && minutes/60<8) {
+					betweenFourToEight++;
+				}
+				else {
+					moreThanEight++;
+				}
 			}
-			return new ParkingReport(totalEntries, totalExtends, totalLates);
+			return new ParkingReport(totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight);
 		} catch (SQLException e) {
 			System.out.println("Error get data for parking report: " + e.getMessage());
 			e.printStackTrace();
@@ -1476,12 +1497,15 @@ public class DBController {
 	 */
 	public void createParkingReport(Date date) {
 		ParkingReport parkingReport=getDataForParkingReport(date);
-		String query="INSERT INTO parkingReport(dateOfParkingReport, totalEntries, totalExtends, totalLates) VALUES (?, ?, ?, ?);";
+		String query="INSERT INTO parkingReport(dateOfParkingReport, totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight) VALUES (?, ?, ?, ?, ?, ?, ?);";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setDate(1, date);
 			stmt.setInt(2, parkingReport.getTotalEntries());
 			stmt.setInt(3, parkingReport.getTotalExtends());
 			stmt.setInt(4, parkingReport.getTotalLates());
+			stmt.setInt(5, parkingReport.getLessThanFour());
+			stmt.setInt(6, parkingReport.getBetweenFourToEight());
+			stmt.setInt(7, parkingReport.getMoreThanEight());
 			stmt.executeUpdate();
 			System.out.println("Parking reoprt created!");
 		} catch (SQLException e) {
@@ -1521,7 +1545,7 @@ public class DBController {
 			stmt.setDate(1, date);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				return new ParkingReport(rs.getInt("totalEntries"), rs.getInt("totalExtends"), rs.getInt("totalLates"));
+				return new ParkingReport(rs.getInt("totalEntries"), rs.getInt("totalExtends"), rs.getInt("totalLates"), rs.getInt("lessThanFourHours"), rs.getInt("betweenFourToEight"), rs.getInt("moreThanEight"));
 			}
 		} catch (SQLException e) {
 			System.out.println("Error get parking report: "+ e.getMessage());
@@ -1705,8 +1729,23 @@ public class DBController {
 	            return rs.next();     
 	        }
 	    }
+	    
 	}
 
-
+	public ArrayList<Date> getAllReportsDates(){
+		ArrayList<Date> datesOfReports=new ArrayList<>();
+		String query="SELECT dateOfParkingReport FROM parkingReport";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				datesOfReports.add(rs.getDate("dateOfParkingReport"));
+			}
+			return datesOfReports;
+		} catch (SQLException e) {
+			System.out.println("Error getting reports dates: "+e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 }

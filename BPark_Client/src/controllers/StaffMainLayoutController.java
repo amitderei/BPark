@@ -159,7 +159,7 @@ public class StaffMainLayoutController implements ClientAware {
 
             if (ctrl instanceof ParkingReportController prc) {
                 client.setParkingReportController(prc);
-                prc.getParkingReportFromServer();
+                prc.getDatesOfReportsInDB();
             }
 
             center.getChildren().setAll(content);

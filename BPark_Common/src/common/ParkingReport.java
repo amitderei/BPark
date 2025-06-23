@@ -20,6 +20,12 @@ public class ParkingReport implements Serializable {
 
 	/** Total number of sessions marked as late (beyond allowed duration) */
 	private int totalLates;
+	
+	private int lessThanFour;
+	
+	private int betweenFourToEight;
+	
+	private int moreThanEight;
 
 	/**
 	 * Constructs a ParkingReport with all relevant values.
@@ -28,10 +34,13 @@ public class ParkingReport implements Serializable {
 	 * @param totalExtends number of sessions that were extended
 	 * @param totalLates   number of sessions that ended late
 	 */
-	public ParkingReport(int totalEntries, int totalExtends, int totalLates) {
+	public ParkingReport(int totalEntries, int totalExtends, int totalLates, int lessThanFour, int betweenFourToEight, int moreThanEight) {
 		this.totalEntries = totalEntries;
 		this.totalExtends = totalExtends;
 		this.totalLates = totalLates;
+		this.lessThanFour=lessThanFour;
+		this.betweenFourToEight=betweenFourToEight;
+		this.moreThanEight=moreThanEight;
 	}
 
 	/**
@@ -54,4 +63,22 @@ public class ParkingReport implements Serializable {
 	public int getTotalLates() {
 		return totalLates;
 	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public int getLessThanFour() {
+		return lessThanFour;
+	}
+
+	public int getBetweenFourToEight() {
+		return betweenFourToEight;
+	}
+
+	public int getMoreThanEight() {
+		return moreThanEight;
+	}
+	
+	
 }

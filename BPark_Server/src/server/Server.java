@@ -130,8 +130,18 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking report."));
 					}
 					else {
-						System.out.println(Integer.toString(parkingReport.getTotalEntries()));
 						client.sendToClient(new ServerResponse(true, parkingReport, "Parking report loaded."));
+					}
+					return;
+				}
+				
+				else if(data.length==1 && "getDatesOfReports".equals(data[0])) {
+					ArrayList<Date> dates=db.getAllReportsDates();
+					if (dates==null) {
+						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking report dates."));
+					}
+					else {
+						client.sendToClient(new ServerResponse(true, dates, "Parking report dates loaded."));
 					}
 					return;
 				}
