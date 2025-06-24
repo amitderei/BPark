@@ -15,9 +15,6 @@ import javafx.scene.control.*;
  * expected exit time based on whether the session was extended.
  */
 public class ViewActiveParkingInfoController implements ClientAware {
-
-    // =================== FXML: Static captions and value labels ===================
-
     /** Label showing the screen headline (e.g., "Active Parking Info") */
     @FXML private Label headline;
 
@@ -66,15 +63,11 @@ public class ViewActiveParkingInfoController implements ClientAware {
     /** Label that shows the parking code */
     @FXML private Label parkingCodeInfo;
 
-    // =================== Runtime variables ===================
-
     /** Reference to the main client controller used for server communication */
     private ClientController client;
 
     /** The active parking event returned by the server */
     private ParkingEvent parkingEvent;
-
-    // =================== Dependency Injection ===================
 
     /**
      * Injects the shared client controller used for server requests and data.
@@ -95,16 +88,12 @@ public class ViewActiveParkingInfoController implements ClientAware {
         this.parkingEvent = parkingEvent;
     }
 
-    // =================== Server Request ===================
-
     /**
      * Requests the current active parking session of the subscriber from the server.
      */
     public void getDetailsOfActiveInfo() {
         client.getDetailsOfActiveInfo();
     }
-
-    // =================== UI Population ===================
 
     /**
      * Populates all labels on the screen using the stored parking event data.

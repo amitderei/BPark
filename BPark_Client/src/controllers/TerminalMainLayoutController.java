@@ -21,9 +21,6 @@ import ui.UiUtils;
  * Child screens are loaded into the centre pane by loadScreen().
  */
 public class TerminalMainLayoutController implements ClientAware {
-
-    // -------------------- Top bar --------------------
-
     /** Button to return to the home screen */
     @FXML private Button btnExit;
 
@@ -32,8 +29,6 @@ public class TerminalMainLayoutController implements ClientAware {
 
     /** Button to return to the welcome panel of the terminal */
     @FXML private Button btnHome;
-
-    // -------------------- Side-menu --------------------
 
     /** Button to begin the car delivery flow */
     @FXML private Button btnSubmitVehicle;
@@ -44,12 +39,8 @@ public class TerminalMainLayoutController implements ClientAware {
     /** Button to check current parking availability */
     @FXML private Button btnCheckAvailability;
 
-    // -------------------- Center pane --------------------
-
     /** The dynamic container into which screens are loaded */
     @FXML private AnchorPane center;
-
-    // -------------------- Runtime --------------------
 
     /** Shared controller for server communication */
     private ClientController client;
@@ -71,10 +62,6 @@ public class TerminalMainLayoutController implements ClientAware {
     public void initialize() {
         handleHomeClick();
     }
-
-    // =====================================================
-    // Top-bar handlers
-    // =====================================================
 
     /**
      * Loads the terminal’s default home panel.
@@ -113,10 +100,6 @@ public class TerminalMainLayoutController implements ClientAware {
         System.exit(0);
     }
 
-    // =====================================================
-    // Side-menu handlers
-    // =====================================================
-
     /**
      * Loads the screen that begins the car delivery (submission) process.
      * Triggered when the user clicks "Submit Vehicle".
@@ -143,10 +126,6 @@ public class TerminalMainLayoutController implements ClientAware {
     private void handleCheckAvailability() {
         loadScreen("/client/AvailabilityScreen.fxml");
     }
-
-    // =====================================================
-    // Screen loader
-    // =====================================================
 
     /**
      * Replaces the content in the center pane with the given screen.

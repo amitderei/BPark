@@ -17,11 +17,6 @@ import ui.UiUtils;
  * Editable fields: first name, last name, phone number, email, password.
  */
 public class EditSubscriberDetailsController implements ClientAware {
-
-    // =========================
-    // FXML fields (captions + inputs)
-    // =========================
-
     /** Headline label at the top of the edit details screen */
     @FXML private Label headline;
 
@@ -68,10 +63,6 @@ public class EditSubscriberDetailsController implements ClientAware {
     /** Button that triggers saving of edited details */
     @FXML private Button saveChangesBtn;
 
-    // =========================
-    // Runtime variables
-    // =========================
-
     /** Reference to the central ClientController */
     private ClientController client;
 
@@ -83,10 +74,6 @@ public class EditSubscriberDetailsController implements ClientAware {
 
     /** Parent layout controller to navigate back to the detail view */
     private SubscriberMainLayoutController mainLayoutController;
-
-    // =========================
-    // Initialization methods
-    // =========================
 
     /**
      * Copies subscriber details into text fields and disables fields that cannot be edited.
@@ -114,10 +101,6 @@ public class EditSubscriberDetailsController implements ClientAware {
         this.passwordStr = client.getPassword();
     }
 
-    // =========================
-    // Dependency injection
-    // =========================
-
     /**
      * Injects the shared ClientController instance.
      *
@@ -127,10 +110,6 @@ public class EditSubscriberDetailsController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    // =========================
-    // Save button logic
-    // =========================
 
     /**
      * Validates user inputs, detects changes compared to original data,
@@ -176,10 +155,6 @@ public class EditSubscriberDetailsController implements ClientAware {
             handleGoToView();
         }
     }
-
-    // =========================
-    // Helper methods
-    // =========================
 
     /**
      * Checks whether any editable text field is left blank.

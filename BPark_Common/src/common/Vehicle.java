@@ -40,8 +40,6 @@ public class Vehicle {
         this(vehicleId, null, parked);
     }
 
-    // -------------------- Getters & Setters --------------------
-
     /**
      * @return the vehicle's ID
      */
@@ -89,8 +87,6 @@ public class Vehicle {
     public void setParked(boolean state) {
         this.parked = state;
     }
-
-    // -------------------- Utility --------------------
 
     /**
      * Returns a short string summary of the vehicle.

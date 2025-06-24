@@ -13,11 +13,6 @@ import javafx.scene.control.Label;
  * shows all reservation details pulled from the Order object.
  */
 public class ParkingReservationSummaryController implements ClientAware {
-
-    // =======================
-    // Static caption labels
-    // =======================
-
     /** Large headline at the top of the confirmation screen */
     @FXML private Label headline;
 
@@ -48,10 +43,6 @@ public class ParkingReservationSummaryController implements ClientAware {
     /** Contact/support message shown below the summary */
     @FXML private Label support;
 
-    // =======================
-    // Dynamic value labels
-    // =======================
-
     /** Displays the reservation number (auto-generated) */
     @FXML private Label reservationNumberOfOrder;
 
@@ -73,19 +64,11 @@ public class ParkingReservationSummaryController implements ClientAware {
     /** Displays the assigned parking space number */
     @FXML private Label parkingSpaceOfOrder;
 
-    // =======================
-    // Runtime state
-    // =======================
-
     /** Shared ClientController instance for server communication */
     private ClientController client;
 
     /** Holds the order just created and shown to the user */
     private Order order;
-
-    // =====================================================
-    // ClientAware interface
-    // =====================================================
 
     /**
      * Stores the ClientController so this screen can communicate
@@ -97,10 +80,6 @@ public class ParkingReservationSummaryController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    // =====================================================
-    // Order state accessors
-    // =====================================================
 
     /**
      * Returns the order currently displayed on this summary screen.
@@ -120,10 +99,6 @@ public class ParkingReservationSummaryController implements ClientAware {
     public void setOrder(Order order) {
         this.order = order;
     }
-
-    // =====================================================
-    // UI binding
-    // =====================================================
 
     /**
      * Populates all dynamic label fields with data

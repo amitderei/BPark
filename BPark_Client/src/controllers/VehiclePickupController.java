@@ -14,9 +14,6 @@ import ui.UiUtils;
  * Step 2 – subscriber enters the six-digit parking code to release the car.
  */
 public class VehiclePickupController implements ClientAware {
-
-    // ------------------------ Identity step ------------------------
-
     /** Text field for entering the subscriber code manually */
     @FXML private TextField txtSubscriberCode;
 
@@ -29,8 +26,6 @@ public class VehiclePickupController implements ClientAware {
     /** Button to validate using tag ID */
     @FXML private Button btnReadTag;
 
-    // ------------------------ Pickup step ------------------------
-
     /** Text field for entering the parking code to retrieve the vehicle */
     @FXML private TextField txtParkingCode;
 
@@ -40,15 +35,11 @@ public class VehiclePickupController implements ClientAware {
     /** Button to request a resend of the parking code if lost */
     @FXML private Button btnLostCode;
 
-    // ------------------------ Misc UI ------------------------
-
     /** Label that prompts the user to enter the parking code (step 2) */
     @FXML private Label lblParkingPrompt;
 
     /** Label used to display live status messages (success/error) */
     @FXML private Label lblStatus;
-
-    // ------------------------ Runtime ------------------------
 
     /** Reference to the shared ClientController used for server communication */
     private ClientController client;

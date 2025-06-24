@@ -21,11 +21,6 @@ import java.util.List;
  * Data is requested once from the server and displayed in a table.
  */
 public class ViewActiveParkingsController implements ClientAware {
-
-    /* ================================
-     * FXML-bound UI components
-     * ================================ */
-
     /** Main table for displaying all active parking events */
     @FXML private TableView<ParkingEvent> parkingTable;
 
@@ -53,19 +48,11 @@ public class ViewActiveParkingsController implements ClientAware {
     /** Column for entry time (formatted) */
     @FXML private TableColumn<ParkingEvent, String> colEntryTime;
 
-    /* ================================
-     * Runtime data and dependencies
-     * ================================ */
-
     /** Central client used to request data and receive callbacks */
     private ClientController client;
 
     /** Observable table data for live UI updates */
     private final ObservableList<ParkingEvent> data = FXCollections.observableArrayList();
-
-    /* =====================================================
-     * Table setup
-     * ===================================================== */
 
     /**
      * Called automatically after the FXML is loaded.
@@ -93,10 +80,6 @@ public class ViewActiveParkingsController implements ClientAware {
             ));
     }
 
-    /* =====================================================
-     * Client wiring
-     * ===================================================== */
-
     /**
      * Injects the active ClientController instance for server communication.
      * Also registers this controller inside the client for callback access.
@@ -109,10 +92,6 @@ public class ViewActiveParkingsController implements ClientAware {
         if (client != null)
             client.setViewActiveParkingsController(this);
     }
-
-    /* =====================================================
-     * Server request + callback
-     * ===================================================== */
 
     /**
      * Sends a one-time request to the server to fetch all currently active parking sessions.

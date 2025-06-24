@@ -22,8 +22,6 @@ public class User implements Serializable {
     /** The user's password  */
     private String password;
 
-    // -------------------- Constructors --------------------
-
     /**
      * Constructor used when creating a user with a username and role only.
      * Typically used when the password is not needed or already verified.
@@ -62,8 +60,6 @@ public class User implements Serializable {
         this.role = UserRole.valueOf(role);
     }
 
-    // -------------------- Getters --------------------
-
     /**
      * Returns the user's login username.
      *
@@ -91,8 +87,6 @@ public class User implements Serializable {
     public String getPassword() {
         return password;
     }
-
-    // -------------------- Utility --------------------
 
     /**
      * Returns a short string summary of the user,

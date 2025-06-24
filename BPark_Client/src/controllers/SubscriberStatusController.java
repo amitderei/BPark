@@ -26,9 +26,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
  * and shows the data in a table, a bar chart, and a pie chart.
  */
 public class SubscriberStatusController implements ClientAware {
-
-    /* ========================== FXML Elements ========================== */
-
     /** Combo box to select the month */
     @FXML private ComboBox<Integer> cmbMonth;
 
@@ -64,8 +61,6 @@ public class SubscriberStatusController implements ClientAware {
 
     /** Table column: total hours parked */
     @FXML private TableColumn<SubscriberStatusReport, Double> colHours;
-
-    /* ========================== Internal State ========================== */
 
     /** The list that holds the report rows to show in the table */
     private final ObservableList<SubscriberStatusReport> rows =

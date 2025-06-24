@@ -57,8 +57,6 @@ public class Order implements Serializable {
         this.dateOfPlacingAnOrder = dateOfPlacingAnOrder;
     }
 
-    // -------------------- Getters --------------------
-
     /**
      * Returns the unique order number.
      *
@@ -122,8 +120,6 @@ public class Order implements Serializable {
         return arrivalTime;
     }
 
-    // -------------------- Setters --------------------
-
     /**
      * Sets the parking space for this order.
      *
@@ -159,8 +155,6 @@ public class Order implements Serializable {
     public void setSubscriberId(int subscriberId) {
         this.subscriberId = subscriberId;
     }
-
-    // -------------------- Utility --------------------
 
     /**
      * Returns a string representation of the order.

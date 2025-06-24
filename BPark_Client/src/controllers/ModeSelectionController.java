@@ -16,11 +16,6 @@ import ui.UiUtils;
  * - Exit the application
  */
 public class ModeSelectionController implements ClientAware {
-
-    // ==========================
-    // FXML Buttons
-    // ==========================
-
     /** Button to launch the full BPARK application (GUI flow for guests/subscribers) */
     @FXML private Button btnApp;
 
@@ -30,16 +25,8 @@ public class ModeSelectionController implements ClientAware {
     /** Button to exit the application */
     @FXML private Button btnExit;
 
-    // ==========================
-    // Runtime fields
-    // ==========================
-
     /** Reference to the shared client instance used to communicate with the server */
     private ClientController client;
-
-    // ==========================
-    // Dependency Injection
-    // ==========================
 
     /**
      * Stores the shared ClientController instance.
@@ -51,10 +38,6 @@ public class ModeSelectionController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    // ==========================
-    // Button Actions
-    // ==========================
 
     /**
      * Called when the user selects the full GUI application.

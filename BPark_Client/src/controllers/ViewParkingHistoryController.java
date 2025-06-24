@@ -20,11 +20,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
  * if one exists. The table is populated from the server response.
  */
 public class ViewParkingHistoryController implements ClientAware {
-
-    /* ================================
-     * UI controls bound to FXML
-     * ================================ */
-
     /** Headline label ("Parking History") */
     @FXML private Label headline;
 
@@ -61,10 +56,6 @@ public class ViewParkingHistoryController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    // ======================================================
-    // Table setup
-    // ======================================================
 
     /**
      * Initializes the parking history table: sets up value factories,
@@ -117,10 +108,6 @@ public class ViewParkingHistoryController implements ClientAware {
         // Request subscriber's parking history from the server
         client.updateParkingHistoryOfSubscriber();
     }
-
-    // ======================================================
-    // Server callback
-    // ======================================================
 
     /**
      * Called by the ClientController once the parking history data is ready.

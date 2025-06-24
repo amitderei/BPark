@@ -13,8 +13,6 @@ import javafx.scene.control.Label;
  */
 public class AvailabilityController implements ClientAware {
 
-    /* ===== UI labels bound to the FXML layout ===== */
-
     /** Label that shows the total number of parking spots */
     @FXML private Label lblTotal;
 

@@ -90,8 +90,6 @@ public class ParkingEvent implements Serializable {
 	/** Default constructor (used for deserialization or empty creation) */
 	public ParkingEvent() {}
 
-	// -------------------- Getters --------------------
-
 	/** @return Event ID */
 	public int getEventId() {
 		return eventId;
@@ -152,8 +150,6 @@ public class ParkingEvent implements Serializable {
 		return lot;
 	}
 
-	// -------------------- Setters --------------------
-
 	/**
 	 * Sets the event ID.
 	 *
@@ -212,8 +208,6 @@ public class ParkingEvent implements Serializable {
 	public void setParkingCode(String parkingCode) {
 		this.parkingCode = parkingCode;
 	}
-
-	// -------------------- Logic --------------------
 
 	/**
 	 * Calculates the current status of the parking session.

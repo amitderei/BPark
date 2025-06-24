@@ -40,9 +40,6 @@ import javafx.util.Callback;
  *  3. If free, an Order is created and passed to the summary screen.
  */
 public class CreateNewOrderViewController implements ClientAware {
-
-    /* --------------- FXML-bound UI controls --------------- */
-
     @FXML private Label headlineParkingReservation;
     @FXML private Label chooseDateAndTime;
     @FXML private Label betweenHourAndMinute;
@@ -56,12 +53,8 @@ public class CreateNewOrderViewController implements ClientAware {
     @FXML private Hyperlink termsOfUseHyper;
     @FXML private Button reserveNowButton;
 
-    /* --------------- External references --------------- */
-
     private SubscriberMainLayoutController mainLayoutController;
     private ClientController client;
-
-    /* --------------- Working state --------------- */
 
     /** Order instance created once all details are validated */
     public Order newOrder;
@@ -70,10 +63,6 @@ public class CreateNewOrderViewController implements ClientAware {
     int subscriberNum;
     Date selectedDate;
     Time timeOfArrival;
-    
-    /* =====================================================
-     *  Initialisation helpers
-     * ===================================================== */
 
     /**
      * Populates the date picker and time combo-boxes.
@@ -109,10 +98,6 @@ public class CreateNewOrderViewController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    /* =====================================================
-     *  Dynamic combo-box population
-     * ===================================================== */
 
     /** Called when a date is picked. Populates hourCombo accordingly. */
     public void dateChosen() {
@@ -166,10 +151,6 @@ public class CreateNewOrderViewController implements ClientAware {
             for (int q = 0; q < 4; q++) addQuarter.accept(q);
         }
     }
-
-    /* =====================================================
-     *  Reservation flow
-     * ===================================================== */
 
     /**
      * Creates an Order and asks the server to save it.
@@ -233,10 +214,6 @@ public class CreateNewOrderViewController implements ClientAware {
     	}
     }
 
-    /* =====================================================
-     *  Terms of Use dialog
-     * ===================================================== */
-
     /** Opens a read-only dialog box containing the parking lot’s terms. */
     public void showTermsOfUse() {
         Dialog<Void> dialog = new Dialog<>();
@@ -297,10 +274,6 @@ public class CreateNewOrderViewController implements ClientAware {
 	    return strBuild.toString();
 	}
 
-    /* =====================================================
-     *  Navigation helpers
-     * ===================================================== */
-
     /** Loads the reservation summary screen into the central layout. */
 	private void handleGoToOrderSummarry(Order order) {
 	    try {
@@ -320,10 +293,6 @@ public class CreateNewOrderViewController implements ClientAware {
 		this.newOrder=order;
 		handleGoToOrderSummarry(newOrder);
 	}
-
-    /* =====================================================
-     *  Utility
-     * ===================================================== */
 
     /**
      * Shows an Alert dialog with a unified title.

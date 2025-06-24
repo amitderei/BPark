@@ -16,9 +16,6 @@ import ui.UiUtils;
  * Keeps the same top bar and side-menu while swapping the centre pane.
  */
 public class SubscriberMainLayoutController implements ClientAware {
-
-    // ======== Top toolbar buttons ========
-
     /** Button to return to subscriber home screen */
     @FXML private Button btnHome;
 
@@ -27,8 +24,6 @@ public class SubscriberMainLayoutController implements ClientAware {
 
     /** Button to exit the application */
     @FXML private Button btnExit;
-
-    // ======== Side menu buttons ========
 
     /** Button to view subscriber's personal information */
     @FXML private Button btnViewPersonalInfo;
@@ -48,22 +43,14 @@ public class SubscriberMainLayoutController implements ClientAware {
     /** Button to view and cancel existing reservations */
     @FXML private Button btnMyReservations;
 
-    // ======== Main content area ========
-
     /** Center pane where child screens are dynamically loaded */
     @FXML private AnchorPane center;
-
-    // ======== Runtime references ========
 
     /** Shared client controller for server communication */
     private ClientController client;
 
     /** Subscriber's first name, used in greeting text */
     private String subscriberName;
-
-    // ======================================================
-    // Setters
-    // ======================================================
 
     /**
      * Injects the shared ClientController instance.
@@ -83,10 +70,6 @@ public class SubscriberMainLayoutController implements ClientAware {
     public void setSubscriberName(String name) {
         this.subscriberName = name;
     }
-
-    // ======================================================
-    // Top toolbar button handlers
-    // ======================================================
 
     /** Navigates to the subscriber's home screen. */
     @FXML private void handleHomeClick() {
@@ -112,10 +95,6 @@ public class SubscriberMainLayoutController implements ClientAware {
         javafx.application.Platform.exit();
         System.exit(0);
     }
-
-    // ======================================================
-    // Side menu button handlers
-    // ======================================================
 
     /** Loads the personal details view. */
     @FXML private void handleViewPersonalInfo() {
@@ -149,10 +128,6 @@ public class SubscriberMainLayoutController implements ClientAware {
     public void handleGoToCreateOrder() {
         loadScreen("/client/PlacingAnOrderView.fxml");
     }
-
-    // ======================================================
-    // FXML loader helpers
-    // ======================================================
 
     /**
      * Loads a standard screen into the center pane.

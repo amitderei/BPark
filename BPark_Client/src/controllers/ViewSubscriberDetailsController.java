@@ -13,11 +13,6 @@ import javafx.scene.control.*;
  * "Edit Details" screen.
  */
 public class ViewSubscriberDetailsController implements ClientAware {
-
-    /* ================================
-     * Labels in the left-right layout
-     * ================================ */
-
     /** Headline label ("Your Personal Details") */
     @FXML private Label headline;
 
@@ -48,10 +43,6 @@ public class ViewSubscriberDetailsController implements ClientAware {
     /** Button to switch to the edit screen */
     @FXML private Button editBtn;
 
-    /* ================================
-     * Runtime fields
-     * ================================ */
-
     /** Shared client used to access subscriber and screen switching */
     private ClientController client;
 
@@ -63,10 +54,6 @@ public class ViewSubscriberDetailsController implements ClientAware {
 
     /** Layout controller used to switch to the edit screen */
     private SubscriberMainLayoutController mainLayoutController;
-
-    /* =====================================================
-     *  Setup methods
-     * ===================================================== */
 
     /**
      * Injects the central ClientController used for retrieving
@@ -102,10 +89,6 @@ public class ViewSubscriberDetailsController implements ClientAware {
         emailDetail         .setText(subscriber.getEmail());
         phoneNumberDetail   .setText(subscriber.getPhoneNum());
     }
-
-    /* =====================================================
-     *  Navigation
-     * ===================================================== */
 
     /**
      * Triggered when the user clicks the "Edit Details" button.

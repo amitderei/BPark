@@ -13,11 +13,6 @@ import ui.UiUtils;
  * Also includes navigation controls to go back or exit the application.
  */
 public class MainController implements ClientAware {
-
-    // ==============================
-    // FXML Buttons
-    // ==============================
-
     /** Button to enter the system as a guest (no login) */
     @FXML private Button guestBtn;
 
@@ -50,10 +45,6 @@ public class MainController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    // ==============================
-    // Button Actions
-    // ==============================
 
     /**
      * Loads the Guest layout and opens the main interface

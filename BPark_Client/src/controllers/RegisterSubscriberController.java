@@ -12,13 +12,8 @@ import ui.UiUtils;
  * Includes client-side validation and sends a Subscriber object to the server.
  */
 public class RegisterSubscriberController implements ClientAware {
-
-    // ======================= runtime =======================
-
     /** Shared client controller used to send requests to the server */
     private ClientController client;
-
-    // ======================= FXML fields =======================
 
     /** Input field for national ID (exactly 9 digits) */
     @FXML private TextField txtUserId;
@@ -44,8 +39,6 @@ public class RegisterSubscriberController implements ClientAware {
     /** Label used to display live validation or server result status */
     @FXML private Label lblStatus;
 
-    // ======================= ClientAware =======================
-
     /**
      * Injects the shared ClientController instance so this screen
      * can communicate with the server.
@@ -56,8 +49,6 @@ public class RegisterSubscriberController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
-
-    // ======================= User Action =======================
 
     /**
      * Triggered when the user presses the "Register" button.
@@ -75,7 +66,7 @@ public class RegisterSubscriberController implements ClientAware {
         String email     = txtEmail.getText().trim();
         String username  = txtUsername.getText().trim();
 
-        // ---- validation rules ----
+        // validation rules
         if (userId.isEmpty() || !userId.matches("\\d{9}"))
             errors.append("- ID must be exactly 9 digits.\n");
 
@@ -100,7 +91,7 @@ public class RegisterSubscriberController implements ClientAware {
             return;
         }
 
-        // ---- build and send subscriber to server ----
+        //build and send subscriber to server 
         Subscriber sub = new Subscriber(
                 0,          // Server generates the subscriber code
                 userId,
@@ -117,8 +108,6 @@ public class RegisterSubscriberController implements ClientAware {
                 "Registration request sent to server.",
                 true);
     }
-
-    // ======================= Callback =======================
 
     /**
      * Called by ClientController after receiving a response from the server.

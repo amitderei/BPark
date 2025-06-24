@@ -20,11 +20,6 @@ import ui.UiUtils;
  * (Subscriber, Attendant, or Manager).
  */
 public class LoginController implements ClientAware {
-
-    // ==============================
-    // FXML Fields
-    // ==============================
-
     /** Text field for entering username */
     @FXML private TextField username;
 
@@ -43,19 +38,11 @@ public class LoginController implements ClientAware {
     /** Button to exit the application */
     @FXML private Button btnExit;
 
-    // ==============================
-    // Runtime Fields
-    // ==============================
-
     /** Active client controller, used to communicate with the server */
     private ClientController client;
 
     /** Cached password for future use (e.g., profile editing) */
     private String password;
-
-    // ==============================
-    // Dependency Injection
-    // ==============================
 
     /**
      * Injects the client controller and registers this controller
@@ -68,10 +55,6 @@ public class LoginController implements ClientAware {
         this.client = client;
         client.setLoginController(this);
     }
-
-    // ==============================
-    // FXML Event Handlers
-    // ==============================
 
     /**
      * Called when the login button is clicked.
@@ -146,10 +129,6 @@ public class LoginController implements ClientAware {
                 "BPARK – Welcome",
                 client);
     }
-
-    // ==============================
-    // Internal Helpers
-    // ==============================
 
     /**
      * Loads the appropriate main layout screen based on the user's role.

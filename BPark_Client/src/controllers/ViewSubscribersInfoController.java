@@ -21,9 +21,6 @@ import java.util.Map;
  * they were late in picking up their vehicle.
  */
 public class ViewSubscribersInfoController implements ClientAware {
-
-    /* ---------- UI Controls from FXML ---------- */
-
     /** Table showing all subscribers */
     @FXML private TableView<Subscriber> subscriberTable;
 
@@ -47,8 +44,6 @@ public class ViewSubscribersInfoController implements ClientAware {
 
     /** Column: number of late vehicle pickups */
     @FXML private TableColumn<Subscriber, Integer> colLate;
-
-    /* ---------- Runtime Data ---------- */
 
     /** Main client instance used for communication with the server */
     private ClientController client;

@@ -38,8 +38,6 @@ public class Subscriber implements Serializable {
     /** Optional RFID tag used to identify the subscriber's vehicle */
     private String tagId;
 
-    // ---------------------- Constructors ----------------------
-
     /**
      * Full constructor — used when loading a complete subscriber record from the database.
      *
@@ -92,8 +90,6 @@ public class Subscriber implements Serializable {
     public Subscriber(String username) {
         this.username = username;
     }
-
-    // ---------------------- Getters ----------------------
 
     /**
      * @return the unique subscriber code
@@ -150,8 +146,6 @@ public class Subscriber implements Serializable {
     public String getTagId() {
         return tagId;
     }
-
-    // ---------------------- Setters ----------------------
 
     /**
      * Sets the unique subscriber code.
@@ -216,8 +210,6 @@ public class Subscriber implements Serializable {
     public void setTagId(String tagId) {
         this.tagId = tagId;
     }
-
-    // ---------------------- Utility ----------------------
 
     /**
      * Compares all main subscriber fields (excluding tagId) to check if two subscriber

@@ -26,11 +26,6 @@ import ui.UiUtils;
  * only accessible to staff roles such as attendant or manager.
  */
 public class ParkingReportController implements ClientAware {
-
-	// ==========================
-	// FXML UI Components
-	// ==========================
-
 	/** Headline label displayed above the charts */
 	@FXML
 	private Label headline;
@@ -55,10 +50,6 @@ public class ParkingReportController implements ClientAware {
 	@FXML
 	private BarChart<String, Number> hoursParkingChart;
 
-	// ==========================
-	// Runtime state
-	// ==========================
-
 	/** Shared socket handler used to communicate with the server */
 	private ClientController client;
 
@@ -66,10 +57,6 @@ public class ParkingReportController implements ClientAware {
 	private ParkingReport parkingReport;
 
 	private ArrayList<Date> dates;
-
-	// ==========================
-	// Dependency Injection
-	// ==========================
 
 	public void setDates(ArrayList<Date> dates) {
 		ObservableList<Date> observableDates = FXCollections.observableArrayList(dates);
@@ -94,10 +81,6 @@ public class ParkingReportController implements ClientAware {
 	public void setParkingReport(ParkingReport parkingReport) {
 		this.parkingReport = parkingReport;
 	}
-
-	// ==========================
-	// Chart Logic
-	// ==========================
 
 	/**
 	 * Populates the pie charts based on the data in the parking report.

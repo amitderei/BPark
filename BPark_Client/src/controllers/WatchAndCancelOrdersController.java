@@ -18,9 +18,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
  * and allows cancellation of individual orders.
  */
 public class WatchAndCancelOrdersController implements ClientAware {
-
-    /* ---------- UI elements ---------- */
-
     /** Header label at the top of the screen */
     @FXML private Label headline;
 
