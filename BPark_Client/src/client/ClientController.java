@@ -483,14 +483,14 @@ public class ClientController extends AbstractClient {
 			}
 			
 			// Handle order making 
-						if (newOrderController != null) {
-							if(response.getMsg().equals("Can't make reservation")) {
-								newOrderController.makingReservation(false);
-							}
-							else if (response.getMsg().equals("Can make reservation")) {
-								newOrderController.makingReservation(true);
-							}
-						}
+			if (newOrderController != null) {
+				if(response.getMsg().equals("Can't make resarvation")) {
+					newOrderController.makingReservation(false);
+				}
+				else if (response.getMsg().equals("Can make resarvation")) {
+					newOrderController.makingReservation(true);
+				}
+			}
 			
 			// subscriber-status report 
 			else if ("subscriber_status".equals(response.getMsg())) {
