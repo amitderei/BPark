@@ -25,14 +25,19 @@
       <Button fx:id="btnLoad" text="Load Report" />
    </HBox>
    <HBox spacing="10">
-      <BarChart fx:id="barChart" prefWidth="380.0" prefHeight="300.0">
-         <xAxis>
-            <CategoryAxis label="Subscriber" />
-         </xAxis>
-         <yAxis>
-            <NumberAxis label="Hours / Count" />
-         </yAxis>
-      </BarChart>
+<javafx.scene.control.ScrollPane prefWidth="420.0" prefHeight="300.0">
+    <content>
+        <BarChart fx:id="barChart" prefWidth="800.0" prefHeight="280.0" animated="false">
+            <xAxis>
+                <CategoryAxis label="Subscriber" />
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="Hours / Count" />
+            </yAxis>
+        </BarChart>
+    </content>
+</javafx.scene.control.ScrollPane>
+
       <PieChart fx:id="pieChart" prefWidth="180.0" prefHeight="300.0" />
    </HBox>
    <TableView fx:id="tblReport" prefHeight="160.0">
