@@ -132,7 +132,7 @@ public class SubscriberStatusController implements ClientAware {
      * Sends a request to the server to load the report
      * for the selected month and year.
      */
-    private void sendRequest() {
+    public void sendRequest() {
         Integer month = cmbMonth.getValue();
         Integer year  = cmbYear.getValue();
         if (month == null || year == null) return; // do nothing if empty
