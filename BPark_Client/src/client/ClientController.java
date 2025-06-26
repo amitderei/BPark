@@ -837,5 +837,13 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'getDatesOfReports' request: " + e.getMessage());
 		}
 	}
+	
+	public void getSubscriberReport(Integer month, Integer year) {
+		try {
+            sendToServer(new Object[]{Operation.GET_SUBSCRIBER_STATUS_REPORT, month, year});
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+	}
 
 }

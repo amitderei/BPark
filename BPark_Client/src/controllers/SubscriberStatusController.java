@@ -132,13 +132,9 @@ public class SubscriberStatusController implements ClientAware {
         Integer year  = cmbYear.getValue();
         if (month == null || year == null) return; // do nothing if empty
 
-        System.out.println("[DEBUG] Sending request for " + month + "/" + year);  // ← הוסף שורה זו
+        System.out.println("[DEBUG] Sending request for " + month + "/" + year); 
 
-        try {
-            client.sendToServer(new Object[]{"get_subscriber_status", month, year});
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        client.getSubscriberReport(month, year);
     }
 
 

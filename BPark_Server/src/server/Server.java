@@ -551,7 +551,7 @@ public class Server extends AbstractServer {
 				}
 				
 				// "get_subscriber_status" 
-				else if (data.length == 3 && "get_subscriber_status".equals(data[0])) {
+				else if (data[0]==Operation.GET_SUBSCRIBER_STATUS_REPORT) {
 				    int month = (int) data[1];
 				    int year  = (int) data[2];
 
