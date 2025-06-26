@@ -143,9 +143,9 @@ public class ClientController extends AbstractClient {
 	public void setViewSubscribersInfoController(ViewSubscribersInfoController c) {
 		this.viewSubscribersInfoController = c;
 	}
-	
+
 	public void setSubscriberStatusController(SubscriberStatusController c) {
-	    this.subscriberStatusController = c;
+		this.subscriberStatusController = c;
 	}
 
 	/**
@@ -357,7 +357,7 @@ public class ClientController extends AbstractClient {
 				int count = (int) response.getData();
 				System.out.println(((Integer) count).toString());
 			}
-			
+
 			if (response.isSucceed() && response.getMsg().equals("Parking report dates loaded.")) {
 				if(parkingReportController!=null) {
 					parkingReportController.setDates((ArrayList<Date>)(response.getData()));
@@ -370,19 +370,19 @@ public class ClientController extends AbstractClient {
 
 				}
 			}
-			
+
 			if (response.isSucceed() && response.getMsg().equals("Order doesn't exists.")) {
 				if (newOrderController != null) {
 					newOrderController.orderExistFuture.complete(false);
 				}
 			}
-			
+
 			if (response.isSucceed() && response.getMsg().equals("This order already exists for this subscriber.")) {
 				if (newOrderController != null) {
 					newOrderController.orderExistFuture.complete(true);
 				}
 			}
-			
+
 			if (response.isSucceed() && response.getData() instanceof Subscriber) {
 				setSubscriber((Subscriber) response.getData());
 			}
@@ -464,7 +464,7 @@ public class ClientController extends AbstractClient {
 				availabilityController.updateAvailability(stats);
 				return;
 			}
-			
+
 			// Handle order making 
 			if (newOrderController != null) {
 				if(response.getMsg().equals("Can't make resarvation")) {
@@ -474,28 +474,28 @@ public class ClientController extends AbstractClient {
 					newOrderController.makingReservation(true);
 				}
 			}
-			
+
 			// subscriber-status report 
 			else if ("subscriber_status".equals(response.getMsg())) {
 
-			    /* ----- success ----- */
-			    if (response.isSucceed()) {
-			        if (subscriberStatusController != null &&
-			            response.getData() instanceof List<?> listRaw)
-			        {
-			            @SuppressWarnings("unchecked")
-			            List<SubscriberStatusReport> list = (List<SubscriberStatusReport>) listRaw;
-			            subscriberStatusController.onReportReceived(list);
-			        }
-			        return;
-			    }
+				/* ----- success ----- */
+				if (response.isSucceed()) {
+					if (subscriberStatusController != null &&
+							response.getData() instanceof List<?> listRaw)
+					{
+						@SuppressWarnings("unchecked")
+						List<SubscriberStatusReport> list = (List<SubscriberStatusReport>) listRaw;
+						subscriberStatusController.onReportReceived(list);
+					}
+					return;
+				}
 
-			    /* ----- fail: no snapshot for that month ----- */
-			    UiUtils.showAlert(
-			            "Subscriber Report",
-			            response.getMsg(),              // e.g. "No snapshot available for 4/2025"
-			            Alert.AlertType.INFORMATION);
-			    return;
+				/* ----- fail: no snapshot for that month ----- */
+				UiUtils.showAlert(
+						"Subscriber Report",
+						response.getMsg(),              // e.g. "No snapshot available for 4/2025"
+						Alert.AlertType.INFORMATION);
+				return;
 			}
 
 
@@ -648,7 +648,7 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	
+
 	/**
 	 * Validates a subscriber by their RFID tag ID.
 	 *
@@ -801,7 +801,7 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Sends a request to find out whether there is an existing order for the time asked or not.
 	 * 
@@ -852,7 +852,7 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'GetParkingReport' request: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * request parking report dates from server.
 	 */
@@ -863,15 +863,27 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'getDatesOfReports' request: " + e.getMessage());
 		}
 	}
-	
+
 	public void getSubscriberReport(Integer month, Integer year) {
 		try {
-            sendToServer(new Object[]{Operation.GET_SUBSCRIBER_STATUS_REPORT, month, year});
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+			sendToServer(new Object[]{Operation.GET_SUBSCRIBER_STATUS_REPORT, month, year});
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
-	
+
+	/**
+	 * Checks whether subscriber code exists or not
+	 */
+	public void checkSubscriberExists(int subscriberCode) {
+		try {
+			sendToServer(new Object[] { "subscriberExists", subscriberCode});
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'TagExists' request to server: " + e.getMessage());
+		}
+	}
+
 	/**
 	 * Validates whether a TagID exists using their code.
 	 *
@@ -885,7 +897,7 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'TagExists' request to server: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 *  Sends a request to the server to check if the subscriber already entered his vehicle into the parking lot
 	 */
@@ -897,7 +909,7 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'subscriberAlreadyEntered' request to server: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Sends a request to the server to check if the matched vehicle to the tag-Id is already inside the parking lot
 	 */
@@ -909,9 +921,72 @@ public class ClientController extends AbstractClient {
 			System.err.println("Failed to send 'tagIdAlreadyEntered' request to server: " + e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Sends a request to make a delivery with a re
+	 */
 	public void DeliveryViaReservation(int subscriberCode, int confirmationCode) {
-		
+		// Prepare the checking - if exists command as an object array and send to server
+		try {
+			sendToServer(new Object[] {"DeliveryViaReservation", subscriberCode, confirmationCode});
+
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'DeliveryViaReservation' request to server: " + e.getMessage());
+		}
 	}
 
+	/**
+	 * Sends a request to the server to check whether there is free parking space in the lot named "Braude".
+	 * This will trigger a server-side check on current occupancy.
+	 */
+	public void isThereFreeParkingSpace(String parkingLotName) {
+		try {
+			sendToServer(new Object[] {"IsThereFreeParkingSpace", parkingLotName});
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'IsThereFreeParkingSpace' request to server: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Sends a request to the server to gather the matching vehicle ID for the current subscriber.
+	 */
+	public void seekVehicleID(int subscriberCode) {
+		try {
+			sendToServer(new Object[] {"getVehicleID", subscriberCode});
+
+		} catch (IOException e) {
+			//Log the error if the update request fails to send
+			System.err.println("Failed to send 'getVehicleID' request to server: " + e.getMessage());
+		}
+	}
+
+	/** 
+	 * Sending to the Server Parking Event that contains every field except exitDate and exitHour: we can't tell by now which values they'll hold
+	 * both of these fields will hold null
+	 */
+	public void deliverVehicle(ParkingEvent parkingEvent) {
+		try {
+			sendToServer(new Object[] {"DeliverVehicle", parkingEvent});
+		} catch (IOException e) {
+			//Log the error if the update request fails to send
+			System.err.println("Failed to send 'DeliverVehicle' request to server: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Checks if the subscriber has a valid reservation.
+	 * The method is triggered after the server responses that the subscriber didn't enter his vehicle yet.
+	 */	
+	public void isThereReservation(int SubscriberCode) {
+		try {
+			sendToServer(new Object[] {"checkIfTheresReservation", SubscriberCode});
+
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'checkIfTheresReservation' request to server: " + e.getMessage());
+		}
+
+	}
 }

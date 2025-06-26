@@ -47,7 +47,7 @@ import javafx.scene.control.Label;
 
 public class VehicleDeliveryController implements ClientAware{
 
-	/**SUBSCRIBER CODE CHECKINGS AND VISIBILITY TOGGLINGS**/
+	/*SUBSCRIBER CODE CHECKINGS AND VISIBILITY TOGGLINGS*/
 	@FXML
 	private TextField subscriberCodeField;   // Text field that will be used for seeking the subscriber code
 
@@ -58,7 +58,7 @@ public class VehicleDeliveryController implements ClientAware{
 	private Label subscriberCodeLabel;   // Label for displaying status whether the subscriber code has been found or not
 
 
-	/**DELIVERY AFTER ENTERING SUBSCRIBER CODE, ENTERING CONFIRMATION CODE IF THERE'S RESERVATION **/
+	/*DELIVERY AFTER ENTERING SUBSCRIBER CODE, ENTERING CONFIRMATION CODE IF THERE'S RESERVATION */
 	@FXML
 	private Label ReservationORRegularEnteranceLabel; // Label for entering to the Parking Lot regularly or threw an existing reservation
 
@@ -71,7 +71,7 @@ public class VehicleDeliveryController implements ClientAware{
 	@FXML
 	private Label ReservationConfirmationCodeLabel;  // Label for confirmation code to show case the input whether it's good or not
 
-	/**TAG CHECKINGS AND VISIBILITY TOGGLINGS**/
+	/*TAG CHECKINGS AND VISIBILITY TOGGLINGS*/
 	@FXML
 	private TextField TagCodeField; // TextField for delivering the vehicle with the tag
 
@@ -81,11 +81,11 @@ public class VehicleDeliveryController implements ClientAware{
 	@FXML
 	private Label TagStatusUpdateLabel; // Label for confirming whether the delivery (with the tag scan) happened successfully or not
 
-	/**IF VEHICLE IS ENTERED ALREADY WILL VISIBILITY TOGGLINGS**/
+	/*IF VEHICLE IS ENTERED ALREADY WILL VISIBILITY TOGGLINGS*/
 	@FXML
 	private Label vehicleHasEnteredLabel; // Label for showing whether the vehicle is already inside or not
 
-	/**AFTER PRESSING DELIVER VIA SUBSCRIBER CODE OR VERIFY TAG AND DELIVER => FOR STATUS**/
+	/*AFTER PRESSING DELIVER VIA SUBSCRIBER CODE OR VERIFY TAG AND DELIVER => FOR STATUS*/
 	@FXML
 	private Label deliverStatusUpdateLabel;  // Label for confirming whether the delivery happened successfully or not
 
@@ -95,7 +95,7 @@ public class VehicleDeliveryController implements ClientAware{
 	@FXML
 	private Label parkingCodeLabel; // Label for matching the parkingCode of the subscriber so he will know it for the pickup of the vehicle
 
-	/**********************************************************************************************************************/
+	/****************************************/
 
 	private ClientController client;
 
@@ -136,7 +136,7 @@ public class VehicleDeliveryController implements ClientAware{
 		this.client = client;
 	}
 
-	/**********************************************************************************************************************/
+	/****************************************/
 
 	/**
 	 * The method triggered when the Submit button is clicked
@@ -154,7 +154,7 @@ public class VehicleDeliveryController implements ClientAware{
 			// If the code isn't type of integer, we will let the user know that the code must be a number
 			codeInt = Integer.parseInt(code);
 
-			client.validateSubscriber(codeInt);
+			client.checkSubscriberExists(codeInt);
 
 			// There will be an exception thrown due to a String not containing only digits.
 		} catch (NumberFormatException e) {
@@ -305,13 +305,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * The method is triggered after the server responses that the subscriber didn't enter his vehicle yet.
 	 */	
 	public void checkIfTheresReservation() {
-		try {
-			client.sendToServer(new Object[] {"checkIfTheresReservation", codeInt});
-
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'checkIfTheresReservation' request to server: " + e.getMessage());
-		}
+		client.isThereReservation(codeInt);
 	}
 
 	/**
@@ -402,7 +396,7 @@ public class VehicleDeliveryController implements ClientAware{
 			subCodeFuture.thenAccept(codeInt -> {
 				this.codeInt = codeInt;
 				// After gathering the subscriber code we will go and check whether there are free space in our parking lot
-				isThereFreeParkingSpace();
+				client.isThereFreeParkingSpace("braude");
 			});
 	}
 
@@ -416,7 +410,8 @@ public class VehicleDeliveryController implements ClientAware{
 		if(hasReservation) {handleDeliveryViaReservation();}
 
 		// If there's no reservation, we will check if we can enter the vehicle on a regular
-		else isThereFreeParkingSpace();
+		else client.isThereFreeParkingSpace("braude");
+
 
 	}
 
@@ -433,25 +428,18 @@ public class VehicleDeliveryController implements ClientAware{
 		}
 
 		// If the code isn't type of integer, we will let the user know that the code must be a number
-				try {
-					confirmationCodeInt = Integer.parseInt(confirmationCode);
+		try {
+			confirmationCodeInt = Integer.parseInt(confirmationCode);
 
-					// Prepare the checking - if exists command as an object array and send to server
-					try {
-						client.sendToServer(new Object[] {"DeliveryViaReservation", codeInt, confirmationCodeInt});
+			client.DeliveryViaReservation(codeInt, confirmationCodeInt);
 
-					} catch (IOException e) {
-						// Log the error if the update request fails to send
-						System.err.println("Failed to send 'DeliveryViaReservation' request to server: " + e.getMessage());
-					}
-
-					// There will be an exception thrown due to a String not containing only digits
-				} catch (NumberFormatException e) {
-					showAlert("Confirmation code must be a number.", AlertType.ERROR);
-					ReservationConfirmationCodeLabel.setText("Please enter a valid input [ONLY DIGITS].");
-					ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: red;");
-					return;
-				}
+			// There will be an exception thrown due to a String not containing only digits
+		} catch (NumberFormatException e) {
+			showAlert("Confirmation code must be a number.", AlertType.ERROR);
+			ReservationConfirmationCodeLabel.setText("Please enter a valid input [ONLY DIGITS].");
+			ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: red;");
+			return;
+		}
 
 	}
 
@@ -487,7 +475,7 @@ public class VehicleDeliveryController implements ClientAware{
 		ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: green;");
 
 		// Before going to the delivery process we shall check whether is there free space or not
-		isThereFreeParkingSpace();
+		client.isThereFreeParkingSpace("braude");
 	}
 
 	/**
@@ -511,20 +499,6 @@ public class VehicleDeliveryController implements ClientAware{
 	}
 
 	/**
-	 * Sends a request to the server to check whether there is free parking space in the lot named "Braude".
-	 * This will trigger a server-side check on current occupancy.
-	 */
-	public void isThereFreeParkingSpace() {
-		try {
-			client.sendToServer(new Object[] {"IsThereFreeParkingSpace", "Braude"});
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'IsThereFreeParkingSpace' request to server: " + e.getMessage());
-		}
-
-	}
-
-	/**
 	 * A setter for the parking space ID
 	 */
 	public void setParkingSpace(int parkingSpace) {
@@ -539,7 +513,7 @@ public class VehicleDeliveryController implements ClientAware{
 		this.parkingLotStatus = parkingLotStatus;
 
 		if(!parkingLotStatus) {
-			///////////////////////////////////////////
+			// Setting label if the parking lot is full
 			deliverStatusUpdateLabel.setText("The Parking Lot is Full!");
 			deliverStatusUpdateLabel.setStyle("-fx-text-fill: red;");
 			deliverStatusUpdateLabel.setVisible(true);
@@ -564,7 +538,7 @@ public class VehicleDeliveryController implements ClientAware{
 
 		}
 		else {
-			///////////////////////////////////////////
+			// Setting label if there is available parking slot
 			deliverStatusUpdateLabel.setText("There is avaliable parking slot!");
 			deliverStatusUpdateLabel.setStyle("-fx-text-fill: green;");
 			deliverStatusUpdateLabel.setVisible(true);
@@ -573,19 +547,6 @@ public class VehicleDeliveryController implements ClientAware{
 		// Starting the deliver vehicle process after knowing whether there is free space or no
 		deliverVehicle();
 
-	}
-
-	/**
-	 * Sends a request to the server to gather the matching vehicle ID for the current subscriber.
-	 */
-	public void seekVehicleID() {
-		try {
-			client.sendToServer(new Object[] {"getVehicleID", codeInt});
-
-		} catch (IOException e) {
-			//Log the error if the update request fails to send
-			System.err.println("Failed to send 'getVehicleID' request to server: " + e.getMessage());
-		}
 	}
 
 	/**
@@ -609,8 +570,7 @@ public class VehicleDeliveryController implements ClientAware{
 		vehicleIdFuture = new CompletableFuture<>();
 
 		// We will seek for the vehicleID before going and making the parking event object
-
-		seekVehicleID();
+		client.seekVehicleID(codeInt);
 
 		// When vehicle ID is received, create the ParkingEvent and send it
 		vehicleIdFuture.thenAcceptAsync(vehicleID -> {
@@ -625,14 +585,8 @@ public class VehicleDeliveryController implements ClientAware{
 			ParkingEvent parkingEvent = new ParkingEvent(codeInt, parkingSpace, entryDate, entryTime, null, null, false, vehicleID, "Braude", parkingCode);
 
 
-			// Sending to the Server Parking Event that contains every field except exitDate and exitHour: we can't tell by now which values they'll hold
-			// both of these fields will hold null
-			try {
-				client.sendToServer(new Object[] {"DeliverVehicle", parkingEvent});
-			} catch (IOException e) {
-				//Log the error if the update request fails to send
-				System.err.println("Failed to send 'DeliverVehicle' request to server: " + e.getMessage());
-			}
+			client.deliverVehicle(parkingEvent);
+			
 		});
 	}
 
@@ -641,7 +595,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * The message is displayed in green to visually confirm completion to the user.
 	 */
 	public void successfulDelivery() {
-		/////////////////////////////////////////////////////////////////////
+		// Setting label if the delivery has completed successfully
 		InsertionUpdateLabel.setText("Completed delivery successfully!");
 		InsertionUpdateLabel.setStyle("-fx-text-fill: green;");
 		InsertionUpdateLabel.setVisible(true);
@@ -687,4 +641,3 @@ public class VehicleDeliveryController implements ClientAware{
 	}
 
 }
-

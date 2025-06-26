@@ -13,34 +13,32 @@ import javafx.scene.layout.AnchorPane;
 import ui.UiUtils;
 
 /**
- * Main layout for a guest session.
- * Top – standard toolbar (Home / Back / Exit).<br>
- * Left – side-menu with a single action: spot availability lookup.<br>
- * Center – dynamically switches content based on user actions.
+ * Controller for the main layout shown to guest users.
+ * Provides top navigation (Home / Back / Exit), a side menu for availability check,
+ * and a central area where different screens are loaded dynamically.
  */
 public class GuestMainLayoutController implements ClientAware {
 
-    /** Exit button – disconnects and closes the application */
-    @FXML private Button btnExit;
+    @FXML 
+    private Button btnExit;
 
-    /** Back button – returns to the selection screen */
-    @FXML private Button btnBack;
+    @FXML 
+    private Button btnBack;
 
-    /** Home button – loads the guest home screen */
-    @FXML private Button btnHome;
+    @FXML 
+    private Button btnHome;
 
     /** Button that loads the live spot availability screen */
-    @FXML private Button btnCheckAvailability;
+    @FXML 
+    private Button btnCheckAvailability;
 
     /** Central placeholder where child screens are loaded */
-    @FXML private AnchorPane center;
+    @FXML 
+    private AnchorPane center;
 
-    /** Reference to the shared client, used to communicate with the server */
+    /** Reference to the active client used for server communication */
     private ClientController client;
 
-    // =====================================================
-    // Framework hooks
-    // =====================================================
 
     /**
      * Runs automatically after the FXML file is loaded.
@@ -52,22 +50,18 @@ public class GuestMainLayoutController implements ClientAware {
     }
 
     /**
-     * Receives the shared ClientController so it can be passed to
-     * dynamically loaded child screens.
+     * Receives the ClientController and registers this controller
+     * inside it so the server can push updates later on.
      *
-     * @param client active client instance
+     * @param client active client instance, may be null before connection
      */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
-    // =====================================================
-    // Toolbar actions
-    // =====================================================
-
     /**
-     * Loads the static "Welcome, Guest" screen into the center pane.
+     * Loads the static screen into the center pane.
      */
     @FXML
     private void handleHomeClick() {
@@ -75,7 +69,7 @@ public class GuestMainLayoutController implements ClientAware {
     }
 
     /**
-     * Navigates back to the user-type selection screen (guest / login).
+     * Navigates back to the user-type selection screen
      */
     @FXML
     private void handleBackClick() {
@@ -103,9 +97,7 @@ public class GuestMainLayoutController implements ClientAware {
         System.exit(0);
     }
 
-    // =====================================================
-    // Side-menu actions
-    // =====================================================
+
 
     /**
      * Loads the live availability screen showing number of free spots.
@@ -115,9 +107,6 @@ public class GuestMainLayoutController implements ClientAware {
         loadScreen("/client/AvailabilityScreen.fxml");
     }
 
-    // =====================================================
-    // Internal helper
-    // =====================================================
 
     /**
      * Loads the specified FXML screen into the center pane and

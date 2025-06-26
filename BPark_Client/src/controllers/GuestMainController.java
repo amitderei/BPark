@@ -5,8 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 /**
- * Landing screen shown to users who are not logged in.
- * Displays a simple welcome message and can later be extended
+ * Controller for the guest home screen shown to users who are not logged in.
+ * Displays a basic welcome message and can be expanded with more guest content.
  * to show available parking spots or promotional info.
  */
 public class GuestMainController implements ClientAware {
@@ -14,19 +14,8 @@ public class GuestMainController implements ClientAware {
     /** Label that shows the greeting text */
     @FXML private Label welcomeLabel;
 
-    /** Reference to the central ClientController */
+    /** Reference to the active client used for server communication */
     private ClientController client;
-
-    /**
-     * JavaFX initialisation hook.
-     * Sets the default greeting when the FXML is loaded.
-     */
-    @FXML
-    public void initialize() {
-        if (welcomeLabel != null) {
-            welcomeLabel.setText("Welcome, Guest!");
-        }
-    }
 
     /**
      * Receives the ClientController and registers this controller
@@ -41,6 +30,16 @@ public class GuestMainController implements ClientAware {
             client.setGuestMainController(this);
         }
     }
-
+    
+    /**
+     * Called automatically when the FXML is loaded.
+     * Sets the default welcome message.
+     */
+    @FXML
+    public void initialize() {
+        if (welcomeLabel != null) {
+            welcomeLabel.setText("Welcome, Guest!");
+        }
+    }
 }
 

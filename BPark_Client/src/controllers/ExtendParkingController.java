@@ -9,7 +9,7 @@ import ui.UiUtils;
 
 /**
  * Screen that lets a subscriber extend an active parking session
- * (adds four hours) as long as the session has not been extended before.
+ * (adds 4 hours) as long as the session has not been extended before.
  *
  * Flow:
  *  1. User types the parking code.
@@ -20,31 +20,33 @@ import ui.UiUtils;
 public class ExtendParkingController implements ClientAware {
 
     /** Input field for the numeric parking code */
-    @FXML private TextField txtParkingCode;
+    @FXML 
+    private TextField txtParkingCode;
 
-    /** "Extend" button */
-    @FXML private Button btnExtend;
+    @FXML 
+    private Button btnExtend;
 
     /** Label used for success / error feedback */
-    @FXML private Label lblStatus;
+    @FXML 
+    private Label lblStatus;
 
-    /** Shared client used to talk with the server */
+    /** Reference to the active client used for server communication */
     private ClientController client;
 
-    /**
-     * Injects the ClientController so this screen can send requests.
-     *
-     * @param client active client instance
-     */
+	/**
+	 * Injects the shared ClientController instance.
+	 *
+	 * @param client active client controller instance
+	 */
     @Override
     public void setClient(ClientController client) {
         this.client = client;
     }
 
     /**
-     * Fired by the "Extend" button.
-     * Validates the text, converts to int, and sends the request.
-     * Shows a local error if the code is missing or not numeric.
+     * Triggered when the "Extend" button is clicked.
+     * Validates the parking code and sends an extension request to the server.
+     * If input is invalid, shows an appropriate error message.
      */
     @FXML
     private void handleExtendClick() {
@@ -70,10 +72,11 @@ public class ExtendParkingController implements ClientAware {
     }
 
     /**
-     * Callback used by ClientController after the server responds.
+     * Called after the server responds to the extension request.
+     * Updates the screen with a success or error message.
      *
-     * @param success true if the extension was successful
-     * @param message explanatory text returned by the server
+     * @param success true if the extension was processed successfully
+     * @param message feedback message returned from the server
      */
     public void onExtensionResponse(boolean success, String message) {
         UiUtils.setStatus(lblStatus, message, success);
