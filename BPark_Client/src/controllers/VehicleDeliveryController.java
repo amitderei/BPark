@@ -387,7 +387,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * Seeking for the matching subscriber so we will be able to proceed to the vehicle delivery.
 	 */
 	public void findMatchedSubToTheTag() {
-			client.validateSubscriberByTag(tag);
+			client.findSubscriberWithTag(tag);
 
 			// Initialize the CompletableFutures
 			subCodeFuture = new CompletableFuture<>();

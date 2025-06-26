@@ -873,21 +873,23 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 * Checks whether subscriber code exists or not
+	 * Validates if the subscriber code exists in the DB
+	 *
+	 * @param subscriberCode to check.
 	 */
 	public void checkSubscriberExists(int subscriberCode) {
 		try {
 			sendToServer(new Object[] { "subscriberExists", subscriberCode});
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'TagExists' request to server: " + e.getMessage());
+			System.err.println("Failed to send 'subscriberExists' request to server: " + e.getMessage());
 		}
 	}
 
 	/**
-	 * Validates whether a TagID exists using their code.
+	 * Validates if the TagID exists in the DB
 	 *
-	 * @param subscriberCode the code to validate
+	 * @param TagID to check
 	 */
 	public void validateTag(String TagID) {
 		try {
@@ -899,7 +901,9 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 *  Sends a request to the server to check if the subscriber already entered his vehicle into the parking lot
+	 * Checks if a subscriber is inside the parking lot right now
+	 *
+	 * @param subscriberCode to check
 	 */
 	public void checkIfSubscriberAlreadyEntered(int subscriberCode) {
 		try {
@@ -911,7 +915,9 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 * Sends a request to the server to check if the matched vehicle to the tag-Id is already inside the parking lot
+	 * Checks whether a vehicle that is matched with a given TagID is inside the parking lot right now
+	 *
+	 * @param TagID to check
 	 */
 	public void checkIfTagIDAlreadyInside(String TagID) {
 		try {
@@ -923,7 +929,24 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 * Sends a request to make a delivery with a re
+	 * Finds the subscriber that matches the given TagID.
+	 *
+	 * @param TagID for seeking the subscriberCode
+	 */
+	public void findSubscriberWithTag(String TagID) {
+		try {
+			sendToServer(new Object[] { "findMatchedSubToTheTag", TagID});
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'findMatchedSubToTheTag' request to server: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Requests to the server to make a delivery of the vehicle with an active reservation
+	 *
+	 * @param subscriberCode  
+	 * @param confirmationCode The confirmation code of the reservation
 	 */
 	public void DeliveryViaReservation(int subscriberCode, int confirmationCode) {
 		// Prepare the checking - if exists command as an object array and send to server
@@ -937,8 +960,9 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 * Sends a request to the server to check whether there is free parking space in the lot named "Braude".
-	 * This will trigger a server-side check on current occupancy.
+	 * Checks if there is free parking space in the given parking lot
+	 *
+	 * @param parkingLotName
 	 */
 	public void isThereFreeParkingSpace(String parkingLotName) {
 		try {
@@ -950,7 +974,9 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 * Sends a request to the server to gather the matching vehicle ID for the current subscriber.
+	 * Retrieves the vehicle ID that is matched with the subscriber code
+	 *
+	 * @param subscriberCode
 	 */
 	public void seekVehicleID(int subscriberCode) {
 		try {
@@ -962,9 +988,11 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
-	/** 
-	 * Sending to the Server Parking Event that contains every field except exitDate and exitHour: we can't tell by now which values they'll hold
-	 * both of these fields will hold null
+	/**
+	 * Sends a ParkingEvent object to the server to register a vehicle delivery
+	 * The event must contain all relevant data except exit date and time (they will be null)
+	 *
+	 * @param parkingEvent
 	 */
 	public void deliverVehicle(ParkingEvent parkingEvent) {
 		try {
@@ -976,9 +1004,11 @@ public class ClientController extends AbstractClient {
 	}
 
 	/**
-	 * Checks if the subscriber has a valid reservation.
-	 * The method is triggered after the server responses that the subscriber didn't enter his vehicle yet.
-	 */	
+	 * Checks if the given subscriber has a valid upcoming reservation.
+	 * Used after confirming the subscriber has not entered the parking lot
+	 *
+	 * @param SubscriberCode The subscriber code to check for existing reservations.
+	 */
 	public void isThereReservation(int SubscriberCode) {
 		try {
 			sendToServer(new Object[] {"checkIfTheresReservation", SubscriberCode});
