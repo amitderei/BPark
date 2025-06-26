@@ -1,40 +1,11 @@
 package client;
 
-import common.Order;
-import common.ParkingEvent;
-import common.ParkingReport;
-import common.ServerResponse;
-import common.Subscriber;
-import common.SubscriberStatusReport;
-import common.User;
-import controllers.AvailabilityController;
-import controllers.CreateNewOrderViewController;
-import controllers.EditSubscriberDetailsController;
-import controllers.ExtendParkingController;
-import controllers.GuestMainController;
-import controllers.LoginController;
-import controllers.MainController;
-import controllers.ParkingReportController;
-import controllers.SubscriberMainLayoutController;
-import controllers.SubscriberStatusController;
-import controllers.ParkingReservationSummaryController;
-import controllers.RegisterSubscriberController;
-import controllers.StaffMainLayoutController;
-import controllers.SubscriberMainController;
-import controllers.TerminalMainLayoutController;
-import controllers.VehicleDeliveryController;
-import controllers.VehiclePickupController;
-import controllers.ViewActiveParkingInfoController;
-import controllers.ViewParkingHistoryController;
-import controllers.ViewSubscriberDetailsController;
-import controllers.WatchAndCancelOrdersController;
-import controllers.ViewSubscribersInfoController;
-import controllers.ViewActiveParkingsController;
+import common.*;
+import controllers.*;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import ocsf.client.AbstractClient;
 import ui.UiUtils;
-
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
@@ -624,7 +595,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void addNewOrder(Order newOrder) {
 		try {
-			sendToServer(new Object[] { "addNewOrder", newOrder });
+			sendToServer(new Object[] { Operation.ADD_NEW_ORDER, newOrder });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'addNewOrder' request to server: " + e.getMessage());
 		}
@@ -632,7 +603,7 @@ public class ClientController extends AbstractClient {
 
 	public void checkAvailability(Date date, Time time) {
 		try {
-			sendToServer(new Object[] { "checkAvailability", date, time });
+			sendToServer(new Object[] { Operation.CHECK_AVAILABILITY_FOR_ORDER, date, time });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'checkAvailability' request to server: " + e.getMessage());
 		}
@@ -646,7 +617,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void requestLogin(String username, String password) {
 		try {
-			sendToServer(new Object[] { "login", username, password });
+			sendToServer(new Object[] { Operation.LOGIN, username, password });
 		} catch (IOException e) {
 			System.err.println("[ERROR] Failed to send login request: " + e.getMessage());
 		}
@@ -659,7 +630,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void validateSubscriber(int subscriberCode) {
 		try {
-			sendToServer(new Object[] { "validateSubscriber", subscriberCode });
+			sendToServer(new Object[] { Operation.VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE, subscriberCode });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'validateSubscriber' request: " + e.getMessage());
 		}
@@ -672,7 +643,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void validateSubscriberByTag(String tagId) {
 		try {
-			sendToServer(new Object[] { "validateSubscriberByTag", tagId });
+			sendToServer(new Object[] { Operation.VALIDATE_SUBSCRIBER_BY_TAG, tagId });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'validateSubscriberByTag' request: " + e.getMessage());
 		}
@@ -686,7 +657,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void collectCar(int subscriberCode, int parkingCode) {
 		try {
-			sendToServer(new Object[] { "collectCar", subscriberCode, parkingCode });
+			sendToServer(new Object[] { Operation.COLLECT_CAR, subscriberCode, parkingCode });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'collectCar' request: " + e.getMessage());
 		}
@@ -702,7 +673,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void subscriberDetails(User user) {
 		try {
-			sendToServer(new Object[] { "subscriberDetails", user });
+			sendToServer(new Object[] { Operation.SUBSCRIBER_DETAILS, user });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'sendLostCode' request: " + e.getMessage());
 		}
@@ -714,7 +685,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void askForReservations() {
 		try {
-			sendToServer(new Object[] { "askForReservations", subscriber });
+			sendToServer(new Object[] { Operation.ASK_FOR_RESERVATIONS, subscriber });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'askForReservations' request: " + e.getMessage());
 		}
@@ -727,7 +698,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void deleteOrder(int orderNumberToDelete) {
 		try {
-			sendToServer(new Object[] { "deleteOrder", orderNumberToDelete });
+			sendToServer(new Object[] { Operation.DELETE_ORDER, orderNumberToDelete });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'deleteOrder' request: " + e.getMessage());
 		}
@@ -741,7 +712,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void updateDetailsOfSubscriber(Subscriber subscriber, User user) {
 		try {
-			sendToServer(new Object[] { "updateDetailsOfSubscriber", subscriber, user });
+			sendToServer(new Object[] { Operation.UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber, user });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateDetailsOfSubscriber' request: " + e.getMessage());
 		}
@@ -760,7 +731,7 @@ public class ClientController extends AbstractClient {
 
 	public void forgotMyParkingCode(int validatedSubscriberCode) {
 		try {
-			sendToServer(new Object[] { "forgotMyParkingCode", validatedSubscriberCode });
+			sendToServer(new Object[] { Operation.FORGEOT_MY_PARKING_CODE, validatedSubscriberCode });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateParkingHistoryOfSubscriber' request: " + e.getMessage());
 		}
@@ -774,7 +745,7 @@ public class ClientController extends AbstractClient {
 
 		try {
 			System.out.println("[DEBUG] Sending 'get_all_subscribers' to server");
-			sendToServer(new Object[] { "get_all_subscribers" });
+			sendToServer(new Object[] { Operation.GET_ALL_SUBSCRIBERS });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'get_all_subscribers' request: " + e.getMessage());
 		}
@@ -786,7 +757,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void requestActiveParkingEvents() {
 		try {
-			sendToServer(new Object[] { "get_active_parkings" });
+			sendToServer(new Object[] { Operation.GET_ACTIVE_PARKINGS });
 		} catch (IOException e) {
 			System.err.println("Failed to send request for active parking events.");
 			e.printStackTrace();
@@ -799,7 +770,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void getDetailsOfActiveInfo() {
 		try {
-			sendToServer(new Object[] { "getDetailsOfActiveInfo", subscriber });
+			sendToServer(new Object[] { Operation.GET_DETAILS_OF_ACTIVE_INFO, subscriber });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'getDetailsOfActiveInfo' request: " + e.getMessage());
 		}
@@ -812,7 +783,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void extendParking(int parkingCode, String subscriberCode) {
 		try {
-			sendToServer(new Object[] { "extendParking", parkingCode, subscriberCode });
+			sendToServer(new Object[] { Operation.EXTEND_PARKING, parkingCode, subscriberCode });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
 		}
@@ -826,7 +797,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void registerSubscriber(Subscriber subscriber) {
 		try {
-			sendToServer(new Object[] { "registerSubscriber", subscriber });
+			sendToServer(new Object[] { Operation.REGISTER_SUBSCRIBER, subscriber });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'registerSubscriber' request: " + e.getMessage());
 		}
@@ -838,7 +809,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void requestParkingAvailability() {
 		try {
-			sendToServer(new Object[] { "get_parking_availability" });
+			sendToServer(new Object[] { Operation.GET_PARKING_AVAILABILITY });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'get_parking_availability' request: " + e.getMessage());
 		}
@@ -850,7 +821,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void getParkingReport(Date date) {
 		try {
-			sendToServer(new Object[] { "GetParkingReport", date });
+			sendToServer(new Object[] { Operation.GET_PARKING_REPORT, date });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'GetParkingReport' request: " + e.getMessage());
 		}
@@ -861,7 +832,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void getDatesOfReports() {
 		try {
-			sendToServer(new Object[] {"getDatesOfReports"});
+			sendToServer(new Object[] {Operation.GET_DATES_OF_REPORTS});
 		}catch (IOException e) {
 			System.err.println("Failed to send 'getDatesOfReports' request: " + e.getMessage());
 		}

@@ -3,6 +3,7 @@ package controllers;
 import java.io.IOException;
 
 import client.ClientController;
+import common.Operation;
 import common.Order;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -92,7 +93,7 @@ public class TerminalMainLayoutController implements ClientAware {
     private void handleExitClick() {
         try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[] { "disconnect" });
+                client.sendToServer(new Object[] { Operation.DISCONNECT });
                 client.closeConnection();
             }
         } catch (Exception ignored) { }

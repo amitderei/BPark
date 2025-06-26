@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import client.ClientApp;
 import client.ClientController;
+import common.Operation;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -142,7 +143,7 @@ public class ConnectController implements ClientAware {
         try {
             if (client != null && client.isConnected()) {
                 // Notify server that we're disconnecting
-                client.sendToServer(new Object[] { "disconnect" });
+                client.sendToServer(new Object[] { Operation.DISCONNECT });
                 client.closeConnection();
                 System.out.println("Client disconnected successfully.");
             }

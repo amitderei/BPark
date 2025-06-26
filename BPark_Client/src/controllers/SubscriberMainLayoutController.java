@@ -3,6 +3,7 @@ package controllers;
 import java.io.IOException;
 
 import client.ClientController;
+import common.Operation;
 import common.Order;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -88,7 +89,7 @@ public class SubscriberMainLayoutController implements ClientAware {
     @FXML private void handleExitClick() {
         try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[]{"disconnect"});
+                client.sendToServer(new Object[]{Operation.DISCONNECT});
                 client.closeConnection();
             }
         } catch (Exception ignored) { }

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import common.Operation;
 import common.Order;
 import common.ParkingEvent;
 import common.ParkingReport;
@@ -84,13 +85,13 @@ public class Server extends AbstractServer {
 			if (msg instanceof Object[] data) {
 
 				// Disconnect request
-				if (data.length == 1 && "disconnect".equals(data[0])) {
+				if (data[0]==Operation.DISCONNECT) {
 					logClientDisconnect(client);
 					return;
 				}
 
 				//get all reservations of subscriber
-				else if (data.length==2 && "askForReservations".equals(data[0])){
+				else if (data[0]==Operation.ASK_FOR_RESERVATIONS){
 					ArrayList<Order> orders=db.returnReservationOfSubscriber((Subscriber)data[1]);
 					if (orders.isEmpty()) {
 						client.sendToClient(new ServerResponse(true, null, "No orders."));
@@ -99,7 +100,7 @@ public class Server extends AbstractServer {
 					}
 				}
 				//expected format: {deleteOrder, orderNumber}
-				else if (data.length==2 && "deleteOrder".equals(data[0])) {
+				else if (data[0]==Operation.DELETE_ORDER) {
 					int orderNumberToDelete=(int) data[1];
 					boolean succeed= db.deleteOrder(orderNumberToDelete);
 					if(succeed) {
@@ -110,7 +111,7 @@ public class Server extends AbstractServer {
 					}
 				}
 				//get parking history of subscriber: expected format {"updateParkingHistoryOfSubscriber", subscriber}
-				else if(data.length==2 && "updateParkingHistoryOfSubscriber".equals(data[0])) {
+				else if(data[0]==Operation.UPDATE_PARKING_HISTORY_OF_SUBSCRIBER) {
 					ArrayList<ParkingEvent> history=db.parkingHistoryOfSubscriber((Subscriber)data[1]);
 					if(history==null) {
 						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking history."));
@@ -123,7 +124,7 @@ public class Server extends AbstractServer {
 					}
 				}
 				//return the parking report: expected format {"GetParkingReport", parkingReport}
-				else if(data.length==2 && "GetParkingReport".equals(data[0])) {
+				else if(data[0]==Operation.GET_PARKING_REPORT) {
 					ParkingReport parkingReport=db.getParkingReport((Date)data[1]);
 
 					if (parkingReport==null) {
@@ -135,7 +136,7 @@ public class Server extends AbstractServer {
 					return;
 				}
 				
-				else if(data.length==1 && "getDatesOfReports".equals(data[0])) {
+				else if(data[0]==Operation.GET_DATES_OF_REPORTS) {
 					ArrayList<Date> dates=db.getAllReportsDates();
 					if (dates==null) {
 						client.sendToClient(new ServerResponse(false, null, "There was an error loading parking report dates."));
@@ -146,7 +147,7 @@ public class Server extends AbstractServer {
 					return;
 				}
 
-				else if (data.length==2 && "getDetailsOfActiveInfo".equals(data[0])) {
+				else if (data[0]==Operation.GET_DETAILS_OF_ACTIVE_INFO) {
 					ParkingEvent parkingEvent=db.getActiveParkingEvent((Subscriber)data[1]);
 					if (parkingEvent==null) {
 						client.sendToClient(new ServerResponse(false, null, "There is no active parking."));
@@ -156,7 +157,7 @@ public class Server extends AbstractServer {
 					}
 				}
 
-				else if(data.length==2 && "forgotMyParkingCode".equals(data[0])) {
+				else if(data[0]==Operation.FORGEOT_MY_PARKING_CODE) {
 					try {
 						String[] emailAndPhone=db.getEmailAndPhoneNumber((int) data[1]);
 						String email=emailAndPhone[0];
@@ -170,7 +171,7 @@ public class Server extends AbstractServer {
 					}
 				}
 				// Validate subscriber by tag: ["validateSubscriberByTag", tagId]
-				else if (data.length == 2 && "validateSubscriberByTag".equals(data[0])) {
+				else if (data[0]==Operation.VALIDATE_SUBSCRIBER_BY_TAG) {
 					String tagId = (String) data[1];
 					int subscriberCode = db.getSubscriberCodeByTag(tagId);
 
@@ -195,7 +196,7 @@ public class Server extends AbstractServer {
 
 
 				// Validate subscriber by numeric code: ["validateSubscriber", subscriberCode]
-				else if (data.length == 2 && "validateSubscriber".equals(data[0])) {
+				else if (data[0]==Operation.VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE) {
 					int subscriberCode = (int) data[1];
 
 					// Step 1: Verify that subscriber exists in DB
@@ -218,13 +219,13 @@ public class Server extends AbstractServer {
 
 
 				// Login request: ["login", username, password]
-				else if (data.length == 3 && "login".equals(data[0])) {
+				else if (data[0]==Operation.LOGIN) {
 					handleLogin(data, client);
 					return;
 				}
 
 				// Collect car: ["collectCar", subscriberCode, parkingCode]
-				else if (data.length == 3 && "collectCar".equals(data[0])) {
+				else if (data[0]==Operation.COLLECT_CAR) {
 					int subCode = (int) data[1];
 					int parkCode = (int) data[2];
 					try {
@@ -261,7 +262,7 @@ public class Server extends AbstractServer {
 				}
 
 
-				else if (data.length == 2 && "subscriberDetails".equals(data[0])) {
+				else if (data[0]==Operation.SUBSCRIBER_DETAILS) {
 					Subscriber subscriber = db.getDetailsOfSubscriber((User) data[1]);
 					if (subscriber != null) {
 						client.sendToClient(
@@ -273,8 +274,7 @@ public class Server extends AbstractServer {
 
 
 
-				else if (data.length == 3 && "checkAvailability".equals(data[0])) {
-					System.out.println("checkAvailability-server");
+				else if (data[0]==Operation.CHECK_AVAILABILITY_FOR_ORDER) {
 					boolean possible = db.parkingSpaceCheckingForNewOrder((Date) data[1], (Time) data[2]);
 					if (possible) {
 						client.sendToClient(new ServerResponse(true, null, "Can make resarvation"));
@@ -283,7 +283,7 @@ public class Server extends AbstractServer {
 					}
 				}
 				//Expected format: {"addNewOrder", order}
-				else if (data.length == 2 && "addNewOrder".equals(data[0])) {
+				else if (data[0]==Operation.ADD_NEW_ORDER) {
 					Order orderToAdd = (Order) data[1];
 					boolean success = db.placingAnNewOrder(orderToAdd);
 
@@ -434,7 +434,7 @@ public class Server extends AbstractServer {
 				}
 
 				// return all subscribers and their late pickup counts
-				else if (data.length == 1 && "get_all_subscribers".equals(data[0])) {
+				else if (data[0]==Operation.GET_ALL_SUBSCRIBERS) {
 					System.out.println("[SERVER] Received get_all_subscribers request");
 					ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
 					client.sendToClient(new ServerResponse(true, rows, "all_subscribers"));
@@ -442,14 +442,14 @@ public class Server extends AbstractServer {
 				}
 
 				// "get_active_parkings" - returns List<ParkingEvent>
-				else if (data.length == 1 && "get_active_parkings".equals(data[0])) {
+				else if (data[0]==Operation.GET_ACTIVE_PARKINGS) {
 					List<ParkingEvent> events = db.getActiveParkingEvents();
 					client.sendToClient(new ServerResponse(true, events, "active_parkings"));
 					return;
 				}
 
 				// Expected format: {"get_parking_availability"}
-				else if (data.length == 1 && "get_parking_availability".equals(data[0])) {
+				else if (data[0]==Operation.GET_PARKING_AVAILABILITY) {
 					System.out.println("[SERVER] Received availability request");
 
 					try {
@@ -469,7 +469,7 @@ public class Server extends AbstractServer {
 
 
 				// Expected format: {"extendParking", parkingCode, subscriberCode}
-				else if (data.length == 3 && "extendParking".equals(data[0])) {
+				else if (data[0]==Operation.EXTEND_PARKING) {
 					int parkingCode = (int) data[1];
 					String subscriberCode = (String) data[2];
 
@@ -479,7 +479,7 @@ public class Server extends AbstractServer {
 				}
 
 				// Register new subscriber: ["registerSubscriber", Subscriber]
-				else if (data.length == 2 && "registerSubscriber".equals(data[0])) {
+				else if (data[0]==Operation.REGISTER_SUBSCRIBER) {
 					Subscriber receivedSub = (Subscriber) data[1];
 
 					// Step 0: Check if username, email, phone or ID already exists
