@@ -154,17 +154,13 @@ public class VehicleDeliveryController implements ClientAware{
 			// If the code isn't type of integer, we will let the user know that the code must be a number
 			codeInt = Integer.parseInt(code);
 
-			try {
-				client.sendToServer(new Object[] { "subscriberExists", codeInt });
-			} catch (IOException e) {
-				// Log the error if the update request fails to send
-				System.err.println("Failed to send 'subscriberExists' request to server: " + e.getMessage());
-			}
+			client.validateSubscriber(codeInt);
 
 			// There will be an exception thrown due to a String not containing only digits.
 		} catch (NumberFormatException e) {
 			showAlert("Subscriber code must be a number.", AlertType.ERROR);
-			////////////////////////////////////////////////
+			
+			// If a NumberFormatException was thrown it means that the input isn't by numbers
 			subscriberCodeLabel.setText("Please enter a valid input [ONLY DIGITS].");
 			subscriberCodeLabel.setStyle("-fx-text-fill: red;");
 			subscriberCodeLabel.setVisible(true);
@@ -189,7 +185,7 @@ public class VehicleDeliveryController implements ClientAware{
 			// Show a warning popup if input is missing
 			showAlert("Please enter a subscriber code.", AlertType.WARNING);
 
-			///////////////////////////////////////////
+			// Setting label if the input is null
 			subscriberCodeLabel.setText("Please enter a valid input");
 			subscriberCodeLabel.setStyle("-fx-text-fill: red;");
 			subscriberCodeLabel.setVisible(true);
@@ -212,12 +208,7 @@ public class VehicleDeliveryController implements ClientAware{
 			return;
 		}
 
-		try {
-			client.sendToServer(new Object[] { "TagExists", tag });
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'TagExists' request to server: " + e.getMessage());
-		}
+		client.validateTag(tag);
 	}
 
 	/**
@@ -233,7 +224,7 @@ public class VehicleDeliveryController implements ClientAware{
 			// Show a warning popup if input is missing
 			showAlert("Please enter the Tag number.", AlertType.WARNING);
 
-			//////////////////////////////////////////////
+			// Setting label if the input is null
 			TagStatusUpdateLabel.setText("Please enter a valid input");
 			TagStatusUpdateLabel.setStyle("-fx-text-fill: red;");
 			TagStatusUpdateLabel.setVisible(true);
@@ -250,7 +241,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * Updates the label that showcase's the subscriber code status, and proceeds to check if there's an existing reservation.
 	 */
 	public void subscriberCodeIsValid() {
-		/////////////////////////////////////////////////
+		// Setting label if the subscriber code is valid
 		subscriberCodeLabel.setText("Subscriber code is valid!");
 		subscriberCodeLabel.setStyle("-fx-text-fill: green;");
 		subscriberCodeLabel.setVisible(true);
@@ -270,11 +261,7 @@ public class VehicleDeliveryController implements ClientAware{
 		TagCodeField.setDisable(true);
 
 		// We will check whether the subscriber has already delivered his vehicle or not
-		checkIfSubscriberAlreadyEntered();
-
-		/*
-		// Now we will progress the reservation process by checking whether there is a reservation or not.
-		checkIfTheresReservation(); */
+		client.checkIfSubscriberAlreadyEntered(codeInt);
 	}
 
 	/**
@@ -282,37 +269,13 @@ public class VehicleDeliveryController implements ClientAware{
 	 * Updates the label to display an error message.
 	 */
 	public void subscriberCodeDoesntExist() {
-		/////////////////////////////////////////////////
+		// Setting label if the subscriber code does not exist
 		subscriberCodeLabel.setText("Subscriber code does not exist.");
 		subscriberCodeLabel.setStyle("-fx-text-fill: red;");
 		subscriberCodeLabel.setVisible(true);
 
 		// Hide the label that shows status for the tag delivery
 		TagStatusUpdateLabel.setVisible(false);
-	}
-
-	/**
-	 *  Sends a request to the server to check if the subscriber already entered his vehicle into the parking lot
-	 */
-	private void checkIfSubscriberAlreadyEntered() {
-		try {
-			client.sendToServer(new Object[] { "subscriberAlreadyEntered", codeInt });
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'subscriberAlreadyEntered' request to server: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Sends a request to the server to check if the matched vehicle to the tag-Id is already inside the parking lot
-	 */
-	private void checkIfTagIDAlreadyInside() {
-		try {
-			client.sendToServer(new Object[] { "tagIdAlreadyEntered", tag });
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'tagIdAlreadyEntered' request to server: " + e.getMessage());
-		}
 	}
 
 	/**
@@ -382,7 +345,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * After the status changes we will seek for the matching subscriber.
 	 */
 	public void tagFound() {
-		/////////////////////////////////////////////
+		// Setting label if the Tag has been found
 		TagStatusUpdateLabel.setText("Tag has found!");
 		TagStatusUpdateLabel.setStyle("-fx-text-fill: green;");
 		TagStatusUpdateLabel.setVisible(true);
@@ -403,7 +366,7 @@ public class VehicleDeliveryController implements ClientAware{
 		InsertionUpdateLabel.setVisible(false);
 
 		// After all of the updates to the visuals, we will find out if the vehicle that is matched to the tag-Id is already in the parking lot
-		checkIfTagIDAlreadyInside();
+		client.checkIfTagIDAlreadyInside(tag);
 	}
 
 	/**
@@ -411,7 +374,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * Makes the label that represents the status of the delivery via tag-id red and shows an error.
 	 */
 	public void tagNotFound() {
-		/////////////////////////////////////////////
+		// Setting label if the TagID does not exist
 		TagStatusUpdateLabel.setText("Tag doesn't exist");
 		TagStatusUpdateLabel.setStyle("-fx-text-fill: red;");
 		TagStatusUpdateLabel.setVisible(true);
@@ -430,8 +393,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * Seeking for the matching subscriber so we will be able to proceed to the vehicle delivery.
 	 */
 	public void findMatchedSubToTheTag() {
-		try {
-			client.sendToServer(new Object[] {"findMatchedSubToTheTag", tag});
+			client.validateSubscriberByTag(tag);
 
 			// Initialize the CompletableFutures
 			subCodeFuture = new CompletableFuture<>();
@@ -442,10 +404,6 @@ public class VehicleDeliveryController implements ClientAware{
 				// After gathering the subscriber code we will go and check whether there are free space in our parking lot
 				isThereFreeParkingSpace();
 			});
-		} catch (IOException e) {
-			// Log the error if the update request fails to send
-			System.err.println("Failed to send 'checkIfTheresReservation' request to server: " + e.getMessage());
-		}
 	}
 
 	/**
@@ -475,25 +433,25 @@ public class VehicleDeliveryController implements ClientAware{
 		}
 
 		// If the code isn't type of integer, we will let the user know that the code must be a number
-		try {
-			confirmationCodeInt = Integer.parseInt(confirmationCode);
+				try {
+					confirmationCodeInt = Integer.parseInt(confirmationCode);
 
-			// Prepare the checking - if exists command as an object array and send to server
-			try {
-				client.sendToServer(new Object[] {"DeliveryViaReservation", codeInt, confirmationCodeInt});
+					// Prepare the checking - if exists command as an object array and send to server
+					try {
+						client.sendToServer(new Object[] {"DeliveryViaReservation", codeInt, confirmationCodeInt});
 
-			} catch (IOException e) {
-				// Log the error if the update request fails to send
-				System.err.println("Failed to send 'DeliveryViaReservation' request to server: " + e.getMessage());
-			}
+					} catch (IOException e) {
+						// Log the error if the update request fails to send
+						System.err.println("Failed to send 'DeliveryViaReservation' request to server: " + e.getMessage());
+					}
 
-			// There will be an exception thrown due to a String not containing only digits
-		} catch (NumberFormatException e) {
-			showAlert("Confirmation code must be a number.", AlertType.ERROR);
-			ReservationConfirmationCodeLabel.setText("Please enter a valid input [ONLY DIGITS].");
-			ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: red;");
-			return;
-		}
+					// There will be an exception thrown due to a String not containing only digits
+				} catch (NumberFormatException e) {
+					showAlert("Confirmation code must be a number.", AlertType.ERROR);
+					ReservationConfirmationCodeLabel.setText("Please enter a valid input [ONLY DIGITS].");
+					ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: red;");
+					return;
+				}
 
 	}
 

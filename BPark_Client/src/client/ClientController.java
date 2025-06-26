@@ -648,6 +648,7 @@ public class ClientController extends AbstractClient {
 		}
 	}
 
+	
 	/**
 	 * Validates a subscriber by their RFID tag ID.
 	 *
@@ -869,6 +870,48 @@ public class ClientController extends AbstractClient {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+	}
+	
+	/**
+	 * Validates whether a TagID exists using their code.
+	 *
+	 * @param subscriberCode the code to validate
+	 */
+	public void validateTag(String TagID) {
+		try {
+			sendToServer(new Object[] { "TagExists", TagID });
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'TagExists' request to server: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 *  Sends a request to the server to check if the subscriber already entered his vehicle into the parking lot
+	 */
+	public void checkIfSubscriberAlreadyEntered(int subscriberCode) {
+		try {
+			sendToServer(new Object[] { "subscriberAlreadyEntered", subscriberCode });
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'subscriberAlreadyEntered' request to server: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sends a request to the server to check if the matched vehicle to the tag-Id is already inside the parking lot
+	 */
+	public void checkIfTagIDAlreadyInside(String TagID) {
+		try {
+			sendToServer(new Object[] { "tagIdAlreadyEntered", TagID});
+		} catch (IOException e) {
+			// Log the error if the update request fails to send
+			System.err.println("Failed to send 'tagIdAlreadyEntered' request to server: " + e.getMessage());
+		}
+	}
+	
+	public void DeliveryViaReservation(int subscriberCode, int confirmationCode) {
+		
 	}
 
 }
