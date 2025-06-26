@@ -42,20 +42,36 @@ import javafx.util.Callback;
  *  3. If free, an Order is created and passed to the summary screen.
  */
 public class CreateNewOrderViewController implements ClientAware {
-	@FXML private Label headlineParkingReservation;
-	@FXML private Label chooseDateAndTime;
-	@FXML private Label betweenHourAndMinute;
-	@FXML private Label subscriberCode;
-	@FXML private TextField insertSubscriberCode;
-	@FXML private Label notPossibleToOrder;
-	@FXML private DatePicker chooseDate;
-	@FXML private ComboBox<String> hourCombo;
-	@FXML private ComboBox<String> minuteCombo;
-	@FXML private CheckBox checkBox;
-	@FXML private Hyperlink termsOfUseHyper;
-	@FXML private Button reserveNowButton;
+	
+	@FXML 
+	private Label headlineParkingReservation;
+	@FXML 
+	private Label chooseDateAndTime;
+	@FXML 
+	private Label betweenHourAndMinute;
+	@FXML 
+	private Label subscriberCode;
+	@FXML 
+	private TextField insertSubscriberCode;
+	@FXML 
+	private Label notPossibleToOrder;
+	@FXML 
+	private DatePicker chooseDate;
+	@FXML 
+	private ComboBox<String> hourCombo;
+	@FXML 
+	private ComboBox<String> minuteCombo;
+	@FXML 
+	private CheckBox checkBox;
+	@FXML 
+	private Hyperlink termsOfUseHyper;
+	@FXML 
+	private Button reserveNowButton;
 
+	/** Reference to the subscriber's main layout controller (for screen switching). */
 	private SubscriberMainLayoutController mainLayoutController;
+
+	/** Active client instance used for communication with the server. */
 	private ClientController client;
 
 	/** Order instance created once all details are validated */
@@ -65,14 +81,23 @@ public class CreateNewOrderViewController implements ClientAware {
 	int subscriberNum;
 	Date selectedDate;
 	Time timeOfArrival;
-	
+
 	// This parameter waits until there will be a value received for orderExistFuture	
 	public CompletableFuture<Boolean> orderExistFuture;
 	
 	/**
-	 * Populates the date picker and time combo-boxes.
-	 * Sets allowed date range to "tomorrow through seven days ahead".
-	 * Must be called from the JavaFX initialise hook of the parent screen.
+	 * Injects the active client controller.
+	 *
+	 * @param client the current ClientController instance
+	 */
+	@Override
+	public void setClient(ClientController client) {
+		this.client = client;
+	}
+
+	/**
+	 * Called once on screen load.
+	 * Initializes the date picker and combo boxes with valid ranges.
 	 */
 	public void initializeCombo() {
 
@@ -101,12 +126,10 @@ public class CreateNewOrderViewController implements ClientAware {
 		insertSubscriberCode.setDisable(true);
 	}
 
-	@Override
-	public void setClient(ClientController client) {
-		this.client = client;
-	}
-
-	/** Called when a date is picked. Populates hourCombo accordingly. */
+	/**
+	 * Called when the user selects a date.
+	 * Fills hour dropdown based on the selected day and current time.
+	 */
 	public void dateChosen() {
 
 		LocalDate date      = chooseDate.getValue();
@@ -191,22 +214,26 @@ public class CreateNewOrderViewController implements ClientAware {
 		timeOfArrival = Time.valueOf(time);
 
 		orderExistFuture = new CompletableFuture<>();
-		
+
 		// Ask server if there is an already existing order for the asked date and time
 		client.checkIfOrderAlreadyExists(client.getSubscriber().getSubscriberCode(), selectedDate, timeOfArrival);
 
 		// When the boolean received, we will check if there is available space in the selected date and time
 		orderExistFuture.thenAcceptAsync(orderExists -> {
-			
+
 			if(!orderExists) {
-				 // Ask server if slot is still free (if the order doesn't exists already)
-			    client.checkAvailability(selectedDate, timeOfArrival);
+				// Ask server if slot is still free (if the order doesn't exists already)
+				client.checkAvailability(selectedDate, timeOfArrival);
 			}
 		});
 	}
 
 	/**
-	 *  Attempting to create a new parking order if allowed
+	 * Called after server confirms availability.
+	 * Creates a new Order object and sends it to the server,
+	 * or shows an error message if not possible.
+	 *
+	 * @param canOrder true if the slot is available
 	 */
 	public void makingReservation(boolean canOrder) {    	
 
@@ -233,7 +260,10 @@ public class CreateNewOrderViewController implements ClientAware {
 		}
 	}
 
-	/** Opens a read-only dialog box containing the parking lot’s terms. */
+	/**
+	 * Shows a modal dialog with the terms of use for the parking lot.
+	 * The dialog is read-only and scrollable.
+	 */
 	public void showTermsOfUse() {
 		Dialog<Void> dialog = new Dialog<>();
 		dialog.setTitle("Terms Of Use");
@@ -250,7 +280,11 @@ public class CreateNewOrderViewController implements ClientAware {
 		dialog.showAndWait();
 	}
 
-	/** Returns the full legal text shown in the terms dialog. */
+	/**
+	 * Returns the full text of the terms of use.
+	 *
+	 * @return string containing formatted terms
+	 */
 	private String returnTermsOfUse() {
 		StringBuilder strBuild=new StringBuilder();
 		strBuild.append("Terms of Use – BPARK Automated Parking Lot\r\n\r\n");
@@ -293,7 +327,11 @@ public class CreateNewOrderViewController implements ClientAware {
 		return strBuild.toString();
 	}
 
-	/** Loads the reservation summary screen into the central layout. */
+	/**
+	 * Loads the reservation summary screen and passes the created Order.
+	 *
+	 * @param order the completed reservation
+	 */
 	private void handleGoToOrderSummarry(Order order) {
 		try {
 			mainLayoutController=client.getMainLayoutController();
@@ -305,8 +343,10 @@ public class CreateNewOrderViewController implements ClientAware {
 	}
 
 	/**
-	 * Called by ClientController after the server confirms the Order.
-	 * Stores the order locally and advances to the next screen.
+	 * Called by the ClientController when the order was successfully saved.
+	 * Stores the order and navigates to the summary screen.
+	 *
+	 * @param order the confirmed Order
 	 */
 	public void setOrderAndGoToNextPage(Order order) {
 		this.newOrder=order;
@@ -314,10 +354,10 @@ public class CreateNewOrderViewController implements ClientAware {
 	}
 
 	/**
-	 * Shows an Alert dialog with a unified title.
+	 * Shows a simple alert popup with the given message and type.
 	 *
-	 * @param message text body
-	 * @param type    alert category (INFORMATION, WARNING, ERROR)
+	 * @param message the text to show
+	 * @param type    the type of alert (INFO, WARNING, etc.)
 	 */
 	private void showAlert(String message, Alert.AlertType type) {
 		Alert alert = new Alert(type);
