@@ -370,7 +370,19 @@ public class ClientController extends AbstractClient {
 
 				}
 			}
-
+			
+			if (response.isSucceed() && response.getMsg().equals("Order doesn't exists.")) {
+				if (newOrderController != null) {
+					newOrderController.orderExistFuture.complete(false);
+				}
+			}
+			
+			if (response.isSucceed() && response.getMsg().equals("This order already exists for this subscriber.")) {
+				if (newOrderController != null) {
+					newOrderController.orderExistFuture.complete(true);
+				}
+			}
+			
 			if (response.isSucceed() && response.getData() instanceof Subscriber) {
 				setSubscriber((Subscriber) response.getData());
 			}
@@ -784,6 +796,19 @@ public class ClientController extends AbstractClient {
 	public void extendParking(int parkingCode, String subscriberCode) {
 		try {
 			sendToServer(new Object[] { Operation.EXTEND_PARKING, parkingCode, subscriberCode });
+		} catch (IOException e) {
+			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sends a request to find out whether there is an existing order for the time asked or not.
+	 * 
+	 * @param subscriberCode, date and time
+	 */
+	public void checkIfOrderAlreadyExists(int subscriberCode, Date selectedDate, Time timeOfArrival) {
+		try {
+			sendToServer(new Object[] { "isThereAnExistedOrder", subscriberCode, selectedDate, timeOfArrival });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
 		}

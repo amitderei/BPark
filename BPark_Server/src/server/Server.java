@@ -477,6 +477,19 @@ public class Server extends AbstractServer {
 					client.sendToClient(response);
 					return;
 				}
+				
+				// Expected format: {"isThereAnExistedOrder", subscriberCode, selectedDate, timeOfArrival}
+				else if (data.length == 4 && "isThereAnExistedOrder".equals(data[0])) {
+					int subscriberCode = (int) data[1];
+					Date selectedDate = (Date) data[2];
+					Time timeOfArrival = (Time) data[3];
+					
+					 if(!db.checkIfOrderAlreadyExists(subscriberCode, selectedDate, timeOfArrival)) {
+						 client.sendToClient(new ServerResponse(true, null, "Order doesn't exists."));
+						 return;
+					 }
+					 client.sendToClient(new ServerResponse(false, null, "This order already exists for this subscriber."));
+				}
 
 				// Register new subscriber: ["registerSubscriber", Subscriber]
 				else if (data[0]==Operation.REGISTER_SUBSCRIBER) {

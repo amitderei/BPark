@@ -1731,6 +1731,28 @@ public class DBController {
 	    }
 	    
 	}
+	
+	/**
+	 * Checks whether a subscriber has already an order with the date and time that he has selected
+	 * if there is it would return true, false otherwise
+	 */
+	public boolean checkIfOrderAlreadyExists(int subscriberCode, Date selectedDate, Time timeOfArrival) {
+	    String query = "SELECT * FROM bpark.order WHERE subscriberCode = ? AND order_date = ? AND arrival_time = ?";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setInt(1, subscriberCode);
+	        stmt.setDate(2, selectedDate);
+	        stmt.setTime(3, timeOfArrival);
+
+	        ResultSet rs = stmt.executeQuery();
+	        return rs.next(); // if there's at least 1 result of that, it means that there is an order like that that's exists
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+
 
 	public ArrayList<Date> getAllReportsDates(){
 		ArrayList<Date> datesOfReports=new ArrayList<>();
