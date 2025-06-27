@@ -1019,4 +1019,28 @@ public class ClientController extends AbstractClient {
 		}
 
 	}
+	
+	/**
+	 * Clears all user-specific session data from memory.
+	 * This is called when logging out or switching accounts.
+	 */
+	public void clearSession() {
+	    this.subscriber = null;
+	    this.password = null;
+
+	    this.subscriberMainController = null;
+	    this.mainLayoutController = null;
+	    this.watchAndCancelOrdersController = null;
+	    this.viewSubscriberDetailsController = null;
+	    this.editSubscriberDetailsController = null;
+	    this.viewParkingHistoryController = null;
+	    this.viewActiveParkingInfoController = null;
+	    this.newOrderController = null;
+	    this.summaryController = null;
+	    this.subscriberStatusController = null;
+
+	    // Add more if needed
+	    System.out.println("[DEBUG] Client session cleared.");
+	}
+
 }

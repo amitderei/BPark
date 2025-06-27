@@ -137,6 +137,7 @@ public class LoginController implements ClientAware {
      * @param user authenticated user returned by the server
      */
     private void navigateToHome(User user) {
+    	client.clearSession();
         String fxml;
         UserRole role = user.getRole();
 
