@@ -295,7 +295,7 @@ public class Server extends AbstractServer {
 				}
 
 				// Expected format: {"subscriberExists", codeInt }
-				else if (data.length == 2 && "subscriberExists".equals(data[0])) {
+				else if (data[0]==Operation.SUBSCRIBER_EXISTS) {
 					int codeInt = (int) data[1];
 
 					// Checking whether the code exists or not
@@ -309,7 +309,7 @@ public class Server extends AbstractServer {
 
 				}
 				// Expected format: {"checkIfTheresReservation", codeInt}
-				else if (data.length == 2 && "checkIfTheresReservation".equals(data[0])) {
+				else if (data[0]==Operation.CHECK_IF_THERE_IS_RERSERVATION) {
 					int codeInt = (int) data[1];
 
 					// Checking whether the subscriber has a reservation, then checks if there is a
@@ -327,7 +327,7 @@ public class Server extends AbstractServer {
 				}
 
 				// Expected format: {"DeliveryViaReservation", codeInt, confirmationCodeInt}
-				else if (data.length == 3 && "DeliveryViaReservation".equals(data[0])) {
+				else if (data[0]==Operation.DELIVERY_VIA_RESERVATION) {
 					int codeInt = (int) data[1];
 					int confirmationCodeInt = (int) data[2];
 
@@ -343,7 +343,7 @@ public class Server extends AbstractServer {
 				}
 
 				// Expected format: {"IsThereFreeParkingSpace", lotName}
-				else if (data.length == 2 && "IsThereFreeParkingSpace".equals(data[0])) {
+				else if (data[0]==Operation.IS_THERE_FREE_PARKING_SPACE) {
 					String lotName = (String) data[1];
 					int parkingSpaceInt = db.hasAvailableSpots(lotName);
 
@@ -358,7 +358,7 @@ public class Server extends AbstractServer {
 				}
 
 				// Expected format: {"getVehicleID", codeInt}
-				else if (data.length == 2 && "getVehicleID".equals(data[0])) {
+				else if (data[0]==Operation.GET_VEHICLE_ID) {
 					int codeInt = (int) data[1];
 
 					// Seeking for a matching vehicle to the asked subscriber
@@ -369,7 +369,7 @@ public class Server extends AbstractServer {
 					return;
 				}
 				// Expected format: {"DeliverVehicle", parkingEvent}
-				else if (data.length == 2 && "DeliverVehicle".equals(data[0])) {
+				else if (data[0]==Operation.DELIVER_VEHICLE) {
 					ParkingEvent parkingEvent = (ParkingEvent) data[1];
 
 					// Inserting the parking event into the DB
@@ -380,7 +380,7 @@ public class Server extends AbstractServer {
 					return;
 				}
 				// Expected format: {"TagExists", tag}
-				else if (data.length == 2 && "TagExists".equals(data[0])) {
+				else if (data[0]==Operation.TAG_EXISTS) {
 					String tag = (String) data[1];
 
 					// Check whether the tag exists in the DB or not
@@ -394,7 +394,7 @@ public class Server extends AbstractServer {
 					return;
 				}
 				// Expected format: {"FindMatchedSubToTheTag", tag}
-				else if (data.length == 2 && "findMatchedSubToTheTag".equals(data[0])) {
+				else if (data[0]==Operation.FIND_MATCHED_SUBSCRIBER_TO_THE_TAG) {
 					String tag = (String) data[1];
 
 					// Gathering the subscriber threw the relevant tag of his
@@ -405,7 +405,7 @@ public class Server extends AbstractServer {
 					return;
 				}
 				// Expected format: {"subscriberAlreadyEntered", codeInt}
-				else if (data.length == 2 && "subscriberAlreadyEntered".equals(data[0])) {
+				else if (data[0]==Operation.SUBSCRIBER_ALREADY_ENTERED) {
 					int codeInt = (int) data[1];
 
 					if (!db.checkSubscriberEntered(codeInt)) {
@@ -420,7 +420,7 @@ public class Server extends AbstractServer {
 
 
 				// Expected format: {"tagIdAlreadyEntered", tag}
-				else if (data.length == 2 && "tagIdAlreadyEntered".equals(data[0])) {
+				else if (data[0]==Operation.TAG_ID_ALREADY_ENTERED) {
 					String tag = (String) data[1];
 
 					if (!db.checkTagIDEntered(tag)) {
@@ -479,7 +479,7 @@ public class Server extends AbstractServer {
 				}
 				
 				// Expected format: {"isThereAnExistedOrder", subscriberCode, selectedDate, timeOfArrival}
-				else if (data.length == 4 && "isThereAnExistedOrder".equals(data[0])) {
+				else if (data[0]==Operation.IS_THERE_AN_EXISTED_ORDER) {
 					int subscriberCode = (int) data[1];
 					Date selectedDate = (Date) data[2];
 					Time timeOfArrival = (Time) data[3];

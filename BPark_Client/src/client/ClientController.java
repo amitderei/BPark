@@ -809,9 +809,9 @@ public class ClientController extends AbstractClient {
 	 */
 	public void checkIfOrderAlreadyExists(int subscriberCode, Date selectedDate, Time timeOfArrival) {
 		try {
-			sendToServer(new Object[] { "isThereAnExistedOrder", subscriberCode, selectedDate, timeOfArrival });
+			sendToServer(new Object[] { Operation.IS_THERE_AN_EXISTED_ORDER, subscriberCode, selectedDate, timeOfArrival });
 		} catch (IOException e) {
-			System.err.println("Failed to send 'extendParking' request: " + e.getMessage());
+			System.err.println("Failed to send 'IS_THERE_AN_EXISTED_ORDER' request: " + e.getMessage());
 		}
 	}
 
@@ -879,7 +879,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void checkSubscriberExists(int subscriberCode) {
 		try {
-			sendToServer(new Object[] { "subscriberExists", subscriberCode});
+			sendToServer(new Object[] { Operation.SUBSCRIBER_EXISTS, subscriberCode});
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
 			System.err.println("Failed to send 'subscriberExists' request to server: " + e.getMessage());
@@ -893,7 +893,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void validateTag(String TagID) {
 		try {
-			sendToServer(new Object[] { "TagExists", TagID });
+			sendToServer(new Object[] { Operation.TAG_EXISTS, TagID });
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
 			System.err.println("Failed to send 'TagExists' request to server: " + e.getMessage());
@@ -907,7 +907,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void checkIfSubscriberAlreadyEntered(int subscriberCode) {
 		try {
-			sendToServer(new Object[] { "subscriberAlreadyEntered", subscriberCode });
+			sendToServer(new Object[] { Operation.SUBSCRIBER_ALREADY_ENTERED, subscriberCode });
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
 			System.err.println("Failed to send 'subscriberAlreadyEntered' request to server: " + e.getMessage());
@@ -921,7 +921,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void checkIfTagIDAlreadyInside(String TagID) {
 		try {
-			sendToServer(new Object[] { "tagIdAlreadyEntered", TagID});
+			sendToServer(new Object[] { Operation.TAG_ID_ALREADY_ENTERED, TagID});
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
 			System.err.println("Failed to send 'tagIdAlreadyEntered' request to server: " + e.getMessage());
@@ -935,7 +935,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void findSubscriberWithTag(String TagID) {
 		try {
-			sendToServer(new Object[] { "findMatchedSubToTheTag", TagID});
+			sendToServer(new Object[] { Operation.FIND_MATCHED_SUBSCRIBER_TO_THE_TAG, TagID});
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
 			System.err.println("Failed to send 'findMatchedSubToTheTag' request to server: " + e.getMessage());
@@ -951,7 +951,7 @@ public class ClientController extends AbstractClient {
 	public void DeliveryViaReservation(int subscriberCode, int confirmationCode) {
 		// Prepare the checking - if exists command as an object array and send to server
 		try {
-			sendToServer(new Object[] {"DeliveryViaReservation", subscriberCode, confirmationCode});
+			sendToServer(new Object[] {Operation.DELIVERY_VIA_RESERVATION, subscriberCode, confirmationCode});
 
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
@@ -966,7 +966,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void isThereFreeParkingSpace(String parkingLotName) {
 		try {
-			sendToServer(new Object[] {"IsThereFreeParkingSpace", parkingLotName});
+			sendToServer(new Object[] {Operation.IS_THERE_FREE_PARKING_SPACE, parkingLotName});
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
 			System.err.println("Failed to send 'IsThereFreeParkingSpace' request to server: " + e.getMessage());
@@ -980,7 +980,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void seekVehicleID(int subscriberCode) {
 		try {
-			sendToServer(new Object[] {"getVehicleID", subscriberCode});
+			sendToServer(new Object[] {Operation.GET_VEHICLE_ID, subscriberCode});
 
 		} catch (IOException e) {
 			//Log the error if the update request fails to send
@@ -996,7 +996,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void deliverVehicle(ParkingEvent parkingEvent) {
 		try {
-			sendToServer(new Object[] {"DeliverVehicle", parkingEvent});
+			sendToServer(new Object[] {Operation.DELIVER_VEHICLE, parkingEvent});
 		} catch (IOException e) {
 			//Log the error if the update request fails to send
 			System.err.println("Failed to send 'DeliverVehicle' request to server: " + e.getMessage());
@@ -1011,7 +1011,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void isThereReservation(int SubscriberCode) {
 		try {
-			sendToServer(new Object[] {"checkIfTheresReservation", SubscriberCode});
+			sendToServer(new Object[] {Operation.CHECK_IF_THERE_IS_RERSERVATION, SubscriberCode});
 
 		} catch (IOException e) {
 			// Log the error if the update request fails to send
