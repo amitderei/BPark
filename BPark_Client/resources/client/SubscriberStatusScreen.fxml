@@ -13,31 +13,33 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:controller="controllers.SubscriberStatusController" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" prefWidth="600.0" prefHeight="453.0" spacing="10">
+<VBox fx:controller="controllers.SubscriberStatusController"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      prefWidth="600.0" prefHeight="453.0" spacing="10">
    <padding>
       <Insets top="10" right="10" bottom="10" left="10"/>
    </padding>
    <HBox spacing="10">
-      <Label text="Month:" />
-      <ComboBox fx:id="cmbMonth" prefWidth="120.0" />
       <Label text="Year:" />
       <ComboBox fx:id="cmbYear" prefWidth="100.0" />
+      <Label text="Month:" />
+      <ComboBox fx:id="cmbMonth" prefWidth="120.0" />
       <Button fx:id="btnLoad" text="Load Report" />
    </HBox>
    <HBox spacing="10">
-<javafx.scene.control.ScrollPane prefWidth="420.0" prefHeight="300.0">
-    <content>
-        <BarChart fx:id="barChart" prefWidth="800.0" prefHeight="280.0" animated="false">
-            <xAxis>
-                <CategoryAxis label="Subscriber" />
-            </xAxis>
-            <yAxis>
-                <NumberAxis label="Hours / Count" />
-            </yAxis>
-        </BarChart>
-    </content>
-</javafx.scene.control.ScrollPane>
-
+      <javafx.scene.control.ScrollPane prefWidth="420.0" prefHeight="300.0">
+         <content>
+            <BarChart fx:id="barChart" prefWidth="800.0" prefHeight="280.0" animated="false">
+               <xAxis>
+                  <CategoryAxis label="Subscriber" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis label="Hours / Count" />
+               </yAxis>
+            </BarChart>
+         </content>
+      </javafx.scene.control.ScrollPane>
       <PieChart fx:id="pieChart" prefWidth="180.0" prefHeight="300.0" />
    </HBox>
    <TableView fx:id="tblReport" prefHeight="160.0">
@@ -51,3 +53,4 @@
       </columns>
    </TableView>
 </VBox>
+

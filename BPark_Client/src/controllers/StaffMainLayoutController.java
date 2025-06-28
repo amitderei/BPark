@@ -165,7 +165,6 @@ public class StaffMainLayoutController implements ClientAware {
             
             if (ctrl instanceof SubscriberStatusController ssc) {
                 client.setSubscriberStatusController(ssc);
-                ssc.sendRequest();     
             }
 
 

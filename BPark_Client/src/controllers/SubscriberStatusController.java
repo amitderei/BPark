@@ -15,11 +15,13 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import ui.UiUtils;
 
 /**
  * This controller handles the Subscriber Status report screen.
@@ -130,12 +132,17 @@ public class SubscriberStatusController implements ClientAware {
     public void sendRequest() {
         Integer month = cmbMonth.getValue();
         Integer year  = cmbYear.getValue();
-        if (month == null || year == null) return; // do nothing if empty
+
+        if (month == null || year == null) {
+            UiUtils.showAlert("Missing Selection", "Please select both month and year before loading the report.", AlertType.WARNING);
+
+            return;
+        }
 
         System.out.println("[DEBUG] Sending request for " + month + "/" + year); 
-
         client.getSubscriberReport(month, year);
     }
+
 
 
     /**
