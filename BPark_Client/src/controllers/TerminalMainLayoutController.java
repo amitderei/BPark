@@ -22,11 +22,10 @@ import ui.UiUtils;
  * Child screens are loaded into the centre pane by loadScreen().
  */
 public class TerminalMainLayoutController implements ClientAware {
-	/** Button to return to the home screen */
+
 	@FXML
 	private Button btnExit;
 
-	/** Button to go back to the previous selection screen */
 	@FXML
 	private Button btnBack;
 
