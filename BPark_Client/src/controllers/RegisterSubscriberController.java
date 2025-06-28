@@ -12,32 +12,41 @@ import ui.UiUtils;
  * Includes client-side validation and sends a Subscriber object to the server.
  */
 public class RegisterSubscriberController implements ClientAware {
+	
     /** Shared client controller used to send requests to the server */
     private ClientController client;
 
     /** Input field for national ID (exactly 9 digits) */
-    @FXML private TextField txtUserId;
+    @FXML 
+    private TextField txtUserId;
 
     /** Input field for subscriber's first name */
-    @FXML private TextField txtFirstName;
+    @FXML 
+    private TextField txtFirstName;
 
     /** Input field for subscriber's last name */
-    @FXML private TextField txtLastName;
+    @FXML 
+    private TextField txtLastName;
 
     /** Input field for phone number (must begin with 05) */
-    @FXML private TextField txtPhone;
+    @FXML 
+    private TextField txtPhone;
 
     /** Input field for valid email address */
-    @FXML private TextField txtEmail;
+    @FXML
+    private TextField txtEmail;
 
     /** Input field for username (4+ alphanumeric characters) */
-    @FXML private TextField txtUsername;
+    @FXML
+    private TextField txtUsername;
 
     /** Button that triggers the registration request */
-    @FXML private Button btnRegister;
+    @FXML 
+    private Button btnRegister;
 
     /** Label used to display live validation or server result status */
-    @FXML private Label lblStatus;
+    @FXML 
+    private Label lblStatus;
 
     /**
      * Injects the shared ClientController instance so this screen

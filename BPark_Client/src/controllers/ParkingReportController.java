@@ -22,9 +22,14 @@ import javafx.scene.control.Label;
 import ui.UiUtils;
 
 /**
- * Controller for displaying a monthly parking report using pie and bar charts.
- * 
- * This version uses two ComboBoxes (year and month) instead of one date picker.
+ * Controller for the parking report screen.
+ *
+ * Displays statistics related to user behavior using two pie charts and one bar chart:
+ * - Number of users who extended their parking
+ * - Number of users who arrived late
+ * - Duration of parking sessions (0–4, 4–8, 8+ hours)
+ *
+ * This screen is only available to staff roles such as attendants and managers.
  */
 public class ParkingReportController implements ClientAware {
 
@@ -40,17 +45,21 @@ public class ParkingReportController implements ClientAware {
 	@FXML
 	private Button sumbit;
 
+	/** Pie chart showing how many users extended their parking sessions */
 	@FXML
 	private PieChart parkingPieChart;
 
+	/** Pie chart showing how many users were late to pick up their vehicles */
 	@FXML
 	private PieChart latesPieChart;
 
 	@FXML
 	private BarChart<String, Number> hoursParkingChart;
 
+	/** Shared socket handler used to communicate with the server */
 	private ClientController client;
 
+	/** Holds the report data received from the server */
 	private ParkingReport parkingReport;
 
 	/**
@@ -72,22 +81,36 @@ public class ParkingReportController implements ClientAware {
 
 		ObservableList<String> monthItems = FXCollections.observableArrayList();
 		for (Integer m : months) {
-			monthItems.add(String.format("%02d", m)); // format as "01", "02", ...
+			monthItems.add(String.format("%02d", m));
 		}
 		monthCombo.setItems(monthItems);
 	}
 
+	/**
+	 * Injects the client controller used for server communication and screen transitions.
+	 *
+	 * @param client the active client instance
+	 */
 	@Override
 	public void setClient(ClientController client) {
 		this.client = client;
 	}
 
+	/**
+	 * Stores the ParkingReport object after receiving it from the server.
+	 *
+	 * @param parkingReport the report object containing statistical data
+	 */
 	public void setParkingReport(ParkingReport parkingReport) {
 		this.parkingReport = parkingReport;
 	}
 
 	/**
-	 * Populates all charts based on the current parking report data.
+	 * Populates the charts using the data stored in the parking report.
+	 * Generates:
+	 * - Bar chart for parking durations
+	 * - Pie chart for extensions
+	 * - Pie chart for late pickups
 	 */
 	public void setChart() {
 		XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -116,8 +139,10 @@ public class ParkingReportController implements ClientAware {
 	}
 
 	/**
-	 * Handles the "Load Report" button press.
-	 * Builds the selected date from year and month combo boxes and sends request.
+	 * Sends a request to the server for the parking report of May 2025.
+	 * 
+	 * This date is currently hardcoded for demonstration purposes, but it can be
+	 * made dynamic in future versions.
 	 */
 	public void getParkingReportFromServer() {
 		if (yearCombo.getValue() == null || monthCombo.getValue() == null) {
@@ -136,7 +161,7 @@ public class ParkingReportController implements ClientAware {
 	}
 
 	/**
-	 * Requests list of existing report dates from the server.
+	 * Requests from the server the list of months that have parking reports stored.
 	 */
 	public void getDatesOfReportsInDB() {
 		client.getDatesOfReports();

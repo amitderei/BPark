@@ -18,23 +18,24 @@ import ui.UiUtils;
  */
 public class ModeSelectionController implements ClientAware {
     /** Button to launch the full BPARK application (GUI flow for guests/subscribers) */
-    @FXML private Button btnApp;
+    @FXML 
+    private Button btnApp;
 
     /** Button to launch the simplified terminal interface (for parking-lot staff) */
-    @FXML private Button btnTerminal;
+    @FXML 
+    private Button btnTerminal;
 
-    /** Button to exit the application */
-    @FXML private Button btnExit;
+    @FXML 
+    private Button btnExit;
 
     /** Reference to the shared client instance used to communicate with the server */
     private ClientController client;
 
-    /**
-     * Stores the shared ClientController instance.
-     * This controller passes it to the next screen after a mode is selected.
-     *
-     * @param client the active client object
-     */
+	/**
+	 * Injects the shared ClientController instance.
+	 *
+	 * @param client active client controller instance
+	 */
     @Override
     public void setClient(ClientController client) {
         this.client = client;

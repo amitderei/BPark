@@ -4,12 +4,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 /**
- * Landing screen shown on the physical kiosk / terminal.
+ * Landing screen shown on the physical terminal.
  * No user-specific data is needed; a fixed greeting is enough.
  */
 public class TerminalMainController {
 
-    /** Label that shows the greeting text on the terminal welcome screen */
     @FXML
     private Label welcomeLabel;
 

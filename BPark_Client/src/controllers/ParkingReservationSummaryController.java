@@ -13,56 +13,72 @@ import javafx.scene.control.Label;
  * shows all reservation details pulled from the Order object.
  */
 public class ParkingReservationSummaryController implements ClientAware {
-    /** Large headline at the top of the confirmation screen */
-    @FXML private Label headline;
+    
+    @FXML 
+    private Label headline;
 
     /** Label caption for "Reservation Number" */
-    @FXML private Label reservationNumber;
+    @FXML 
+    private Label reservationNumber;
 
     /** Label caption for "Confirmation Code" */
-    @FXML private Label confirmationCode;
+    @FXML 
+    private Label confirmationCode;
 
     /** Label caption for "Subscriber Code" */
-    @FXML private Label subscriberCode;
+    @FXML 
+    private Label subscriberCode;
 
     /** Label caption for "Order Submission Date" */
-    @FXML private Label orderSubmissionDate;
+    @FXML 
+    private Label orderSubmissionDate;
 
     /** Label caption for "Reservation Date" */
-    @FXML private Label reservationDate;
+    @FXML 
+    private Label reservationDate;
 
     /** Label caption for "Reservation Time" */
-    @FXML private Label reservationTime;
+    @FXML 
+    private Label reservationTime;
 
     /** Label caption for "Parking Space" */
-    @FXML private Label parkingSpace;
+    @FXML 
+    private Label parkingSpace;
 
-    /** "Thank you" message shown after successful reservation */
-    @FXML private Label thankU;
+    @FXML 
+    private Label thankU;
 
     /** Contact/support message shown below the summary */
-    @FXML private Label support;
+    @FXML 
+    private Label support;
 
     /** Displays the reservation number (auto-generated) */
-    @FXML private Label reservationNumberOfOrder;
+    @FXML 
+    private Label reservationNumberOfOrder;
 
     /** Displays the confirmation code assigned to this reservation */
-    @FXML private Label confirmationCodeOfOrder;
+    @FXML 
+    private Label confirmationCodeOfOrder;
 
     /** Displays the subscriber's code (ID in the system) */
-    @FXML private Label subscriberCodeOfOrder;
+    @FXML 
+    private Label subscriberCodeOfOrder;
 
     /** Displays the date when the order was submitted */
-    @FXML private Label orderSubmissionDateOfOrder;
+    @FXML 
+    private Label orderSubmissionDateOfOrder;
 
     /** Displays the requested reservation date */
-    @FXML private Label reservationDateOfOrder;
+    @FXML 
+    private Label reservationDateOfOrder;
 
     /** Displays the requested reservation time */
-    @FXML private Label reservationTimeOfOrder;
+    @FXML 
+    private Label reservationTimeOfOrder;
 
     /** Displays the assigned parking space number */
-    @FXML private Label parkingSpaceOfOrder;
+    @FXML 
+    private Label parkingSpaceOfOrder;
 
     /** Shared ClientController instance for server communication */
     private ClientController client;
@@ -71,10 +87,9 @@ public class ParkingReservationSummaryController implements ClientAware {
     private Order order;
 
     /**
-     * Stores the ClientController so this screen can communicate
-     * with the server if needed.
+     * Injects the client controller used for server communication and screen transitions.
      *
-     * @param client the active ClientController instance
+     * @param client the active client instance
      */
     @Override
     public void setClient(ClientController client) {

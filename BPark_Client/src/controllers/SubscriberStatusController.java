@@ -30,44 +30,55 @@ import ui.UiUtils;
  */
 public class SubscriberStatusController implements ClientAware {
     /** Combo box to select the month */
-    @FXML private ComboBox<Integer> cmbMonth;
+    @FXML 
+    private ComboBox<Integer> cmbMonth;
 
     /** Combo box to select the year */
-    @FXML private ComboBox<Integer> cmbYear;
+    @FXML 
+    private ComboBox<Integer> cmbYear;
 
     /** Button to load the report */
-    @FXML private Button btnLoad;
+    @FXML 
+    private Button btnLoad;
 
     /** Bar chart to show top subscribers by total hours */
-    @FXML private BarChart<String, Number> barChart;
+    @FXML 
+    private BarChart<String, Number> barChart;
 
     /** Pie chart to show active vs inactive subscribers */
-    @FXML private PieChart pieChart;
+    @FXML 
+    private PieChart pieChart;
 
     /** Table that displays all subscriber data */
-    @FXML private TableView<SubscriberStatusReport> tblReport;
+    @FXML 
+    private TableView<SubscriberStatusReport> tblReport;
 
     /** Table column: subscriber code */
-    @FXML private TableColumn<SubscriberStatusReport, Integer> colCode;
+    @FXML 
+    private TableColumn<SubscriberStatusReport, Integer> colCode;
 
     /** Table column: subscriber name */
-    @FXML private TableColumn<SubscriberStatusReport, String> colName;
+    @FXML 
+    private TableColumn<SubscriberStatusReport, String> colName;
 
     /** Table column: number of entries */
-    @FXML private TableColumn<SubscriberStatusReport, Integer> colEntries;
+    @FXML 
+    private TableColumn<SubscriberStatusReport, Integer> colEntries;
 
     /** Table column: number of parking extensions */
-    @FXML private TableColumn<SubscriberStatusReport, Integer> colExtends;
+    @FXML 
+    private TableColumn<SubscriberStatusReport, Integer> colExtends;
 
     /** Table column: number of late exits */
-    @FXML private TableColumn<SubscriberStatusReport, Integer> colLates;
+    @FXML 
+    private TableColumn<SubscriberStatusReport, Integer> colLates;
 
     /** Table column: total hours parked */
-    @FXML private TableColumn<SubscriberStatusReport, Double> colHours;
+    @FXML 
+    private TableColumn<SubscriberStatusReport, Double> colHours;
 
     /** The list that holds the report rows to show in the table */
-    private final ObservableList<SubscriberStatusReport> rows =
-            FXCollections.observableArrayList();
+    private final ObservableList<SubscriberStatusReport> rows = FXCollections.observableArrayList();
 
     /** Reference to the active client (used to send requests) */
     private ClientController client;

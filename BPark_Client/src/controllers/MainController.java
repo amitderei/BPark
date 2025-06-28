@@ -13,28 +13,23 @@ import ui.UiUtils;
  * Also includes navigation controls to go back or exit the application.
  */
 public class MainController implements ClientAware {
+	
     /** Button to enter the system as a guest (no login) */
-    @FXML private Button guestBtn;
+    @FXML 
+    private Button guestBtn;
 
     /** Button to navigate to the login screen for registered users */
-    @FXML private Button loginBtn;
+    @FXML 
+    private Button loginBtn;
 
-    /** Button to exit the application */
-    @FXML private Button btnExit;
+    @FXML 
+    private Button btnExit;
 
-    /** Button to go back to the previous screen (Mode Selection) */
-    @FXML private Button btnBack;
-
-    // ==============================
-    // Runtime Fields
-    // ==============================
+    @FXML 
+    private Button btnBack;
 
     /** Shared ClientController used to send requests to the server */
     private ClientController client;
-
-    // ==============================
-    // Dependency Injection
-    // ==============================
 
     /**
      * Injects the client controller used for server communication and screen transitions.

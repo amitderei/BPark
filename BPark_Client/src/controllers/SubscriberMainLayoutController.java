@@ -17,51 +17,49 @@ import ui.UiUtils;
  * side-menu while swapping the centre pane.
  */
 public class SubscriberMainLayoutController implements ClientAware {
-	/** Button to return to subscriber home screen */
-	@FXML
-	private Button btnHome;
+	
+    @FXML 
+    private Button btnHome;
 
-	/** Button to log out and return to login screen */
-	@FXML
-	private Button btnLogout;
+    @FXML 
+    private Button btnLogout;
 
-	/** Button to exit the application */
-	@FXML
-	private Button btnExit;
+    @FXML 
+    private Button btnExit;
 
-	/** Button to view subscriber's personal information */
-	@FXML
-	private Button btnViewPersonalInfo;
+    /** Button to view subscriber's personal information */
+    @FXML 
+    private Button btnViewPersonalInfo;
 
-	/** Button to view full parking history */
-	@FXML
-	private Button btnViewParkingHistory;
+    /** Button to view full parking history */
+    @FXML 
+    private Button btnViewParkingHistory;
 
-	/** Button to view the current active parking session */
-	@FXML
-	private Button btnViewActiveParkingInfo;
+    /** Button to view the current active parking session */
+    @FXML 
+    private Button btnViewActiveParkingInfo;
 
-	/** Button to request parking extension */
-	@FXML
-	private Button btnExtendParkingTime;
+    /** Button to request parking extension */
+    @FXML 
+    private Button btnExtendParkingTime;
 
-	/** Button to place a new parking reservation */
-	@FXML
-	private Button btnParkingReservation;
+    /** Button to place a new parking reservation */
+    @FXML 
+    private Button btnParkingReservation;
 
-	/** Button to view and cancel existing reservations */
-	@FXML
-	private Button btnMyReservations;
+    /** Button to view and cancel existing reservations */
+    @FXML 
+    private Button btnMyReservations;
 
-	/** Center pane where child screens are dynamically loaded */
-	@FXML
-	private AnchorPane center;
+    /** Center pane where child screens are dynamically loaded */
+    @FXML 
+    private AnchorPane center;
 
-	/** Shared client controller for server communication */
-	private ClientController client;
+    /** Shared client controller for server communication */
+    private ClientController client;
 
-	/** Subscriber's first name, used in greeting text */
-	private String subscriberName;
+    /** Subscriber's first name, used in greeting text */
+    private String subscriberName;
 
 	/**
 	 * Injects the shared ClientController instance.

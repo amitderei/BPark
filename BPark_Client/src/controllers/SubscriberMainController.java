@@ -11,10 +11,6 @@ import javafx.scene.control.Label;
  */
 public class SubscriberMainController implements ClientAware {
 
-    /** 
-     * Label that displays a personalized greeting, e.g. "Welcome, John!".
-     * Bound to the FXML layout.
-     */
     @FXML
     private Label welcomeLabel;
 

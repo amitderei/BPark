@@ -490,7 +490,9 @@ public class VehicleDeliveryController implements ClientAware{
 
 	/**
 	 * Generates a random 6-digit parking code as a zero-padded string.
-	 * The code is created using a random integer between 0 and 999999 - (e.g., "004521") and returns it
+	 * The result is a number between 000000 and 999999, used to identify a parked vehicle.
+	 *
+	 * @return a 6-digit parking code string (e.g., "004521")
 	 */
 	public String createParkingCode() {
 		Random rand=new Random();
@@ -499,15 +501,21 @@ public class VehicleDeliveryController implements ClientAware{
 	}
 
 	/**
-	 * A setter for the parking space ID
+	 * Sets the parking space number to be assigned to the vehicle during delivery.
+	 *
+	 * @param parkingSpace the ID of the available parking spot
 	 */
 	public void setParkingSpace(int parkingSpace) {
 		this.parkingSpace = parkingSpace;
 	}
 
 	/**
-	 * Updates the internal parking lot status based on server response, if there is no free space then the labels will show the status.
-	 * If there is free space inside the parking lot then the method will continue to the vehicle delivery.
+	 * Sets the current parking lot availability status.
+	 * 
+	 * If no space is available, disables input fields and updates the UI to reflect a full lot.
+	 * If space is available, displays a success message and proceeds to deliver the vehicle.
+	 *
+	 * @param parkingLotStatus true if there is at least one available spot, false otherwise
 	 */
 	public void setParkingLotStatus(boolean parkingLotStatus) {
 		this.parkingLotStatus = parkingLotStatus;
