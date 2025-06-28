@@ -85,16 +85,7 @@ public class GuestMainLayoutController implements ClientAware {
      */
     @FXML
     private void handleExitClick() {
-        try {
-            if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[]{Operation.DISCONNECT});
-                client.closeConnection();
-            }
-        } catch (Exception ignored) {
-            // not critical – we are exiting anyway
-        }
-        Platform.exit();
-        System.exit(0);
+        UiUtils.exitFromSystem();
     }
 
 

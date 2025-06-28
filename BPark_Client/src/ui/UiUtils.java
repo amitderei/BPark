@@ -1,6 +1,7 @@
 package ui;
 
 import client.ClientController;
+import common.Operation;
 import controllers.*;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -134,5 +135,22 @@ public final class UiUtils {
         stage.setWidth(800);
         stage.setHeight(500);
         stage.show();
+    }
+    
+    
+    /**
+     * Handles the Exit button press — disconnects from the server (if needed)
+     * and closes the application.
+     */
+    public static void exitFromSystem() {
+    	try {
+            if (client != null && client.isConnected()) {
+                client.sendToServer(new Object[] { Operation.DISCONNECT });
+                client.closeConnection();
+            }
+        } catch (Exception ignored) {
+        }
+        javafx.application.Platform.exit();
+        System.exit(0);
     }
 }

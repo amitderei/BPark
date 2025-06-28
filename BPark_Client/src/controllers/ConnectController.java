@@ -139,17 +139,7 @@ public class ConnectController implements ClientAware {
 	 */
 	@FXML
 	public void exitApplication() {
-		try {
-			if (client != null && client.isConnected()) {
-				// Notify server that we're disconnecting
-				client.sendToServer(new Object[] { "disconnect" });
-				client.closeConnection();
-				System.out.println("Client disconnected successfully.");
-			}
-		} catch (Exception e) {
-			System.err.println("Failed to disconnect client: " + e.getMessage());
-		}
-		System.exit(0);
+		UiUtils.exitFromSystem();
 	}
 
 	/**
