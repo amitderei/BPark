@@ -725,7 +725,7 @@ public class ClientController extends AbstractClient {
 	 */
 	public void updateDetailsOfSubscriber(Subscriber subscriber, User user) {
 		try {
-			sendToServer(new Object[] { Operation.UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber, user });
+			sendToServer(new Object[] { Operation.UPDATE_DETAILS_OF_SUBSCRIBER, subscriber, user });
 		} catch (IOException e) {
 			System.err.println("Failed to send 'updateDetailsOfSubscriber' request: " + e.getMessage());
 		}
