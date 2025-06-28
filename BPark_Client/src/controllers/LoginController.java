@@ -20,23 +20,29 @@ import ui.UiUtils;
  * (Subscriber, Attendant, or Manager).
  */
 public class LoginController implements ClientAware {
+	
     /** Text field for entering username */
-    @FXML private TextField username;
+    @FXML 
+    private TextField username;
 
     /** Password field for entering subscriber/staff code */
-    @FXML private PasswordField code;
+    @FXML 
+    private PasswordField code;
 
     /** Button to submit the login form */
-    @FXML private Button submit;
+    @FXML 
+    private Button submit;
 
     /** Label to show login errors or validation messages */
     @FXML private Label lblError;
 
     /** Button to return to the previous screen */
-    @FXML private Button backButton;
+    @FXML 
+    private Button backButton;
 
     /** Button to exit the application */
-    @FXML private Button btnExit;
+    @FXML 
+    private Button btnExit;
 
     /** Active client controller, used to communicate with the server */
     private ClientController client;
