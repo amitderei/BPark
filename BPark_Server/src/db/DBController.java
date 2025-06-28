@@ -1447,6 +1447,7 @@ public class DBController {
 		LocalDate local = date.toLocalDate();
 		int year = local.getYear();
 		int month = local.getMonthValue();
+		System.out.println("year = " + year + ", month = " + month);
 		int totalExtends = 0;
 		int totalEntries = 0;
 		int totalLates=0;
@@ -1459,12 +1460,6 @@ public class DBController {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				totalEntries++;
-				if (rs.getBoolean("wasExtended")) {
-					totalExtends++;
-				}
-				if(rs.getBoolean("sendMsgForLating")) {
-					totalLates++;
-				}
 				
 				LocalDateTime entryDateTime = LocalDateTime.of(rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime());
 				LocalDateTime exitDateTime = LocalDateTime.of(rs.getDate("exitDate").toLocalDate(), rs.getTime("exitHour").toLocalTime());
@@ -1472,16 +1467,30 @@ public class DBController {
 				Duration duration = Duration.between(entryDateTime, exitDateTime);
 				
 				long minutes=duration.toMinutes();
+				double durationOfParking=minutes/60.0;
 				
-				if(minutes/60 <4) {
+				
+				if(durationOfParking <4) {
 					lessThanFourHours++;
 				}
-				else if(minutes/60>=4 && minutes/60<8) {
+				else if(durationOfParking>=4 && durationOfParking<8) {
 					betweenFourToEight++;
 				}
 				else {
 					moreThanEight++;
 				}
+				if (rs.getBoolean("wasExtended")) {
+					totalExtends++;
+					if (durationOfParking>8) {
+						totalLates++;
+					}
+				}
+				else {
+					if (durationOfParking>4) {
+						totalLates++;
+					}
+				}
+				
 			}
 			return new ParkingReport(totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight);
 		} catch (SQLException e) {
