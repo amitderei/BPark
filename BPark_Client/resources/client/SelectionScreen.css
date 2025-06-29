@@ -13,16 +13,6 @@
 	-fx-font-weight: bold;
 }
 
-.toolbar-check-connection {
-	-fx-text-fill: white;
-}
-
-status-label {
-	text-align: center;
-	-fx-alignment: center;
-	-fx-font-size: 14px;
-	-fx-text-fill: #18374E;
-}
 
 .button {
 	-fx-background-color: #99C75F;
