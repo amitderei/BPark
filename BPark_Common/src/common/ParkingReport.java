@@ -5,8 +5,10 @@ import java.io.Serializable;
 /**
  * A simple data holder for parking-related statistics,
  * typically used in generating summary reports.
- * Contains total counts for vehicle entries, parking extensions,
- * and late departures for a given period (e.g., per month).
+ *
+ * Contains aggregated data such as total parking entries, number of extensions,
+ * number of late departures, and duration distribution (less than 4 hours,
+ * between 4 to 8 hours, and more than 8 hours).
  */
 public class ParkingReport implements Serializable {
 
@@ -20,11 +22,11 @@ public class ParkingReport implements Serializable {
 
 	/** Total number of sessions marked as late (beyond allowed duration) */
 	private int totalLates;
-	
+
 	private int lessThanFour;
-	
+
 	private int betweenFourToEight;
-	
+
 	private int moreThanEight;
 
 	/**
@@ -44,41 +46,64 @@ public class ParkingReport implements Serializable {
 	}
 
 	/**
-	 * @return total number of parking entries
+	 * Returns the total number of parking entries recorded.
+	 *
+	 * @return total parking entries
 	 */
 	public int getTotalEntries() {
 		return totalEntries;
 	}
 
 	/**
-	 * @return total number of parking extensions
+	 * Returns the total number of parking sessions that were extended.
+	 *
+	 * @return number of extensions
 	 */
 	public int getTotalExtends() {
 		return totalExtends;
 	}
-
 	/**
-	 * @return total number of late parking sessions
+	 * Returns the total number of parking sessions that ended late.
+	 *
+	 * @return number of late sessions
 	 */
 	public int getTotalLates() {
 		return totalLates;
 	}
 
+	/**
+	 * Returns the serialization version UID for the class.
+	 *
+	 * @return the serial version UID
+	 */
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
 
+	/**
+	 * Returns the number of parking sessions shorter than four hours.
+	 *
+	 * @return count of sessions under 4 hours
+	 */
 	public int getLessThanFour() {
 		return lessThanFour;
 	}
 
+	/**
+	 * Returns the number of parking sessions between four and eight hours.
+	 *
+	 * @return count of sessions between 4 to 8 hours
+	 */
 	public int getBetweenFourToEight() {
 		return betweenFourToEight;
 	}
 
+	/**
+	 * Returns the number of parking sessions longer than eight hours.
+	 *
+	 * @return count of sessions over 8 hours
+	 */
 	public int getMoreThanEight() {
 		return moreThanEight;
 	}
-	
-	
 }

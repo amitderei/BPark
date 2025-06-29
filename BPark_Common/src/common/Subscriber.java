@@ -17,7 +17,7 @@ public class Subscriber implements Serializable {
     /** Unique code for the subscriber (assigned by the database) */
     private int subscriberCode;
 
-    /** National ID (Israeli Teudat Zehut, 9-digit format) */
+    /** National ID (Israeli ID, 9-digit format) */
     private String userId;
 
     /** Subscriber's first name */

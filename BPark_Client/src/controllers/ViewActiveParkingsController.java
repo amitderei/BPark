@@ -21,32 +21,42 @@ import java.util.List;
  * Data is requested once from the server and displayed in a table.
  */
 public class ViewActiveParkingsController implements ClientAware {
+	
     /** Main table for displaying all active parking events */
-    @FXML private TableView<ParkingEvent> parkingTable;
+    @FXML 
+    private TableView<ParkingEvent> parkingTable;
 
     /** Column for parking event ID */
-    @FXML private TableColumn<ParkingEvent, Integer> colEventId;
+    @FXML 
+    private TableColumn<ParkingEvent, Integer> colEventId;
 
     /** Column for subscriber code */
-    @FXML private TableColumn<ParkingEvent, Integer> colSubscriber;
+    @FXML 
+    private TableColumn<ParkingEvent, Integer> colSubscriber;
 
     /** Column for vehicle ID */
-    @FXML private TableColumn<ParkingEvent, String> colVehicleId;
+    @FXML 
+    private TableColumn<ParkingEvent, String> colVehicleId;
 
     /** Column for unique parking code */
-    @FXML private TableColumn<ParkingEvent, String> colParkingCode;
+    @FXML 
+    private TableColumn<ParkingEvent, String> colParkingCode;
 
     /** Column for name of the parking lot */
-    @FXML private TableColumn<ParkingEvent, String> colLot;
+    @FXML 
+    private TableColumn<ParkingEvent, String> colLot;
 
     /** Column for parking space number */
-    @FXML private TableColumn<ParkingEvent, Integer> colSpace;
+    @FXML 
+    private TableColumn<ParkingEvent, Integer> colSpace;
 
     /** Column for entry date (formatted) */
-    @FXML private TableColumn<ParkingEvent, String> colEntryDate;
+    @FXML 
+    private TableColumn<ParkingEvent, String> colEntryDate;
 
     /** Column for entry time (formatted) */
-    @FXML private TableColumn<ParkingEvent, String> colEntryTime;
+    @FXML 
+    private TableColumn<ParkingEvent, String> colEntryTime;
 
     /** Central client used to request data and receive callbacks */
     private ClientController client;

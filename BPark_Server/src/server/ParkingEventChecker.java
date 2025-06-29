@@ -9,7 +9,6 @@ import mailService.TypeOfMail;
 
 /**
  * A background thread that checks for overdue parking sessions.
- * <p>
  * Its job is to find all active parkings that are marked as "late"
  * and haven't yet received an email, send them a late notice,
  * and mark them as notified in the database.

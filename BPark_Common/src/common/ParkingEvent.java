@@ -17,6 +17,9 @@ import java.time.LocalTime;
  */
 public class ParkingEvent implements Serializable {
 
+	/**
+	 * Serial version UID for ensuring compatibility during serialization.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/** Unique identifier for this parking event */

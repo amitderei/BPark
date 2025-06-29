@@ -15,46 +15,55 @@ import javafx.scene.control.*;
  * expected exit time based on whether the session was extended.
  */
 public class ViewActiveParkingInfoController implements ClientAware {
+	
     /** Label showing the screen headline (e.g., "Active Parking Info") */
     @FXML private Label headline;
-
+    
     /** Caption label for the event ID */
     @FXML private Label eventId;
+    
     /** Label that shows the event ID value */
     @FXML private Label eventIdInfo;
-
+    
     /** Caption label for the vehicle ID */
     @FXML private Label vehicleId;
+    
     /** Label that shows the vehicle ID value */
     @FXML private Label vehicleIdInfo;
-
+    
     /** Caption label for the entry date */
     @FXML private Label entryDate;
+    
     /** Label that shows the entry date value */
     @FXML private Label entryDateInfo;
-
+    
     /** Caption label for the entry hour */
     @FXML private Label entryHour;
+    
     /** Label that shows the entry hour value */
     @FXML private Label entryHourInfo;
 
     /** Caption label for the extension status */
     @FXML private Label extended;
+    
     /** Label that shows whether the parking was extended */
     @FXML private Label extendedInfo;
 
     /** Caption label for the expected exit date */
     @FXML private Label expectedExitDate;
+    
     /** Label that shows the expected exit date */
     @FXML private Label expectedExitDateInfo;
 
     /** Caption label for the expected exit hour */
     @FXML private Label expectedExitHour;
+    
     /** Label that shows the expected exit hour */
     @FXML private Label expectedExitHourInfo;
 
     /** Caption label for the parking space number */
     @FXML private Label parkingSpace;
+    
     /** Label that shows the parking space number */
     @FXML private Label parkingSpaceInfo;
 

@@ -29,18 +29,18 @@ import common.*;
  */
 public class DBController {
 
-    /** Singleton instance shared across all classes */
-    private static DBController instance = null;
+	/** Singleton instance shared across all classes */
+	private static DBController instance = null;
 
-    /** JDBC connection object used for all queries */
-    private static Connection conn;
+	/** JDBC connection object used for all queries */
+	private static Connection conn;
 
-    /**
-     * Returns the single instance of the DBController.
-     * If it doesn't exist, creates a new one.
-     *
-     * @return the singleton instance
-     */
+	/**
+	 * Returns the single instance of the DBController.
+	 * If it doesn't exist, creates a new one.
+	 *
+	 * @return the singleton instance
+	 */
 	public static DBController getInstance() {
 		if (instance == null) {
 			instance = new DBController(); // initialization
@@ -48,10 +48,10 @@ public class DBController {
 		return instance;
 	}
 
-    /**
-     * Establishes connection to the MySQL database.
-     * Loads the JDBC driver and connects to the local DB.
-     */
+	/**
+	 * Establishes connection to the MySQL database.
+	 * Loads the JDBC driver and connects to the local DB.
+	 */
 	public static void connectToDB() {
 		try {
 			// Loads and initializes the MySQL JDBC driver class
@@ -400,13 +400,12 @@ public class DBController {
 	}
 
 	/**
-	 * 
-	 * check using query if there is enough parking space to make a reservation (at
-	 * least 40%)
-	 * 
-	 * @param date
-	 * @param time,
-	 * @return true\false
+	 * Checks if at least 40% of the parking spaces are available for a new order
+	 * at the given date and time. This ensures availability before confirming a reservation.
+	 *
+	 * @param date date of the desired reservation
+	 * @param time time of the desired reservation
+	 * @return true if reservation is allowed, false otherwise
 	 */
 	public synchronized boolean parkingSpaceCheckingForNewOrder(Date date, Time time) {
 		String query = "SELECT (100-COUNT(DISTINCT parking_space))>=40 AS canOrder FROM( SELECT parking_space, TIMESTAMP (order_date, arrival_time) AS startTime, DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime, status FROM bpark.order) AS orders WHERE startTime<? AND endTime>? AND `status`='ACTIVE'";
@@ -483,10 +482,13 @@ public class DBController {
 	}
 
 	/**
-	 * get details after subscriber log in
-	 * 
-	 * @param user
-	 * @return
+	 * Retrieves the subscriber's full details after successful user login.
+	 * Looks up the subscriber in the database using the provided username and
+	 * returns a populated Subscriber object (excluding password).
+	 *
+	 * @param user the User object containing the username to search by
+	 * @return a Subscriber object with full profile information if found;
+	 *         null if no match was found or an error occurred
 	 */
 	public Subscriber getDetailsOfSubscriber(User user) {
 		String query = "SELECT * FROM subscriber WHERE username=?";
@@ -905,8 +907,10 @@ public class DBController {
 	}
 
 	/**
-	 * Method that checks whether the tag exists in the DB or no If yes then return
-	 * true, false otherwise
+	 * Checks whether a subscriber with the given tag ID exists in the database.
+	 *
+	 * @param tag the tag ID to check (e.g., "TAG_001")
+	 * @return true if the tag exists in the database; false otherwise
 	 */
 	public boolean tagExists(String tag) {
 
@@ -932,8 +936,10 @@ public class DBController {
 	}
 
 	/**
-	 * Method that returns the subscriber through a matched tag-Id with the DB
-	 * Returns the subscriberCode, in case of an error returns -1
+	 * Retrieves the subscriber code associated with the given tag ID.
+	 *
+	 * @param tag the tag ID to look up (e.g., "TAG_001")
+	 * @return the subscriber code if found; -1 if not found or an error occurs
 	 */
 	public int seekForTheSubscriberWithTag(String tag) {
 		String query = "SELECT s.subscriberCode FROM bpark.subscriber s WHERE s.tagId = ?";
@@ -952,9 +958,13 @@ public class DBController {
 	}
 
 	/**
-	 * Checks whether the subscriber already has entered his vehicle into the
-	 * parking lot If he entered already return true, otherwise return false
+	 * Checks whether the subscriber currently has an active parking event,
+	 * meaning they have entered the parking lot and not yet exited.
+	 *
+	 * @param codeInt the subscriber's unique code
+	 * @return true if the subscriber has an open parking event (i.e., vehicle is inside); false otherwise
 	 */
+
 	public boolean checkSubscriberEntered(int codeInt) {
 		String query = "SELECT * FROM bpark.parkingevent WHERE subscriberCode = ? AND exitHour IS NULL";
 
@@ -971,8 +981,11 @@ public class DBController {
 	}
 
 	/**
-	 * Checks whether the vehicle that is matched to the tag-Id is already inside
-	 * the parking lot If he entered already return true, otherwise return false
+	 * Checks whether the vehicle associated with the given tag ID is currently
+	 * inside the parking lot (i.e., has an active parking event with no recorded exit time).
+	 *
+	 * @param tag the tag ID associated with the vehicle (e.g., "TAG_001")
+	 * @return true if the vehicle is currently inside the parking lot; false otherwise
 	 */
 	public boolean checkTagIDEntered(String tag) {
 		String query = "SELECT pe.* FROM bpark.parkingevent pe "
@@ -1185,8 +1198,11 @@ public class DBController {
 	}
 
 	/**
-	 * Returns the next available subscriber code (MAX + 1). Starts from 1011 if
-	 * table is empty.
+	 * Generates the next available subscriber code by retrieving the current maximum
+	 * value from the database and adding 1. 
+	 * If the table is empty (i.e., no subscribers exist), returns the default starting value 1011.
+	 *
+	 * @return the next available subscriber code
 	 */
 	public int getNextSubscriberCode() {
 		String query = "SELECT MAX(subscriberCode) FROM bpark.subscriber";
@@ -1202,7 +1218,11 @@ public class DBController {
 	}
 
 	/**
-	 * Generates the next unique tag ID in the format TAG_XXX.
+	 * Generates the next unique tag ID for a new subscriber in the format "TAG_XXX",
+	 * where XXX is a zero-padded sequence number based on the current number of subscribers.
+	 * For example: if there are 15 subscribers, returns "TAG_016".
+	 *
+	 * @return the newly generated tag ID; returns "TAG_999" if an error occurs
 	 */
 	public String generateNextTagId() {
 		String query = "SELECT COUNT(*) FROM bpark.subscriber";
@@ -1318,7 +1338,7 @@ public class DBController {
 	}
 
 	/**
-	 * Checks if a user ID (Teudat Zehut) already exists in the subscriber table.
+	 * Checks if a user ID (ID) already exists in the subscriber table.
 	 *
 	 * @param userId the ID to check
 	 * @return true if the ID exists, false otherwise
@@ -1378,7 +1398,7 @@ public class DBController {
 
 		return list;
 	}
-	
+
 
 	/**
 	 * Marks a subscriber as having been notified for being late. This sets the
@@ -1462,16 +1482,16 @@ public class DBController {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				totalEntries++;
-				
+
 				LocalDateTime entryDateTime = LocalDateTime.of(rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime());
 				LocalDateTime exitDateTime = LocalDateTime.of(rs.getDate("exitDate").toLocalDate(), rs.getTime("exitHour").toLocalTime());
-				
+
 				Duration duration = Duration.between(entryDateTime, exitDateTime);
-				
+
 				long minutes=duration.toMinutes();
 				double durationOfParking=minutes/60.0;
-				
-				
+
+
 				if(durationOfParking <4) {
 					lessThanFourHours++;
 				}
@@ -1492,7 +1512,7 @@ public class DBController {
 						totalLates++;
 					}
 				}
-				
+
 			}
 			return new ParkingReport(totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight);
 		} catch (SQLException e) {
@@ -1524,7 +1544,7 @@ public class DBController {
 			e.printStackTrace();
 		}	
 	}
-	
+
 	/**
 	 * check existence of parking report on database for creating only the missing reports.
 	 * @param date (of month that we want to check)
@@ -1564,207 +1584,216 @@ public class DBController {
 		}
 		return null;
 	}
-	
-    /**
-     * Returns a list of subscriber statistics (entries, extends, lates, hours)
-     * for the selected month and year – calculated directly from parkingEvent.
-     * This method does NOT store anything in the database, it's used for
-     * real-time calculation only (read-only).
-     *
-     * @param month calendar month (1 = January, ..., 12 = December)
-     * @param year  full year (e.g. 2025)
-     * @return list of subscriber rows with usage data
-     * @throws SQLException if something goes wrong during the query
-     */
 
+	/**
+	 * Returns a list of subscriber statistics (entries, extends, lates, hours)
+	 * for the selected month and year – calculated directly from parkingEvent.
+	 * This method does NOT store anything in the database, it's used for
+	 * real-time calculation only (read-only).
+	 *
+	 * @param month calendar month (1 = January, ..., 12 = December)
+	 * @param year  full year (e.g. 2025)
+	 * @return list of subscriber rows with usage data
+	 * @throws SQLException if something goes wrong during the query
+	 */
 	public List<SubscriberStatusReport> getSubscriberStatusLive(int month, int year)
-	        throws SQLException {
+			throws SQLException {
 
-	    final String sql =
-	        """
-	        SELECT
-	            s.subscriberCode                                    AS code,
-	            CONCAT(s.firstName, ' ', s.lastName)               AS fullName,
-	            COUNT(pe.eventId)                                  AS totalEntries,
-	            COALESCE(SUM(pe.wasExtended), 0)                   AS totalExtends,
-	            COALESCE(SUM(pe.sendMsgForLating), 0)              AS totalLates,
-	            COALESCE(SUM(
-	                TIMESTAMPDIFF(MINUTE,
-	                              TIMESTAMP(pe.entryDate, pe.entryHour),
-	                              IFNULL(TIMESTAMP(pe.exitDate, pe.exitHour), NOW()))
-	            ), 0) / 60.0                                       AS totalHours
-	        FROM subscriber s
-	        LEFT JOIN parkingEvent pe
-	               ON s.subscriberCode = pe.subscriberCode
-	              AND YEAR(pe.entryDate)  = ?
-	              AND MONTH(pe.entryDate) = ?
-	        GROUP BY s.subscriberCode, fullName
-	        ORDER BY totalHours DESC;
-	        """;
+		final String sql =
+				"""
+				SELECT
+				    s.subscriberCode                                    AS code,
+				    CONCAT(s.firstName, ' ', s.lastName)               AS fullName,
+				    COUNT(pe.eventId)                                  AS totalEntries,
+				    COALESCE(SUM(pe.wasExtended), 0)                   AS totalExtends,
+				    COALESCE(SUM(pe.sendMsgForLating), 0)              AS totalLates,
+				    COALESCE(SUM(
+				        TIMESTAMPDIFF(MINUTE,
+				                      TIMESTAMP(pe.entryDate, pe.entryHour),
+				                      IFNULL(TIMESTAMP(pe.exitDate, pe.exitHour), NOW()))
+				    ), 0) / 60.0                                       AS totalHours
+				FROM subscriber s
+				LEFT JOIN parkingEvent pe
+				       ON s.subscriberCode = pe.subscriberCode
+				      AND YEAR(pe.entryDate)  = ?
+				      AND MONTH(pe.entryDate) = ?
+				GROUP BY s.subscriberCode, fullName
+				ORDER BY totalHours DESC;
+				""";
 
-	    List<SubscriberStatusReport> rows = new ArrayList<>();
+		List<SubscriberStatusReport> rows = new ArrayList<>();
 
-	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	        ps.setInt(1, year);
-	        ps.setInt(2, month);
-	        try (ResultSet rs = ps.executeQuery()) {
-	            while (rs.next()) {
-	                rows.add(new SubscriberStatusReport(
-	                        rs.getInt("code"),
-	                        rs.getString("fullName"),
-	                        rs.getInt("totalEntries"),
-	                        rs.getInt("totalExtends"),
-	                        rs.getInt("totalLates"),
-	                        rs.getDouble("totalHours")));
-	            }
-	        }
-	    }
-	    return rows;
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, year);
+			ps.setInt(2, month);
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					rows.add(new SubscriberStatusReport(
+							rs.getInt("code"),
+							rs.getString("fullName"),
+							rs.getInt("totalEntries"),
+							rs.getInt("totalExtends"),
+							rs.getInt("totalLates"),
+							rs.getDouble("totalHours")));
+				}
+			}
+		}
+		return rows;
 	}
 
-    /**
-     * Generates and stores a fixed snapshot of all subscribers’ activity
-     * for a given month+year. This method:
-     * Fetches fresh data using getSubscriberStatusLive()
-     * Deletes any existing snapshot for that month (if already exists)
-     * Inserts a new set of records into subscriberStatusReport
-     * 
-     * Used by the monthly report generator (automatic or manual).
-     *
-     * @param month calendar month to save (1-12)
-     * @param year  year to save (4-digit)
-     * @return number of rows inserted (equals number of subscribers)
-     * @throws SQLException if the DB insert fails
-     */
+	/**
+	 * Generates and stores a fixed snapshot of all subscribers’ activity
+	 * for a given month+year. This method:
+	 * Fetches fresh data using getSubscriberStatusLive()
+	 * Deletes any existing snapshot for that month (if already exists)
+	 * Inserts a new set of records into subscriberStatusReport
+	 * 
+	 * Used by the monthly report generator (automatic or manual).
+	 *
+	 * @param month calendar month to save (1-12)
+	 * @param year  year to save (4-digit)
+	 * @return number of rows inserted (equals number of subscribers)
+	 * @throws SQLException if the DB insert fails
+	 */
 	public int storeSubscriberStatusReport(int month, int year) throws SQLException {
 
-	    // 1. Build the list in memory
-	    List<SubscriberStatusReport> rows = getSubscriberStatusLive(month, year);
+		// 1. Build the list in memory
+		List<SubscriberStatusReport> rows = getSubscriberStatusLive(month, year);
 
-	    // 2. Clear existing snapshot (if the thread ran twice)
-	    String deleteSQL =
-	        "DELETE FROM subscriberStatusReport " +
-	        "WHERE reportMonth = ?";
-	    try (PreparedStatement del = conn.prepareStatement(deleteSQL)) {
-	        del.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
-	        del.executeUpdate();
-	    }
+		// 2. Clear existing snapshot (if the thread ran twice)
+		String deleteSQL =
+				"DELETE FROM subscriberStatusReport " +
+						"WHERE reportMonth = ?";
+		try (PreparedStatement del = conn.prepareStatement(deleteSQL)) {
+			del.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
+			del.executeUpdate();
+		}
 
-	    // 3. Insert fresh rows
-	    String insertSQL =
-	        "INSERT INTO subscriberStatusReport " +
-	        "(reportMonth, subscriberCode, totalEntries, totalExtends, totalLates, totalHours) " +
-	        "VALUES (?, ?, ?, ?, ?, ?)";
+		// 3. Insert fresh rows
+		String insertSQL =
+				"INSERT INTO subscriberStatusReport " +
+						"(reportMonth, subscriberCode, totalEntries, totalExtends, totalLates, totalHours) " +
+						"VALUES (?, ?, ?, ?, ?, ?)";
 
-	    int inserted = 0;
-	    try (PreparedStatement ins = conn.prepareStatement(insertSQL)) {
-	        java.sql.Date monthKey =
-	            java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month));
+		int inserted = 0;
+		try (PreparedStatement ins = conn.prepareStatement(insertSQL)) {
+			java.sql.Date monthKey =
+					java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month));
 
-	        for (SubscriberStatusReport r : rows) {
-	            ins.setDate   (1, monthKey);
-	            ins.setInt    (2, r.getCode());
-	            ins.setInt    (3, r.getTotalEntries());
-	            ins.setInt    (4, r.getTotalExtends());
-	            ins.setInt    (5, r.getTotalLates());
-	            ins.setDouble (6, r.getTotalHours());
-	            ins.addBatch();
-	            inserted++;
-	        }
-	        ins.executeBatch();
-	    }
-	    return inserted;
+			for (SubscriberStatusReport r : rows) {
+				ins.setDate   (1, monthKey);
+				ins.setInt    (2, r.getCode());
+				ins.setInt    (3, r.getTotalEntries());
+				ins.setInt    (4, r.getTotalExtends());
+				ins.setInt    (5, r.getTotalLates());
+				ins.setDouble (6, r.getTotalHours());
+				ins.addBatch();
+				inserted++;
+			}
+			ins.executeBatch();
+		}
+		return inserted;
 	}
-	
-    /**
-     * Reads the saved subscriber snapshot from the database for a given month+year.
-     * This is the version used when the report was already generated and stored
-     * (instead of calculating it again).
-     *
-     * @param month month of the report (1-12)
-     * @param year  year of the report (e.g. 2025)
-     * @return list of subscriber statistics for that period (can be empty)
-     * @throws SQLException if database access fails
-     */
+
+	/**
+	 * Reads the saved subscriber snapshot from the database for a given month+year.
+	 * This is the version used when the report was already generated and stored
+	 * (instead of calculating it again).
+	 *
+	 * @param month month of the report (1-12)
+	 * @param year  year of the report (e.g. 2025)
+	 * @return list of subscriber statistics for that period (can be empty)
+	 * @throws SQLException if database access fails
+	 */
 	public List<SubscriberStatusReport> getSubscriberStatusFromTable(int month, int year)
-	        throws SQLException {
+			throws SQLException {
 
-	    String sql =
-	        "SELECT subscriberCode, totalEntries, totalExtends, totalLates, totalHours, " +
-	        "       CONCAT(s.firstName,' ',s.lastName) AS fullName " +
-	        "FROM subscriberStatusReport r " +
-	        "JOIN subscriber s USING (subscriberCode) " +
-	        "WHERE reportMonth = ?";
+		String sql =
+				"SELECT subscriberCode, totalEntries, totalExtends, totalLates, totalHours, " +
+						"       CONCAT(s.firstName,' ',s.lastName) AS fullName " +
+						"FROM subscriberStatusReport r " +
+						"JOIN subscriber s USING (subscriberCode) " +
+						"WHERE reportMonth = ?";
 
-	    List<SubscriberStatusReport> rows = new ArrayList<>();
+		List<SubscriberStatusReport> rows = new ArrayList<>();
 
-	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	        ps.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
-	        try (ResultSet rs = ps.executeQuery()) {
-	            while (rs.next()) {
-	                rows.add(new SubscriberStatusReport(
-	                        rs.getInt("subscriberCode"),
-	                        rs.getString("fullName"),
-	                        rs.getInt("totalEntries"),
-	                        rs.getInt("totalExtends"),
-	                        rs.getInt("totalLates"),
-	                        rs.getDouble("totalHours")));
-	            }
-	        }
-	    }
-	    return rows;
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					rows.add(new SubscriberStatusReport(
+							rs.getInt("subscriberCode"),
+							rs.getString("fullName"),
+							rs.getInt("totalEntries"),
+							rs.getInt("totalExtends"),
+							rs.getInt("totalLates"),
+							rs.getDouble("totalHours")));
+				}
+			}
+		}
+		return rows;
 	}
-	
-    /**
-     * Checks if there is already at least one row in subscriberStatusReport
-     * for the given month and year.
-     * Used to prevent creating the same report twice.
-     *
-     * @param month month to check (1-12)
-     * @param year  year to check (4-digit)
-     * @return true if snapshot exists, false otherwise
-     * @throws SQLException if DB check fails
-     */
 
+	/**
+	 * Checks if there is already at least one row in subscriberStatusReport
+	 * for the given month and year.
+	 * Used to prevent creating the same report twice.
+	 *
+	 * @param month month to check (1-12)
+	 * @param year  year to check (4-digit)
+	 * @return true if snapshot exists, false otherwise
+	 * @throws SQLException if DB check fails
+	 */
 	public boolean subscriberStatusReportExists(int month, int year) throws SQLException {
 
-	    String sql =
-	        "SELECT 1 FROM subscriberStatusReport " +
-	        "WHERE MONTH(reportMonth)=? AND YEAR(reportMonth)=? " +
-	        "LIMIT 1";
+		String sql =
+				"SELECT 1 FROM subscriberStatusReport " +
+						"WHERE MONTH(reportMonth)=? AND YEAR(reportMonth)=? " +
+						"LIMIT 1";
 
-	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	        ps.setInt(1, month);
-	        ps.setInt(2, year);
-	        try (ResultSet rs = ps.executeQuery()) {
-	            return rs.next();     
-	        }
-	    }
-	    
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, month);
+			ps.setInt(2, year);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next();     
+			}
+		}
+
 	}
-	
+
 	/**
-	 * Checks whether a subscriber has already an order with the date and time that he has selected
-	 * if there is it would return true, false otherwise
+	 * Checks whether the given subscriber already has an active order
+	 * for the specified date and arrival time.
+	 *
+	 * @param subscriberCode the subscriber's unique code
+	 * @param selectedDate the date of the desired reservation
+	 * @param timeOfArrival the time of the desired reservation
+	 * @return true if an active order already exists for the same date and time; false otherwise
 	 */
 	public boolean checkIfOrderAlreadyExists(int subscriberCode, Date selectedDate, Time timeOfArrival) {
-	    String query = "SELECT * FROM bpark.order WHERE subscriberCode = ? AND order_date = ? AND arrival_time = ? AND `status`='ACTIVE'";
+		String query = "SELECT * FROM bpark.order WHERE subscriberCode = ? AND order_date = ? AND arrival_time = ? AND `status`='ACTIVE'";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setInt(1, subscriberCode);
-	        stmt.setDate(2, selectedDate);
-	        stmt.setTime(3, timeOfArrival);
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, subscriberCode);
+			stmt.setDate(2, selectedDate);
+			stmt.setTime(3, timeOfArrival);
 
-	        ResultSet rs = stmt.executeQuery();
-	        return rs.next(); // if there's at least 1 result of that, it means that there is an order like that that's exists
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+			ResultSet rs = stmt.executeQuery();
+			return rs.next(); // if there's at least 1 result of that, it means that there is an order like that that's exists
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return false;
+		return false;
 	}
 
 
+	/**
+	 * Retrieves all existing dates for which a parking report has been generated.
+	 *
+	 * @return a list of dates representing existing parking reports;
+	 *         null if an error occurs during retrieval
+	 */
 	public ArrayList<Date> getAllReportsDates(){
 		ArrayList<Date> datesOfReports=new ArrayList<>();
 		String query="SELECT dateOfParkingReport FROM parkingReport";

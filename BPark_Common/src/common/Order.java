@@ -12,6 +12,9 @@ import java.sql.Time;
  */
 public class Order implements Serializable {
 
+	/**
+	 * Serial version UID for ensuring compatibility during serialization.
+	 */
     private static final long serialVersionUID = 1L;
 
     /** Unique ID of the order (primary key) */
