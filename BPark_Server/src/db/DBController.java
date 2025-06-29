@@ -1358,21 +1358,17 @@ public class DBController {
 				event.setEntryDate(rs.getDate("entryDate").toLocalDate());
 				event.setEntryTime(rs.getTime("entryHour").toLocalTime());
 				event.setWasExtended(rs.getBoolean("wasExtended"));
-				LocalDateTime dateTimeEntry = event.getEntryDate().atTime(event.getEntryHour());
-				if (event.isWasExtended()) {
-
-					dateTimeEntry = dateTimeEntry.plusHours(8);
-
-				} else {
-					dateTimeEntry = dateTimeEntry.plusHours(4);
-				}
-				event.setExitDate(dateTimeEntry.toLocalDate()); // expected date
-				event.setExitTime(dateTimeEntry.toLocalTime()); // expected time
 				event.setLot(rs.getString("nameParkingLot"));
 				event.setVehicleID(rs.getString("vehicleId"));
 				event.setParkingCode(rs.getString("parkingCode"));
-				list.add(event);
-
+				LocalDateTime now = LocalDateTime.now();
+				LocalDateTime dateTimeEntry = event.getEntryDate().atTime(event.getEntryHour());
+				Duration duration = Duration.between(dateTimeEntry, now);
+				//check if subscriber is lating according if he extended
+				double timeOfParking=duration.toMinutes()/60.0;
+				if ((event.isWasExtended() && timeOfParking>8) || ((!event.isWasExtended() )&& timeOfParking>4)) {
+					list.add(event);
+				} 
 			}
 			return list;
 		} catch (SQLException e) {
@@ -1789,7 +1785,7 @@ public class DBController {
 	 * set inactive order after 15 minutes from arrival time
 	 */
 	public void inactiveReservations() {
-		String query="UPDATE `order` SET `status`='INACTIVE' WHERE `status` = 'ACTIVE'  AND TIMESTAMP(order_date, arrival_time) <= NOW() - INTERVAL 15 MINUTE;";
+		String query="UPDATE `order` SET `status`='INACTIVE' WHERE `status`='ACTIVE' AND TIMESTAMP(order_date, arrival_time) <= NOW() - INTERVAL 15 MINUTE;";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			
 		} catch (SQLException e) {

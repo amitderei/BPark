@@ -338,7 +338,9 @@ public class Server extends AbstractServer {
 				//get in the new car to the lot. expected format: {DELIVER_VEHICLE, parkingEvent}
 				case DELIVER_VEHICLE:
 					ParkingEvent newParkingEvent = (ParkingEvent) data[1];
-
+					
+					//change status of inactive orders
+					db.inactiveReservations();
 					// Inserting the parking event into the DB
 					db.addParkingEvent(newParkingEvent);
 
