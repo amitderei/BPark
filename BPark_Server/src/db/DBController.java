@@ -1787,7 +1787,7 @@ public class DBController {
 	public void inactiveReservations() {
 		String query="UPDATE `order` SET `status`='INACTIVE' WHERE `status`='ACTIVE' AND TIMESTAMP(order_date, arrival_time) <= NOW() - INTERVAL 15 MINUTE;";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			
+			int rowsUpdated = stmt.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("Error inactive reservations: "+e.getMessage());
 			e.printStackTrace();
