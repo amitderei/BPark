@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 import client.ClientController;
 import common.Order;
+import common.StatusOfOrder;
 import common.Subscriber;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -245,12 +246,12 @@ public class CreateNewOrderViewController implements ClientAware {
 			String formattedCode = String.format("%06d", randomCode);
 			newOrder = new Order(
 					1,               // dummy order number (server assigns real PK)
-					55,              // parking lot ID (single lot in this project)
+					55,              // dummy parking space
 					selectedDate,
 					timeOfArrival,
 					formattedCode,
 					subscriberNum,
-					Date.valueOf(LocalDate.now()));
+					Date.valueOf(LocalDate.now()), StatusOfOrder.ACTIVE);
 
 			client.addNewOrder(newOrder);
 		}

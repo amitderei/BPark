@@ -81,7 +81,7 @@ public class DBController {
 		try {
 			conn.close(); // close JDBC connection
 		} catch (Exception e) {
-			System.out.println("Error! " + e.getMessage()); // log if failed
+			System.out.println("Error to disconnect from DB " + e.getMessage()); // log if failed
 		}
 	}
 
@@ -394,7 +394,7 @@ public class DBController {
 				}
 			}
 		} catch (SQLException e) {
-			System.out.println("Error! " + e.getMessage());
+			System.out.println("Error get a parking space" + e.getMessage());
 		}
 		return -1;
 	}
@@ -409,7 +409,7 @@ public class DBController {
 	 * @return true\false
 	 */
 	public synchronized boolean parkingSpaceCheckingForNewOrder(Date date, Time time) {
-		String query = "SELECT (100-COUNT(DISTINCT parking_space))>=40 AS canOrder FROM( SELECT parking_space, TIMESTAMP (order_date, arrival_time) AS startTime, DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime FROM bpark.order) AS orders WHERE startTime<? AND endTime>?";
+		String query = "SELECT (100-COUNT(DISTINCT parking_space))>=40 AS canOrder FROM( SELECT parking_space, TIMESTAMP (order_date, arrival_time) AS startTime, DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime, status FROM bpark.order) AS orders WHERE startTime<? AND endTime>? AND `status`='ACTIVE'";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			Timestamp requestToStart = Timestamp.valueOf(date.toString() + " " + time.toString());
 			Timestamp requestToEnd = new Timestamp(requestToStart.getTime() + 46060 * 1000);
@@ -421,7 +421,7 @@ public class DBController {
 				}
 			}
 		} catch (SQLException e) {
-			System.out.println("Error! " + e.getMessage());
+			System.out.println("Error parking space checking " + e.getMessage());
 		}
 		return false;
 	}
@@ -446,7 +446,7 @@ public class DBController {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Error! " + e.getMessage());
+			System.out.println("Error set order id " + e.getMessage());
 		}
 	}
 
@@ -457,7 +457,7 @@ public class DBController {
 	 * @param newOrder
 	 */
 	public boolean placingAnNewOrder(Order newOrder) {
-		String query = "INSERT INTO `order` (parking_space, order_date, arrival_time ,confirmation_code, subscriberCode, date_of_placing_an_order) VALUES (?, ?, ?, ?, ?, ?)";
+		String query = "INSERT INTO `order` (parking_space, order_date, arrival_time ,confirmation_code, subscriberCode, date_of_placing_an_order, `status`) VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')";
 		int parking_space_id = getParkingSpace(newOrder.getArrivalTime(), newOrder.getOrderDate());
 		newOrder.setParkingSpace(parking_space_id);
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -477,7 +477,7 @@ public class DBController {
 			}
 		} catch (Exception e) {
 			// Error during update execution
-			System.out.println("Error! " + e.getMessage());
+			System.out.println("Error placing new order " + e.getMessage());
 			return false;
 		}
 	}
@@ -506,7 +506,7 @@ public class DBController {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Error! " + e.getMessage());
+			System.out.println("Error get details of subscriber " + e.getMessage());
 		}
 		return null;
 	}
@@ -525,7 +525,7 @@ public class DBController {
 	 */
 	public boolean checkSubscriberHasReservationNow(int subscriberCode) {
 
-		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ?";
+		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ? AND `status`='ACTIVE'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriberCode);
@@ -569,7 +569,7 @@ public class DBController {
 	 *         and the current time is within the allowed window, false otherwise
 	 */
 	public boolean checkConfirmationCode(int subscriberCode, int confirmationCode) {
-		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ? AND confirmation_code = ?";
+		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ? AND confirmation_code = ? AND `status`='ACTIVE'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriberCode);
@@ -594,6 +594,12 @@ public class DBController {
 
 					// If current time is between arrivalTime and arrivalTime + 15 minutes
 					if (!now.isBefore(arrivalTime) && now.isBefore(latestAllowedEntry)) {
+						String newQuery="UPDATE `order` SET `status`='FULFILLED' WHERE subscriberCode = ? AND confirmation_code = ? AND `status`='ACTIVE'";
+						try (PreparedStatement updateStmt = conn.prepareStatement(newQuery)) {
+							updateStmt.setInt(1, subscriberCode);
+							updateStmt.setInt(2, confirmationCode);
+							updateStmt.executeUpdate();
+						}
 						return true; // Valid reservation window
 					}
 				}
@@ -776,7 +782,7 @@ public class DBController {
 	 * @return arrayList of subscriber's reservations
 	 */
 	public ArrayList<Order> returnReservationOfSubscriber(Subscriber subscriber) {
-		String query = "SELECT * FROM `order` WHERE subscriberCode=? AND order_date>CURDATE()+INTERVAL 1 DAY";
+		String query = "SELECT * FROM `order` WHERE subscriberCode=? AND order_date>CURDATE()+INTERVAL 1 DAY AND `status`='ACTIVE'";
 		ArrayList<Order> orders = new ArrayList<>();
 		int subsCode = subscriber.getSubscriberCode();
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -785,7 +791,7 @@ public class DBController {
 				while (rs.next()) {
 					Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
 							rs.getDate("order_date"), rs.getTime("arrival_time"), rs.getString("confirmation_code"),
-							rs.getInt("subscriberCode"), rs.getDate("date_of_placing_an_order"));
+							rs.getInt("subscriberCode"), rs.getDate("date_of_placing_an_order"), StatusOfOrder.ACTIVE);
 					orders.add(newOrder);
 				}
 				return orders;
@@ -803,7 +809,7 @@ public class DBController {
 	 * @return true if succeed, else- false
 	 */
 	public boolean deleteOrder(int orderNumber) {
-		String query = "DELETE FROM `order` WHERE order_number=?";
+		String query = "UPDATE `order` SET `status`='CANCELLED' WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, orderNumber);
 			int ifDelete = stmt.executeUpdate();
@@ -1746,7 +1752,7 @@ public class DBController {
 	 * if there is it would return true, false otherwise
 	 */
 	public boolean checkIfOrderAlreadyExists(int subscriberCode, Date selectedDate, Time timeOfArrival) {
-	    String query = "SELECT * FROM bpark.order WHERE subscriberCode = ? AND order_date = ? AND arrival_time = ?";
+	    String query = "SELECT * FROM bpark.order WHERE subscriberCode = ? AND order_date = ? AND arrival_time = ? AND `status`='ACTIVE'";
 
 	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
 	        stmt.setInt(1, subscriberCode);
@@ -1779,4 +1785,16 @@ public class DBController {
 		return null;
 	}
 
+	/**
+	 * set inactive order after 15 minutes from arrival time
+	 */
+	public void inactiveReservations() {
+		String query="UPDATE `order` SET `status`='INACTIVE' WHERE `status` = 'ACTIVE'  AND TIMESTAMP(order_date, arrival_time) <= NOW() - INTERVAL 15 MINUTE;";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			
+		} catch (SQLException e) {
+			System.out.println("Error inactive reservations: "+e.getMessage());
+			e.printStackTrace();
+		}
+	}
 }

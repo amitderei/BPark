@@ -34,6 +34,11 @@ public class Order implements Serializable {
 
     /** Time when the vehicle is expected to arrive */
     private Time arrivalTime;
+    
+    /** 
+     * the status of order: active, in active...
+     */
+    private StatusOfOrder status;
 
     /**
      * Constructs an Order object with all relevant fields.
@@ -45,9 +50,10 @@ public class Order implements Serializable {
      * @param confirmationCode     Code used to confirm the order
      * @param subscriberId         ID of the subscriber who placed the order
      * @param dateOfPlacingAnOrder Date when the order was submitted
-     */
+     * @param status the status of order
+     **/
     public Order(int orderNumber, int parkingSpace, Date orderDate, Time arrivalTime, String confirmationCode,
-                 int subscriberId, Date dateOfPlacingAnOrder) {
+                 int subscriberId, Date dateOfPlacingAnOrder, StatusOfOrder status) {
         this.orderNumber = orderNumber;
         this.parkingSpace = parkingSpace;
         this.orderDate = orderDate;
@@ -55,6 +61,7 @@ public class Order implements Serializable {
         this.confirmationCode = confirmationCode;
         this.subscriberId = subscriberId;
         this.dateOfPlacingAnOrder = dateOfPlacingAnOrder;
+        this.status=status;
     }
 
     /**
