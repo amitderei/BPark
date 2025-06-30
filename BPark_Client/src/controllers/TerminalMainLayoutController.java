@@ -40,6 +40,9 @@ public class TerminalMainLayoutController implements ClientAware {
 	/** Button to begin the car retrieval flow */
 	@FXML
 	private Button btnRetrieveVehicle;
+	
+	@FXML
+	private Button btnExtendParking;
 
 	/** Button to check current parking availability */
 	@FXML
@@ -115,6 +118,12 @@ public class TerminalMainLayoutController implements ClientAware {
 	private void handleRetrieveVehicle() {
 		loadScreen("/client/VehiclePickupScreen.fxml");
 	}
+	
+	@FXML
+	private void handleExtendParking() {
+		loadScreen("/client/ExtendParkingScreen.fxml");
+	}
+
 
 	/**
 	 * Loads the screen that shows current spot availability. Triggered when the
@@ -145,17 +154,25 @@ public class TerminalMainLayoutController implements ClientAware {
 			if (ctrl instanceof CreateNewOrderViewController c) {
 				client.setNewOrderController(c);
 				c.initializeCombo();
-			} else if (ctrl instanceof WatchAndCancelOrdersController c) {
+			} 
+			else if (ctrl instanceof WatchAndCancelOrdersController c) {
 				client.setWatchAndCancelOrdersController(c);
 				c.defineTable();
-			} else if (ctrl instanceof VehiclePickupController c) {
+			} 
+			else if (ctrl instanceof VehiclePickupController c) {
 				client.setPickupController(c);
-			} else if (ctrl instanceof VehicleDeliveryController c) {
+			} 
+			else if (ctrl instanceof VehicleDeliveryController c) {
 				client.setDeliveryController(c);
-			} else if (ctrl instanceof AvailabilityController c) {
+			} 
+			else if (ctrl instanceof AvailabilityController c) {
 				client.setAvailabilityController(c);
 				client.requestParkingAvailability();
 			}
+			else if (ctrl instanceof ExtendParkingController c) {
+				client.setExtendParkingController(c);
+			}
+
 
 			// Display the loaded screen
 			center.getChildren().setAll(content);

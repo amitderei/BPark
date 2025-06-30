@@ -34,6 +34,11 @@
                         onAction="#handleRetrieveVehicle"
                         prefHeight="44.0" prefWidth="209.0"
                         text="Retrieve Vehicle" />
+                <Button fx:id="btnExtendParking"
+				        mnemonicParsing="false"
+				        onAction="#handleExtendParking"
+				        prefHeight="44.0" prefWidth="209.0"
+				        text="Extend Parking Time" />
                 <Button fx:id="btnCheckAvailability"
                         mnemonicParsing="false"
                         onAction="#handleCheckAvailability"

@@ -1173,17 +1173,33 @@ public class DBController {
 	 *         including a message explaining the result
 	 */
 	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
-		final String sql =
-				"UPDATE bpark.parkingEvent " +
-						"SET wasExtended = TRUE " +
-						"WHERE parkingCode = ? " +
-						"AND subscriberCode = ? " +
-						"AND exitDate IS NULL AND exitHour IS NULL " +
-						"AND wasExtended = FALSE";
+		String sql;
+		boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
+
+		// Case 1: Extend by parking code only (used by terminal)
+		if (!useSubscriberCode) {
+			sql = "UPDATE bpark.parkingEvent " +
+					"SET wasExtended = TRUE " +
+					"WHERE parkingCode = ? " +
+					"AND exitDate IS NULL AND exitHour IS NULL " +
+					"AND wasExtended = FALSE";
+		} 
+		// Case 2: Extend with verification of subscriberCode (used by subscriber)
+		else {
+			sql = "UPDATE bpark.parkingEvent " +
+					"SET wasExtended = TRUE " +
+					"WHERE parkingCode = ? " +
+					"AND subscriberCode = ? " +
+					"AND exitDate IS NULL AND exitHour IS NULL " +
+					"AND wasExtended = FALSE";
+		}
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 			stmt.setInt(1, parkingCode);
-			stmt.setString(2, subscriberCode);
+			if (useSubscriberCode) {
+				stmt.setString(2, subscriberCode);
+			}
+
 			int rowsAffected = stmt.executeUpdate();
 
 			if (rowsAffected > 0) {
@@ -1196,6 +1212,7 @@ public class DBController {
 			return new ServerResponse(false, null, "Database error: " + e.getMessage());
 		}
 	}
+
 
 	/**
 	 * Generates the next available subscriber code by retrieving the current maximum
