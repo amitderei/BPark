@@ -784,7 +784,7 @@ public class DBController {
 	 * @return arrayList of subscriber's reservations
 	 */
 	public ArrayList<Order> returnReservationOfSubscriber(Subscriber subscriber) {
-		String query = "SELECT * FROM `order` WHERE subscriberCode=? AND order_date>CURDATE()+INTERVAL 1 DAY AND `status`='ACTIVE'";
+		String query = "SELECT * FROM `order` WHERE subscriberCode=? AND TIMESTAMP(order_date, arrival_time) > NOW() + INTERVAL 15 MINUTE AND `status`='ACTIVE'";
 		ArrayList<Order> orders = new ArrayList<>();
 		int subsCode = subscriber.getSubscriberCode();
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
