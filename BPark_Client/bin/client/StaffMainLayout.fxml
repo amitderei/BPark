@@ -11,7 +11,7 @@
 <BorderPane prefHeight="500.0" prefWidth="800.0"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.StaffMainLayoutController">
+            fx:controller="controllers.StaffMainLayoutController" stylesheets="@TerminalMainLayout.css">
     <top>
         <ToolBar>
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />

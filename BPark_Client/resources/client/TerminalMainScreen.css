@@ -1,0 +1,13 @@
+.root {
+	-fx-background-color: #EEF3F6;
+}
+
+.welcome-box {
+	-fx-background-color: #ffffff;
+	-fx-border-color: #cccccc;
+	-fx-border-width: 2;
+	-fx-background-radius: 10;
+	-fx-border-radius: 10;
+	-fx-padding: 30;
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 15, 0, 0, 4);
+}
