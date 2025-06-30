@@ -10,7 +10,7 @@
 
 <AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@ExtendParkingScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ExtendParkingController">
     <VBox alignment="CENTER" layoutX="10.0" layoutY="11.0" prefHeight="430.0" prefWidth="577.0" spacing="20" styleClass="extend-box">
-      <Label text="Extend Parking Time">
+      <Label styleClass="headline" text="Extend Parking Time">
          <font>
             <Font name="System Bold" size="25.0" />
          </font>

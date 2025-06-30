@@ -7,8 +7,6 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@VehicleDeliveryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleDeliveryController">
    <children>
@@ -37,11 +35,6 @@
          <children>
             <TextField fx:id="subscriberCodeField" prefHeight="28.0" prefWidth="227.0" promptText="e.g. 1001" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="26.0" prefWidth="102.0" styleClass="code-btn" text="Verify Code" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Vehicle Delivery " textAlignment="CENTER" wrappingWidth="293.5" GridPane.columnIndex="2" GridPane.halignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="25.0" />
-               </font>
-            </Text>
             <Label fx:id="subscriberCodeLabel" prefHeight="18.0" prefWidth="276.0" text=" " visible="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             <Label text=" Subscriber code :" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label fx:id="ReservationORRegularEnteranceLabel" prefHeight="18.0" prefWidth="250.0" text="Enter to the Parking Lot (based on free place)" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
@@ -56,6 +49,7 @@
             <Label fx:id="TagStatusUpdateLabel" prefHeight="18.0" prefWidth="165.0" text=" " visible="false" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Label fx:id="parkingCodeLabel" prefHeight="18.0" prefWidth="238.0" text=" PARKING CODE : XXXXXX" visible="false" GridPane.columnIndex="3" GridPane.rowIndex="9" />
             <Label fx:id="vehicleHasEnteredLabel" prefHeight="18.0" prefWidth="238.0" text="The vehicle is Already inside the parking lot!" textFill="RED" visible="false" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+            <Label prefHeight="35.0" prefWidth="197.0" styleClass="delivery-headline" text="Vehicle Delivery" GridPane.columnIndex="0" GridPane.columnSpan="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
          </children>
       </GridPane>
    </children>
