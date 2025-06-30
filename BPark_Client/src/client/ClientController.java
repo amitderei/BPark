@@ -246,7 +246,7 @@ public class ClientController extends AbstractClient {
 
 
 			if (!response.isSucceed() && loginController != null
-					&& response.getMsg().toLowerCase().contains("invalid")) {
+					&& response.getMsg().toLowerCase().contains("invalid username or password")) {
 				loginController.handleLoginFailure(response.getMsg());
 				return;
 			}
@@ -431,8 +431,9 @@ public class ClientController extends AbstractClient {
 
 			// Handle extension response (ExtendParkingController)
 			if (response.getMsg() != null &&
-					(response.getMsg().toLowerCase().contains("parking session extended successfully") ||
-							response.getMsg().toLowerCase().contains("no active parking session found"))) {
+				    (response.getMsg().toLowerCase().contains("parking session extended successfully") ||
+				     response.getMsg().toLowerCase().contains("no active parking session found") ||
+				     response.getMsg().toLowerCase().contains("invalid code"))) {
 
 				if (extendParkingController != null) {
 					extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
