@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="500.0" prefWidth="800.0" stylesheets="@TerminalMainLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubscriberMainLayoutController" >
+<BorderPane prefHeight="500.0" prefWidth="800.0" stylesheets="@TerminalMainLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubscriberMainLayoutController">
     <top>
         <ToolBar styleClass="toolbar">
             <Button fx:id="btnLogout" onAction="#handleLogoutClick" text="🔓 Logout" />
@@ -24,7 +24,7 @@
         </ToolBar>
     </top>
     <left>
-        <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
+        <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" styleClass="menu-box" BorderPane.alignment="CENTER">
             <children>
                 <Button fx:id="btnViewPersonalInfo" mnemonicParsing="false" onAction="#handleViewPersonalInfo" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="View Personal Info" />
                 <Button fx:id="btnViewParkingHistory" mnemonicParsing="false" onAction="#handleViewParkingHistory" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="View Parking History" />

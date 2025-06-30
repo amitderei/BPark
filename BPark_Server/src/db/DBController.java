@@ -1503,6 +1503,9 @@ public class DBController {
 			while (rs.next()) {
 				totalEntries++;
 
+				if (rs.getDate("exitDate") == null || rs.getTime("exitHour") == null) {
+				    continue;
+				}
 				LocalDateTime entryDateTime = LocalDateTime.of(rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime());
 				LocalDateTime exitDateTime = LocalDateTime.of(rs.getDate("exitDate").toLocalDate(), rs.getTime("exitHour").toLocalTime());
 
