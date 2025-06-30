@@ -14,12 +14,14 @@ import javafx.scene.layout.AnchorPane;
 import ui.UiUtils;
 
 /**
- * Root layout for the physical kiosk / terminal used by parking-lot staff.
- * Fixed parts: top bar (Home / Back / Exit) and a small side-menu listing the
- * two main flows – "Submit Vehicle" (delivery) and "Retrieve Vehicle" (pickup)
- * – plus a quick availability check.
+ * Main layout for the physical terminal (kiosk) used by subscribers at the parking lot.
+ * The layout includes a top bar and a side menu with quick actions:
+ * - Submit vehicle (enter the parking lot)
+ * - Retrieve vehicle (collect the car)
+ * - Extend parking session
+ * - Check availability
  *
- * Child screens are loaded into the centre pane by loadScreen().
+ * All other screens are loaded into the center panel.
  */
 public class TerminalMainLayoutController implements ClientAware {
 
@@ -119,6 +121,9 @@ public class TerminalMainLayoutController implements ClientAware {
 		loadScreen("/client/VehiclePickupScreen.fxml");
 	}
 	
+    /**
+     * Opens the screen to extend an active parking session.
+     */
 	@FXML
 	private void handleExtendParking() {
 		loadScreen("/client/ExtendParkingScreen.fxml");
