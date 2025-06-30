@@ -250,11 +250,11 @@ public class DBController {
 			event = getOpenParkingEvent(subscriberCode, parkingCode);
 		} catch (SQLException e) {
 			System.err.println("Error retrieving parking event: " + e.getMessage());
-			return new ServerResponse(false, null, "An error occurred while retrieving your parking session.");
+			return new ServerResponse(false, null, null, "An error occurred while retrieving your parking session.");
 		}
 
 		if (event == null) {
-			return new ServerResponse(false, null, "No active parking session found for the provided information.");
+			return new ServerResponse(false, null, null, "No active parking session found for the provided information.");
 		}
 
 		try {
@@ -270,14 +270,14 @@ public class DBController {
 			if (hours > allowedHours) {
 				System.out.println(
 						"[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
-				return new ServerResponse(true, null, "Pickup successful with delay. A notification was sent.");
+				return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Pickup successful with delay. A notification was sent.");
 			}
 
-			return new ServerResponse(true, null, "Vehicle pickup successful (" + hours + " hours).");
+			return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Vehicle pickup successful (" + hours + " hours).");
 
 		} catch (SQLException e) {
 			System.err.println("Failed to finalize parking event: " + e.getMessage());
-			return new ServerResponse(false, null, "An error occurred while completing the pickup process.");
+			return new ServerResponse(false, null, null, "An error occurred while completing the pickup process.");
 		}
 	}
 
@@ -1206,13 +1206,13 @@ public class DBController {
 			int rowsAffected = stmt.executeUpdate();
 
 			if (rowsAffected > 0) {
-				return new ServerResponse(true, null, "Parking session extended successfully.");
+				return new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, "Parking session extended successfully.");
 			} else {
-				return new ServerResponse(false, null, "Invalid code.");
+				return new ServerResponse(false, null, null, "Invalid code.");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return new ServerResponse(false, null, "Database error: " + e.getMessage());
+			return new ServerResponse(false, null, null, "Database error: " + e.getMessage());
 		}
 	}
 

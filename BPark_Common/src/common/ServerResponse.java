@@ -1,3 +1,4 @@
+
 package common;
 
 import java.io.Serializable;
@@ -19,19 +20,24 @@ public class ServerResponse implements Serializable {
 	/** Optional data returned as part of the response (can be null) */
 	private Object data;
 
+	/** Type of response */
+	private ResponseType type;
+	
 	/** Message for the client (e.g., error, success info, etc.) */
-	private String msg;
-
+	private String msg;	
+	
 	/**
 	 * Full constructor for ServerResponse.
 	 *
 	 * @param succeed whether the operation was successful
 	 * @param data    the object returned (can be null)
+	 * @param type    the type of response that the server 
 	 * @param msg     message to display to user
 	 */
-	public ServerResponse(boolean succeed, Object data, String msg) {
+	public ServerResponse(boolean succeed, Object data, ResponseType type,String msg) {
 		this.succeed = succeed;
 		this.data = data;
+		this.type = type;
 		this.msg = msg;
 	}
 
@@ -61,5 +67,17 @@ public class ServerResponse implements Serializable {
 	public String getMsg() {
 		return msg;
 	}
+	
+	/**
+	 * Returns the response type enum which describes what this response means.
+	 *
+	 * @return ResponseType enum value
+	 */
+	public ResponseType getType() {
+		return type;
+	}
+	
 }
+
+
 

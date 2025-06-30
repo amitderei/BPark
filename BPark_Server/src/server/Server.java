@@ -78,10 +78,10 @@ public class Server extends AbstractServer {
 				case ASK_FOR_RESERVATIONS:
 					ArrayList<Order> orders = db.returnReservationOfSubscriber((Subscriber) data[1]);
 					if (orders.isEmpty()) {
-						client.sendToClient(new ServerResponse(true, null, "No orders."));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.NO_ORDERS, "No orders."));
 					} else {
 						client.sendToClient(
-								new ServerResponse(true, orders, "Orders of subscriber displayed successfully."));
+								new ServerResponse(true, orders, ResponseType.ORDERS_DISPLAY, "Orders of subscriber displayed successfully."));
 					}
 					break;
 				//cancel order of subscriber. expected format: {DELETE_ORDER, orderNumber}
@@ -89,9 +89,9 @@ public class Server extends AbstractServer {
 					int orderNumberToDelete = (int) data[1];
 					boolean succeed = db.deleteOrder(orderNumberToDelete);
 					if (succeed) {
-						client.sendToClient(new ServerResponse(true, null, "order deleted successfully."));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.ORDER_DELETED ,"order deleted successfully."));
 					} else {
-						client.sendToClient(new ServerResponse(false, null, "order didn't delete"));
+						client.sendToClient(new ServerResponse(false, null, null ,"order didn't delete"));
 					}
 					break;
 				//get parking history of subscriber. expected format: {UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber}
@@ -99,12 +99,12 @@ public class Server extends AbstractServer {
 					ArrayList<ParkingEvent> history = db.parkingHistoryOfSubscriber((Subscriber) data[1]);
 					if (history == null) {
 						client.sendToClient(
-								new ServerResponse(false, null, "There was an error loading parking history."));
+								new ServerResponse(false, null, null, "There was an error loading parking history."));
 					} else if (history.isEmpty()) {
-						client.sendToClient(new ServerResponse(false, null, "There is no data for this user."));
+						client.sendToClient(new ServerResponse(false, null, null, "There is no data for this user."));
 					} else {
 						client.sendToClient(
-								new ServerResponse(true, history, "Parking history data loaded successfully."));
+								new ServerResponse(true, history, ResponseType.PARKING_HISTORY_LOADED, "Parking history data loaded successfully."));
 					}
 					break;
 				//return the parking report. expected format {GET_PARKING_REPORT, parkingReport}
@@ -113,9 +113,9 @@ public class Server extends AbstractServer {
 
 					if (parkingReport == null) {
 						client.sendToClient(
-								new ServerResponse(false, null, "There was an error loading parking report."));
+								new ServerResponse(false, null, null,  "There was an error loading parking report."));
 					} else {
-						client.sendToClient(new ServerResponse(true, parkingReport, "Parking report loaded."));
+						client.sendToClient(new ServerResponse(true, parkingReport, ResponseType.PARKING_REPORT_LOADED, "Parking report loaded."));
 					}
 					break;
 				//return the dates of the reports. expected format {GET_DATES_OF_REPORTS}
@@ -123,19 +123,19 @@ public class Server extends AbstractServer {
 					ArrayList<Date> dates = db.getAllReportsDates();
 					if (dates == null) {
 						client.sendToClient(
-								new ServerResponse(false, null, "There was an error loading parking report dates."));
+								new ServerResponse(false, null, null , "There was an error loading parking report dates."));
 					} else {
-						client.sendToClient(new ServerResponse(true, dates, "Parking report dates loaded."));
+						client.sendToClient(new ServerResponse(true, dates, ResponseType.REPOSTS_DATE_LOADED , "Parking report dates loaded."));
 					}
 					break;
 				//return the data of active parking of subscriber. expected format {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
 				case GET_DETAILS_OF_ACTIVE_INFO:
 					ParkingEvent parkingEvent = db.getActiveParkingEvent((Subscriber) data[1]);
 					if (parkingEvent == null) {
-						client.sendToClient(new ServerResponse(false, null, "There is no active parking."));
+						client.sendToClient(new ServerResponse(false, null, null, "There is no active parking."));
 					} else {
 						client.sendToClient(
-								new ServerResponse(true, parkingEvent, "Active parking info loaded successfully."));
+								new ServerResponse(true, parkingEvent, ResponseType.PARKING_INFO_LOADED, "Active parking info loaded successfully."));
 					}
 					break;
 				//send mail to subscriber that forget the parking code. expected format {FORGEOT_MY_PARKING_CODE, subscriberCode}
@@ -146,11 +146,11 @@ public class Server extends AbstractServer {
 						String phone = emailAndPhone[1];
 						ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
 						sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
-						client.sendToClient(new ServerResponse(true, null, "The code was sent to your email."));
+						client.sendToClient(new ServerResponse(true, null, null, "The code was sent to your email."));
 					} catch (Exception e) {
 						e.printStackTrace();
 						client.sendToClient(
-								new ServerResponse(false, null, "Failed to send email. Please try again later."));
+								new ServerResponse(false, null, null, "Failed to send email. Please try again later."));
 					}
 					break;
 				// Validate subscriber by tag.  expected format {VALIDATE_SUBSCRIBER_BY_TAG, tagId}
@@ -163,16 +163,16 @@ public class Server extends AbstractServer {
 						// Step 2: Ensure that the vehicle associated with this tag is inside the parking lot
 						if (!db.checkSubscriberEntered(subscriberCode)) {
 							client.sendToClient(
-									new ServerResponse(false, null, "Your vehicle is not currently parked."));
+									new ServerResponse(false, null, null, "Your vehicle is not currently parked."));
 							return;
 						}
 
 						// Step 3: Valid tag and active parking -> send subscriber code for client use
 						client.sendToClient(
-								new ServerResponse(true, subscriberCode, "Subscriber verified successfully by tag."));
+								new ServerResponse(true, subscriberCode, ResponseType.SUBSCRIBER_VERIFIED , "Subscriber verified successfully by tag."));
 					} else {
 						client.sendToClient(
-								new ServerResponse(false, null, "Tag ID not recognized. Please try again."));
+								new ServerResponse(false, null, null, "Tag ID not recognized. Please try again."));
 					}
 					break;
 				// Validate subscriber by numeric code. expected format {VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE, subscriberCode}
@@ -181,18 +181,18 @@ public class Server extends AbstractServer {
 
 					// Step 1: Verify that subscriber exists in DB
 					if (!db.subscriberExists(validateSubscriberCode)) {
-						client.sendToClient(new ServerResponse(false, null, "Subscriber code not found."));
+						client.sendToClient(new ServerResponse(false, null, null, "Subscriber code not found."));
 					}
 
 					// Step 2: Check that the subscriber's vehicle is currently parked (active
 					// session)
 					else if (!db.checkSubscriberEntered(validateSubscriberCode)) {
-						client.sendToClient(new ServerResponse(false, null, "Your vehicle is not currently parked."));
+						client.sendToClient(new ServerResponse(false, null, null, "Your vehicle is not currently parked."));
 					}
 
 					// Step 3: If both checks pass, approve validation
 					else {
-						client.sendToClient(new ServerResponse(true, null, "Subscriber verified"));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.SUBSCRIBER_VERIFIED, "Subscriber verified"));
 					}
 					break;
 				// Login request. expected format {LOGIN, username. password}
@@ -208,7 +208,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(response);
 					} catch (Exception e) {
 						client.sendToClient(
-								new ServerResponse(false, null, "An error occurred while collecting the vehicle."));
+								new ServerResponse(false, null, null, "An error occurred while collecting the vehicle."));
 						System.err.println("Error: collectCar - " + e.getMessage());
 					}
 					break;
@@ -228,9 +228,9 @@ public class Server extends AbstractServer {
 						newDetails.add(user);
 					}
 					if (isSucceedSubscriber && isSucceedUser) {
-						client.sendToClient(new ServerResponse(true, newDetails, "Details updated successfully."));
+						client.sendToClient(new ServerResponse(true, newDetails, ResponseType.DETAILS_UPDATED, "Details updated successfully."));
 					} else {
-						client.sendToClient(new ServerResponse(false, null,
+						client.sendToClient(new ServerResponse(false, null, null,
 								"The update did not occur due to a problem. Please try again later."));
 					}
 					break;
@@ -239,18 +239,18 @@ public class Server extends AbstractServer {
 					Subscriber subscriber = db.getDetailsOfSubscriber((User) data[1]);
 					if (subscriber != null) {
 						client.sendToClient(
-								new ServerResponse(true, subscriber, "Subscriber details saved successfully."));
+								new ServerResponse(true, subscriber, ResponseType.SUBSCRIBER_DETAILS , "Subscriber details saved successfully."));
 					} else {
-						client.sendToClient(new ServerResponse(false, null, "Subscriber details not found."));
+						client.sendToClient(new ServerResponse(false, null, null, "Subscriber details not found."));
 					}
 					break;
 				//check availability for order (at least 40%). expected format={CHECK_AVAILABILITY_FOR_ORDER, date, time}
 				case CHECK_AVAILABILITY_FOR_ORDER:
 					boolean possible = db.parkingSpaceCheckingForNewOrder((Date) data[1], (Time) data[2]);
 					if (possible) {
-						client.sendToClient(new ServerResponse(true, null, "Can make resarvation"));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.RESERVATION_VALID, "Can make resarvation"));
 					} else {
-						client.sendToClient(new ServerResponse(false, null, "Can't make resarvation because no availability"));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.RESERVATION_INVALID, "Can't make resarvation because no availability"));
 					}
 					break;
 				//add a new reservation. expected format: {ADD_NEW_ORDER, order}
@@ -259,9 +259,9 @@ public class Server extends AbstractServer {
 					boolean success = db.placingAnNewOrder(orderToAdd);
 
 					if (success) {
-						client.sendToClient(new ServerResponse(true, orderToAdd, "reservation succeed!"));
+						client.sendToClient(new ServerResponse(true, orderToAdd,ResponseType.ORDER_ADDED, "reservation succeed!"));
 					} else {
-						client.sendToClient(new ServerResponse(false, null, "reservation not succeed!"));
+						client.sendToClient(new ServerResponse(false, null, null, "reservation not succeed!"));
 					}
 					break;
 				//check if there is a subscriber with this subscriber code. expected format: {SUBSCRIBER_EXISTS, subscriberCode}
@@ -271,11 +271,11 @@ public class Server extends AbstractServer {
 					// Checking whether the code exists or not
 					if (!db.subscriberExists(codeInt)) {
 						// If the code doesn't exist we will let the user to know
-						client.sendToClient(new ServerResponse(false, null, "Subscriber code does not exist."));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_CODE, "Subscriber code does not exist."));
 					}
 					// If the code does exist we will let the user to know and to continue
 					else {
-						client.sendToClient(new ServerResponse(true, null, "Subscriber code is valid!"));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.SUBSCRIBER_CODE, "Subscriber code is valid!"));
 					}
 					break;
 				//check if the subscriber has a reservation right now. expected format: {CHECK_IF_THERE_IS_RERSERVATION, subscriberCode}
@@ -287,12 +287,12 @@ public class Server extends AbstractServer {
 					if (!db.checkSubscriberHasReservationNow(codeIntForCheckingReservation)) {
 						// If the subscriber doesn't have a reservation we will let the user to enter
 						// only regularly
-						client.sendToClient(new ServerResponse(true, null, "Subscriber doesn't have a reseravtion."));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.RESERVATION_NOT_EXISTS, "Subscriber doesn't have a reseravtion."));
 					}
 					// If the subscriber has a reservation we will let the user to enter with the
 					// existing reservation
 					else {
-						client.sendToClient(new ServerResponse(true, null, "Subscriber has a reservation."));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.RESERVATION_EXISTS, "Subscriber has a reservation."));
 					}
 					break;
 				//make the delivery via reservation of subscriber. expected format: {DELIVERY_VIA_RESERVATION, subscriberCode, confirmationCode}
@@ -303,12 +303,12 @@ public class Server extends AbstractServer {
 					// Checking whether the subscriber has entered his confirmation code correctly
 					if (!db.checkConfirmationCode(codeIntForDeliveryViaReservation, confirmationCodeInt)) {
 						// If the subscriber code hasn't entered correctly we will tell the user
-						client.sendToClient(new ServerResponse(false, null, "The confirmation code isn't currect."));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.CONFIRMATION_CODE_VALIDATION, "The confirmation code isn't currect."));
 					}
 					else {
 					// Letting the user know that he has entered the confirmation code successfully
 					client.sendToClient(
-							new ServerResponse(true, null, "The confirmation code has entered successfully."));
+							new ServerResponse(true, null, ResponseType.CONFIRMATION_CODE_VALIDATION, "The confirmation code has entered successfully."));
 					}
 					break;
 				//check if there is an empty parking spot in the parking lot. expected format: {IS_THERE_FREE_PARKING_SPACE, lotName}
@@ -319,11 +319,11 @@ public class Server extends AbstractServer {
 					// If the method hasAvaliableSpots returns -1 it means that the parking lot is
 					// full
 					if (parkingSpaceInt == -1) {
-						client.sendToClient(new ServerResponse(false, null, "The Parking Lot is Full"));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.PARKING_SPACE_AVAILABILITY , "The Parking Lot is Full"));
 					}
 					else {
 					// Else, we will sent the parking space to the client controller
-					client.sendToClient(new ServerResponse(true, parkingSpaceInt, "There is free parking space"));
+					client.sendToClient(new ServerResponse(true, parkingSpaceInt, ResponseType.PARKING_SPACE_AVAILABILITY , "There is free parking space"));
 					}
 					break;
 				//get vehicle id. expected format: {GET_VEHICLE_ID, subscriberCode}
@@ -334,7 +334,7 @@ public class Server extends AbstractServer {
 					String vehicleID = db.findVehicleID(codeIntForGetVehicleId);
 
 					// The server sends the matched vehicleID
-					client.sendToClient(new ServerResponse(true, vehicleID, "Found matched vehicle"));
+					client.sendToClient(new ServerResponse(true, vehicleID, ResponseType.VEHICLE_ID , "Found matched vehicle"));
 					break;
 				//get in the new car to the lot. expected format: {DELIVER_VEHICLE, parkingEvent}
 				case DELIVER_VEHICLE:
@@ -346,7 +346,7 @@ public class Server extends AbstractServer {
 					db.addParkingEvent(newParkingEvent);
 
 					// The server sends the successful addition of parking event
-					client.sendToClient(new ServerResponse(true, null, "Added parking event successfully"));
+					client.sendToClient(new ServerResponse(true, null, ResponseType.DELIVER_VEHICLE , "Added parking event successfully"));
 					break;
 				//check if tag exists. expected format: {TAG_EXISTS, tagId}
 				case TAG_EXISTS:
@@ -354,12 +354,12 @@ public class Server extends AbstractServer {
 
 					// Check whether the tag exists in the DB or not
 					if (!db.tagExists(tag)) {
-						client.sendToClient(new ServerResponse(false, null, "Tag does not exists"));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.TAG_EXISTS, "Tag does not exists"));
 						
 					}
 					else {
 					// The server sends that the tag has been found
-					client.sendToClient(new ServerResponse(true, null, "Tag exists"));
+					client.sendToClient(new ServerResponse(true, null, ResponseType.TAG_EXISTS ,"Tag exists"));
 					}
 					break;
 				//find a matched subscriber code to the tag ID. expected format: {FIND_MATCHED_SUBSCRIBER_TO_THE_TAG, tagId}
@@ -371,7 +371,7 @@ public class Server extends AbstractServer {
 
 					// The server sends the successful addition of parking event
 					client.sendToClient(
-							new ServerResponse(true, subsCode, "Subscriber with matching tag has been found"));
+							new ServerResponse(true, subsCode, ResponseType.MATCHED_SUBSCRIBER_TO_TAG, "Subscriber with matching tag has been found"));
 					break;
 				//check if subscriber already entered to the lot. expected format: {SUBSCRIBER_ALREADY_ENTERED, subscriberCode}
 				case SUBSCRIBER_ALREADY_ENTERED:
@@ -381,13 +381,13 @@ public class Server extends AbstractServer {
 						// The server will check whether the subscriber has already entered his vehicle
 						// into the parking lot or not
 						client.sendToClient(
-								new ServerResponse(true, null, "The subscriber didn't entered his vehicle yet"));
+								new ServerResponse(true, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE, "The subscriber didn't entered his vehicle yet"));
 					}
 					else {
 					// If this method will return true, it means that he already entered his vehicle
 					// into the parking lot
 					client.sendToClient(
-							new ServerResponse(false, null, "The vehicle is already inside the parking lot"));
+							new ServerResponse(false, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE, "The vehicle is already inside the parking lot"));
 					}
 					break;
 				//check if tag id already entered to lot. expected format: {TAG_ID_ALREADY_ENTERED, tadId}
@@ -397,25 +397,25 @@ public class Server extends AbstractServer {
 					if (!db.checkTagIDEntered(tagIdToCheckIfEntered)) {
 						// The server will check whether the vehicle that is matched with the tag is
 						// already inside the parking lot
-						client.sendToClient(new ServerResponse(true, null, "The tag isn't inside"));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE_BY_TAG, "The tag isn't inside"));
 					}
 					else {
 					// If this method will return true, it means that the vehicle that is matched
 					// with the tag is already inside the parking lot
 					client.sendToClient(
-							new ServerResponse(false, null, "The vehicle is Already inside the parking lot"));
+							new ServerResponse(false, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE, "The vehicle is Already inside the parking lot"));
 					}
 					break;
 				// return all subscribers and their late pickup counts. expected format: {GET_ALL_SUBSCRIBERS}
 				case GET_ALL_SUBSCRIBERS:
 					System.out.println("[SERVER] Received get_all_subscribers request");
 					ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
-					client.sendToClient(new ServerResponse(true, rows, "all_subscribers"));
+					client.sendToClient(new ServerResponse(true, rows,ResponseType.LATE_PICKUP_COUNTS,  "all_subscribers"));
 					break;
 				//get all parking event that active right now. expected format: {GET_ACTIVE_PARKINGS}
 				case GET_ACTIVE_PARKINGS:
 					List<ParkingEvent> events = db.getActiveParkingEvents();
-					client.sendToClient(new ServerResponse(true, events, "active_parkings"));
+					client.sendToClient(new ServerResponse(true, events, ResponseType.ACTIVE_PARKINGS , "active_parkings"));
 					break;
 				//get the data of parking availability. expected format: {GET_PARKING_AVAILABILITY}
 				case GET_PARKING_AVAILABILITY:
@@ -427,11 +427,11 @@ public class Server extends AbstractServer {
 						int available = total - occupied;
 
 						Object[] stats = new Object[] { total, occupied, available };
-						client.sendToClient(new ServerResponse(true, stats, "parking_availability"));
+						client.sendToClient(new ServerResponse(true, stats, ResponseType.PARKING_AVALIABILITY, "parking_availability"));
 					} catch (Exception e) {
 						e.printStackTrace();
 						client.sendToClient(
-								new ServerResponse(false, null, "Failed to retrieve parking availability."));
+								new ServerResponse(false, null, null, "Failed to retrieve parking availability."));
 					}
 					break;
 				//extend the parking event of subscriber. expected format: {"extendParking", parkingCode, subscriberCode(String)}
@@ -449,11 +449,11 @@ public class Server extends AbstractServer {
 					Time timeOfArrival = (Time) data[3];
 
 					if (!db.checkIfOrderAlreadyExists(subscriberCodeToCheckOrder, selectedDate, timeOfArrival)) {
-						client.sendToClient(new ServerResponse(true, null, "Order doesn't exists."));
+						client.sendToClient(new ServerResponse(true, null, ResponseType.ORDER_NOT_EXISTS, "Order doesn't exists."));
 					}
 					else {
 					client.sendToClient(
-							new ServerResponse(false, null, "This order already exists for this subscriber."));
+							new ServerResponse(false, null, ResponseType.ORDER_ALREADY_EXISTS, "This order already exists for this subscriber."));
 					}
 					break;
 				//register a new subscriber to the system. expected format: {REGISTER_SUBSCRIBER, subscriber}
@@ -463,20 +463,20 @@ public class Server extends AbstractServer {
 					// Step 0: Check if username, email, phone or ID already exists
 					if (db.usernameExists(receivedSub.getUsername())) {
 						client.sendToClient(
-								new ServerResponse(false, null, "Username already exists. Please choose another."));
+								new ServerResponse(false, null, null, "Username already exists. Please choose another."));
 						return;
 					}
 					if (db.emailExists(receivedSub.getEmail())) {
 						client.sendToClient(
-								new ServerResponse(false, null, "Email already registered. Use a different email."));
+								new ServerResponse(false, null, null, "Email already registered. Use a different email."));
 						return;
 					}
 					if (db.phoneExists(receivedSub.getPhoneNum())) {
-						client.sendToClient(new ServerResponse(false, null, "Phone number already in use."));
+						client.sendToClient(new ServerResponse(false, null, null, "Phone number already in use."));
 						return;
 					}
 					if (db.idExists(receivedSub.getUserId())) {
-						client.sendToClient(new ServerResponse(false, null,
+						client.sendToClient(new ServerResponse(false, null, null,
 								"ID already in use. Please verify the subscriber is not already registered."));
 						return;
 					}
@@ -495,7 +495,7 @@ public class Server extends AbstractServer {
 							.insertUser(new User(receivedSub.getUsername(), generatedPassword, "Subscriber"));
 
 					if (!userSuccess) {
-						client.sendToClient(new ServerResponse(false, null, "Failed to insert user. Try again later."));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_INSERTED, "Failed to insert user. Try again later."));
 						return;
 					}
 
@@ -521,10 +521,10 @@ public class Server extends AbstractServer {
 
 						sendEmail.sendEmail(receivedSub.getEmail(), content, TypeOfMail.GENERIC_MESSAGE);
 
-						client.sendToClient(new ServerResponse(true, receivedSub,
+						client.sendToClient(new ServerResponse(true, receivedSub, ResponseType.SUBSCRIBER_INSERTED ,
 								"Subscriber registered successfully. Login details sent via email."));
 					} else {
-						client.sendToClient(new ServerResponse(false, null, "Failed to insert subscriber. Try again."));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_INSERTED, "Failed to insert subscriber. Try again."));
 					}
 					break;
 				//get subscriber status report of selected date. expected format: {GET_SUBSCRIBER_STATUS_REPORT, month, year}
@@ -545,13 +545,13 @@ public class Server extends AbstractServer {
 
 						if (rowsOfSubscriberStatus.isEmpty()) { // past month with no snapshot
 							client.sendToClient(
-									new ServerResponse(false, null, "No snapshot available for " + month + "/" + year));
+									new ServerResponse(false, null, null, "No snapshot available for " + month + "/" + year));
 						} else {
-							client.sendToClient(new ServerResponse(true, rowsOfSubscriberStatus, "subscriber_status"));
+							client.sendToClient(new ServerResponse(true, rowsOfSubscriberStatus, ResponseType.SUBSCRIBER_STATUS, "subscriber_status"));
 						}
 					} catch (SQLException ex) {
 						ex.printStackTrace();
-						client.sendToClient(new ServerResponse(false, null, "subscriber_status"));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_STATUS, "subscriber_status"));
 					}
 					break;
 					
@@ -578,9 +578,9 @@ public class Server extends AbstractServer {
 
 		try {
 			if (user != null) {
-				client.sendToClient(new ServerResponse(true, user, "Login successful"));
+				client.sendToClient(new ServerResponse(true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
 			} else {
-				client.sendToClient(new ServerResponse(false, null, "Invalid username or password."));
+				client.sendToClient(new ServerResponse(false, null, ResponseType.LOGIN_FAILED, "Invalid username or password."));
 			}
 		} catch (IOException e) {
 			System.err.println("Error sending login response: " + e.getMessage());
