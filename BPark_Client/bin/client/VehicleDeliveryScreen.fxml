@@ -10,9 +10,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="453.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleDeliveryController">
+<AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@VehicleDeliveryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleDeliveryController">
    <children>
-      <GridPane layoutX="10.0" layoutY="9.0" prefHeight="433.0" prefWidth="580.0">
+      <GridPane layoutX="10.0" layoutY="9.0" prefHeight="433.0" prefWidth="580.0" styleClass="delivery-box">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.199951171875" minWidth="10.0" prefWidth="18.199993896484372" />
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="375.1999755859375" minWidth="10.0" prefWidth="267.0000061035156" />
@@ -36,10 +36,10 @@
          </rowConstraints>
          <children>
             <TextField fx:id="subscriberCodeField" prefHeight="28.0" prefWidth="227.0" promptText="e.g. 1001" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="26.0" prefWidth="102.0" text="Verify Code" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Vehicle Delivery : terminal" textAlignment="CENTER" wrappingWidth="293.5" GridPane.columnIndex="2" GridPane.halignment="CENTER">
+            <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="26.0" prefWidth="102.0" styleClass="code-btn" text="Verify Code" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Vehicle Delivery " textAlignment="CENTER" wrappingWidth="293.5" GridPane.columnIndex="2" GridPane.halignment="CENTER">
                <font>
-                  <Font name="Calibri" size="24.0" />
+                  <Font name="System Bold" size="25.0" />
                </font>
             </Text>
             <Label fx:id="subscriberCodeLabel" prefHeight="18.0" prefWidth="276.0" text=" " visible="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -52,7 +52,7 @@
             <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="294.0" text=" SUCCESSFUL DELIVER" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="10" />
             <Label text=" Or scan your tag :" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <TextField fx:id="TagCodeField" prefHeight="28.0" prefWidth="127.0" promptText="e.g. TAG_001" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Button fx:id="submitTagButton" mnemonicParsing="false" onAction="#handleTagDelivery" prefHeight="26.0" prefWidth="131.0" text="Verify Tag &amp; Deliver " GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Button fx:id="submitTagButton" mnemonicParsing="false" onAction="#handleTagDelivery" prefHeight="30.0" prefWidth="156.0" styleClass="tag-btn" text="Verify Tag &amp; Deliver " textAlignment="CENTER" textOverrun="WORD_ELLIPSIS" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Label fx:id="TagStatusUpdateLabel" prefHeight="18.0" prefWidth="165.0" text=" " visible="false" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Label fx:id="parkingCodeLabel" prefHeight="18.0" prefWidth="238.0" text=" PARKING CODE : XXXXXX" visible="false" GridPane.columnIndex="3" GridPane.rowIndex="9" />
             <Label fx:id="vehicleHasEnteredLabel" prefHeight="18.0" prefWidth="238.0" text="The vehicle is Already inside the parking lot!" textFill="RED" visible="false" GridPane.columnIndex="3" GridPane.rowIndex="8" />
@@ -60,9 +60,3 @@
       </GridPane>
    </children>
 </AnchorPane>
-
-
-
-
-
-
