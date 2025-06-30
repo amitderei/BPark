@@ -164,6 +164,7 @@ public class Server extends AbstractServer {
 						if (!db.checkSubscriberEntered(subscriberCode)) {
 							client.sendToClient(
 									new ServerResponse(false, null, "Your vehicle is not currently parked."));
+							return;
 						}
 
 						// Step 3: Valid tag and active parking -> send subscriber code for client use

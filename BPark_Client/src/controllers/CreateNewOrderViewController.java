@@ -111,7 +111,7 @@ public class CreateNewOrderViewController implements ClientAware {
 
 		LocalDate today     = LocalDate.now();
 		LocalDate tomorrow  = today.plusDays(1);
-		LocalDate nextWeek  = today.plusDays(8);  // inclusive upper bound
+		LocalDate nextWeek  = today.plusDays(7);  // inclusive upper bound
 
 		// Disable dates outside [tomorrow..nextWeek]
 		chooseDate.setDayCellFactory((Callback<DatePicker, DateCell>) picker -> new DateCell() {
@@ -135,7 +135,7 @@ public class CreateNewOrderViewController implements ClientAware {
 
 		LocalDate date      = chooseDate.getValue();
 		LocalDate tomorrow  = LocalDate.now().plusDays(1);
-		LocalDate nextWeek  = LocalDate.now().plusDays(8);
+		LocalDate nextWeek  = LocalDate.now().plusDays(7);
 		int currentHour     = LocalTime.now().getHour();
 
 		hourCombo.getItems().clear();
@@ -158,7 +158,7 @@ public class CreateNewOrderViewController implements ClientAware {
 
 		LocalDate date      = chooseDate.getValue();
 		LocalDate tomorrow  = LocalDate.now().plusDays(1);
-		LocalDate nextWeek  = LocalDate.now().plusDays(8);
+		LocalDate nextWeek  = LocalDate.now().plusDays(7);
 
 		int currentHour     = LocalTime.now().getHour();
 		int currentMinute   = LocalTime.now().getMinute();
