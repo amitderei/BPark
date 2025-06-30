@@ -1,0 +1,26 @@
+.root {
+	-fx-background-color: #EEF3F6;
+}
+
+.extend-box {
+	-fx-background-color: white;
+  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4);
+  -fx-background-radius: 10;
+}
+
+.status-box {
+	background: #f5f5f5;
+	border: 1px solid #ddd;
+	padding: 16px;
+	font-size: 14px;
+	color: #333;
+	border-radius: 10px;
+	margin-top: 24px;
+}
+
+.status-msg {
+	font-size: 14px;
+	-fx-font-weight: bold;
+	-fx-alignment: center;
+	-fx-text-alignment: center;
+}
