@@ -1161,16 +1161,19 @@ public class DBController {
 	}
 
 	/**
-	 * Attempts to extend an active parking session for a given parking code and subscriber.
-	 * The extension is only allowed if:
-	 * - The parking session has not yet ended (exitDate and exitHour are NULL)
-	 * - The session has not been extended before (wasExtended = FALSE)
-	 * - The session belongs to the provided subscriber code
+	 * Attempts to extend an active parking session based on the given parking code.
 	 *
-	 * @param parkingCode    the code of the parking session to extend
-	 * @param subscriberCode the code identifying the subscriber attempting the extension
-	 * @return a {@link ServerResponse} indicating whether the extension was successful,
-	 *         including a message explaining the result
+	 * The extension will succeed only if all of the following conditions are met:
+	 * - The parking session is still active (exitDate and exitHour are NULL)
+	 * - The session has not been extended before (wasExtended = FALSE)
+	 * - If a subscriberCode is provided (not null or blank), the session must belong to that subscriber
+	 *
+	 * If subscriberCode is null or blank (used from terminal), the extension will be attempted
+	 * using only the parking code without checking subscriber ownership.
+	 *
+	 * @param parkingCode the code identifying the parking session
+	 * @param subscriberCode the subscriber's code (may be null or blank if called from terminal)
+	 * @return a ServerResponse indicating whether the extension was successful, with a message
 	 */
 	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
 		String sql;

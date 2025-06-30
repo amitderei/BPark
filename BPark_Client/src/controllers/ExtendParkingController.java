@@ -8,14 +8,14 @@ import javafx.scene.control.TextField;
 import ui.UiUtils;
 
 /**
- * Screen that lets a subscriber extend an active parking session
- * (adds 4 hours) as long as the session has not been extended before.
+ * Controller for the "Extend Parking Time" screen.
+ * Allows a subscriber (or a terminal user) to extend an active parking session by 4 hours.
+ * The extension is allowed only if:
+ * - The session is still active (exitDate and exitHour are null)
+ * - It hasn't been extended before
+ * - If a subscriber is logged in, the session must belong to them
  *
- * Flow:
- *  1. User types the parking code.
- *  2. Controller validates that the field is not empty and is numeric.
- *  3. A request is sent to the server.  The server replies through
- *     ClientController -> onExtensionResponse().
+ * The request is sent to the server and handled via onExtensionResponse().
  */
 public class ExtendParkingController implements ClientAware {
 
@@ -44,9 +44,12 @@ public class ExtendParkingController implements ClientAware {
     }
 
     /**
-     * Triggered when the "Extend" button is clicked.
+     * Called when the "Extend" button is clicked.
      * Validates the parking code and sends an extension request to the server.
-     * If input is invalid, shows an appropriate error message.
+     * - If a subscriber is logged in, the request includes their subscriber code.
+     * - If used from a terminal, only the parking code is sent.
+     *
+     * Displays an error if input is missing or invalid.
      */
     @FXML
     private void handleExtendClick() {
