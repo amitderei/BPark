@@ -254,7 +254,7 @@ public class DBController {
 		}
 
 		if (event == null) {
-			return new ServerResponse(false, null, null, "No active parking session found for the provided information.");
+			return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "No active parking session found for the provided information.");
 		}
 
 		try {
@@ -1208,7 +1208,7 @@ public class DBController {
 			if (rowsAffected > 0) {
 				return new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, "Parking session extended successfully.");
 			} else {
-				return new ServerResponse(false, null, null, "Invalid code.");
+				return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Invalid code.");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

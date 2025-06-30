@@ -242,362 +242,334 @@ public class ClientController extends AbstractClient {
 
 		Platform.runLater(() -> {
 
-
-
-
-			if (!response.isSucceed() && loginController != null
-					&& response.getMsg().toLowerCase().contains("invalid username or password")) {
-				loginController.handleLoginFailure(response.getMsg());
+			if(response.getType() == null) {
+				System.out.println("Server response msg: " + response.getMsg());
+				System.out.println("Success? " + response.isSucceed());
+				// General error message pop up (only if not handled before)
+				if (!response.isSucceed()) {
+					UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+				}
 				return;
 			}
+			
+			
+			switch((ResponseType)response.getType()) {
+			case LOGIN_FAILED :
+				if (!response.isSucceed() && loginController != null) {
+					loginController.handleLoginFailure(response.getMsg());
+					break;
+				}
 
-
-			System.out.println("Server response msg: " + response.getMsg());
-			System.out.println("Success? " + response.isSucceed());
-			// General error message popup (only if not handled before)
-			if (!response.isSucceed()) {
-
-				UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
-			}
-
-
-			if (response.isSucceed()&& "Parking report loaded.".equals(response.getMsg())) {
-				if(parkingReportController!=null) {
+			case PARKING_REPORT_LOADED:
+				if (response.isSucceed() && parkingReportController!=null) {
 					parkingReportController.setParkingReport((ParkingReport)response.getData());
 					parkingReportController.setChart();
+					break;
 				}
-				return;
-			}
 
-			else if (response.isSucceed() && response.getData() instanceof User user) {
-				if (loginController != null) {
-					loginController.handleLoginSuccess(user);
+			case LOGIN_SUCCESSFULL :
+				if(response.isSucceed() && loginController != null) {
+					loginController.handleLoginSuccess((User)response.getData());
+					break;
 				}
-				return;
-			} 
 
-			// update the table after deleting order
-			else if (response.isSucceed() && response.getMsg().equals("order deleted successfully.")) {
-				if (watchAndCancelOrdersController != null) {
+			case ORDER_DELETED :
+				if(response.isSucceed() && watchAndCancelOrdersController != null) {
 					askForReservations();
 				}
-			}
 
-
-
-			else if (response.isSucceed() && response.getMsg().equals("Parking history data loaded successfully.")) {
-				if (viewParkingHistoryController != null) {
+			case PARKING_HISTORY_LOADED :
+				if (response.isSucceed() && viewParkingHistoryController != null) {
 					viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
+					break;
 				}
-			}
 
-
-
-			// display orders of subscriber in table
-			else if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
-					&& response.getMsg().equals("Orders of subscriber displayed successfully.")) {
-				ArrayList<Order> orders = (ArrayList<Order>) dataList;
-				if (watchAndCancelOrdersController != null) {
+			case ORDERS_DISPLAY :
+				if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList && watchAndCancelOrdersController != null) {
+					ArrayList<Order> orders = (ArrayList<Order>) dataList;
 					watchAndCancelOrdersController.displayOrders(orders);
+					break;
 				}
-				return;
-			}
 
-
-
-			else if(response.isSucceed()&&response.getMsg().equals("No orders.")) {
-				if (watchAndCancelOrdersController != null) {
+			case NO_ORDERS :
+				if (response.isSucceed() && watchAndCancelOrdersController != null) {
 					watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
 					UiUtils.showAlert(response.getMsg(), response.getMsg(), Alert.AlertType.INFORMATION);
+					break;
 				}
-				return;
-			}
 
-			else if (response.isSucceed() && response.getMsg().equals("Details updated successfully.")) {
-				ArrayList<Object> newDetails = (ArrayList<Object>) response.getData();
-				if (newDetails.get(0) instanceof Subscriber) {
-					setSubscriber((Subscriber) newDetails.get(0));
-					newDetails.remove(0);
-				}
-				if (!newDetails.isEmpty()) {
-					setPassword(((User) newDetails.get(0)).getPassword());
-				}
-				editSubscriberDetailsController.handleGoToView();
-			}
-
-			else if (pickupController != null) {
-				UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
-
-				if (response.isSucceed()) {
-					String lowerMsg = response.getMsg().toLowerCase(); // changed from 'msg' to 'lowerMsg'
-
-					// Handle subscriber validation (by code or by tag)
-					if (lowerMsg.contains("subscriber verified")) {
-						if (response.getData() instanceof Integer subscriberCode) {
-							// Subscriber was validated using tag ID
-							pickupController.onSubscriberValidated(subscriberCode);
-						} else {
-							// Subscriber was validated using numeric code input
-							pickupController.onSubscriberValidated();
-						}
+			case DETAILS_UPDATED :
+				if(response.isSucceed()) {
+					ArrayList<Object> newDetails = (ArrayList<Object>) response.getData();
+					if (newDetails.get(0) instanceof Subscriber) {
+						setSubscriber((Subscriber) newDetails.get(0));
+						newDetails.remove(0);
 					}
+					if (!newDetails.isEmpty()) {
+						setPassword(((User) newDetails.get(0)).getPassword());
+					}
+					editSubscriberDetailsController.handleGoToView();
+					break;
+				}
 
-					// Handle successful car collection
-					else if (lowerMsg.contains("pickup successful")) {
-						pickupController.disableAfterPickup();
+			case SUBSCRIBER_VERIFIED :
+				if (pickupController != null && response.isSucceed()) {
+					UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+
+					if (response.getData() instanceof Integer subscriberCode) {
+						// Subscriber was validated using tag ID
+						pickupController.onSubscriberValidated(subscriberCode);
+						break;
+					} else {
+						// Subscriber was validated using numeric code input
+						pickupController.onSubscriberValidated();
+						break;
 					}
 				}
-			}
 
-			// get response from server and back to GuestMainController with
-			// updateAvailableSpots
+			case PICKUP_VEHICLE :
+				if (pickupController != null) {
+					UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+					pickupController.disableAfterPickup();
+					break;
+				}
 
-			// get response from server and back to CreateNeworder
-			if (response.getData() instanceof Integer && guestMainController != null) {
-				int count = (int) response.getData();
-				System.out.println(((Integer) count).toString());
-			}
-
-			if (response.isSucceed() && response.getMsg().equals("Parking report dates loaded.")) {
-				if(parkingReportController!=null) {
+			case REPOSTS_DATE_LOADED :
+				if (response.isSucceed() && parkingReportController != null) {
 					parkingReportController.setDates((ArrayList<Date>)(response.getData()));
+					break;
 				}
-			}
 
-			if (response.isSucceed() && response.getMsg().equals("reservation succeed!")) {
-				if (newOrderController != null) {
+			case ORDER_ADDED :
+				if (response.isSucceed() && newOrderController != null) {
 					newOrderController.setOrderAndGoToNextPage((Order) response.getData());
-
+					break;
 				}
-			}
 
-			if (response.isSucceed() && response.getMsg().equals("Order doesn't exists.")) {
-				if (newOrderController != null) {
+			case ORDER_NOT_EXISTS : 
+				if (response.isSucceed() && newOrderController != null) {
 					newOrderController.orderExistFuture.complete(false);
+					break;
 				}
-			}
 
-			if (response.isSucceed() && response.getMsg().equals("This order already exists for this subscriber.")) {
-				if (newOrderController != null) {
+			case ORDER_ALREADY_EXISTS :
+				if (response.isSucceed() && newOrderController != null) {
 					newOrderController.orderExistFuture.complete(true);
-				}
-			}
-
-			if (response.isSucceed() && response.getData() instanceof Subscriber) {
-				setSubscriber((Subscriber) response.getData());
-			}
-
-			// "all_subscribers"  rows = List<Object[]> { [0]=Subscriber , [1]=Integer lateCount }
-			if (response.isSucceed() && "all_subscribers".equals(response.getMsg())) {
-
-				ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
-
-				System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
-
-				List<Subscriber> subs = new ArrayList<>();
-				Map<Subscriber, Integer> lateMap = new HashMap<>();
-
-				for (Object[] r : rows) {
-					Subscriber s = (Subscriber) r[0];
-					int late = (Integer) r[1];
-					subs.add(s);
-					lateMap.put(s, late);
-					System.out.println(" -> " + s.getUsername() + ", late: " + late);
+					break;
 				}
 
-				if (viewSubscribersInfoController != null)
-					viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
+			case SUBSCRIBER_DETAILS :
+				if (response.isSucceed()) {
+					setSubscriber((Subscriber) response.getData());
+					break;
+				}
 
-				return; // handled
-			}
+			case LATE_PICKUP_COUNTS :
+				if (response.isSucceed()) {
+					ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
 
-			else if (response.isSucceed()&&response.getMsg().equals("Active parking info loaded successfully.")) {
-				if(viewActiveParkingInfoController!=null) {
+					System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
+
+					List<Subscriber> subs = new ArrayList<>();
+					Map<Subscriber, Integer> lateMap = new HashMap<>();
+
+					for (Object[] r : rows) {
+						Subscriber s = (Subscriber) r[0];
+						int late = (Integer) r[1];
+						subs.add(s);
+						lateMap.put(s, late);
+						System.out.println(" -> " + s.getUsername() + ", late: " + late);
+					}
+
+					if (viewSubscribersInfoController != null)
+						viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
+
+					break; // handled
+
+				}
+
+			case PARKING_INFO_LOADED :
+				if(response.isSucceed() && viewActiveParkingInfoController!=null) {
 					viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
 					viewActiveParkingInfoController.setTexts();
+					break;
 				}
-				return;
-			}
 
-			// staff -view current active parking events
-			if (response.isSucceed() && "active_parkings".equals(response.getMsg())) {
-				ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
-
-				if (viewActiveParkingsController != null)
+			case ACTIVE_PARKINGS :
+				if(response.isSucceed() && viewActiveParkingsController != null) {
+					ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
 					viewActiveParkingsController.onActiveParkingsReceived(events);
-
-				return; // handled
-			}
-
-			// Handle extension response (ExtendParkingController)
-			if (response.getMsg() != null &&
-				    (response.getMsg().toLowerCase().contains("parking session extended successfully") ||
-				     response.getMsg().toLowerCase().contains("no active parking session found") ||
-				     response.getMsg().toLowerCase().contains("invalid code"))) {
-
-				if (extendParkingController != null) {
-					extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
+					break;
 				}
 
-				return;
-			}
+			case PARKING_SESSION_EXTENDED :
+				if(response.getMsg() != null && extendParkingController != null) {
+					extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
+					break;
+				}
 
-			// Handle registration response
-			else if (response.getMsg().toLowerCase().contains("subscriber registered")
-					|| response.getMsg().toLowerCase().contains("failed to insert subscriber")
-					|| response.getMsg().toLowerCase().contains("insert user")) {
-
+			case SUBSCRIBER_INSERTED :
 				if (registerSubscriberController != null) {
 					registerSubscriberController.showStatusFromServer(response.getMsg(), response.isSucceed());
+					break;
 				} else {
 					UiUtils.showAlert("Subscriber Registration", response.getMsg(),
 							response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+					break;
 				}
-				return;
-			}
 
-			// parking_availability (Array of 3 ints)
-			if (response.isSucceed() &&
-					"parking_availability".equals(response.getMsg()) &&
-					response.getData() instanceof Object[] stats &&
-					availabilityController != null) {
-
-				availabilityController.updateAvailability(stats);
-				return;
-			}
-
-			// Handle order making 
-			if (newOrderController != null) {
-				if(response.getMsg().equals("Can't make resarvation")) {
-					newOrderController.makingReservation(false);
+			case PARKING_AVALIABILITY :
+				if(response.isSucceed() && response.getData() instanceof Object[] stats &&
+						availabilityController != null) {
+					availabilityController.updateAvailability(stats);
+					break;
 				}
-				else if (response.getMsg().equals("Can make resarvation")) {
+
+			case RESERVATION_VALID :
+				if(newOrderController != null) {
 					newOrderController.makingReservation(true);
+					break;
 				}
-			}
 
-			// subscriber-status report 
-			else if ("subscriber_status".equals(response.getMsg())) {
+			case RESERVATION_INVALID :
+				if(newOrderController != null) {
+					newOrderController.makingReservation(false);
+					break;
+				}
 
-				/* ----- success ----- */
-				if (response.isSucceed()) {
-					if (subscriberStatusController != null &&
-							response.getData() instanceof List<?> listRaw)
-					{
+			case SUBSCRIBER_STATUS :
+				if(subscriberStatusController != null &&
+				response.getData() instanceof List<?> listRaw) {
+					if(response.isSucceed()) {
 						@SuppressWarnings("unchecked")
 						List<SubscriberStatusReport> list = (List<SubscriberStatusReport>) listRaw;
 						subscriberStatusController.onReportReceived(list);
+						break;
 					}
-					return;
+					else {
+						/* ----- fail: no snapshot for that month ----- */
+						UiUtils.showAlert(
+								"Subscriber Report",
+								response.getMsg(),              // e.g. "No snapshot available for 4/2025"
+								Alert.AlertType.INFORMATION);
+						break;
+					}
 				}
 
-				/* ----- fail: no snapshot for that month ----- */
-				UiUtils.showAlert(
-						"Subscriber Report",
-						response.getMsg(),              // e.g. "No snapshot available for 4/2025"
-						Alert.AlertType.INFORMATION);
-				return;
-			}
-
-
-
-
-
-
-
-			// Vehicle delivery screen updates
-			if (newDeliveryController != null) {
-				System.out.println(">> newDeliveryController connected!");
-				// 1 – handle subscriber code not found
-				if (response.getMsg().toLowerCase().contains("does not")) {
-					newDeliveryController.subscriberCodeDoesntExist();
+			case SUBSCRIBER_CODE :
+				if (newDeliveryController != null) {
+					if(response.isSucceed()) {
+						newDeliveryController.subscriberCodeIsValid();
+						break;
+					}
+					else {
+						newDeliveryController.subscriberCodeDoesntExist();
+						break;
+					}
 				}
 
-				// 2 - handle subscriber validation successfully
-				if (response.getMsg().toLowerCase().contains("is valid!")) {
-					newDeliveryController.subscriberCodeIsValid();
-				}
-
-				// 3 - handle subscriber has a reservation
-				if (response.getMsg().toLowerCase().contains("has a reservation.")) {
+			case RESERVATION_EXISTS :
+				if (newDeliveryController != null) {
 					newDeliveryController.hasReservation();
+					break;
 				}
 
-				// 4 - handle subscriber doesn't have a reservation
-				if (response.getMsg().toLowerCase().contains("doesn't have a reseravtion.")) {
+			case RESERVATION_NOT_EXISTS : 
+				if (newDeliveryController != null) {
 					newDeliveryController.NoReservation();
+					break;
 				}
 
-				// 5 - handle subscriber entered subscriber code successfully
-				if (response.getMsg().toLowerCase().contains("confirmation code has entered")) {
-					newDeliveryController.confirmationCodeIsValid();
+			case CONFIRMATION_CODE_VALIDATION :
+				if (newDeliveryController != null) {
+					if(response.isSucceed()) {
+						newDeliveryController.confirmationCodeIsValid();
+						break;
+					}
+					else {
+						newDeliveryController.confirmationCodeNotValid();
+						break;
+					}
 				}
 
-				// 6 - handle subscriber entered subscriber code unsuccessfully
-				if (response.getMsg().toLowerCase().contains("confirmation code isn't")) {
-					newDeliveryController.confirmationCodeNotValid();
+			case PARKING_SPACE_AVAILABILITY :
+				if (newDeliveryController != null) {
+					if(response.isSucceed()) {
+						// gathering the available parking space
+						int parkingSpace = (int) response.getData();
+						// setting the gathered parking space in the delivery controller
+						newDeliveryController.setParkingSpace(parkingSpace);
+						// setting the status of the parking lot to not be full
+						newDeliveryController.setParkingLotStatus(true);
+						break;
+					}
+					else {
+						newDeliveryController.setParkingLotStatus(false);
+						break;
+					}
 				}
-
-				// 7 - handle no free parking spaces
-				if (response.getMsg().toLowerCase().contains("the parking lot is full")) {
-					newDeliveryController.setParkingLotStatus(false);
-				}
-
-				// 8 - handle there's free parking space
-				if (response.getMsg().toLowerCase().contains("there is free parking space")) {
-					// gathering the available parking space
-					int parkingSpace = (int) response.getData();
-					// setting the gathered parking space in the delivery controller
-					newDeliveryController.setParkingSpace(parkingSpace);
-					// setting the status of the parking lot to not be full
-					newDeliveryController.setParkingLotStatus(true);
-				}
-
-				// 9 - handle a matched vehicleID to the asked subscriber
-				if (response.getMsg().toLowerCase().contains("found matched vehicle")) {
-					// gathering the matched vehicle
+				
+			case VEHICLE_ID :
+				if (newDeliveryController != null) {
 					String vehicleID = (String) response.getData();
 					newDeliveryController.vehicleIdFuture.complete(vehicleID);
+					break;
 				}
-
-				// 10 - handle successful addition of adding a parking event into the DB
-				if (response.getMsg().toLowerCase().contains("added parking event successfully")) {
+				
+			case DELIVER_VEHICLE :
+				if (newDeliveryController != null) {
 					newDeliveryController.successfulDelivery();
+					break;
 				}
-
-				// 11 - handle existing tag
-				if (response.getMsg().toLowerCase().contains("tag exists")) {
-					newDeliveryController.tagFound();
+				
+			case TAG_EXISTS :
+				if (newDeliveryController != null) {
+					if(response.isSucceed()) {
+						newDeliveryController.tagFound();
+						break;
+					}
+					else {
+						newDeliveryController.tagNotFound();
+						break;
+					}
 				}
-
-				// 12 - handle tag doesn't exists
-				if (response.getMsg().toLowerCase().contains("tag does not exists")) {
-					newDeliveryController.tagNotFound();
-				}
-
-				// 13 - handle subscriber found by a tag, deliver the vehicle with a parking
-				// event creation
-				if (response.getMsg().toLowerCase().contains("subscriber with matching tag has been found")) {
+				
+			case MATCHED_SUBSCRIBER_TO_TAG :
+				if (newDeliveryController != null) {
 					int subCode = (int) response.getData();
 					newDeliveryController.subCodeFuture.complete(subCode);
+					break;
 				}
-
-				// 14 - handle subscriber isn't inside the parking lot
-				if (response.getMsg().toLowerCase().contains("the subscriber didn't entered his vehicle yet")) {
-					newDeliveryController.checkIfTheresReservation();
+				
+			case SUBSCRIBER_VEHICLE_ISNT_INSIDE :
+				if (newDeliveryController != null) {
+					if(response.isSucceed()) {
+						newDeliveryController.checkIfTheresReservation();
+						break;
+					}
+					else {
+						newDeliveryController.vehicleIsAlreadyInside();
+						break;
+					}
 				}
-
-				// 15 - handle vehicle with the matched tagId isn't inside the parking lot
-				if (response.getMsg().toLowerCase().contains("the tag isn't inside")) {
+				
+			case SUBSCRIBER_VEHICLE_ISNT_INSIDE_BY_TAG :
+				if (newDeliveryController != null) {
 					newDeliveryController.findMatchedSubToTheTag();
+					break;
 				}
 
-				// 16 - handle subscriber is already inside the parking lot
-				if (response.getMsg().toLowerCase().contains("the vehicle is already inside the parking lot")) {
-					newDeliveryController.vehicleIsAlreadyInside();
+			default :
+				System.out.println("Server response msg: " + response.getMsg());
+				System.out.println("Success? " + response.isSucceed());
+				// General error message pop up (only if not handled before)
+				if (!response.isSucceed()) {
+					UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+					break;
 				}
 
 			}
+
 		});
 	}
 
