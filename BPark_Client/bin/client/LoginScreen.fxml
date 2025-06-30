@@ -28,7 +28,7 @@
       </ToolBar>
       <Pane layoutX="203.0" layoutY="80.0" prefHeight="340.0" prefWidth="405.0" styleClass="pane-box">
          <children>
-              <Label layoutX="134.0" layoutY="17.0" styleClass="headline" text="Login Screen">
+              <Label layoutX="134.0" layoutY="17.0" styleClass="headline" text="Login Screen" textFill="#18374e">
                   <font>
                       <Font size="24.0" />
                   </font>
