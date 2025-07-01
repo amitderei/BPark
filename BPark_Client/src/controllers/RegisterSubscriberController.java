@@ -8,55 +8,52 @@ import ui.UiUtils;
 
 /**
  * Controller for the staff-facing registration screen.
- * Enables attendants to create new subscriber accounts by filling a form.
- * Includes client-side validation and sends a Subscriber object to the server.
+ * Handles input validation and communicates with the server to register a new subscriber.
  */
 public class RegisterSubscriberController implements ClientAware {
-	
+
     /** Shared client controller used to send requests to the server */
     private ClientController client;
 
-    /** Input field for national ID (exactly 9 digits) */
-    @FXML 
-    private TextField txtUserId;
+    /** Input field for subscriber's national ID (must be 9 digits) */
+    @FXML private TextField txtUserId;
 
     /** Input field for subscriber's first name */
-    @FXML 
-    private TextField txtFirstName;
+    @FXML private TextField txtFirstName;
 
     /** Input field for subscriber's last name */
-    @FXML 
-    private TextField txtLastName;
+    @FXML private TextField txtLastName;
 
-    /** Input field for phone number (must begin with 05) */
-    @FXML 
-    private TextField txtPhone;
+    /** Input field for subscriber's phone number (must start with 05 and be 10 digits) */
+    @FXML private TextField txtPhone;
 
-    /** Input field for valid email address */
-    @FXML
-    private TextField txtEmail;
+    /** Input field for subscriber's email address */
+    @FXML private TextField txtEmail;
 
-    /** Input field for username (4+ alphanumeric characters) */
-    @FXML
-    private TextField txtUsername;
-    
-    /** Input field for vehicle id */
-    @FXML 
-    private TextField txtVehicleId;
+    /** Input field for username (at least 4 alphanumeric characters) */
+    @FXML private TextField txtUsername;
 
-    /** Button that triggers the registration request */
-    @FXML 
-    private Button btnRegister;
+    /** Input field for vehicle license plate number (7–10 digits) */
+    @FXML private TextField txtVehicleId;
 
-    /** Label used to display live validation or server result status */
-    @FXML 
-    private Label lblStatus;
+    @FXML private Label errUserId;
+    @FXML private Label errFirstName;
+    @FXML private Label errLastName;
+    @FXML private Label errPhone;
+    @FXML private Label errEmail;
+    @FXML private Label errUsername;
+    @FXML private Label errVehicleId;
+
+    /** Button that triggers the registration process */
+    @FXML private Button btnRegister;
+
+    /** Label that displays status from the server (confirmation or error) */
+    @FXML private Label lblStatus;
 
     /**
-     * Injects the shared ClientController instance so this screen
-     * can communicate with the server.
+     * Injects the active client instance used for server communication.
      *
-     * @param client the active client controller instance
+     * @param client the shared ClientController instance
      */
     @Override
     public void setClient(ClientController client) {
@@ -64,74 +61,109 @@ public class RegisterSubscriberController implements ClientAware {
     }
 
     /**
-     * Triggered when the user presses the "Register" button.
-     * Validates input fields, and if all are valid, creates a Subscriber
-     * object and sends it to the server for registration.
+     * Called when the "Register Subscriber" button is clicked.
+     * Validates the input fields and sends the new subscriber to the server if valid.
      */
     @FXML
     private void handleRegisterClick() {
-        StringBuilder errors = new StringBuilder();
+        // Clear all previous error messages before validating again
+        clearErrors();
 
-        String userId    = txtUserId.getText();
-        String firstName = txtFirstName.getText();
-        String lastName  = txtLastName.getText();
-        String phone     = txtPhone.getText();
-        String email     = txtEmail.getText();
-        String username  = txtUsername.getText();
-        String vehicleId  = txtVehicleId.getText();
+        // Read and trim all inputs
+        String userId    = txtUserId.getText().trim();
+        String firstName = txtFirstName.getText().trim();
+        String lastName  = txtLastName.getText().trim();
+        String phone     = txtPhone.getText().trim();
+        String email     = txtEmail.getText().trim();
+        String username  = txtUsername.getText().trim();
+        String vehicleId = txtVehicleId.getText().trim();
 
-        // validation rules
-        if (userId.isEmpty() || !userId.matches("\\d{9}"))
-            errors.append("- ID must be exactly 9 digits.\n");
+        boolean valid = true;
 
-        if (firstName.isEmpty())
-            errors.append("- First name is required.\n");
+        if (userId.isEmpty() || !userId.matches("\\d{9}")) {
+            errUserId.setText("Must be exactly 9 digits.");
+            errUserId.setVisible(true);
+            valid = false;
+        }
 
-        if (lastName.isEmpty())
-            errors.append("- Last name is required.\n");
+        if (firstName.isEmpty()) {
+            errFirstName.setText("First name is required.");
+            errFirstName.setVisible(true);
+            valid = false;
+        }
 
-        if (phone.isEmpty() || !phone.matches("^05\\d{8}$"))
-            errors.append("- Phone must start with 05 and be 10 digits.\n");
+        if (lastName.isEmpty()) {
+            errLastName.setText("Last name is required.");
+            errLastName.setVisible(true);
+            valid = false;
+        }
 
-        if (email.isEmpty() || !email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$"))
-            errors.append("- Email format is invalid.\n");
+        if (phone.isEmpty() || !phone.matches("^05\\d{8}$")) {
+            errPhone.setText("Phone must start with 05 and be 10 digits.");
+            errPhone.setVisible(true);
+            valid = false;
+        }
 
-        if (username.isEmpty() || !username.matches("\\w{4,}"))
-            errors.append("- Username must be at least 4 characters.\n");
-        
-        if (vehicleId.isEmpty() || !vehicleId.matches("\\d{7,10}"))
-            errors.append("- Vehicle ID must be 7-10 digits.\n");
+        if (email.isEmpty() || !email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
+            errEmail.setText("Invalid email format.");
+            errEmail.setVisible(true);
+            valid = false;
+        }
 
-        if (errors.length() > 0) {
-            // Display validation errors
-            UiUtils.setStatus(lblStatus, errors.toString().trim(), false);
+        if (username.isEmpty() || !username.matches("\\w{4,}")) {
+            errUsername.setText("At least 4 alphanumeric characters.");
+            errUsername.setVisible(true);
+            valid = false;
+        }
+
+        if (vehicleId.isEmpty() || !vehicleId.matches("\\d{7,10}")) {
+            errVehicleId.setText("Vehicle ID must be 7–10 digits.");
+            errVehicleId.setVisible(true);
+            valid = false;
+        }
+
+        // If any field was invalid, do not continue
+        if (!valid) {
+            lblStatus.setText("");
             return;
         }
 
-        //build and send subscriber to server 
+
         Subscriber sub = new Subscriber(
-                0,          // Server generates the subscriber code
+                0,          // Subscriber code is generated server-side
                 userId,
                 firstName,
                 lastName,
                 phone,
                 email,
                 username,
-                null        // Tag ID is assigned by the server
+                null        // Tag ID will be generated on the server
         );
 
         client.registerSubscriber(sub, vehicleId);
-        UiUtils.setStatus(lblStatus,
-                "Registration request sent to server.",
-                true);
+
+        // Show pending status while waiting for server response
+        UiUtils.setStatus(lblStatus, "Registration request sent to server.", true);
     }
 
     /**
-     * Called by ClientController after receiving a response from the server.
-     * Updates the status label with success or error message.
+     * Hides all error labels before re-validating fields.
+     */
+    private void clearErrors() {
+        errUserId.setVisible(false);
+        errFirstName.setVisible(false);
+        errLastName.setVisible(false);
+        errPhone.setVisible(false);
+        errEmail.setVisible(false);
+        errUsername.setVisible(false);
+        errVehicleId.setVisible(false);
+    }
+
+    /**
+     * Updates the status label with a message received from the server.
      *
-     * @param message server response message
-     * @param success whether the operation succeeded
+     * @param message the message to display
+     * @param success true if registration succeeded, false otherwise
      */
     public void showStatusFromServer(String message, boolean success) {
         UiUtils.setStatus(lblStatus, message, success);
