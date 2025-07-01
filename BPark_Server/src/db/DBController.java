@@ -615,76 +615,121 @@ public class DBController {
 	}
 
 	/**
-	 * Checks if there are available parking spots in the specified parking lot.
-	 *
-	 * @param parkingLotName The name of the parking lot to check.
-	 * @return true if there are available spots (occupied < total), false
-	 *         otherwise.
+	 * Checks whether there is a free parking space in the given parking lot,
+	 * considering both currently occupied spots and future reservations.
+	 * 
+	 * If space is available:
+	 * - A spot is selected that is NOT currently occupied and NOT reserved for a reservation starting now.
+	 * - The spot is marked as occupied both in the `parkingSpaces` table and in the `parkingLot` counter.
+	 * 
+	 * @param parkingLotName the name of the parking lot (e.g., "Braude")
+	 * @return the ID of the available parking space if one exists, or -1 if the lot is full
 	 */
 	public synchronized int hasAvailableSpots(String parkingLotName) {
-		String query = "SELECT totalSpots, occupiedSpots FROM bpark.parkinglot WHERE NameParkingLot = ?";
+	    try {
+	        int totalSpots = getTotalSpots();
+	        int activeParkings = getActiveParkingsCount();
+	        int reservedNow = getActiveReservationsNowCount();
 
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	        int used = activeParkings + reservedNow;
 
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, parkingLotName);
+	        if (used >= totalSpots) {
+	            return -1; // No space available
+	        }
 
-			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
-				int totalSpots = rs.getInt("totalSpots");
-				int occupiedSpots = rs.getInt("occupiedSpots");
+	        int freeSpot = findUnreservedFreeParkingSpace();
+	        if (freeSpot == -1) {
+	            return -1; // No safe space found
+	        }
 
-				if(occupiedSpots < totalSpots) {
-					// Updating the amount of occupied parking space by +1
-					addOccupiedParkingSpace();
+	        addOccupiedParkingSpace();               // Increment counter
+	        updateParkingSpaceOccupied(freeSpot);    // Mark space as occupied
 
-					// Searching for a free parking space
-					int parkingSpace = findParkingSpace();
+	        return freeSpot;
 
-					// Updating the parking space itself to be on a occupied status
-					updateParkingSpaceOccupied(parkingSpace);
-
-					// Returning the parking space that has been found
-					return parkingSpace;
-				}
-
-				// return true if there are more parking spots that occupied spots, false
-				// otherwise false
-				return -1;
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Error checking available spots: " + e.getMessage());
-		}
-
-		System.out.println("error");
-		return -1; // Return false if parking lot not found or error occurred
+	    } catch (Exception e) {
+	        System.err.println("Error checking available spots: " + e.getMessage());
+	        return -1;
+	    }
 	}
+	
 	/**
-	 * Finds the first available parking space that is not currently occupied.
+	 * Counts how many parking events are currently active (vehicles that are still inside).
 	 *
-	 * Queries the 'parkingspaces' table for a parking space where 'is_occupied' is
-	 * false. Returns the 'parking_space' value of the first free spot found.
+	 * An event is considered active if it has no exit time yet.
 	 *
-	 * @return the parking space number if available, if not found then -1.
+	 * @return number of active parking events, or -1 if an error occurs
 	 */
-	private int findParkingSpace() {
-		String query = "SELECT parking_space FROM parkingspaces WHERE is_occupied = 0 LIMIT 1";
+	private int getActiveParkingsCount() {
+		String sql = "SELECT COUNT(*) FROM parkingEvent WHERE exitDate IS NULL";
 
-		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-			if (rs.next()) {
-				return rs.getInt("parking_space");
-			}
+		try (PreparedStatement stmt = conn.prepareStatement(sql);
+		     ResultSet rs = stmt.executeQuery()) {
+			return rs.next() ? rs.getInt(1) : 0;
 		} catch (SQLException e) {
-			System.err.println("Error retrieving parking space: " + e.getMessage());
+			System.err.println("Error counting active parking events: " + e.getMessage());
+			return -1;
 		}
+	}
 
-		return -1; // No free parking space found
+	
+	/**
+	 * Counts how many ACTIVE reservations exist for right now.
+	 * A reservation is "active" if current time is within the 4-hour protected window.
+	 *
+	 * @return number of active reservations holding spots right now
+	 */
+	private int getActiveReservationsNowCount() {
+	    String sql = """
+	        SELECT COUNT(*)
+	        FROM `order`
+	        WHERE `status` = 'ACTIVE'
+	          AND order_date = CURDATE()
+	          AND NOW() BETWEEN
+	              TIMESTAMP(order_date, SUBTIME(arrival_time, '04:00:00')) AND
+	              TIMESTAMP(order_date, ADDTIME(arrival_time, '00:15:00'))
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+	        return rs.next() ? rs.getInt(1) : 0;
+	    } catch (SQLException e) {
+	        System.err.println("Error counting active reservations: " + e.getMessage());
+	        return -1;
+	    }
+	}
+
+
+	/**
+	 * Finds a free parking space that is not currently occupied and
+	 * not blocked by a reservation window of [arrival - 4h, arrival + 15min].
+	 *
+	 * @return a free and unreserved parking space, or -1 if none found
+	 */
+	private int findUnreservedFreeParkingSpace() {
+	    String sql = """
+	        SELECT ps.parking_space
+	        FROM parkingSpaces ps
+	        WHERE ps.is_occupied = FALSE
+	          AND ps.parking_space NOT IN (
+	              SELECT parking_space
+	              FROM `order`
+	              WHERE `status` = 'ACTIVE'
+	                AND order_date = CURDATE()
+	                AND NOW() BETWEEN
+	                    TIMESTAMP(order_date, SUBTIME(arrival_time, '04:00:00')) AND
+	                    TIMESTAMP(order_date, ADDTIME(arrival_time, '00:15:00'))
+	          )
+	        LIMIT 1
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+	        return rs.next() ? rs.getInt(1) : -1;
+	    } catch (SQLException e) {
+	        System.err.println("Error finding free parking space: " + e.getMessage());
+	        return -1;
+	    }
 	}
 
 	/**
@@ -694,7 +739,7 @@ public class DBController {
 	 *                     be stored.
 	 */
 	public void addParkingEvent(ParkingEvent parkingEvent) {
-		String query = "INSERT INTO bpark.parkingevent (subscriberCode, parking_space, entryDate, entryHour, exitDate, exitHour, wasExtended, vehicleId, NameParkingLot, parkingCode) VALUES "
+		String query = "INSERT INTO bpark.parkingEvent (subscriberCode, parking_space, entryDate, entryHour, exitDate, exitHour, wasExtended, vehicleId, NameParkingLot, parkingCode) VALUES "
 				+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
