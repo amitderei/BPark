@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WatchAndCancelOrdersController">
+<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@WatchAndCancelOrdersScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WatchAndCancelOrdersController">
    <padding>
       <Insets bottom="20" left="20" right="20" top="20" />
    </padding>
@@ -29,18 +29,18 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label fx:id="headlineParkingReservation" prefHeight="26.0" prefWidth="172.0" text="My Reservations" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+            <Label fx:id="headlineParkingReservation" prefHeight="26.0" prefWidth="172.0" styleClass="headline" text="My Reservations" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER">
                <font>
                   <Font name="Calibri Bold" size="22.0" />
                </font>
             </Label>
-            <TableView fx:id="reservationTable" prefHeight="60.0" prefWidth="560.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
+            <TableView fx:id="reservationTable" maxWidth="587.0" prefHeight="347.0" prefWidth="550.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
                <columns>
-                  <TableColumn fx:id="orderNumberColumn" prefWidth="99.0" text="Order number" />
-                  <TableColumn fx:id="dateColumn" prefWidth="99.0" text="Order date" />
-                  <TableColumn fx:id="timeColumn" minWidth="0.0" prefWidth="99.0" text="Order time" />
-                  <TableColumn fx:id="confirmationCodeColumn" prefWidth="138.0" text="Confirmation code" />
-                  <TableColumn fx:id="cancelOrderColumn" prefWidth="124.0" text="Cancel Order" />
+                  <TableColumn fx:id="orderNumberColumn" prefWidth="95.33334350585938" text="Order number" />
+                  <TableColumn fx:id="dateColumn" prefWidth="84.66668701171875" text="Order date" />
+                  <TableColumn fx:id="timeColumn" minWidth="0.0" prefWidth="93.99993896484375" text="Order time" />
+                  <TableColumn fx:id="confirmationCodeColumn" prefWidth="135.33331298828125" text="Confirmation code" />
+                  <TableColumn fx:id="cancelOrderColumn" maxWidth="125.0" prefWidth="152.0" text="Cancel Order" />
                </columns>
             </TableView>
          </children>

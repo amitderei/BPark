@@ -1,0 +1,71 @@
+
+#reservationTable {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdcdc;
+    -fx-border-width: 0.5px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 8px;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 6, 0, 0, 1);
+    -fx-max-width: 550px; 
+}
+
+
+.table-view .column-header-background {
+    -fx-background-color: #e8f5e9;
+    -fx-border-color: transparent;
+}
+
+.table-view .column-header{
+	 -fx-background-color:#18374E;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-size: 32px;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #ccc;
+}
+
+.table-view .column-header .label {
+     -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER; 
+   
+}
+
+.headline{
+	-fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #18374E;
+}
+
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cell-size: 25px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #cce5ff;
+}
+
+
+.table-cell {
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER; 
+}
+
+
+.table-view .button {
+    -fx-background-color: red;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-padding: 4 10;
+    -fx-alignment: CENTER;
+}
