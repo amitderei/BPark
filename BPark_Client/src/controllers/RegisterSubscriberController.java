@@ -142,8 +142,8 @@ public class RegisterSubscriberController implements ClientAware {
 
         client.registerSubscriber(sub, vehicleId);
 
-        // Show pending status while waiting for server response
-        UiUtils.setStatus(lblStatus, "Registration request sent to server.", true);
+        // wait for server response
+        lblStatus.setText("");
     }
 
     /**
@@ -160,12 +160,27 @@ public class RegisterSubscriberController implements ClientAware {
     }
 
     /**
-     * Updates the status label with a message received from the server.
+     * Displays the server response message in the status label.
+     * If registration was successful, disables all input fields and the register button
+     * to prevent further editing.
      *
-     * @param message the message to display
+     * @param message the message returned from the server (success or error)
      * @param success true if registration succeeded, false otherwise
      */
     public void showStatusFromServer(String message, boolean success) {
         UiUtils.setStatus(lblStatus, message, success);
+
+        if (success) {
+            txtUserId.setDisable(true);
+            txtFirstName.setDisable(true);
+            txtLastName.setDisable(true);
+            txtPhone.setDisable(true);
+            txtEmail.setDisable(true);
+            txtUsername.setDisable(true);
+            txtVehicleId.setDisable(true);
+            btnRegister.setDisable(true);
+        }
     }
+
+
 }

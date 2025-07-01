@@ -534,7 +534,7 @@ public class Server extends AbstractServer {
 					sendEmail.sendEmail(receivedSub.getEmail(), content, TypeOfMail.GENERIC_MESSAGE);
 
 					client.sendToClient(new ServerResponse(true, receivedSub, ResponseType.SUBSCRIBER_INSERTED,
-							"Subscriber registered successfully. Login details sent via email."));
+							"Subscriber registered successfully.\nLogin details sent via email."));
 					break;
 
 				//get subscriber status report of selected date. expected format: {GET_SUBSCRIBER_STATUS_REPORT, month, year}
