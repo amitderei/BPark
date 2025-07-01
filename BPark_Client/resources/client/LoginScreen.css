@@ -41,7 +41,12 @@
 
 .headline{
 	-fx-text-fill: #18374E;
-	-fx-text-color: #18374E;
 	-fx-font-size: 20px;
 	-fx-font-weight: bold;
+}
+
+.error-label{
+	-fx-font-weight: bold;
+	-fx-text-fill: red;
+	-fx-alignment: CENTER;
 }

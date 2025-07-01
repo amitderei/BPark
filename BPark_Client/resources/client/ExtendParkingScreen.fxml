@@ -20,7 +20,7 @@
         <Button fx:id="btnExtend" onAction="#handleExtendClick" style="-fx-font-size: 14px; -fx-padding: 6px 20px;" text="Extend by 4 hours" />
       <Pane prefHeight="47.0" prefWidth="398.0" styleClass="status-box">
          <children>
-              <Label fx:id="lblStatus" layoutX="131.0" layoutY="15.0" prefHeight="19.0" prefWidth="306.0" style="-fx-text-fill: #2b5797; -fx-font-size: 13px;" styleClass="status-msg" wrapText="true" />
+              <Label fx:id="lblStatus" layoutX="40.0" layoutY="15.0" prefHeight="19.0" prefWidth="491.0" style="-fx-text-fill: #2b5797; -fx-font-size: 13px;" styleClass="status-msg" wrapText="true" />
          </children>
       </Pane>
     </VBox>
