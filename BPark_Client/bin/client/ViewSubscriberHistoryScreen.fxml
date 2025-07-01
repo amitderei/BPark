@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewParkingHistoryController">
+<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@ViewSubscriberHistoryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewParkingHistoryController">
    <padding>
       <Insets bottom="20" left="20" right="20" top="20" />
    </padding>
@@ -36,12 +36,12 @@
             </Label>
             <TableView fx:id="parkingHistoryTable" prefHeight="60.0" prefWidth="560.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
                <columns>
-                  <TableColumn fx:id="eventNumberColumn" prefWidth="86.0" text="Event ID" />
-                  <TableColumn fx:id="entryDateColumn" prefWidth="103.0" text="Entry Date" />
-                  <TableColumn fx:id="entryHourColumn" minWidth="0.0" prefWidth="99.0" text="Entry Hour" />
-                  <TableColumn fx:id="exitDateColumn" prefWidth="91.0" text="Exit Date" />
-                  <TableColumn fx:id="exitHourColumn" prefWidth="91.0" text="Exit Hour" />
-                  <TableColumn fx:id="status" prefWidth="89.0" text="Status" />
+                  <TableColumn fx:id="eventNumberColumn" prefWidth="89.0" text="Event ID" />
+                  <TableColumn fx:id="entryDateColumn" prefWidth="89.0" text="Entry Date" />
+                  <TableColumn fx:id="entryHourColumn" minWidth="0.0" prefWidth="89.0" text="Entry Hour" />
+                  <TableColumn fx:id="exitDateColumn" prefWidth="89.0" text="Exit Date" />
+                  <TableColumn fx:id="exitHourColumn" maxWidth="150.0" prefWidth="89.0" text="Exit Hour" />
+                  <TableColumn fx:id="status" maxWidth="150.0" prefWidth="89.0" text="Status" />
                </columns>
             </TableView>
          </children>
