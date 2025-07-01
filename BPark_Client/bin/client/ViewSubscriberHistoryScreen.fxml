@@ -22,8 +22,8 @@
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="366.0" minWidth="10.0" prefWidth="176.0" />
          </columnConstraints>
          <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="46.000003814697266" minHeight="10.0" prefHeight="46.000003814697266" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="115.33333969116211" minHeight="10.0" prefHeight="113.99999618530273" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -34,7 +34,7 @@
                   <Font name="Calibri Bold" size="22.0" />
                </font>
             </Label>
-            <TableView fx:id="parkingHistoryTable" prefHeight="60.0" prefWidth="560.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
+            <TableView fx:id="parkingHistoryTable" prefHeight="335.0" prefWidth="560.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
                <columns>
                   <TableColumn fx:id="eventNumberColumn" prefWidth="89.0" text="Event ID" />
                   <TableColumn fx:id="entryDateColumn" prefWidth="89.0" text="Entry Date" />
