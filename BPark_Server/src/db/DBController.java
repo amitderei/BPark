@@ -1468,6 +1468,44 @@ public class DBController {
 			return false;
 		}
 	}
+	
+	/**
+	 * Inserts a new vehicle and assigns it to a subscriber.
+	 *
+	 * @param vehicleId the vehicle ID (e.g. license plate)
+	 * @param subscriberCode the subscriber this vehicle belongs to
+	 * @return true if insertion succeeded, false otherwise
+	 */
+	public boolean insertVehicle(String vehicleId, int subscriberCode) {
+		String sql = "INSERT INTO vehicle (vehicleId, subscriberCode) VALUES (?, ?)";
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, vehicleId);
+			stmt.setInt(2, subscriberCode);
+			return stmt.executeUpdate() == 1;
+		} catch (SQLException e) {
+			System.err.println("Error inserting vehicle: " + e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Checks whether a vehicle with the given ID already exists in the database.
+	 *
+	 * @param vehicleId the vehicle ID to check
+	 * @return true if the vehicle already exists, false otherwise
+	 */
+	public boolean vehicleExists(String vehicleId) {
+		String query = "SELECT 1 FROM vehicle WHERE vehicleId = ? LIMIT 1";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setString(1, vehicleId);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next();
+		} catch (SQLException e) {
+			System.err.println("Error checking vehicle existence: " + e.getMessage());
+			return false;
+		}
+	}
+
 
 	/**
 	 * Checks whether the provided email is already associated with an existing

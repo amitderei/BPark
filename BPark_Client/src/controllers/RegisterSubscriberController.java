@@ -39,6 +39,10 @@ public class RegisterSubscriberController implements ClientAware {
     /** Input field for username (4+ alphanumeric characters) */
     @FXML
     private TextField txtUsername;
+    
+    /** Input field for vehicle id */
+    @FXML 
+    private TextField txtVehicleId;
 
     /** Button that triggers the registration request */
     @FXML 
@@ -68,12 +72,13 @@ public class RegisterSubscriberController implements ClientAware {
     private void handleRegisterClick() {
         StringBuilder errors = new StringBuilder();
 
-        String userId    = txtUserId.getText().trim();
-        String firstName = txtFirstName.getText().trim();
-        String lastName  = txtLastName.getText().trim();
-        String phone     = txtPhone.getText().trim();
-        String email     = txtEmail.getText().trim();
-        String username  = txtUsername.getText().trim();
+        String userId    = txtUserId.getText();
+        String firstName = txtFirstName.getText();
+        String lastName  = txtLastName.getText();
+        String phone     = txtPhone.getText();
+        String email     = txtEmail.getText();
+        String username  = txtUsername.getText();
+        String vehicleId  = txtVehicleId.getText();
 
         // validation rules
         if (userId.isEmpty() || !userId.matches("\\d{9}"))
@@ -93,6 +98,9 @@ public class RegisterSubscriberController implements ClientAware {
 
         if (username.isEmpty() || !username.matches("\\w{4,}"))
             errors.append("- Username must be at least 4 characters.\n");
+        
+        if (vehicleId.isEmpty() || !vehicleId.matches("\\d{7,10}"))
+            errors.append("- Vehicle ID must be 7-10 digits.\n");
 
         if (errors.length() > 0) {
             // Display validation errors
@@ -112,7 +120,7 @@ public class RegisterSubscriberController implements ClientAware {
                 null        // Tag ID is assigned by the server
         );
 
-        client.registerSubscriber(sub);
+        client.registerSubscriber(sub, vehicleId);
         UiUtils.setStatus(lblStatus,
                 "Registration request sent to server.",
                 true);

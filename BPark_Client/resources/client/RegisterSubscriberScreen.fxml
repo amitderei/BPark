@@ -16,6 +16,7 @@
         <TextField fx:id="txtPhone" promptText="Phone Number" />
         <TextField fx:id="txtEmail" promptText="Email Address" />
         <TextField fx:id="txtUsername" promptText="Username" />
+        <TextField fx:id="txtVehicleId" promptText="Vehicle ID (e.g. 123456789)" />
         <Button fx:id="btnRegister" text="Register Subscriber"
                 onAction="#handleRegisterClick" maxWidth="200" />
         <Label fx:id="lblStatus" textFill="green" wrapText="true" />
