@@ -29,7 +29,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label fx:id="headline" prefHeight="26.0" prefWidth="172.0" text="Parking History" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+            <Label fx:id="headline" prefHeight="26.0" prefWidth="172.0" styleClass="headline" text="Parking History" GridPane.columnIndex="1" GridPane.halignment="CENTER">
                <font>
                   <Font name="Calibri Bold" size="22.0" />
                </font>
