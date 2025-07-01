@@ -1212,6 +1212,7 @@ public class DBController {
 	 * - The parking session is still active (exitDate and exitHour are NULL)
 	 * - The session has not been extended before (wasExtended = FALSE)
 	 * - If a subscriberCode is provided (not null or blank), the session must belong to that subscriber
+	 * - There is no upcoming reservation in the next 4 hours if the parking lot is full
 	 *
 	 * If subscriberCode is null or blank (used from terminal), the extension will be attempted
 	 * using only the parking code without checking subscriber ownership.
@@ -1221,45 +1222,79 @@ public class DBController {
 	 * @return a ServerResponse indicating whether the extension was successful, with a message
 	 */
 	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
-		String sql;
-		boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
+	    String sql;
+	    boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
 
-		// Case 1: Extend by parking code only (used by terminal)
-		if (!useSubscriberCode) {
-			sql = "UPDATE bpark.parkingEvent " +
-					"SET wasExtended = TRUE " +
-					"WHERE parkingCode = ? " +
-					"AND exitDate IS NULL AND exitHour IS NULL " +
-					"AND wasExtended = FALSE";
-		} 
-		// Case 2: Extend with verification of subscriberCode (used by subscriber)
-		else {
-			sql = "UPDATE bpark.parkingEvent " +
-					"SET wasExtended = TRUE " +
-					"WHERE parkingCode = ? " +
-					"AND subscriberCode = ? " +
-					"AND exitDate IS NULL AND exitHour IS NULL " +
-					"AND wasExtended = FALSE";
-		}
+	    // Prevent extension if the parking lot is full and there is a reservation soon
+	    int totalSpots = getTotalSpots();
+	    int occupied = getOccupiedSpots();
+	    boolean upcomingReservation = hasReservationInNext4Hours();
 
-		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setInt(1, parkingCode);
-			if (useSubscriberCode) {
-				stmt.setString(2, subscriberCode);
-			}
+	    if (occupied >= totalSpots && upcomingReservation) {
+	        return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED,
+	            "Extension not allowed- spot is reserved.");
+	    }
 
-			int rowsAffected = stmt.executeUpdate();
+	    // Prepare SQL for extension
+	    if (!useSubscriberCode) {
+	        sql = "UPDATE bpark.parkingEvent " +
+	              "SET wasExtended = TRUE " +
+	              "WHERE parkingCode = ? " +
+	              "AND exitDate IS NULL AND exitHour IS NULL " +
+	              "AND wasExtended = FALSE";
+	    } else {
+	        sql = "UPDATE bpark.parkingEvent " +
+	              "SET wasExtended = TRUE " +
+	              "WHERE parkingCode = ? " +
+	              "AND subscriberCode = ? " +
+	              "AND exitDate IS NULL AND exitHour IS NULL " +
+	              "AND wasExtended = FALSE";
+	    }
 
-			if (rowsAffected > 0) {
-				return new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, "Parking session extended successfully.");
-			} else {
-				return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Invalid code.");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return new ServerResponse(false, null, null, "Database error: " + e.getMessage());
-		}
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, parkingCode);
+	        if (useSubscriberCode) {
+	            stmt.setString(2, subscriberCode);
+	        }
+
+	        int rowsAffected = stmt.executeUpdate();
+
+	        if (rowsAffected > 0) {
+	            return new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, "Parking session extended successfully.");
+	        } else {
+	            return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Invalid code.");
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return new ServerResponse(false, null, null, "Database error: " + e.getMessage());
+	    }
 	}
+
+	/**
+	 * Checks whether there's an upcoming reservation in the next 4 hours.
+	 * This helps prevent extending if it might block someone else.
+	 *
+	 * @return true if there is a reservation coming soon
+	 */
+	public boolean hasReservationInNext4Hours() {
+	    String sql = """
+	        SELECT 1
+	        FROM `order`
+	        WHERE `status` = 'ACTIVE'
+	          AND order_date = CURDATE()
+	          AND TIMESTAMP(order_date, arrival_time) BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 4 HOUR)
+	        LIMIT 1
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+	        return rs.next();
+	    } catch (SQLException e) {
+	        System.err.println("Error checking future reservations: " + e.getMessage());
+	        return false;
+	    }
+	}
+
 
 
 	/**
