@@ -16,7 +16,7 @@
          </font>
       </Label>
         <Label style="-fx-font-size: 14px;" text="Enter your parking code:" />
-        <TextField fx:id="txtParkingCode" maxWidth="400.0" prefHeight="29.0" prefWidth="400.0" promptText="e.g. 800101" style="-fx-font-size: 14px; -fx-pref-width: 250px;" />
+        <TextField fx:id="txtParkingCode" maxWidth="400.0" prefHeight="29.0" prefWidth="400.0" promptText="e.g. XXXXXX" style="-fx-font-size: 14px; -fx-pref-width: 250px;" />
         <Button fx:id="btnExtend" onAction="#handleExtendClick" style="-fx-font-size: 14px; -fx-padding: 6px 20px;" text="Extend by 4 hours" />
       <Pane prefHeight="47.0" prefWidth="398.0" styleClass="status-box">
          <children>
