@@ -113,6 +113,10 @@ public final class UiUtils {
             stage.setScene(new Scene(root));
             stage.setTitle(title);
             stage.show();
+            
+            if (ctrl instanceof MainController m) {
+                m.setVideos();
+            }
 
         } catch (Exception ex) {
             showAlert("BPARK – Error",

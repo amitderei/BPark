@@ -71,9 +71,15 @@ public class MainController implements ClientAware {
     	mediaPlayerOfParkingVideo= new MediaPlayer(mediaOfParkingVideo);
     	mediaPlayerOfBraude= new MediaPlayer(mediaOfBraude);
     	
+    	mediaPlayerOfParkingVideo.setMute(true);
+    	mediaPlayerOfBraude.setMute(true);
+    	
     	//connect between media player to media view
     	automaticParkingVideo.setMediaPlayer(mediaPlayerOfParkingVideo);
     	braudeVideo.setMediaPlayer(mediaPlayerOfBraude);
+    	
+    	mediaPlayerOfParkingVideo.setAutoPlay(true);
+    	mediaPlayerOfBraude.setAutoPlay(true);
     }
     
     
