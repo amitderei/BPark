@@ -490,13 +490,13 @@ public class VehicleDeliveryController implements ClientAware{
 
 	/**
 	 * Generates a random 6-digit parking code as a zero-padded string.
-	 * The result is a number between 000000 and 999999, used to identify a parked vehicle.
+	 * The result is a number between 100000 and 999999, used to identify a parked vehicle.
 	 *
 	 * @return a 6-digit parking code string (e.g., "004521")
 	 */
 	public String createParkingCode() {
 		Random rand=new Random();
-		int parkingCode=rand.nextInt(1000000);
+		int parkingCode=rand.nextInt(899999) + 100000;
 		return String.format("%06d", parkingCode);
 	}
 

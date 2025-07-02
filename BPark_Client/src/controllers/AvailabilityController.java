@@ -24,9 +24,6 @@ public class AvailabilityController implements ClientAware {
 	@FXML 
 	private Label lblAvailable;
 
-	/** Status label to show whether the data was loaded successfully */
-	@FXML 
-	private Label lblStatus;
 
 	/** Reference to the main client used to communicate with the server */
 	private ClientController client;
@@ -61,7 +58,6 @@ public class AvailabilityController implements ClientAware {
 		// All UI updates must be run on the JavaFX thread
 		Platform.runLater(() -> {
 			if (stats == null || stats.length != 3) {
-				lblStatus.setText("Failed to load availability.");
 				return;
 			}
 
@@ -74,7 +70,6 @@ public class AvailabilityController implements ClientAware {
 			lblTotal.setText("Total spots: " + total);
 			lblOccupied.setText("Occupied: " + occupied);
 			lblAvailable.setText("Available: " + available);
-			lblStatus.setText("Availability data loaded.");
 		});
 	}
 }

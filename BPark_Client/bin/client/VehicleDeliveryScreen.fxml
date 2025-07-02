@@ -33,7 +33,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <TextField fx:id="subscriberCodeField" prefHeight="28.0" prefWidth="227.0" promptText="e.g. 1001" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="subscriberCodeField" prefHeight="28.0" prefWidth="227.0" promptText="e.g. XXXX" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="26.0" prefWidth="102.0" styleClass="code-btn" text="Verify Code" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
             <Label fx:id="subscriberCodeLabel" prefHeight="18.0" prefWidth="276.0" text=" " visible="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             <Label text=" Subscriber code :" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -44,7 +44,7 @@
             <Label fx:id="deliverStatusUpdateLabel" prefHeight="18.0" prefWidth="277.0" text=" Status--Of--Parking--Lot" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
             <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="294.0" text=" SUCCESSFUL DELIVER" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="10" />
             <Label text=" Or scan your tag :" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <TextField fx:id="TagCodeField" prefHeight="28.0" prefWidth="127.0" promptText="e.g. TAG_001" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <TextField fx:id="TagCodeField" prefHeight="28.0" prefWidth="127.0" promptText="e.g. TAG_XXX" GridPane.columnIndex="3" GridPane.rowIndex="2" />
             <Button fx:id="submitTagButton" mnemonicParsing="false" onAction="#handleTagDelivery" prefHeight="30.0" prefWidth="156.0" styleClass="tag-btn" text="Verify Tag &amp; Deliver " textAlignment="CENTER" textOverrun="WORD_ELLIPSIS" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Label fx:id="TagStatusUpdateLabel" prefHeight="18.0" prefWidth="165.0" text=" " visible="false" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Label fx:id="parkingCodeLabel" prefHeight="18.0" prefWidth="238.0" text=" PARKING CODE : XXXXXX" visible="false" GridPane.columnIndex="3" GridPane.rowIndex="9" />

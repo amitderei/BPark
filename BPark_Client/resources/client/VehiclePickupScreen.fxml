@@ -21,9 +21,9 @@
             <Pane prefHeight="211.0" prefWidth="508.0" styleClass="pane-box">
                <children>
                   <Label layoutX="98.0" layoutY="10.0" text="Step1: Enter your subscriber code or scan your tag:" />
-                  <TextField fx:id="txtSubscriberCode" layoutX="144.0" layoutY="44.0" maxWidth="200.0" prefHeight="25.0" prefWidth="305.0" promptText="e.g. 1001" />
+                  <TextField fx:id="txtSubscriberCode" layoutX="144.0" layoutY="44.0" maxWidth="200.0" prefHeight="25.0" prefWidth="305.0" promptText="e.g. XXXX" />
                   <Button fx:id="btnNext" layoutX="368.0" layoutY="45.0" mnemonicParsing="false" onAction="#validateSubscriber" text="Verify Code" />
-                  <TextField fx:id="txtTagId" layoutX="144.0" layoutY="94.0" maxWidth="200.0" prefHeight="25.0" prefWidth="305.0" promptText="e.g. TAG_001" />
+                  <TextField fx:id="txtTagId" layoutX="144.0" layoutY="94.0" maxWidth="200.0" prefHeight="25.0" prefWidth="305.0" promptText="e.g. TAG_XXX" />
                   <Button fx:id="btnReadTag" layoutX="368.0" layoutY="96.0" mnemonicParsing="false" onAction="#handleReadTag" text="Verify Tag" />
                   <Label layoutX="40.0" layoutY="51.0" text="Subscriber Code:" />
                   <Label layoutX="64.0" layoutY="101.0" text="Tag ID:" />
