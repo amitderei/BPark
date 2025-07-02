@@ -69,3 +69,7 @@
     -fx-padding: 4 10;
     -fx-alignment: CENTER;
 }
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: black;
+}
