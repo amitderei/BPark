@@ -92,6 +92,7 @@ public final class UiUtils {
             if (ctrl instanceof MainController m) {
                 client.setMainController(m);
                 m.setClient(client);
+                m.setVideos();
             }
             if (ctrl instanceof LoginController l) {
                 client.setLoginController(l);

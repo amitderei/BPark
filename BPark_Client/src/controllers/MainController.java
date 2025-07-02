@@ -1,9 +1,15 @@
 package controllers;
 
+import java.net.URL;
+
 import client.ClientController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import ui.UiUtils;
 
 /**
@@ -27,9 +33,73 @@ public class MainController implements ClientAware {
 
     @FXML 
     private Button btnBack;
-
+    
+    @FXML
+    private MediaView automaticParkingVideo;
+    
+    @FXML
+    private MediaView braudeVideo;
+    
+    private MediaPlayer mediaPlayerOfParkingVideo;
+    private MediaPlayer mediaPlayerOfBraude;
+    
+    
     /** Shared ClientController used to send requests to the server */
     private ClientController client;
+    
+    /**
+     * set the videos on MediaView
+     */
+    @FXML
+    public void setVideos() {
+    	//path to the videos
+    	String pathOfParkingVideo="/client/AutomaticParking.mp4";
+    	String pathOfBraude="/client/Braude.mp4";
+    	
+    	//URL of the videos
+    	URL pathOfParkingVideoUrl= getClass().getResource(pathOfParkingVideo);
+    	URL pathOfBraudeUrl= getClass().getResource(pathOfBraude);
+    	if (pathOfParkingVideoUrl==null || pathOfBraudeUrl==null) {
+    		System.out.println("Video not found");
+    		return;
+    	}
+    	//create media objects that represents the video file
+    	Media mediaOfParkingVideo= new Media(pathOfParkingVideoUrl.toExternalForm());
+    	Media mediaOfBraude= new Media(pathOfBraudeUrl.toExternalForm());
+    	
+    	//create media player object that take control on media
+    	mediaPlayerOfParkingVideo= new MediaPlayer(mediaOfParkingVideo);
+    	mediaPlayerOfBraude= new MediaPlayer(mediaOfBraude);
+    	
+    	//connect between media player to media view
+    	automaticParkingVideo.setMediaPlayer(mediaPlayerOfParkingVideo);
+    	braudeVideo.setMediaPlayer(mediaPlayerOfBraude);
+    }
+    
+    
+    /**
+     * play the video of automatic parking system
+     */
+    @FXML
+    private void handleAutomaticParkingVideoClick(MouseEvent event) {
+        if (mediaPlayerOfParkingVideo.getStatus() == MediaPlayer.Status.PLAYING) {
+        	mediaPlayerOfParkingVideo.pause();
+        } else {
+        	mediaPlayerOfParkingVideo.play();
+        }
+    }
+    
+    /**
+     * play the video of braude
+     */
+    @FXML
+    private void handleMediaPlayerOfBraudeClick(MouseEvent event) {
+        if (mediaPlayerOfBraude.getStatus() == MediaPlayer.Status.PLAYING) {
+        	mediaPlayerOfBraude.pause();
+        } else {
+        	mediaPlayerOfBraude.play();
+        }
+    }
 
     /**
      * Injects the client controller used for server communication and screen transitions.
