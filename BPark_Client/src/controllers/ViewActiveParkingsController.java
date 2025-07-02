@@ -38,13 +38,6 @@ public class ViewActiveParkingsController implements ClientAware {
     @FXML 
     private TableColumn<ParkingEvent, String> colVehicleId;
 
-    /** Column for unique parking code */
-    @FXML 
-    private TableColumn<ParkingEvent, String> colParkingCode;
-
-    /** Column for name of the parking lot */
-    @FXML 
-    private TableColumn<ParkingEvent, String> colLot;
 
     /** Column for parking space number */
     @FXML 
@@ -73,8 +66,6 @@ public class ViewActiveParkingsController implements ClientAware {
         colEventId     .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getEventId()));
         colSubscriber  .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getSubscriberCode()));
         colVehicleId   .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getVehicleId()));
-        colParkingCode .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getParkingCode()));
-        colLot         .setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNameParkingLot()));
         colSpace       .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getParkingSpace()));
 
         // Format entry date as "yyyy-MM-dd"

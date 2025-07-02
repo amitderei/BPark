@@ -1,28 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="controllers.ViewActiveParkingsController"
-            prefWidth="600.0" prefHeight="453.0">
+<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@ViewActiveParkingsScreen.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="controllers.ViewActiveParkingsController">
     <top>
-        <Label text="Active Parkings"
-               BorderPane.alignment="CENTER"
-               styleClass="headline" />
+        <Label styleClass="headline" text="Active Parkings" BorderPane.alignment="CENTER" />
     </top>
     <center>
-        <TableView fx:id="parkingTable"
-                   prefWidth="580.0" prefHeight="400.0">
+        <TableView fx:id="parkingTable" prefHeight="400.0" prefWidth="580.0">
             <columns>
-                <TableColumn fx:id="colEventId"     text="Event ID"        prefWidth="60.0"/>
-                <TableColumn fx:id="colSubscriber"  text="Subscriber"      prefWidth="80.0"/>
-                <TableColumn fx:id="colVehicleId"   text="Vehicle ID"      prefWidth="80.0"/>
-                <TableColumn fx:id="colParkingCode" text="Parking Code"    prefWidth="80.0"/>
-                <TableColumn fx:id="colLot"         text="Parking Lot"     prefWidth="90.0"/>
-                <TableColumn fx:id="colSpace"       text="Space #"         prefWidth="50.0"/>
-                <TableColumn fx:id="colEntryDate"   text="Entry Date"      prefWidth="70.0"/>
-                <TableColumn fx:id="colEntryTime"   text="Entry Time"      prefWidth="70.0"/>
+                <TableColumn fx:id="colEventId" prefWidth="60.0" text="Event ID" />
+                <TableColumn fx:id="colSubscriber" prefWidth="114.66665649414062" text="Subscriber" />
+                <TableColumn fx:id="colVehicleId" prefWidth="108.0" text="Vehicle ID" />
+                <TableColumn fx:id="colSpace" prefWidth="97.3333740234375" text="Space #" />
+                <TableColumn fx:id="colEntryDate" prefWidth="83.99993896484375" text="Entry Date" />
+                <TableColumn fx:id="colEntryTime" prefWidth="97.33331298828125" text="Entry Time" />
             </columns>
         </TableView>
     </center>
