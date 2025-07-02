@@ -7,37 +7,37 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="453" prefWidth="600" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="controllers.RegisterSubscriberController">
-    <VBox alignment="TOP_CENTER" spacing="16" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+<AnchorPane maxHeight="453.0" prefHeight="449.0" prefWidth="600" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RegisterSubscriberController">
+    <VBox alignment="TOP_CENTER" layoutX="40.0" layoutY="17.0" maxHeight="440.0" prefHeight="345.0" prefWidth="560.0" spacing="16" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="17.0">
         <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Register New Subscriber" />
         <HBox alignment="TOP_CENTER" spacing="40">
             <VBox spacing="6">
-                <Label text="User ID" />
+                <Label text="User ID:" />
                 <TextField fx:id="txtUserId" prefHeight="26.0" prefWidth="225.0" />
                 <Label fx:id="errUserId" textFill="red" visible="false" />
-                <Label text="First Name" />
+                <Label text="First Name:" />
                 <TextField fx:id="txtFirstName" />
                 <Label fx:id="errFirstName" textFill="red" visible="false" />
-                <Label text="Last Name" />
+                <Label text="Last Name:" />
                 <TextField fx:id="txtLastName" />
                 <Label fx:id="errLastName" textFill="red" visible="false" />
-                <Label text="Phone Number" />
+                <Label text="Phone Number:" />
                 <TextField fx:id="txtPhone" />
                 <Label fx:id="errPhone" textFill="red" visible="false" />
             </VBox>
             <VBox spacing="6">
-                <Label text="Email" />
+                <Label text="Email:" />
                 <TextField fx:id="txtEmail" prefHeight="26.0" prefWidth="225.0" />
                 <Label fx:id="errEmail" textFill="red" visible="false" />
-                <Label text="Username" />
+                <Label text="Username:" />
                 <TextField fx:id="txtUsername" />
                 <Label fx:id="errUsername" textFill="red" visible="false" />
-                <Label text="Vehicle ID" />
+                <Label text="Vehicle ID:" />
                 <TextField fx:id="txtVehicleId" />
-                <Label fx:id="errVehicleId" textFill="red" visible="false" />
-                <Button fx:id="btnRegister" maxWidth="180" onAction="#handleRegisterClick" text="Register Subscriber" />
-                <Label fx:id="lblStatus" maxWidth="250" style="-fx-text-fill: green; -fx-font-size: 13px;" wrapText="true" />
+                <Label fx:id="errVehicleId" prefHeight="17.0" prefWidth="203.0" textFill="red" visible="false" />
             </VBox>
         </HBox>
     </VBox>
+       <Button fx:id="btnRegister" layoutX="241.0" layoutY="374.0" maxWidth="180" onAction="#handleRegisterClick" text="Register Subscriber" />
+       <Label fx:id="lblStatus" layoutX="168.0" layoutY="412.0" maxWidth="273.0" prefHeight="19.0" prefWidth="273.0" style="-fx-text-fill: green; -fx-font-size: 13px;" wrapText="true" />
 </AnchorPane>

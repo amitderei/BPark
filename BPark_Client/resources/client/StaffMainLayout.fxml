@@ -29,8 +29,8 @@
                 <Button fx:id="btnRegisterUsers" mnemonicParsing="false" onAction="#handleRegisterUsers" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="Register Users" />
                 <Button fx:id="btnViewSubscriberInfo" mnemonicParsing="false" onAction="#handleViewSubscriberInfo" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="View Subscriber Info" />
                 <Button fx:id="btnViewActiveParkings" mnemonicParsing="false" onAction="#handleViewActiveParkings" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="View Active Parkings" />
-                <Button fx:id="btnViewParkingReport" mnemonicParsing="false" onAction="#handleViewParkingReport" prefHeight="44.0" prefWidth="209.0" styleClass="menu-box" text="View Parking Report" />
-                <Button fx:id="btnViewSubscriberReport" mnemonicParsing="false" onAction="#handleViewSubscriberReport" prefHeight="44.0" prefWidth="209.0" styleClass="menu-box" text="View Subscriber Report" />
+                <Button fx:id="btnViewParkingReport" mnemonicParsing="false" onAction="#handleViewParkingReport" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="View Parking Report" />
+                <Button fx:id="btnViewSubscriberReport" mnemonicParsing="false" onAction="#handleViewSubscriberReport" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="View Subscriber Report" />
                 <Pane VBox.vgrow="ALWAYS" />
                 <Button fx:id="btnExit" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="44.0" prefWidth="209.0" styleClass="exit-button" text="Exit" />
             </children>
