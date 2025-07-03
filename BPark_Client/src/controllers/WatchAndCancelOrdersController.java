@@ -55,7 +55,7 @@ public class WatchAndCancelOrdersController implements ClientAware {
         confirmationCodeColumn.setCellValueFactory(new PropertyValueFactory<>("confirmationCode"));
 
         // Ask the server to send the subscriber's future orders
-        client.askForReservations();
+        client.getRequestSender().askForReservations();
 
         // Add a "Cancel" button in each row
         cancelOrderColumn.setCellFactory(col -> new TableCell<>() {
@@ -65,7 +65,7 @@ public class WatchAndCancelOrdersController implements ClientAware {
                 // When clicked, delete the order by its ID
                 deleteBtn.setOnAction(e -> {
                     Order order = getTableView().getItems().get(getIndex());
-                    client.deleteOrder(order.getOrderNumber());
+                    client.getRequestSender().deleteOrder(order.getOrderNumber());
                 });
             }
 

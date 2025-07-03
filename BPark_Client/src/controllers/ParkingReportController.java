@@ -187,13 +187,13 @@ public class ParkingReportController implements ClientAware {
 		Date sqlDate = Date.valueOf(date);
 
 		hoursParkingChart.getData().clear();
-		client.getParkingReport(sqlDate);
+		client.getRequestSender().getParkingReport(sqlDate);
 	}
 
 	/**
 	 * Requests from the server the list of months that have parking reports stored.
 	 */
 	public void getDatesOfReportsInDB() {
-		client.getDatesOfReports();
+		client.getRequestSender().getDatesOfReports();
 	}
 }

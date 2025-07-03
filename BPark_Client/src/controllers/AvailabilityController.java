@@ -44,7 +44,7 @@ public class AvailabilityController implements ClientAware {
 			client.setAvailabilityController(this);
 
 			// Request availability data from the server
-			client.requestParkingAvailability();
+			client.getRequestSender().requestParkingAvailability();
 		}
 	}
 

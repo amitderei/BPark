@@ -96,7 +96,7 @@ public class VehiclePickupController implements ClientAware {
 
         try {
             int code = Integer.parseInt(txtSubscriberCode.getText());
-            client.validateSubscriber(code);
+            client.getRequestSender().validateSubscriber(code);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Subscriber code must be a number.", false);
             UiUtils.showAlert("BPARK - Error", "Subscriber code must be a number.",
@@ -117,7 +117,7 @@ public class VehiclePickupController implements ClientAware {
         }
 
         UiUtils.setStatus(lblStatus, "Reading tag... (" + tagId + ")", true);
-        client.validateSubscriberByTag(tagId);
+        client.getRequestSender().validateSubscriberByTag(tagId);
     }
 
     /**
@@ -139,7 +139,7 @@ public class VehiclePickupController implements ClientAware {
     public void collectCar() {
         try {
             int parkingCode = Integer.parseInt(txtParkingCode.getText());
-            client.collectCar(validatedSubscriberCode, parkingCode);
+            client.getRequestSender().collectCar(validatedSubscriberCode, parkingCode);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Parking code must be numeric.", false);
             UiUtils.showAlert("BPARK - Error", "Parking code must be numeric.",
@@ -157,7 +157,7 @@ public class VehiclePickupController implements ClientAware {
     @FXML
     public void forgotMyCode() {
         try {
-            client.forgotMyParkingCode(validatedSubscriberCode);
+        	client.getRequestSender().forgotMyParkingCode(validatedSubscriberCode);
         } catch (Exception e) {
             UiUtils.setStatus(lblStatus,
                     "An error occurred while requesting your code.", false);

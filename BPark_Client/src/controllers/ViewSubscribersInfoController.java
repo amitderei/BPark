@@ -72,7 +72,7 @@ public class ViewSubscribersInfoController implements ClientAware {
      */
     public void requestSubscribers() {
         if (client != null)
-            client.requestAllSubscribers();
+        	client.getRequestSender().requestAllSubscribers();
     }
 
     /**

@@ -72,13 +72,13 @@ public class ExtendParkingController implements ClientAware {
         // Case 1: if a subscriber is logged in (subscriber screen)
         if (client.getSubscriber() != null) {
             String subscriberCode = String.valueOf(client.getSubscriber().getSubscriberCode());
-            client.extendParking(parkingCode, subscriberCode);
+            client.getRequestSender().extendParking(parkingCode, subscriberCode);
         }
 
         // Case 2: no subscriber is logged in (terminal screen)
         else {
             // Send empty subscriber code – the server will handle validation
-            client.extendParking(parkingCode, null);
+        	client.getRequestSender().extendParking(parkingCode, null);
         }
     }
 

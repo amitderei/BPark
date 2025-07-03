@@ -140,7 +140,7 @@ public class RegisterSubscriberController implements ClientAware {
                 null        // Tag ID will be generated on the server
         );
 
-        client.registerSubscriber(sub, vehicleId);
+        client.getRequestSender().registerSubscriber(sub, vehicleId);
 
         // wait for server response
         lblStatus.setText("");

@@ -151,7 +151,7 @@ public class SubscriberStatusController implements ClientAware {
         }
 
         System.out.println("[DEBUG] Sending request for " + month + "/" + year); 
-        client.getSubscriberReport(month, year);
+        client.getRequestSender().getSubscriberReport(month, year);
     }
 
 

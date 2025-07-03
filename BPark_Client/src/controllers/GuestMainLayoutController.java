@@ -121,7 +121,7 @@ public class GuestMainLayoutController implements ClientAware {
             if (ctrl instanceof AvailabilityController ac) {
                 ac.setClient(client);
                 client.setAvailabilityController(ac);
-                client.requestParkingAvailability();
+                client.getRequestSender().requestParkingAvailability();
             }
 
             center.getChildren().setAll(content);

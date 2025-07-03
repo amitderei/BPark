@@ -217,14 +217,14 @@ public class CreateNewOrderViewController implements ClientAware {
 		orderExistFuture = new CompletableFuture<>();
 
 		// Ask server if there is an already existing order for the asked date and time
-		client.checkIfOrderAlreadyExists(client.getSubscriber().getSubscriberCode(), selectedDate, timeOfArrival);
+		client.getRequestSender().checkIfOrderAlreadyExists(client.getSubscriber().getSubscriberCode(), selectedDate, timeOfArrival);
 
 		// When the boolean received, we will check if there is available space in the selected date and time
 		orderExistFuture.thenAcceptAsync(orderExists -> {
 
 			if(!orderExists) {
 				// Ask server if slot is still free (if the order doesn't exists already)
-				client.checkAvailability(selectedDate, timeOfArrival);
+				client.getRequestSender().checkAvailability(selectedDate, timeOfArrival);
 			}
 		});
 	}
@@ -253,7 +253,7 @@ public class CreateNewOrderViewController implements ClientAware {
 					subscriberNum,
 					Date.valueOf(LocalDate.now()), StatusOfOrder.ACTIVE);
 
-			client.addNewOrder(newOrder);
+			client.getRequestSender().addNewOrder(newOrder);
 		}
 		else {
 			notPossibleToOrder.setText("Can't make an order on this time");	

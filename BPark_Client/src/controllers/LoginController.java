@@ -80,7 +80,7 @@ public class LoginController implements ClientAware {
 
         // Send login request to server
         try {
-            client.requestLogin(user, password);
+        	client.getRequestSender().requestLogin(user, password);
         } catch (Exception ex) {
             lblError.setText("Failed to send login request.");
             ex.printStackTrace();
@@ -151,7 +151,7 @@ public class LoginController implements ClientAware {
         switch (role) {
             case Subscriber -> {
                 fxml = "/client/SubscriberMainLayout.fxml";
-                client.subscriberDetails(user); // Fetch full subscriber info from server
+                client.getRequestSender().subscriberDetails(user); // Fetch full subscriber info from server
             }
             case Attendant, Manager -> fxml = "/client/StaffMainLayout.fxml";
             default -> {

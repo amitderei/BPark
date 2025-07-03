@@ -154,7 +154,7 @@ public class VehicleDeliveryController implements ClientAware{
 			// If the code isn't type of integer, we will let the user know that the code must be a number
 			codeInt = Integer.parseInt(code);
 
-			client.checkSubscriberExists(codeInt);
+			client.getRequestSender().checkSubscriberExists(codeInt);
 
 			// There will be an exception thrown due to a String not containing only digits.
 		} catch (NumberFormatException e) {
@@ -208,7 +208,7 @@ public class VehicleDeliveryController implements ClientAware{
 			return;
 		}
 
-		client.validateTag(tag);
+		client.getRequestSender().validateTag(tag);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class VehicleDeliveryController implements ClientAware{
 		TagCodeField.setDisable(true);
 
 		// We will check whether the subscriber has already delivered his vehicle or not
-		client.checkIfSubscriberAlreadyEntered(codeInt);
+		client.getRequestSender().checkIfSubscriberAlreadyEntered(codeInt);
 	}
 
 	/**
@@ -305,7 +305,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * The method is triggered after the server responses that the subscriber didn't enter his vehicle yet.
 	 */	
 	public void checkIfTheresReservation() {
-		client.isThereReservation(codeInt);
+		client.getRequestSender().isThereReservation(codeInt);
 	}
 
 	/**
@@ -360,7 +360,7 @@ public class VehicleDeliveryController implements ClientAware{
 		InsertionUpdateLabel.setVisible(false);
 
 		// After all of the updates to the visuals, we will find out if the vehicle that is matched to the tag-Id is already in the parking lot
-		client.checkIfTagIDAlreadyInside(tag);
+		client.getRequestSender().checkIfTagIDAlreadyInside(tag);
 	}
 
 	/**
@@ -387,7 +387,7 @@ public class VehicleDeliveryController implements ClientAware{
 	 * Seeking for the matching subscriber so we will be able to proceed to the vehicle delivery.
 	 */
 	public void findMatchedSubToTheTag() {
-			client.findSubscriberWithTag(tag);
+		client.getRequestSender().findSubscriberWithTag(tag);
 
 			// Initialize the CompletableFutures
 			subCodeFuture = new CompletableFuture<>();
@@ -396,7 +396,7 @@ public class VehicleDeliveryController implements ClientAware{
 			subCodeFuture.thenAccept(codeInt -> {
 				this.codeInt = codeInt;
 				// After gathering the subscriber code we will go and check whether there are free space in our parking lot
-				client.isThereFreeParkingSpace("braude");
+				client.getRequestSender().isThereFreeParkingSpace("braude");
 			});
 	}
 
@@ -410,7 +410,7 @@ public class VehicleDeliveryController implements ClientAware{
 		if(hasReservation) {handleDeliveryViaReservation();}
 
 		// If there's no reservation, we will check if we can enter the vehicle on a regular
-		else client.isThereFreeParkingSpace("braude");
+		else client.getRequestSender().isThereFreeParkingSpace("braude");
 
 
 	}
@@ -431,7 +431,7 @@ public class VehicleDeliveryController implements ClientAware{
 		try {
 			confirmationCodeInt = Integer.parseInt(confirmationCode);
 
-			client.DeliveryViaReservation(codeInt, confirmationCodeInt);
+			client.getRequestSender().deliveryViaReservation(codeInt, confirmationCodeInt);
 
 			// There will be an exception thrown due to a String not containing only digits
 		} catch (NumberFormatException e) {
@@ -475,7 +475,7 @@ public class VehicleDeliveryController implements ClientAware{
 		ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: green;");
 
 		// Before going to the delivery process we shall check whether is there free space or not
-		client.isThereFreeParkingSpace("braude");
+		client.getRequestSender().isThereFreeParkingSpace("braude");
 	}
 
 	/**
@@ -578,7 +578,7 @@ public class VehicleDeliveryController implements ClientAware{
 		vehicleIdFuture = new CompletableFuture<>();
 
 		// We will seek for the vehicleID before going and making the parking event object
-		client.seekVehicleID(codeInt);
+		client.getRequestSender().seekVehicleID(codeInt);
 
 		// When vehicle ID is received, create the ParkingEvent and send it
 		vehicleIdFuture.thenAcceptAsync(vehicleID -> {
@@ -593,7 +593,7 @@ public class VehicleDeliveryController implements ClientAware{
 			ParkingEvent parkingEvent = new ParkingEvent(codeInt, parkingSpace, entryDate, entryTime, null, null, false, vehicleID, "Braude", parkingCode);
 
 
-			client.deliverVehicle(parkingEvent);
+			client.getRequestSender().deliverVehicle(parkingEvent);
 			
 		});
 	}

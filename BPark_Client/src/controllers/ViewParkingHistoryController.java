@@ -106,7 +106,7 @@ public class ViewParkingHistoryController implements ClientAware {
         });
 
         // Request subscriber's parking history from the server
-        client.updateParkingHistoryOfSubscriber();
+        client.getRequestSender().updateParkingHistoryOfSubscriber();
     }
 
     /**

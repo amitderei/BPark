@@ -172,7 +172,7 @@ public class TerminalMainLayoutController implements ClientAware {
 			} 
 			else if (ctrl instanceof AvailabilityController c) {
 				client.setAvailabilityController(c);
-				client.requestParkingAvailability();
+				client.getRequestSender().requestParkingAvailability();
 			}
 			else if (ctrl instanceof ExtendParkingController c) {
 				client.setExtendParkingController(c);

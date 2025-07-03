@@ -140,11 +140,11 @@ public class EditSubscriberDetailsController implements ClientAware {
 
 		if (!Subscriber.equals(updated, subscriber)) {
 			if (passwordChanged)
-				client.updateDetailsOfSubscriber(updated, new User(subscriber.getUsername(), newPassword));
+				client.getRequestSender().updateDetailsOfSubscriber(updated, new User(subscriber.getUsername(), newPassword));
 			else
-				client.updateDetailsOfSubscriber(updated, null);
+				client.getRequestSender().updateDetailsOfSubscriber(updated, null);
 		} else if (passwordChanged) {
-			client.updateDetailsOfSubscriber(null, new User(usernameEdit.getText(), newPassword));
+			client.getRequestSender().updateDetailsOfSubscriber(null, new User(usernameEdit.getText(), newPassword));
 		} else {
 			handleGoToView();
 		}

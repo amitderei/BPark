@@ -101,7 +101,7 @@ public class ViewActiveParkingInfoController implements ClientAware {
      * Requests the current active parking session of the subscriber from the server.
      */
     public void getDetailsOfActiveInfo() {
-        client.getDetailsOfActiveInfo();
+    	client.getRequestSender().getDetailsOfActiveInfo();
     }
 
     /**

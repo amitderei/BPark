@@ -16,7 +16,6 @@ import java.sql.Time;
  *     client.getRequestSender().requestLogin(...);
  *
  */
-
 public class ClientRequestSender {
 
 	/** The client network layer used to send messages to the server. */

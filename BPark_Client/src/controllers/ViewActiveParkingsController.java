@@ -100,7 +100,7 @@ public class ViewActiveParkingsController implements ClientAware {
      */
     public void requestActiveParkingEvents() {
         if (client != null)
-            client.requestActiveParkingEvents();
+        	client.getRequestSender().requestActiveParkingEvents();
     }
 
     /**
