@@ -13,7 +13,7 @@ import java.util.TimerTask;
 public class MonthlyReportScheduler {
 
     /** Instance used to create all monthly reports */
-    private static final MonthlyReportGenarator generator = new MonthlyReportGenarator();
+    private static final MonthlyReportGenerator generator = new MonthlyReportGenerator();
 
     /** Timer that manages the scheduling of report generation */
     private static final Timer timer = new Timer("MonthlyReportTimer");

@@ -51,7 +51,7 @@ public class Server extends AbstractServer {
 		db.connectToDB();
 		System.out.println("Server started on port " + getPort());
 		MonthlyReportScheduler.start(); // schedule monthly reports
-		new MonthlyReportGenarator().generatePastReports();
+		new MonthlyReportGenerator().generatePastReports();
 
 	}
 

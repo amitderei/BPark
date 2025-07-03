@@ -14,7 +14,7 @@ import db.DBController;
  * - New reports for the current month
  * - Catch-up reports from February 2025 up to the last full month
  */
-public class MonthlyReportGenarator {
+public class MonthlyReportGenerator {
 
     private final DBController db = new DBController();
 
