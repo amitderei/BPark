@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  * Launches the BPARK server GUI and starts the socket server
@@ -59,6 +60,8 @@ public class ServerApp extends Application {
         ServerController ctrl = fxml.getController();
         ctrl.setApp(this);
 
+		// Set up the stage with no window borders
+		stage.initStyle(StageStyle.UNDECORATED);
         stage.setTitle("BPARK – Server");
         stage.setScene(new Scene(root));
         stage.show();

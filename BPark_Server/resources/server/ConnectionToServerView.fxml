@@ -8,19 +8,19 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.ServerController">
+<AnchorPane prefHeight="600.0" prefWidth="450.0" stylesheets="@ConnectionToServerView.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.ServerController">
     <children>
         <VBox alignment="CENTER" prefHeight="600.0" prefWidth="450.0" spacing="15.0">
             <!-- Header label -->
-            <Label fx:id="lblConnection" text="Server connection">
+            <Label fx:id="lblConnection" styleClass="headline" text="Server connection">
                 <font>
                     <Font name="System Bold" size="26.0" />
                 </font>
             </Label>
             <Label fx:id="lblEx" text="Enter port number" />
-            <TextField fx:id="txtPort" maxWidth="200.0" />
+            <TextField fx:id="txtPort" maxWidth="200.0" styleClass="text-field" />
             <Button fx:id="btnSend" maxWidth="150.0" onAction="#connect" text="Connect" />
-            <TextArea fx:id="txtConnectedClients" editable="false" prefHeight="120.0" prefWidth="300.0" wrapText="true" />
+            <TextArea fx:id="txtConnectedClients" editable="false" prefHeight="120.0" prefWidth="443.0" styleClass="text-area" wrapText="true" />
             <Button fx:id="btnExit" maxWidth="100.0" onAction="#exitApplication" text="Exit" />
         </VBox>
     </children>
