@@ -11,7 +11,7 @@
             <padding>
                 <Insets bottom="20" left="20" right="20" top="20" />
             </padding>
-            <Label fx:id="welcomeLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Welcome, Subscriber!" />
+            <Label fx:id="welcomeLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Welcome, Subscriber!" textFill="#18374e" />
         </VBox>
     </center>
 </BorderPane>
