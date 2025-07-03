@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * This is the main client-side controller responsible for managing the connection to the server.
  * 
- * It listens for messages from the server and updates the UI accordingly (controllers, views, etc).
+ * It listens for messages from the server and updates the UI accordingly.
  * Any outgoing request to the server is sent via the ClientRequestSender helper class.
  *
  * This class also holds the current session state (e.g., subscriber and password),
