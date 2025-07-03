@@ -55,6 +55,26 @@ public class ParkingReportController implements ClientAware {
 
 	@FXML
 	private BarChart<String, Number> hoursParkingChart;
+	
+	/**
+	 * for displaying the number of first bar
+	 */
+	@FXML
+	private Label firstLabel; 
+	
+	
+	/**
+	 * for displaying the number of second bar
+	 */
+	@FXML
+	private Label secondLabel;
+	
+	
+	/**
+	 * for displaying the number of third bar
+	 */
+	@FXML
+	private Label thirdLabel;
 
 	/** Shared socket handler used to communicate with the server */
 	private ClientController client;
@@ -119,6 +139,10 @@ public class ParkingReportController implements ClientAware {
 		series.getData().add(new XYChart.Data<>("4-8", parkingReport.getBetweenFourToEight()));
 		series.getData().add(new XYChart.Data<>("8+", parkingReport.getMoreThanEight()));
 
+		firstLabel.setText(((Integer)parkingReport.getLessThanFour()).toString());
+		secondLabel.setText(((Integer)parkingReport.getBetweenFourToEight()).toString());
+		thirdLabel.setText(((Integer)parkingReport.getMoreThanEight()).toString());
+		
 		hoursParkingChart.getData().add(series);
 		CategoryAxis xAxis = (CategoryAxis) hoursParkingChart.getXAxis();
 		xAxis.setCategories(FXCollections.observableArrayList("0-4", "4-8", "8+"));
@@ -132,10 +156,16 @@ public class ParkingReportController implements ClientAware {
 			new PieChart.Data("On-time pickups", parkingReport.getTotalEntries() - parkingReport.getTotalLates()));
 
 		parkingPieChart.setData(extendsChartData);
+		parkingPieChart.setLegendVisible(true);
+		parkingPieChart.setLabelsVisible(false);
 		parkingPieChart.setTitle("Monthly Extends Pie");
 
 		latesPieChart.setData(latesChartData);
+		latesPieChart.setLegendVisible(true);
+		latesPieChart.setLabelsVisible(false);
 		latesPieChart.setTitle("Monthly Lates Pie");
+		
+		System.out.println("Legend visible: " + parkingPieChart.isLegendVisible());
 	}
 
 	/**

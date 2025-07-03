@@ -1,4 +1,4 @@
-#parkingTable {
+#subscriberTable {
     -fx-background-color: #ffffff;
     -fx-border-color: #dcdcdc;
     -fx-border-width: 0.5px;
@@ -59,3 +59,4 @@
     -fx-font-size: 13px;
     -fx-alignment: CENTER; 
 }
+

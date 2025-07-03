@@ -8,34 +8,47 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="453.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.ParkingReportController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="453.0" prefWidth="600.0" stylesheets="@ParkingReportScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ParkingReportController">
    <children>
-      <Label fx:id="headline" layoutX="221.0" layoutY="51.0" text="Monthly Parking Report">
-         <font>
-            <Font name="System Bold" size="16.0" />
-         </font>
-      </Label>
-      <BarChart fx:id="hoursParkingChart" layoutX="126.0" layoutY="84.0" prefHeight="174.0" prefWidth="363.0">
-         <xAxis>
-            <CategoryAxis side="BOTTOM" />
-         </xAxis>
-         <yAxis>
-            <NumberAxis side="LEFT" />
-         </yAxis>
-      </BarChart>
-      <PieChart fx:id="parkingPieChart" layoutX="32.0" layoutY="247.0" prefHeight="192.0" prefWidth="243.0" />
-      <PieChart fx:id="latesPieChart" layoutX="326.0" layoutY="247.0" prefHeight="192.0" prefWidth="243.0" />
-      <Label layoutX="26.0" layoutY="13.0" text="Year:" />
-      <ComboBox fx:id="yearCombo" layoutX="72.0" layoutY="12.0" prefHeight="17.0" prefWidth="73.0" />
-      <Label layoutX="156.0" layoutY="13.0" text="Month:" />
-      <ComboBox fx:id="monthCombo" layoutX="210.0" layoutY="12.0" prefHeight="17.0" prefWidth="73.0" />
-      <Button fx:id="sumbit" layoutX="306.0" layoutY="11.0" mnemonicParsing="false"
-              onAction="#getParkingReportFromServer" text="Load Report" />
+      <VBox layoutY="45.0" prefHeight="408.0" prefWidth="600.0" styleClass="mainContainer">
+         <children>
+            <Pane prefHeight="157.0" prefWidth="600.0">
+               <children>
+                  <BarChart fx:id="hoursParkingChart" layoutX="134.0" layoutY="21.0" maxWidth="475.0" prefHeight="150.0" prefWidth="313.0">
+                     <xAxis>
+                        <CategoryAxis side="BOTTOM" />
+                     </xAxis>
+                     <yAxis>
+                        <NumberAxis side="LEFT" />
+                     </yAxis>
+                  </BarChart>
+                  <Label fx:id="headline" layoutX="181.0" layoutY="-6.0" text="Monthly Parking Report">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+            <HBox prefHeight="249.0" prefWidth="600.0">
+               <children>
+                  <PieChart fx:id="parkingPieChart" prefHeight="180.0" prefWidth="293.0" />
+                  <PieChart fx:id="latesPieChart" prefHeight="235.0" prefWidth="293.0" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <Label layoutX="21.0" layoutY="11.0" text="Year:" />
+      <ComboBox fx:id="yearCombo" layoutX="52.0" layoutY="9.0" prefHeight="17.0" prefWidth="73.0" />
+      <Label layoutX="173.0" layoutY="11.0" text="Month:" />
+      <ComboBox fx:id="monthCombo" layoutX="221.0" layoutY="10.0" prefHeight="17.0" prefWidth="73.0" />
+      <Button fx:id="sumbit" layoutX="340.0" layoutY="10.0" mnemonicParsing="false" onAction="#getParkingReportFromServer" text="Load Report" />
+      <Label fx:id="firstLabel" layoutX="203.0" layoutY="160.0" prefHeight="17.0" prefWidth="28.0" />
+      <Label fx:id="secondLabel" layoutX="289.0" layoutY="159.0" prefHeight="17.0" prefWidth="26.0" />
+      <Label fx:id="thirdLabel" layoutX="380.0" layoutY="159.0" prefHeight="17.0" prefWidth="26.0" />
    </children>
 </AnchorPane>

@@ -5,7 +5,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ViewSubscribersInfoController"
-            prefWidth="600.0" prefHeight="453.0">
+            prefWidth="600.0" prefHeight="453.0" stylesheets="@ViewSubscribersInfoScreen.css">
     <top>
         <Label text="Subscribers List"
                BorderPane.alignment="CENTER"
