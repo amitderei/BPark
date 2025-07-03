@@ -118,7 +118,13 @@ public class ViewParkingHistoryController implements ClientAware {
      * @param parkingEventsHistory list of all past and active events
      */
     public void displayHistory(ArrayList<ParkingEvent> parkingEventsHistory) {
+        if (parkingEventsHistory == null) {
+            System.err.println("[ERROR] Tried to display null parking history – ignoring.");
+            return;
+        }
+
         ObservableList<ParkingEvent> rows = FXCollections.observableArrayList(parkingEventsHistory);
         parkingHistoryTable.setItems(rows);
     }
+
 }
