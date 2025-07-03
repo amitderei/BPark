@@ -1075,66 +1075,71 @@ public class DBController {
 	}
 
 	/**
-	 * Returns every subscriber plus a computed "late" count.
+	 * Returns all subscribers along with how many times each one was late.
 	 *
-	 * Late = (duration > 8 h) OR (duration > 4 h AND wasExtended = FALSE)
+	 * A late is counted if:
+	 * - The parking duration was over 8 hours.
+	 * - Or it was over 4 hours and was not extended.
 	 *
-	 * @return List<Object[]> where index 0 -> Subscriber, index 1 -> Integer
-	 *         lateCount
+	 * Ongoing and completed events are both included.
+	 *
+	 * @return List of Object[] where:
+	 *         [0] = Subscriber
+	 *         [1] = Number of late parkings (Integer)
 	 */
 	public List<Object[]> getAllSubscribersWithLateCount() {
-		final String sql = """
-				SELECT s.subscriberCode,
-				       s.userId,
-				       s.firstName,
-				       s.lastName,
-				       s.phoneNumber,
-				       s.email,
-				       s.username,
-				       s.tagId,
-				       COALESCE(l.late_cnt, 0) AS late_count
-				FROM   bpark.subscriber AS s
-				LEFT JOIN (
-				    SELECT subscriberCode,
-				           COUNT(*) AS late_cnt
-				    FROM   bpark.parkingEvent
-				    WHERE  exitDate IS NOT NULL
-				      AND (
-				           TIMESTAMPDIFF(
-				             HOUR,
-				             TIMESTAMP(entryDate, entryHour),
-				             TIMESTAMP(exitDate, exitHour)
-				           ) > 8
-				         OR (
-				             wasExtended = FALSE
-				             AND TIMESTAMPDIFF(
-				                   HOUR,
-				                   TIMESTAMP(entryDate, entryHour),
-				                   TIMESTAMP(exitDate, exitHour)
-				                ) > 4
-				         )
-				      )
-				    GROUP BY subscriberCode
-				) AS l USING (subscriberCode)
-				ORDER BY s.subscriberCode;
-				""";
+	    final String sql = """
+	        SELECT s.subscriberCode,
+	               s.userId,
+	               s.firstName,
+	               s.lastName,
+	               s.phoneNumber,
+	               s.email,
+	               s.username,
+	               s.tagId,
+	               COALESCE(l.late_cnt, 0) AS late_count
+	        FROM bpark.subscriber AS s
+	        LEFT JOIN (
+	            SELECT subscriberCode,
+	                   COUNT(*) AS late_cnt
+	            FROM bpark.parkingEvent
+	            WHERE (
+	                TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), 
+	                                   COALESCE(TIMESTAMP(exitDate, exitHour), NOW())) > 480
+	                OR (
+	                    wasExtended = FALSE AND
+	                    TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), 
+	                                       COALESCE(TIMESTAMP(exitDate, exitHour), NOW())) > 240
+	                )
+	            )
+	            GROUP BY subscriberCode
+	        ) AS l USING (subscriberCode)
+	        ORDER BY s.subscriberCode;
+	        """;
 
-		List<Object[]> result = new ArrayList<>();
+	    List<Object[]> result = new ArrayList<>();
 
-		try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+	    try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+	        while (rs.next()) {
+	            Subscriber sub = new Subscriber(
+	                rs.getInt("subscriberCode"),
+	                rs.getString("userId"),
+	                rs.getString("firstName"),
+	                rs.getString("lastName"),
+	                rs.getString("phoneNumber"),
+	                rs.getString("email"),
+	                rs.getString("username"),
+	                rs.getString("tagId")
+	            );
 
-			while (rs.next()) {
-				Subscriber sub = new Subscriber(rs.getInt("subscriberCode"), rs.getString("userId"),
-						rs.getString("firstName"), rs.getString("lastName"), rs.getString("phoneNumber"),
-						rs.getString("email"), rs.getString("username"), rs.getString("tagId"));
+	            int lateCount = rs.getInt("late_count");
+	            result.add(new Object[]{ sub, lateCount });
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 
-				int lateCount = rs.getInt("late_count");
-				result.add(new Object[] { sub, lateCount });
-			}
-		} catch (SQLException e) {
-			e.printStackTrace(); // replace with proper logging if required
-		}
-		return result;
+	    return result;
 	}
 
 	/**
