@@ -13,12 +13,19 @@ import java.sql.Time;
 import java.util.*;
 
 /**
- * This class handles communication with the server.
- * It receives messages from the server and updates the UI accordingly.
- * Any request-sending logic was moved to {@link ClientRequestSender}.
+ * This class is the main client used to manage the connection between the app and the server.
+ * It receives responses from the server and updates the different UI controllers based on what happened.
+ *
+ * It also stores the current session info, like the logged-in subscriber and their password,
+ * and holds references to all the UI controllers used throughout the system.
+ *
+ * Any method that sends a request to the server is handled by a separate helper class (ClientRequestSender).
+ * This class only listens to responses and handles what the app should do after a response comes back.
  */
+
 public class ClientController extends AbstractClient {
 
+	/** Helper class responsible for sending requests to the server. */
     private final ClientRequestSender requestSender;
 
     // UI controllers (setters are used from JavaFX side)

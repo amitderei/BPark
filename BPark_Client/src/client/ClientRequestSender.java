@@ -6,19 +6,20 @@ import java.sql.Date;
 import java.sql.Time;
 
 /**
- * Handles all outgoing requests from the client to the server.
- * This class doesn't handle any response logic – it just sends.
- * Think of it as the "transmitter" for the client-side app.
- *
- * You can call these methods from any controller like:
+ * This class is in charge of sending requests from the client to the server.
+ * It doesn't deal with responses at all — just sends data when asked.
  * 
+ * Think of it as the "transmitter" of the app: other controllers call it
+ * whenever they need to communicate something to the server.
+ *
+ * Example usage from any controller:
  *     client.getRequestSender().requestLogin(...);
- * 
  *
- * @author BPARK
  */
+
 public class ClientRequestSender {
 
+	/** The client network layer used to send messages to the server. */
     private final ClientController client;
 
     /**
@@ -31,7 +32,10 @@ public class ClientRequestSender {
         this.client = client;
     }
 
-    /** Sends a login attempt to the server */
+    /**
+     * Sends a login request to the server with given username and password.
+     * If sending fails, an error is printed to the console.
+     */
     public void requestLogin(String username, String password) {
         try {
             client.sendToServer(new Object[] { Operation.LOGIN, username, password });
@@ -40,7 +44,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Adds a new reservation/order to the DB */
+    /**
+     * Adds a new order to the database.
+     *
+     * @param newOrder the order to add
+     */
     public void addNewOrder(Order newOrder) {
         try {
             client.sendToServer(new Object[] { Operation.ADD_NEW_ORDER, newOrder });
@@ -49,7 +57,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if a parking lot has space on a given date/time */
+    /**
+     * Asks the server if there's availability for the given date and time.
+     *
+     * @param date the requested date
+     * @param time the requested time
+     */
     public void checkAvailability(Date date, Time time) {
         try {
             client.sendToServer(new Object[] { Operation.CHECK_AVAILABILITY_FOR_ORDER, date, time });
@@ -58,7 +71,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Confirms a subscriber is valid using their code */
+    /**
+     * Checks if a subscriber is valid using their subscriber code.
+     *
+     * @param subscriberCode the code entered by the subscriber
+     */
     public void validateSubscriber(int subscriberCode) {
         try {
             client.sendToServer(new Object[] { Operation.VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE, subscriberCode });
@@ -67,7 +84,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Confirms a subscriber is valid using their RFID tag */
+    /**
+     * Validates a subscriber using their RFID tag.
+     *
+     * @param tagId the tag scanned at the entrance
+     */
     public void validateSubscriberByTag(String tagId) {
         try {
             client.sendToServer(new Object[] { Operation.VALIDATE_SUBSCRIBER_BY_TAG, tagId });
@@ -76,7 +97,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Sends pickup request (subscriber wants to collect car) */
+    /**
+     * Sends a request to collect a vehicle by subscriber code and parking code.
+     *
+     * @param subscriberCode the subscriber's ID
+     * @param parkingCode the code entered to pick up the car
+     */
     public void collectCar(int subscriberCode, int parkingCode) {
         try {
             client.sendToServer(new Object[] { Operation.COLLECT_CAR, subscriberCode, parkingCode });
@@ -85,7 +111,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets full subscriber details from server */
+    /**
+     * Asks the server for all subscriber details linked to the given user.
+     *
+     * @param user the logged-in user
+     */
     public void subscriberDetails(User user) {
         try {
             client.sendToServer(new Object[] { Operation.SUBSCRIBER_DETAILS, user });
@@ -94,7 +124,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Requests all reservations for the currently logged-in subscriber */
+    /**
+     * Requests the list of all reservations for the currently logged-in subscriber.
+     */
     public void askForReservations() {
         try {
             client.sendToServer(new Object[] { Operation.ASK_FOR_RESERVATIONS, client.getSubscriber() });
@@ -103,7 +135,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Deletes a specific order (by its primary key) */
+    /**
+     * Sends a request to delete an order by its order number.
+     *
+     * @param orderNumberToDelete the primary key of the order to delete
+     */
     public void deleteOrder(int orderNumberToDelete) {
         try {
             client.sendToServer(new Object[] { Operation.DELETE_ORDER, orderNumberToDelete });
@@ -112,7 +148,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Updates both subscriber and user personal info */
+    /**
+     * Sends updated subscriber and user details to the server.
+     *
+     * @param subscriber the updated subscriber info
+     * @param user the updated user info
+     */	
     public void updateDetailsOfSubscriber(Subscriber subscriber, User user) {
         try {
             client.sendToServer(new Object[] { Operation.UPDATE_DETAILS_OF_SUBSCRIBER, subscriber, user });
@@ -121,7 +162,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Refreshes parking history from server */
+    /**
+     * Asks the server for the subscriber’s parking history.
+     */
     public void updateParkingHistoryOfSubscriber() {
         try {
             client.sendToServer(new Object[] { Operation.UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, client.getSubscriber() });
@@ -130,7 +173,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Forgot code flow – request parking code recovery */
+    /**
+     * Requests the parking code again in case the subscriber forgot it.
+     *
+     * @param subscriberCode the subscriber's ID
+     */
     public void forgotMyParkingCode(int subscriberCode) {
         try {
             client.sendToServer(new Object[] { Operation.FORGEOT_MY_PARKING_CODE, subscriberCode });
@@ -139,7 +186,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets all subscribers and how many times they were late */
+    /**
+     * Requests all subscribers and how many times each was late.
+     */
     public void requestAllSubscribers() {
         try {
             client.sendToServer(new Object[] { Operation.GET_ALL_SUBSCRIBERS });
@@ -148,7 +197,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets all currently active parking events (for staff view) */
+    /**
+     * Requests all currently active parking sessions for staff view.
+     */
     public void requestActiveParkingEvents() {
         try {
             client.sendToServer(new Object[] { Operation.GET_ACTIVE_PARKINGS });
@@ -157,7 +208,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets details of current active parking event for this subscriber */
+    /**
+     * Requests details about the subscriber's currently active parking session.
+     */
     public void getDetailsOfActiveInfo() {
         try {
             client.sendToServer(new Object[] { Operation.GET_DETAILS_OF_ACTIVE_INFO, client.getSubscriber() });
@@ -166,7 +219,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Sends a request to extend the current parking session */
+    /**
+     * Sends a request to extend a parking session.
+     *
+     * @param parkingCode the active parking code
+     * @param subscriberCode the subscriber's ID as a string
+     */
     public void extendParking(int parkingCode, String subscriberCode) {
         try {
             client.sendToServer(new Object[] { Operation.EXTEND_PARKING, parkingCode, subscriberCode });
@@ -175,7 +233,13 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if an order already exists for a date/time */
+    /**
+     * Checks if the subscriber already has an order at the given date and time.
+     *
+     * @param subscriberCode the subscriber's ID
+     * @param date the date of the new reservation
+     * @param time the time of the new reservation
+     */
     public void checkIfOrderAlreadyExists(int subscriberCode, Date date, Time time) {
         try {
             client.sendToServer(new Object[] {
@@ -186,7 +250,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Registers a new subscriber with a vehicle */
+    /**
+     * Registers a new subscriber and their vehicle.
+     *
+     * @param subscriber the subscriber to register
+     * @param vehicleId the ID of the vehicle being registered
+     */
     public void registerSubscriber(Subscriber subscriber, String vehicleId) {
         try {
             client.sendToServer(new Object[] {
@@ -197,7 +266,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets a live snapshot of parking availability stats */
+    /**
+     * Requests current parking availability statistics.
+     */
     public void requestParkingAvailability() {
         try {
             client.sendToServer(new Object[] { Operation.GET_PARKING_AVAILABILITY });
@@ -206,7 +277,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Requests parking report (usage + revenue) for a specific day */
+    /**
+     * Requests a parking report (usage and revenue) for a specific day.
+     *
+     * @param date the day for which to fetch the report
+     */
     public void getParkingReport(Date date) {
         try {
             client.sendToServer(new Object[] { Operation.GET_PARKING_REPORT, date });
@@ -215,7 +290,9 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets list of all dates that have existing parking reports */
+    /**
+     * Requests all available dates that have reports.
+     */
     public void getDatesOfReports() {
         try {
             client.sendToServer(new Object[] { Operation.GET_DATES_OF_REPORTS });
@@ -224,7 +301,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Fetches a monthly subscriber status report */
+    /**
+     * Asks for the subscriber status report for a specific month and year.
+     *
+     * @param month the month of the report
+     * @param year the year of the report
+     */
     public void getSubscriberReport(Integer month, Integer year) {
         try {
             client.sendToServer(new Object[] {
@@ -235,7 +317,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if subscriber exists (by code) */
+    /**
+     * Checks if a subscriber exists based on their code.
+     *
+     * @param subscriberCode the subscriber's ID
+     */
     public void checkSubscriberExists(int subscriberCode) {
         try {
             client.sendToServer(new Object[] { Operation.SUBSCRIBER_EXISTS, subscriberCode });
@@ -244,7 +330,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if a given tag ID exists in DB */
+    /**
+     * Checks if the tag exists in the system.
+     *
+     * @param tagID the tag to validate
+     */
     public void validateTag(String tagID) {
         try {
             client.sendToServer(new Object[] { Operation.TAG_EXISTS, tagID });
@@ -253,7 +343,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if subscriber already entered the lot */
+    /**
+     * Checks if the subscriber has already entered the parking lot.
+     *
+     * @param subscriberCode the subscriber's ID
+     */
     public void checkIfSubscriberAlreadyEntered(int subscriberCode) {
         try {
             client.sendToServer(new Object[] {
@@ -264,7 +358,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if a vehicle (by tag) is already inside */
+    /**
+     * Checks if a vehicle with the given tag ID is already inside.
+     *
+     * @param tagID the RFID tag of the vehicle
+     */
     public void checkIfTagIDAlreadyInside(String tagID) {
         try {
             client.sendToServer(new Object[] {
@@ -275,7 +373,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Finds the subscriber who owns a given tag */
+    /**
+     * Finds the subscriber who owns the given tag.
+     *
+     * @param tagID the tag to match with a subscriber
+     */
     public void findSubscriberWithTag(String tagID) {
         try {
             client.sendToServer(new Object[] {
@@ -286,7 +388,12 @@ public class ClientRequestSender {
         }
     }
 
-    /** Sends a request to process delivery via reservation */
+    /**
+     * Starts the delivery process using a reservation.
+     *
+     * @param subscriberCode the subscriber's ID
+     * @param confirmationCode the reservation confirmation code
+     */
     public void deliveryViaReservation(int subscriberCode, int confirmationCode) {
         try {
             client.sendToServer(new Object[] {
@@ -297,7 +404,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if a parking lot has space */
+    /**
+     * Checks if the specified parking lot has at least one free space.
+     *
+     * @param parkingLotName the name of the parking lot
+     */
     public void isThereFreeParkingSpace(String parkingLotName) {
         try {
             client.sendToServer(new Object[] {
@@ -308,7 +419,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Gets vehicle ID matched to subscriber */
+    /**
+     * Requests the vehicle ID for the given subscriber.
+     *
+     * @param subscriberCode the subscriber’s ID
+     */
     public void seekVehicleID(int subscriberCode) {
         try {
             client.sendToServer(new Object[] {
@@ -319,7 +434,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Registers a new vehicle delivery at the gate */
+    /**
+     * Sends a request to log a new vehicle delivery at the parking entrance.
+     *
+     * @param parkingEvent the parking event to register
+     */
     public void deliverVehicle(ParkingEvent parkingEvent) {
         try {
             client.sendToServer(new Object[] {
@@ -330,7 +449,11 @@ public class ClientRequestSender {
         }
     }
 
-    /** Checks if subscriber has a valid upcoming reservation */
+    /**
+     * Checks if the subscriber has a valid upcoming reservation.
+     *
+     * @param subscriberCode the subscriber's ID
+     */
     public void isThereReservation(int subscriberCode) {
         try {
             client.sendToServer(new Object[] {
