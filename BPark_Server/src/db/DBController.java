@@ -120,7 +120,8 @@ public class DBController {
 	 *         if it fails
 	 */
 	public User authenticateUser(String username, String password) {
-		String query = "SELECT role FROM bpark.user WHERE username = ? AND password = ?";
+		String query = "SELECT role FROM bpark.user " +
+	               "WHERE BINARY username = ? AND BINARY password = ?"; // Case sensitive login query - BINARY forces byte-level comparison.
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, username);
@@ -1532,21 +1533,25 @@ public class DBController {
 	}
 
 	/**
-	 * Checks whether the provided username is already taken.
+	 * Checks whether a **case-sensitive** username already exists.
 	 *
-	 * @param username the username to check
-	 * @return true if the username exists, false otherwise
+	 * @param username exact username to check
+	 * @return true if username is taken
 	 */
 	public boolean usernameExists(String username) {
-		String query = "SELECT 1 FROM bpark.user WHERE username = ? LIMIT 1";
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, username);
-			ResultSet rs = stmt.executeQuery();
-			return rs.next(); // true if exists
-		} catch (SQLException e) {
-			System.err.println("Error checking username existence: " + e.getMessage());
-			return false;
-		}
+	    final String sql = """
+	        SELECT 1
+	        FROM   bpark.user
+	        WHERE  BINARY username = ?
+	        LIMIT  1
+	        """;
+	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setString(1, username);
+	        return ps.executeQuery().next();
+	    } catch (SQLException e) {
+	        System.err.println("[DB] usernameExists: " + e.getMessage());
+	        return false;
+	    }
 	}
 
 	/**

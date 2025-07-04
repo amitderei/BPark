@@ -7,7 +7,7 @@ import java.sql.Time;
 
 /**
  * This class is in charge of sending requests from the client to the server.
- * It doesn't deal with responses at all — just sends data when asked.
+ * It doesn't deal with responses at all - just sends data when asked.
  * 
  * Think of it as the "transmitter" of the app: other controllers call it
  * whenever they need to communicate something to the server.
