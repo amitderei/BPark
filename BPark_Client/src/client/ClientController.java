@@ -326,15 +326,27 @@ public class ClientController extends AbstractClient {
 					break;
 				}
 
-			case SUBSCRIBER_INSERTED :
+			case SUBSCRIBER_INSERTED:
+				// If the registration failed and the server sent a list of duplicate fields (like "username", "email", etc.)
 				if (registerSubscriberController != null) {
-					registerSubscriberController.showStatusFromServer(response.getMsg(), response.isSucceed());
+					if (!response.isSucceed() && response.getData() instanceof List<?> list) {
+						for (Object fieldObj : list) {
+							if (fieldObj instanceof String field)
+								// Show the appropriate error next to the corresponding input field
+								registerSubscriberController.showDuplicateError(field);
+						}
+					} else {
+						// Otherwise (either success or general failure), show the status at the bottom label
+						registerSubscriberController.showStatusFromServer(response.getMsg(), response.isSucceed());
+					}
 					break;
 				} else {
+					// Just in case the controller wasn't loaded properly (fallback for unexpected situations)
 					UiUtils.showAlert("Subscriber Registration", response.getMsg(),
 							response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
 					break;
 				}
+
 
 			case PARKING_AVALIABILITY :
 				if(response.isSucceed() && response.getData() instanceof Object[] stats &&

@@ -462,26 +462,28 @@ public class Server extends AbstractServer {
 					String vehicleId = (data.length > 2 && data[2] instanceof String) ? (String) data[2] : null;
 
 					// Step 0: Check for duplicates
-					if (db.usernameExists(receivedSub.getUsername())) {
-						client.sendToClient(new ServerResponse(false, null, null, "Username already exists. Please choose another."));
-						return;
+					List<String> invalidFields = new ArrayList<>();
+
+					if (db.usernameExists(receivedSub.getUsername()))
+					    invalidFields.add("username");
+
+					if (db.emailExists(receivedSub.getEmail()))
+					    invalidFields.add("email");
+
+					if (db.phoneExists(receivedSub.getPhoneNum()))
+					    invalidFields.add("phone");
+
+					if (db.idExists(receivedSub.getUserId()))
+					    invalidFields.add("id");
+
+					if (vehicleId != null && db.vehicleExists(vehicleId))
+					    invalidFields.add("vehicle");
+
+					if (!invalidFields.isEmpty()) {
+					    client.sendToClient(new ServerResponse(false, invalidFields, ResponseType.SUBSCRIBER_INSERTED, "Duplicate fields"));
+					    return;
 					}
-					if (db.emailExists(receivedSub.getEmail())) {
-						client.sendToClient(new ServerResponse(false, null, null, "Email already registered. Use a different email."));
-						return;
-					}
-					if (db.phoneExists(receivedSub.getPhoneNum())) {
-						client.sendToClient(new ServerResponse(false, null, null, "Phone number already in use."));
-						return;
-					}
-					if (db.idExists(receivedSub.getUserId())) {
-						client.sendToClient(new ServerResponse(false, null, null, "ID already in use."));
-						return;
-					}
-					if (vehicleId != null && db.vehicleExists(vehicleId)) {
-						client.sendToClient(new ServerResponse(false, null, null, "Vehicle ID already registered."));
-						return;
-					}
+
 
 					// Step 1: Generate subscriberCode and tagId
 					int newCode = db.getNextSubscriberCode();

@@ -29,7 +29,7 @@ public enum Operation {
     /** Get all subscribers along with how many times they were late picking up */
     GET_ALL_SUBSCRIBERS,
 
-    /** Used when a subscriber clicks "Forgot parking code" – sends email again */
+    /** Used when a subscriber clicks "Forgot parking code" - sends email again */
     FORGEOT_MY_PARKING_CODE,
 
     /** Request to load the full parking history of a subscriber */
@@ -47,13 +47,13 @@ public enum Operation {
     /** Request to collect a car from the lot by providing subscriber + code */
     COLLECT_CAR,
 
-    /** Validate subscriber using tag ID (used at terminal) */
+    /** Validate subscriber using tag ID */
     VALIDATE_SUBSCRIBER_BY_TAG,
 
-    /** Validate subscriber using numeric code (used at terminal) */
+    /** Validate subscriber using numeric code */
     VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE,
 
-    /** Login request – check if username + password are correct */
+    /** Login request - check if username + password are correct */
     LOGIN,
 
     /** Ask if it's possible to make a reservation at a specific time */
@@ -62,7 +62,7 @@ public enum Operation {
     /** Add a new reservation to the system */
     ADD_NEW_ORDER,
 
-    /** Disconnect request – called when client logs out or closes app */
+    /** Disconnect request - called when client logs out or closes app */
     DISCONNECT,
 
     /** Ask for the subscriber status report of a certain month/year */

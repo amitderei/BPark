@@ -181,6 +181,44 @@ public class RegisterSubscriberController implements ClientAware {
             btnRegister.setDisable(true);
         }
     }
+    
+    /**
+     * Shows duplicate-field error received from the server
+     * and re-enables the Register button.
+     *
+     * @param field one of: "username", "email", "phone", "id", "vehicle"
+     */
+    public void showDuplicateError(String field) {
+        switch (field) {
+            case "username" -> {
+                errUsername.setText("Username already exists.");
+                errUsername.setVisible(true);
+            }
+            case "email" -> {
+                errEmail.setText("Email already exists.");
+                errEmail.setVisible(true);
+            }
+            case "phone" -> {
+                errPhone.setText("Phone number already exists.");
+                errPhone.setVisible(true);
+            }
+            case "id" -> {
+                errUserId.setText("ID already exists.");
+                errUserId.setVisible(true);
+            }
+            case "vehicle" -> {
+                errVehicleId.setText("Vehicle ID already exists.");
+                errVehicleId.setVisible(true);
+            }
+            default -> UiUtils.showAlert(
+                    "System Message", "Unknown field: " + field, Alert.AlertType.ERROR);
+        }
+
+        // Allow the user to correct and resubmit
+        btnRegister.setDisable(false);
+        UiUtils.setStatus(lblStatus, "", true);   // Clear bottom status
+    }
+
 
 
 }
