@@ -48,88 +48,103 @@ import javafx.scene.control.Label;
 public class VehicleDeliveryController implements ClientAware{
 
 	/*SUBSCRIBER CODE CHECKINGS AND VISIBILITY TOGGLINGS*/
+	/**Text field that will be used for seeking the subscriber code */
 	@FXML
-	private TextField subscriberCodeField;   // Text field that will be used for seeking the subscriber code
+	private TextField subscriberCodeField;   
 
+	/** Button for submitting the SubscriberCode that the user has entered. */
 	@FXML
-	private Button submitButton;  // Button for submitting the SubscriberCode that the user has entered.
+	private Button submitButton;  
 
+	/** Label for displaying status whether the subscriber code has been found or not */
 	@FXML
-	private Label subscriberCodeLabel;   // Label for displaying status whether the subscriber code has been found or not
+	private Label subscriberCodeLabel;   
 
 
-	/*DELIVERY AFTER ENTERING SUBSCRIBER CODE, ENTERING CONFIRMATION CODE IF THERE'S RESERVATION */
+	/**DELIVERY AFTER ENTERING SUBSCRIBER CODE, ENTERING CONFIRMATION CODE IF THERE'S RESERVATION */
+	
+	/** Label for entering to the Parking Lot regularly or threw an existing reservation */
 	@FXML
-	private Label ReservationORRegularEnteranceLabel; // Label for entering to the Parking Lot regularly or threw an existing reservation
+	private Label ReservationORRegularEnteranceLabel; 
 
+	/** TextField for entering confirmation code for an existing reservation */
 	@FXML
-	private TextField ReservationConfirmationCodeField; // TextField for entering confirmation code for an existing reservation
+	private TextField ReservationConfirmationCodeField;
 
+	/** Button for entering to the Parking Lot regularly or threw an existing reservation */
 	@FXML
-	private Button ReservationORRegularEnteranceButton; // Button for entering to the Parking Lot regularly or threw an existing reservation
+	private Button ReservationORRegularEnteranceButton; 
 
+	/** Label for confirmation code to show case the input whether it's good or not */
 	@FXML
-	private Label ReservationConfirmationCodeLabel;  // Label for confirmation code to show case the input whether it's good or not
+	private Label ReservationConfirmationCodeLabel;  
 
 	/*TAG CHECKINGS AND VISIBILITY TOGGLINGS*/
+	/** TextField for delivering the vehicle with the tag */
 	@FXML
-	private TextField TagCodeField; // TextField for delivering the vehicle with the tag
+	private TextField TagCodeField; 
 
+	/** Button for submitting delivery of a vehicle with the tag */
 	@FXML
-	private Button submitTagButton; // Button for submitting delivery of a vehicle with the tag
+	private Button submitTagButton; 
 
+	/** Label for confirming whether the delivery (with the tag scan) happened successfully or not */
 	@FXML
-	private Label TagStatusUpdateLabel; // Label for confirming whether the delivery (with the tag scan) happened successfully or not
+	private Label TagStatusUpdateLabel; 
 
 	/*IF VEHICLE IS ENTERED ALREADY WILL VISIBILITY TOGGLINGS*/
+	/** Label for showing whether the vehicle is already inside or not */
 	@FXML
-	private Label vehicleHasEnteredLabel; // Label for showing whether the vehicle is already inside or not
+	private Label vehicleHasEnteredLabel; 
 
 	/*AFTER PRESSING DELIVER VIA SUBSCRIBER CODE OR VERIFY TAG AND DELIVER => FOR STATUS*/
+	/** Label for confirming whether the delivery happened successfully or not */
 	@FXML
-	private Label deliverStatusUpdateLabel;  // Label for confirming whether the delivery happened successfully or not
+	private Label deliverStatusUpdateLabel;  
 
+	/** Label for confirming that the insertion of parking event has been successful */
 	@FXML
-	private Label InsertionUpdateLabel; // Label for confirming that the insertion of parking event has been successful
+	private Label InsertionUpdateLabel; 
 
+	/** Label for matching the parkingCode of the subscriber so he will know it for the pickup of the vehicle */
 	@FXML
-	private Label parkingCodeLabel; // Label for matching the parkingCode of the subscriber so he will know it for the pickup of the vehicle
+	private Label parkingCodeLabel; 
 
 	/****************************************/
 
 	private ClientController client;
 
-	// The string will be holding the Subscriber code
+	/** The string will be holding the Subscriber code */
 	private String code;
 
-	// The integer will be holding the Subscriber code
+	/** The integer will be holding the Subscriber code */
 	private int codeInt; 
 
-	// The boolean variable will be having true if the subscriber has a reservation or false if he doesn't have
+	/** The boolean variable will be having true if the subscriber has a reservation or false if he doesn't have */
 	private boolean hasReservation = false;
 
-	// The integer will be holding the Confirmation code
+	/** The integer will be holding the Confirmation code */
 	private String confirmationCode;
 
-	// The String will be holding the Parking code after deliver
+	/** The String will be holding the Parking code after deliver */
 	private String parkingCode;
 
-	// The integer will be holding the Confirmation code
+	/** The integer will be holding the Confirmation code */
 	private int confirmationCodeInt;
 
-	// The string will be holding the tag-id
+	/** The string will be holding the tag-id */
 	private String tag;
 
-	// THe integer will be holding the parkingSpace
+	/** THe integer will be holding the parkingSpace */
 	private int parkingSpace;
 
-	// The boolean will be holding true if there's a free space or false if no
+	/** The boolean will be holding true if there's a free space or false if no */
 	public boolean parkingLotStatus = false;
 
-	// This parameter waits until there will be a value received for vehicleID
+	/** This parameter waits until there will be a value received for vehicleID */
 	public CompletableFuture<String> vehicleIdFuture;
 
-	// This parameter waits until there will be a value received for matching subscriber for the tag
+	/** This parameter waits until there will be a value received for matching subscriber for the tag */
 	public CompletableFuture<Integer> subCodeFuture;
 
 	public void setClient(ClientController client) {

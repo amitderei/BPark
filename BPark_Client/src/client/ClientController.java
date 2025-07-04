@@ -23,8 +23,8 @@ import java.util.*;
  */
 public class ClientController extends AbstractClient {
 
-	/** Helper class responsible for sending requests to the server. */
-    private final ClientRequestSender requestSender;
+	/** Helper object responsible for sending requests to the server. */ 
+	private final ClientRequestSender requestSender;
 
     // UI controllers (setters are used from JavaFX side)
     private LoginController loginController;
@@ -55,7 +55,9 @@ public class ClientController extends AbstractClient {
     private String password;
 
     /**
-     * Initializes a new network client.
+     * Constructs a new {@code ClientController} instance with the specified host and port.
+     * @param host the server host address
+     * @param port the server port number
      */
     public ClientController(String host, int port) {
         super(host, port);
@@ -67,10 +69,18 @@ public class ClientController extends AbstractClient {
         return requestSender;
     }
 
+    /**
+     * Sets the password for the current client session.
+     * @param password the password to set
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Gets the password for the current client session.
+     * @return the current password
+     */
     public String getPassword() {
         return password;
     }

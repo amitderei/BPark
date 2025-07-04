@@ -32,8 +32,9 @@ public class ClientRequestSender {
     }
 
     /**
-     * Sends a login request to the server with given username and password.
-     * If sending fails, an error is printed to the console.
+     * Sends a login request to the server with the given username and password.
+     * @param username the username to authenticate
+     * @param password the user's password
      */
     public void requestLogin(String username, String password) {
         try {
@@ -45,7 +46,6 @@ public class ClientRequestSender {
 
     /**
      * Adds a new order to the database.
-     *
      * @param newOrder the order to add
      */
     public void addNewOrder(Order newOrder) {
@@ -58,7 +58,6 @@ public class ClientRequestSender {
 
     /**
      * Asks the server if there's availability for the given date and time.
-     *
      * @param date the requested date
      * @param time the requested time
      */
@@ -72,7 +71,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if a subscriber is valid using their subscriber code.
-     *
      * @param subscriberCode the code entered by the subscriber
      */
     public void validateSubscriber(int subscriberCode) {
@@ -85,7 +83,6 @@ public class ClientRequestSender {
 
     /**
      * Validates a subscriber using their RFID tag.
-     *
      * @param tagId the tag scanned at the entrance
      */
     public void validateSubscriberByTag(String tagId) {
@@ -98,7 +95,6 @@ public class ClientRequestSender {
 
     /**
      * Sends a request to collect a vehicle by subscriber code and parking code.
-     *
      * @param subscriberCode the subscriber's ID
      * @param parkingCode the code entered to pick up the car
      */
@@ -112,7 +108,6 @@ public class ClientRequestSender {
 
     /**
      * Asks the server for all subscriber details linked to the given user.
-     *
      * @param user the logged-in user
      */
     public void subscriberDetails(User user) {
@@ -136,7 +131,6 @@ public class ClientRequestSender {
 
     /**
      * Sends a request to delete an order by its order number.
-     *
      * @param orderNumberToDelete the primary key of the order to delete
      */
     public void deleteOrder(int orderNumberToDelete) {
@@ -149,7 +143,6 @@ public class ClientRequestSender {
 
     /**
      * Sends updated subscriber and user details to the server.
-     *
      * @param subscriber the updated subscriber info
      * @param user the updated user info
      */	
@@ -174,7 +167,6 @@ public class ClientRequestSender {
 
     /**
      * Requests the parking code again in case the subscriber forgot it.
-     *
      * @param subscriberCode the subscriber's ID
      */
     public void forgotMyParkingCode(int subscriberCode) {
@@ -220,7 +212,6 @@ public class ClientRequestSender {
 
     /**
      * Sends a request to extend a parking session.
-     *
      * @param parkingCode the active parking code
      * @param subscriberCode the subscriber's ID as a string
      */
@@ -234,7 +225,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if the subscriber already has an order at the given date and time.
-     *
      * @param subscriberCode the subscriber's ID
      * @param date the date of the new reservation
      * @param time the time of the new reservation
@@ -251,7 +241,6 @@ public class ClientRequestSender {
 
     /**
      * Registers a new subscriber and their vehicle.
-     *
      * @param subscriber the subscriber to register
      * @param vehicleId the ID of the vehicle being registered
      */
@@ -278,7 +267,6 @@ public class ClientRequestSender {
 
     /**
      * Requests a parking report (usage and revenue) for a specific day.
-     *
      * @param date the day for which to fetch the report
      */
     public void getParkingReport(Date date) {
@@ -302,7 +290,6 @@ public class ClientRequestSender {
 
     /**
      * Asks for the subscriber status report for a specific month and year.
-     *
      * @param month the month of the report
      * @param year the year of the report
      */
@@ -318,7 +305,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if a subscriber exists based on their code.
-     *
      * @param subscriberCode the subscriber's ID
      */
     public void checkSubscriberExists(int subscriberCode) {
@@ -331,7 +317,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if the tag exists in the system.
-     *
      * @param tagID the tag to validate
      */
     public void validateTag(String tagID) {
@@ -344,7 +329,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if the subscriber has already entered the parking lot.
-     *
      * @param subscriberCode the subscriber's ID
      */
     public void checkIfSubscriberAlreadyEntered(int subscriberCode) {
@@ -359,7 +343,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if a vehicle with the given tag ID is already inside.
-     *
      * @param tagID the RFID tag of the vehicle
      */
     public void checkIfTagIDAlreadyInside(String tagID) {
@@ -374,7 +357,6 @@ public class ClientRequestSender {
 
     /**
      * Finds the subscriber who owns the given tag.
-     *
      * @param tagID the tag to match with a subscriber
      */
     public void findSubscriberWithTag(String tagID) {
@@ -389,7 +371,6 @@ public class ClientRequestSender {
 
     /**
      * Starts the delivery process using a reservation.
-     *
      * @param subscriberCode the subscriber's ID
      * @param confirmationCode the reservation confirmation code
      */
@@ -405,7 +386,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if the specified parking lot has at least one free space.
-     *
      * @param parkingLotName the name of the parking lot
      */
     public void isThereFreeParkingSpace(String parkingLotName) {
@@ -420,7 +400,6 @@ public class ClientRequestSender {
 
     /**
      * Requests the vehicle ID for the given subscriber.
-     *
      * @param subscriberCode the subscriber’s ID
      */
     public void seekVehicleID(int subscriberCode) {
@@ -435,7 +414,6 @@ public class ClientRequestSender {
 
     /**
      * Sends a request to log a new vehicle delivery at the parking entrance.
-     *
      * @param parkingEvent the parking event to register
      */
     public void deliverVehicle(ParkingEvent parkingEvent) {
@@ -450,7 +428,6 @@ public class ClientRequestSender {
 
     /**
      * Checks if the subscriber has a valid upcoming reservation.
-     *
      * @param subscriberCode the subscriber's ID
      */
     public void isThereReservation(int subscriberCode) {
