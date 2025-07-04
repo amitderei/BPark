@@ -190,6 +190,9 @@ public class SubscriberStatusController implements ClientAware {
         barChart.getData().setAll(series);
         ((CategoryAxis) barChart.getXAxis()).setTickLabelRotation(45);
         barChart.setTitle("Top-10 by Hours");
+        barChart.getYAxis().setLabel("Hours");
+        barChart.getXAxis().setLabel("Subscriber");
+
 
         // PieChart: number of active vs inactive subscribers
         long active   = rows.stream().filter(r -> r.getTotalEntries() > 0).count();
