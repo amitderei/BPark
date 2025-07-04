@@ -51,7 +51,10 @@ public class ClientController extends AbstractClient {
     private ParkingReportController parkingReportController;
     private SubscriberStatusController subscriberStatusController;
 
+    /** Stores the logged-in subscriber object during session (null if not logged in) */
     private Subscriber subscriber;
+
+    /** Stores the user's password during the current session */
     private String password;
 
     /**

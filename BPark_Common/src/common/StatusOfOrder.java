@@ -1,15 +1,30 @@
 package common;
 
 /**
- * This enum is the status of order:
- * FULFILLED- the subscriber used the order to get in to the lot in the date and time of order.
- * ACTIVE-  the scheduled date and time of the order have not yet passed
- * INACTIVE- the date and time of order pass
- * CANCELLED-the subscriber cancel the order
+ * Represents the current status of an order made by a subscriber.
+ * The status helps track if the order is still valid, was used, expired, or canceled.
  */
 public enum StatusOfOrder {
-	FULFILLED,
-	ACTIVE,
-	INACTIVE,
-	CANCELLED
+    
+    /** 
+     * The order was used successfully - the subscriber entered the parking lot 
+     * at the scheduled date and time. 
+     */
+    FULFILLED,
+
+    /** 
+     * The order is still active - its scheduled time hasn’t passed yet. 
+     */
+    ACTIVE,
+
+    /** 
+     * The order is no longer valid - the scheduled time has already passed 
+     * and it wasn’t used. 
+     */
+    INACTIVE,
+
+    /** 
+     * The order was canceled by the subscriber before it was used. 
+     */
+    CANCELLED
 }
