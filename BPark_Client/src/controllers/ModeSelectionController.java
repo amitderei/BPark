@@ -5,6 +5,10 @@ import common.Operation;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
+import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
@@ -16,7 +20,7 @@ import ui.UiUtils;
  * - Terminal interface for parking-lot staff
  * - Exit the application
  */
-public class ModeSelectionController implements ClientAware {
+public class ModeSelectionController implements ClientAware, StageAware {
     /** Button to launch the full BPARK application (GUI flow for guests/subscribers) */
     @FXML 
     private Button btnApp;
@@ -30,6 +34,19 @@ public class ModeSelectionController implements ClientAware {
 
     /** Reference to the shared client instance used to communicate with the server */
     private ClientController client;
+    
+    /** The toolbar used for dragging the undecorated window */
+    @FXML
+    private ToolBar dragArea;
+
+    /**
+     * Enables drag-to-move behavior using the top toolbar.
+     *
+     * @param stage the primary application stage
+     */
+    public void setStage(Stage stage) {
+    	DragUtil.enableDrag(dragArea, stage);
+    }
 
 	/**
 	 * Injects the shared ClientController instance.

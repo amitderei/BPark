@@ -10,7 +10,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
@@ -23,7 +27,7 @@ import ui.UiUtils;
  *
  * All other screens are loaded into the center panel.
  */
-public class TerminalMainLayoutController implements ClientAware {
+public class TerminalMainLayoutController implements ClientAware, StageAware {
 
 	@FXML
 	private Button btnExit;
@@ -53,9 +57,28 @@ public class TerminalMainLayoutController implements ClientAware {
 	/** The dynamic container into which screens are loaded */
 	@FXML
 	private AnchorPane center;
+	
+	/**
+	 * The toolbar at the top of the terminal layout, used as the drag handle for moving the undecorated window.
+	 */
+	@FXML
+	private ToolBar dragArea;
+
 
 	/** Shared controller for server communication */
 	private ClientController client;
+	
+	/**
+	 * Enables drag-to-move functionality for the terminal window
+	 * by allowing the user to click and drag the top toolbar.
+	 *
+	 * @param stage the primary JavaFX window (used to move the window)
+	 */
+	@Override
+	public void setStage(Stage stage) {
+	    DragUtil.enableDrag(dragArea, stage);
+	}
+
 
 	/**
 	 * Injects the ClientController reference for use in this layout and

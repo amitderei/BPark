@@ -102,6 +102,12 @@ public final class UiUtils {
                 client.setGuestMainController(g);
                 g.setClient(client);
             }
+            
+            // inject the Stage if the controller supports it
+            if (ctrl instanceof StageAware stageAware) {
+                Stage stage = (Stage) source.getScene().getWindow();
+                stageAware.setStage(stage); 
+            }
 
             // General injection for any controller that implements ClientAware
             if (ctrl instanceof ClientAware aware) {

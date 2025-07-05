@@ -11,7 +11,7 @@
 
 <BorderPane prefHeight="500.0" prefWidth="800.0" stylesheets="@TerminalMainLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TerminalMainLayoutController">
     <top>
-        <ToolBar styleClass="toolbar">
+        <ToolBar fx:id="dragArea" styleClass="toolbar">
             <Button fx:id="btnBack" onAction="#handleBackClick" text="←Back" />
          <Pane prefHeight="25.0" prefWidth="327.0" />
          <Label styleClass="toolbar-label" text="BPARK">
