@@ -165,6 +165,14 @@ public class ParkingReportController implements ClientAware {
 		latesPieChart.setLabelsVisible(false);
 		latesPieChart.setTitle("Monthly Lates Pie");
 		
+		// Set fixed pie chart colors to match legends
+		extendsChartData.get(0).getNode().setStyle("-fx-pie-color: #f17c67;"); // Extends parking
+		extendsChartData.get(1).getNode().setStyle("-fx-pie-color: #fbb034;"); // No extension
+
+		latesChartData.get(0).getNode().setStyle("-fx-pie-color: #f17c67;"); // Late pickups
+		latesChartData.get(1).getNode().setStyle("-fx-pie-color: #fbb034;"); // On-time pickups
+
+		
 		System.out.println("Legend visible: " + parkingPieChart.isLegendVisible());
 	}
 

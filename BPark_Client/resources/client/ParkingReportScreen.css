@@ -41,4 +41,14 @@
     -fx-padding: 10 0 0 0;
 }
 
+.legend-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #333;
+}
+
+.circle {
+    -fx-stroke: #ccc;
+    -fx-stroke-width: 1;
+}
+
 
