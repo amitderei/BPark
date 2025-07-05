@@ -19,7 +19,7 @@
                <Font name="Aharoni Bold" size="12.0" />
             </font>
          </Label>
-         <Pane prefHeight="30.0" prefWidth="230.0" />
+         <Pane prefHeight="30.0" prefWidth="220.0" />
             <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
         </ToolBar>
     </top>

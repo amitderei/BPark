@@ -21,7 +21,7 @@
                <Font name="Aharoni Bold" size="18.0" />
             </font>
          </Label>
-         <Pane prefHeight="35.0" prefWidth="289.0" />
+         <Pane prefHeight="35.0" prefWidth="280.0" />
          <Button fx:id="btnExit" mnemonicParsing="false" onAction="#handleExitClick" prefWidth="60.0" text="Exit" />
       </items>
    </ToolBar>
