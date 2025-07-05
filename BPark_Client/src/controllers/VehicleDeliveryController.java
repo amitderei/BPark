@@ -410,8 +410,8 @@ public class VehicleDeliveryController implements ClientAware{
 			// When we have the tag, we will seek for the subscriber code
 			subCodeFuture.thenAccept(codeInt -> {
 				this.codeInt = codeInt;
-				// After gathering the subscriber code we will go and check whether there are free space in our parking lot
-				client.getRequestSender().isThereFreeParkingSpace("braude");
+				// After gathering the subscriber code we will go to the method which will check if there is a reservation
+				checkIfTheresReservation();
 			});
 	}
 
@@ -425,7 +425,7 @@ public class VehicleDeliveryController implements ClientAware{
 		if(hasReservation) {handleDeliveryViaReservation();}
 
 		// If there's no reservation, we will check if we can enter the vehicle on a regular
-		else client.getRequestSender().isThereFreeParkingSpace("braude");
+		else client.getRequestSender().isThereFreeParkingSpace("braude", codeInt);
 
 
 	}
@@ -490,7 +490,7 @@ public class VehicleDeliveryController implements ClientAware{
 		ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: green;");
 
 		// Before going to the delivery process we shall check whether is there free space or not
-		client.getRequestSender().isThereFreeParkingSpace("braude");
+		client.getRequestSender().isThereFreeParkingSpace("braude", codeInt);
 	}
 
 	/**

@@ -626,32 +626,61 @@ public class DBController {
 	 * @param parkingLotName the name of the parking lot (e.g., "Braude")
 	 * @return the ID of the available parking space if one exists, or -1 if the lot is full
 	 */
-	public synchronized int hasAvailableSpots(String parkingLotName) {
-		try {
-			int totalSpots = getTotalSpots();
-			int activeParkings = getActiveParkingsCount();
-			int reservedNow = getActiveReservationsNowCount();
+	public synchronized int hasAvailableSpots(String parkingLotName, int subscriberCode) {
+		 try {
+		        int totalSpots = getTotalSpots();
+		        int activeParkings = getActiveParkingsCount();
+		        int reservedNow = getActiveReservationsNowCount();
 
-			int used = activeParkings + reservedNow;
+		        int used = activeParkings + reservedNow;
 
-			if (used >= totalSpots) {
-				return -1; // No space available
-			}
+		        if (used >= totalSpots) {
+		            return -1; // Lot is full
+		        }
 
-			int freeSpot = findUnreservedFreeParkingSpace();
-			if (freeSpot == -1) {
-				return -1; // No safe space found
-			}
+		        int freeSpot;
 
-			addOccupiedParkingSpace();               // Increment counter
-			updateParkingSpaceOccupied(freeSpot);    // Mark space as occupied
+		        if (checkSubscriberHasReservationNow(subscriberCode)) {
+		            freeSpot = findAnyFreeParkingSpace(); // For subscribers with a reservation
+		        } else {
+		            freeSpot = findUnreservedFreeParkingSpace(); // For subscribers with No reservation
+		        }
 
-			return freeSpot;
+		        if (freeSpot == -1) {
+		            return -1; // No suitable spot found
+		        }
 
-		} catch (Exception e) {
-			System.err.println("Error checking available spots: " + e.getMessage());
-			return -1;
-		}
+		        addOccupiedParkingSpace();
+		        updateParkingSpaceOccupied(freeSpot);
+
+		        return freeSpot;
+
+		    } catch (Exception e) {
+		        System.err.println("Error checking available spots: " + e.getMessage());
+		        return -1;
+		    }
+	}
+
+	/**
+	 * Finds any free parking space that is currently not occupied, ignoring reservation windows.
+	 *
+	 * @return a free parking space ID if found, or -1 if none found
+	 */
+	private int findAnyFreeParkingSpace() {
+	    String sql = """
+	        SELECT ps.parking_space
+	        FROM parkingSpaces ps
+	        WHERE ps.is_occupied = FALSE
+	        LIMIT 1
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+	        return rs.next() ? rs.getInt(1) : -1;
+	    } catch (SQLException e) {
+	        System.err.println("Error finding any free parking space: " + e.getMessage());
+	        return -1;
+	    }
 	}
 
 	/**

@@ -388,10 +388,10 @@ public class ClientRequestSender {
      * Checks if the specified parking lot has at least one free space.
      * @param parkingLotName the name of the parking lot
      */
-    public void isThereFreeParkingSpace(String parkingLotName) {
+    public void isThereFreeParkingSpace(String parkingLotName, int subscriberCode) {
         try {
             client.sendToServer(new Object[] {
-                    Operation.IS_THERE_FREE_PARKING_SPACE, parkingLotName
+                    Operation.IS_THERE_FREE_PARKING_SPACE, parkingLotName, subscriberCode,
             });
         } catch (IOException e) {
             System.err.println("Failed to send 'IsThereFreeParkingSpace' request: " + e.getMessage());

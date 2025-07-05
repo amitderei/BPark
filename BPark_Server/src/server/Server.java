@@ -333,7 +333,8 @@ public class Server extends AbstractServer {
 				//check if there is an empty parking spot in the parking lot. expected format: {IS_THERE_FREE_PARKING_SPACE, lotName}
 				case IS_THERE_FREE_PARKING_SPACE:
 					String lotName = (String) data[1];
-					int parkingSpaceInt = db.hasAvailableSpots(lotName);
+					subscriberCode = (Integer) data[2];
+					int parkingSpaceInt = db.hasAvailableSpots(lotName, subscriberCode);
 
 					// If the method hasAvaliableSpots returns -1 it means that the parking lot is
 					// full
