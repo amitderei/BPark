@@ -59,6 +59,8 @@ public class ServerApp extends Application {
         // give the controller a handle back to this class
         ServerController ctrl = fxml.getController();
         ctrl.setApp(this);
+        
+        ctrl.setStage(stage);
 
 		// Set up the stage with no window borders
 		stage.initStyle(StageStyle.UNDECORATED);

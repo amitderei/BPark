@@ -11,6 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -51,6 +53,19 @@ public class ServerController {
 
     /** Timeline for auto-refreshing the connected clients list */
     private Timeline clientUpdateTimeline;
+    
+    /** AnchorPane area that handles drag gestures for moving the undecorated window */
+    @FXML
+    private AnchorPane dragArea;
+
+    /** Offset from the mouse click X position to the window X */
+    private double xOffset = 0;
+
+    /** Offset from the mouse click Y position to the window Y */
+    private double yOffset = 0;
+
+    /** Reference to the Stage, used to allow window dragging */
+    private Stage stageRef;
 
     /**
      * Links this controller with the ServerApp instance.
@@ -59,6 +74,16 @@ public class ServerController {
      */
     public void setApp(ServerApp app) {
         this.app = app;
+    }
+    
+    /**
+     * Passes the stage from ServerApp to this controller.
+     * Required in order to move the undecorated window with mouse drag.
+     *
+     * @param stage the primary JavaFX stage (window)
+     */
+    public void setStage(Stage stage) {
+        this.stageRef = stage;
     }
 
     /**
@@ -188,10 +213,27 @@ public class ServerController {
 
     /**
      * JavaFX initialize method.
-     * Sets a default port value in the text field on load.
+     * Sets a default port value in the text field on load,
+     * and attaches mouse listeners for dragging the undecorated window.
      */
     @FXML
     public void initialize() {
         txtPort.setText("5555");
+
+        // Drag event: record initial offset when mouse is pressed
+        dragArea.setOnMousePressed(event -> {
+            xOffset = event.getSceneX();
+            yOffset = event.getSceneY();
+        });
+
+        // Drag event: move the stage when mouse is dragged
+        dragArea.setOnMouseDragged(event -> {
+            if (stageRef != null) {
+                stageRef.setX(event.getScreenX() - xOffset);
+                stageRef.setY(event.getScreenY() - yOffset);
+            }
+        });
     }
+    
+    
 }

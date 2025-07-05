@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="450.0" stylesheets="@ConnectionToServerView.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.ServerController">
+<AnchorPane fx:id="dragArea" prefHeight="600.0" prefWidth="450.0" stylesheets="@ConnectionToServerView.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.ServerController">
     <children>
         <VBox alignment="CENTER" prefHeight="600.0" prefWidth="450.0" spacing="15.0">
             <!-- Header label -->
