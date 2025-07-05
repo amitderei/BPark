@@ -9,7 +9,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
@@ -17,7 +21,7 @@ import ui.UiUtils;
  * Displays a fixed top bar and side menu.
  * Swaps the center pane using loadScreen().
  */
-public class StaffMainLayoutController implements ClientAware {
+public class StaffMainLayoutController implements ClientAware, StageAware  {
 
     /** "Home" button in the top bar */
     @FXML private Button btnHome;
@@ -45,12 +49,26 @@ public class StaffMainLayoutController implements ClientAware {
 
     /** Placeholder pane that swaps child screens */
     @FXML private AnchorPane center;
+    
+    /** The toolbar used to drag the undecorated window. */
+    @FXML
+    private ToolBar dragArea;
 
     /** Active client instance used for server communication */
     private ClientController client;
 
     /** Logged-in staff user (Manager or Attendant) */
     private User user;
+    
+    /**
+     * Enables drag-to-move functionality using the top toolbar.
+     *
+     * @param stage the primary JavaFX stage
+     */
+    @Override
+    public void setStage(Stage stage) {
+        DragUtil.enableDrag(dragArea, stage);
+    }
 
     /**
      * Sets the shared client controller and registers this controller.

@@ -10,6 +10,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
@@ -19,7 +21,7 @@ import ui.UiUtils;
  * and get redirected to the appropriate screen based on their role
  * (Subscriber, Attendant, or Manager).
  */
-public class LoginController implements ClientAware {
+public class LoginController implements ClientAware, StageAware {
 	
     /** Text field for entering username */
     @FXML 
@@ -43,6 +45,12 @@ public class LoginController implements ClientAware {
     /** Button to exit the application */
     @FXML 
     private Button btnExit;
+    
+    /**
+     * The toolbar used to drag the undecorated login window.
+     */
+    @FXML
+    private ToolBar dragArea;
 
     /** Active client controller, used to communicate with the server */
     private ClientController client;
@@ -50,6 +58,16 @@ public class LoginController implements ClientAware {
     /** Cached password for future use (e.g., profile editing) */
     private String password;
 
+    /**
+     * Enables drag-to-move behavior using the top toolbar.
+     *
+     * @param stage the primary JavaFX stage
+     */
+    @Override
+    public void setStage(Stage stage) {
+        DragUtil.enableDrag(dragArea, stage);
+    }
+    
     /**
      * Injects the client controller and registers this controller
      * as the login callback handler.
@@ -181,6 +199,12 @@ public class LoginController implements ClientAware {
             if (ctrl instanceof StaffMainLayoutController staff) {
                 staff.setClient(client);
                 staff.setUser(user);
+            }
+            
+            // for allow draging
+            if (ctrl instanceof StageAware stageAware) {
+                Stage stage = (Stage) submit.getScene().getWindow();
+                stageAware.setStage(stage);
             }
 
             // Replace current scene

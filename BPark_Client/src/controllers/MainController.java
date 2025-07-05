@@ -6,10 +6,14 @@ import client.ClientController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
@@ -18,7 +22,7 @@ import ui.UiUtils;
  * Allows the user to either continue as a guest or log in as a registered user.
  * Also includes navigation controls to go back or exit the application.
  */
-public class MainController implements ClientAware {
+public class MainController implements ClientAware, StageAware {
 	
 	//FXML UI elements for the BPARK entry screen
 	
@@ -40,6 +44,11 @@ public class MainController implements ClientAware {
     @FXML
     private MediaView braudeVideo;
     
+    /** The toolbar used to drag the undecorated main window. */
+    @FXML
+    private ToolBar dragArea;
+
+    
     /** Media player for the automatic parking video preview. */
     private MediaPlayer mediaPlayerOfParkingVideo;
     
@@ -48,6 +57,18 @@ public class MainController implements ClientAware {
     
     /** Shared ClientController used to send requests to the server */
     private ClientController client;
+    
+    /**
+     * Enables drag-to-move functionality for the main window
+     * using the top toolbar as the drag handle.
+     *
+     * @param stage the main JavaFX window
+     */
+    @Override
+    public void setStage(Stage stage) {
+        DragUtil.enableDrag(dragArea, stage);
+    }
+
     
     /**
      * set the videos on MediaView

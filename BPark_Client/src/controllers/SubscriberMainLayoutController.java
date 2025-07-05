@@ -9,14 +9,18 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
  * Main container for every subscriber screen. Keeps the same top bar and
  * side-menu while swapping the centre pane.
  */
-public class SubscriberMainLayoutController implements ClientAware {
+public class SubscriberMainLayoutController implements ClientAware, StageAware {
 	
     @FXML 
     private Button btnHome;
@@ -54,6 +58,10 @@ public class SubscriberMainLayoutController implements ClientAware {
     /** Center pane where child screens are dynamically loaded */
     @FXML 
     private AnchorPane center;
+    
+    /** The toolbar used to drag the undecorated window. */
+    @FXML
+    private ToolBar dragArea;
 
     /** Shared client controller for server communication */
     private ClientController client;
@@ -61,6 +69,16 @@ public class SubscriberMainLayoutController implements ClientAware {
     /** Subscriber's first name, used in greeting text */
     private String subscriberName;
 
+    /**
+     * Enables drag-to-move functionality using the top toolbar.
+     *
+     * @param stage the primary JavaFX window
+     */
+    @Override
+    public void setStage(Stage stage) {
+        DragUtil.enableDrag(dragArea, stage);
+    }
+    
 	/**
 	 * Injects the shared ClientController instance.
 	 * 

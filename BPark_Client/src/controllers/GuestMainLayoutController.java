@@ -9,7 +9,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import ui.DragUtil;
+import ui.StageAware;
 import ui.UiUtils;
 
 /**
@@ -17,7 +21,7 @@ import ui.UiUtils;
  * Provides top navigation (Home / Back / Exit), a side menu for availability check,
  * and a central area where different screens are loaded dynamically.
  */
-public class GuestMainLayoutController implements ClientAware {
+public class GuestMainLayoutController implements ClientAware, StageAware {
 
     @FXML 
     private Button btnExit;
@@ -35,11 +39,26 @@ public class GuestMainLayoutController implements ClientAware {
     /** Central placeholder where child screens are loaded */
     @FXML 
     private AnchorPane center;
+    
+    /**
+     * The toolbar used to drag the undecorated guest window.
+     */
+    @FXML
+    private ToolBar dragArea;
 
     /** Reference to the active client used for server communication */
     private ClientController client;
 
-
+    /**
+     * Enables drag-to-move functionality using the top toolbar.
+     *
+     * @param stage the primary JavaFX window
+     */
+    @Override
+    public void setStage(Stage stage) {
+        DragUtil.enableDrag(dragArea, stage);
+    }
+    
     /**
      * Runs automatically after the FXML file is loaded.
      * Loads the guest home screen into the center pane.

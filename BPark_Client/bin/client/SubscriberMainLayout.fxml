@@ -11,7 +11,7 @@
 
 <BorderPane prefHeight="500.0" prefWidth="800.0" stylesheets="@TerminalMainLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubscriberMainLayoutController">
     <top>
-        <ToolBar styleClass="toolbar">
+        <ToolBar fx:id="dragArea" styleClass="toolbar">
             <Button fx:id="btnLogout" onAction="#handleLogoutClick" text="🔓 Logout" />
          <Pane prefHeight="30.0" prefWidth="296.0" />
          <Label styleClass="toolbar-label" text="BPARK">
