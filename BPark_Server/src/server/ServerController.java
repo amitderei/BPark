@@ -14,6 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import ui.DragUtil;
 
 /**
  * Controller for the BPARK server connection screen.
@@ -58,15 +59,6 @@ public class ServerController {
     @FXML
     private AnchorPane dragArea;
 
-    /** Offset from the mouse click X position to the window X */
-    private double xOffset = 0;
-
-    /** Offset from the mouse click Y position to the window Y */
-    private double yOffset = 0;
-
-    /** Reference to the Stage, used to allow window dragging */
-    private Stage stageRef;
-
     /**
      * Links this controller with the ServerApp instance.
      *
@@ -83,7 +75,7 @@ public class ServerController {
      * @param stage the primary JavaFX stage (window)
      */
     public void setStage(Stage stage) {
-        this.stageRef = stage;
+        DragUtil.enableDrag(dragArea, stage); 
     }
 
     /**
@@ -219,20 +211,6 @@ public class ServerController {
     @FXML
     public void initialize() {
         txtPort.setText("5555");
-
-        // Drag event: record initial offset when mouse is pressed
-        dragArea.setOnMousePressed(event -> {
-            xOffset = event.getSceneX();
-            yOffset = event.getSceneY();
-        });
-
-        // Drag event: move the stage when mouse is dragged
-        dragArea.setOnMouseDragged(event -> {
-            if (stageRef != null) {
-                stageRef.setX(event.getScreenX() - xOffset);
-                stageRef.setY(event.getScreenY() - yOffset);
-            }
-        });
     }
     
     

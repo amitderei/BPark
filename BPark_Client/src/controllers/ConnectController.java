@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
+import ui.DragUtil;
 import ui.UiUtils;
 
 /**
@@ -38,17 +39,17 @@ public class ConnectController implements ClientAware {
 	/** The client instance responsible for communication with the server */
 	private ClientController client;
 	
+	/** The toolbar used for dragging the undecorated window */
 	@FXML private ToolBar dragArea;
-
-	private double xOffset = 0;
-	private double yOffset = 0;
-	private Stage stageRef;
 	
 	/**
 	 * Injects the primary stage so the window can be dragged manually.
+	 *
+	 * @param stage the JavaFX window stage
 	 */
 	public void setStage(Stage stage) {
-		this.stageRef = stage;
+		// enable window drag via DragUtil
+		DragUtil.enableDrag(dragArea, stage);
 	}
 
 	/**
@@ -167,18 +168,5 @@ public class ConnectController implements ClientAware {
 		} catch (UnknownHostException e) {
 			ipTextField.setText("");
 		}
-		
-		// Enable window drag using the toolbar
-		dragArea.setOnMousePressed(event -> {
-			xOffset = event.getSceneX();
-			yOffset = event.getSceneY();
-		});
-
-		dragArea.setOnMouseDragged(event -> {
-			if (stageRef != null) {
-				stageRef.setX(event.getScreenX() - xOffset);
-				stageRef.setY(event.getScreenY() - yOffset);
-			}
-		});
 	}
 }
