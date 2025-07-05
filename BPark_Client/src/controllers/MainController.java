@@ -20,11 +20,10 @@ import ui.UiUtils;
  */
 public class MainController implements ClientAware {
 	
-    /** Button to enter the system as a guest (no login) */
+	/** FXML UI elements for the BPARK entry screen. */
     @FXML 
     private Button guestBtn;
 
-    /** Button to navigate to the login screen for registered users */
     @FXML 
     private Button loginBtn;
 
@@ -40,9 +39,11 @@ public class MainController implements ClientAware {
     @FXML
     private MediaView braudeVideo;
     
+    /** Media player for the automatic parking video preview. */
     private MediaPlayer mediaPlayerOfParkingVideo;
-    private MediaPlayer mediaPlayerOfBraude;
     
+    /** Media player for the Braude video preview. */
+    private MediaPlayer mediaPlayerOfBraude;
     
     /** Shared ClientController used to send requests to the server */
     private ClientController client;

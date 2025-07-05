@@ -18,11 +18,14 @@ import ui.UiUtils;
  */
 public class EditSubscriberDetailsController implements ClientAware {
 
-	/** Headline label at the top of the edit details screen */
+	/**
+	 * FXML UI elements for the subscriber details edit screen.
+	 * Includes labels, text fields, and the save button.
+	 */
 	@FXML 
 	private Label headline;
 	@FXML 
-	private Label sunscriberCode;   
+	private Label subscriberCode;  
 	@FXML 
 	private TextField subscriberCodeEdit;
 	@FXML 
@@ -53,9 +56,8 @@ public class EditSubscriberDetailsController implements ClientAware {
 	private Label phoneNumber;
 	@FXML 
 	private TextField phoneNumberEdit;
-
-	/** Button that triggers saving of edited details */
-	@FXML private Button saveChangesBtn;
+	@FXML 
+	private Button saveChangesBtn;
 
 	/** Reference to the active client used for server communication */
 	private ClientController client;

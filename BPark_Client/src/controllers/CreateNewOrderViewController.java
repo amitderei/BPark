@@ -83,7 +83,7 @@ public class CreateNewOrderViewController implements ClientAware {
 	Date selectedDate;
 	Time timeOfArrival;
 
-	// This parameter waits until there will be a value received for orderExistFuture	
+	/** This parameter waits until there will be a value received for orderExistFuture */	
 	public CompletableFuture<Boolean> orderExistFuture;
 	
 	/**
@@ -153,8 +153,8 @@ public class CreateNewOrderViewController implements ClientAware {
 		}
 	}
 
-	/** Called when an hour is picked. Populates minuteCombo in 15-minute steps. */
-	public void hourChoosen() {
+	/** Updates the minute selector in 15-minute increments when an hour is chosen. */
+	public void hourChosen() {
 
 		LocalDate date      = chooseDate.getValue();
 		LocalDate tomorrow  = LocalDate.now().plusDays(1);
