@@ -154,7 +154,7 @@ public class CreateNewOrderViewController implements ClientAware {
 	}
 
 	/** Updates the minute selector in 15-minute increments when an hour is chosen. */
-	public void hourChosen() {
+	public void hourChoosen() {
 
 		LocalDate date      = chooseDate.getValue();
 		LocalDate tomorrow  = LocalDate.now().plusDays(1);

@@ -160,15 +160,22 @@ public class ClientController extends AbstractClient {
 
 		Platform.runLater(() -> {
 
-			if(response.getType() == null) {
-				System.out.println("Server response msg: " + response.getMsg());
-				System.out.println("Success? " + response.isSucceed());
-				// General error message pop up (only if not handled before)
-				if (!response.isSucceed()) {
-					UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
-				}
-				return;
+			if (response.getType() == null) {
+			    System.out.println("Server response msg: " + response.getMsg());
+			    System.out.println("Success? " + response.isSucceed());
+
+			    // If we are on the pickup screen – show in label
+			    if (pickupController != null) {
+			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+			    } else {
+			        // If not success and no pickup controller – fallback alert
+			        if (!response.isSucceed()) {
+			            UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+			        }
+			    }
+			    return;
 			}
+
 			
 			
 			switch((ResponseType)response.getType()) {
@@ -230,20 +237,21 @@ public class ClientController extends AbstractClient {
 					break;
 				}
 
-			case SUBSCRIBER_VERIFIED :
-				if (pickupController != null && response.isSucceed()) {
+			case SUBSCRIBER_VERIFIED:
+				if (pickupController != null) {
+					// Always show status in the label - success or failure
 					UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
-					if (response.getData() instanceof Integer subscriberCode) {
-						// Subscriber was validated using tag ID
-						pickupController.onSubscriberValidated(subscriberCode);
-						break;
-					} else {
-						// Subscriber was validated using numeric code input
-						pickupController.onSubscriberValidated();
-						break;
+					if (response.isSucceed()) {
+						if (response.getData() instanceof Integer subscriberCode) {
+							pickupController.onSubscriberValidated(subscriberCode);
+						} else {
+							pickupController.onSubscriberValidated();
+						}
 					}
+					break;
 				}
+
 
 			case PICKUP_VEHICLE :
 				if (pickupController != null) {
@@ -307,28 +315,11 @@ public class ClientController extends AbstractClient {
 				}
 
 			case PARKING_INFO_LOADED:
-				ParkingEvent event = (ParkingEvent) response.getData();
-
-				// If there is no active parking session, show a message and go back to home
-				if (event == null) {
-					UiUtils.showAlert("No Active Parking", "You don't have any active parking session.", Alert.AlertType.INFORMATION);
-					if (getMainLayoutController() != null) {
-						getMainLayoutController().handleHomeClick();
-					}
-					break;
-				}
-
-				// There is an active parking session than load the info screen
-				if (getMainLayoutController() != null) {
-					getMainLayoutController().loadScreen("/client/ViewActiveParkingInfoScreen.fxml");
-				}
-
-				// Once the screen is loaded, update it with the event details
-				if (getViewActiveParkingInfoController() != null) {
-					getViewActiveParkingInfoController().setParkingEvent(event);
-					getViewActiveParkingInfoController().setTexts();
-				}
+				if(response.isSucceed() && viewActiveParkingInfoController!=null) {
+					viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
+					viewActiveParkingInfoController.setTexts();
 				break;
+				}
 
 			case ACTIVE_PARKINGS :
 				if(response.isSucceed() && viewActiveParkingsController != null) {

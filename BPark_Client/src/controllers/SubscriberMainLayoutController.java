@@ -82,7 +82,7 @@ public class SubscriberMainLayoutController implements ClientAware {
 
 	/** Navigates to the subscriber's home screen. */
 	@FXML
-	public void handleHomeClick() {
+	private void handleHomeClick() {
 		loadScreen("/client/SubscriberMainScreen.fxml");
 	}
 
@@ -110,14 +110,10 @@ public class SubscriberMainLayoutController implements ClientAware {
 		loadScreen("/client/ViewSubscriberHistoryScreen.fxml");
 	}
 
-	/** 
-	 * Called when the user clicks the "Active Parking Info" button.
-	 * Instead of loading the screen directly, we ask the server for the latest parking info.
-	 * The screen will only load if the server confirms there's an active session.
-	 */
+	/** Loads the current active parking session view. */
 	@FXML
 	private void handleViewActiveParkingInfo() {
-		client.getRequestSender().getDetailsOfActiveInfo();
+		loadScreen("/client/ViewActiveParkingInfoScreen.fxml");
 	}
 
 	/** Loads the extend parking request screen. */

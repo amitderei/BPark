@@ -99,8 +99,6 @@ public class VehiclePickupController implements ClientAware {
             client.getRequestSender().validateSubscriber(code);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Subscriber code must be a number.", false);
-            UiUtils.showAlert("BPARK - Error", "Subscriber code must be a number.",
-                    javafx.scene.control.Alert.AlertType.ERROR);
         }
     }
 
@@ -142,8 +140,6 @@ public class VehiclePickupController implements ClientAware {
             client.getRequestSender().collectCar(validatedSubscriberCode, parkingCode);
         } catch (NumberFormatException e) {
             UiUtils.setStatus(lblStatus, "Parking code must be numeric.", false);
-            UiUtils.showAlert("BPARK - Error", "Parking code must be numeric.",
-                    javafx.scene.control.Alert.AlertType.ERROR);
         } catch (Exception ex) {
             UiUtils.setStatus(lblStatus,
                     "An error occurred while trying to collect the vehicle.", false);

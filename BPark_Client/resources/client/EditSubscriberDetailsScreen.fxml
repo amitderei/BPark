@@ -46,7 +46,7 @@
                   </Label>
 
      
-                  <Label fx:id="sunscriberCode" text="Unique Code:" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <Label fx:id="subscriberCode" text="Unique Code:" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                   <TextField fx:id="subscriberCodeEdit" maxWidth="175.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                   <Label fx:id="id" text="ID:" GridPane.halignment="CENTER" GridPane.rowIndex="2" />

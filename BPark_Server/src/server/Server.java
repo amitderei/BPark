@@ -134,18 +134,15 @@ public class Server extends AbstractServer {
 					}
 					break;
 					
-				// Handle request to get the subscriber's active parking event
-				// Expected format: {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
+				//return the data of active parking of subscriber. expected format {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
 				case GET_DETAILS_OF_ACTIVE_INFO:
 					ParkingEvent parkingEvent = db.getActiveParkingEvent((Subscriber) data[1]);
-
-					// Always return a successful response (even if no parking found), so the client can decide what to do with it
-					client.sendToClient(new ServerResponse(
-						true, // not an error, just no active parking
-						parkingEvent, // might be null if there is no active session
-						ResponseType.PARKING_INFO_LOADED,
-						parkingEvent == null ? "No active parking." : "Active parking info loaded successfully."
-					));
+					if (parkingEvent == null) {
+						client.sendToClient(new ServerResponse(false, null, null, "There is no active parking."));
+					} else {
+						client.sendToClient(
+								new ServerResponse(true, parkingEvent, ResponseType.PARKING_INFO_LOADED, "Active parking info loaded successfully."));
+					}
 					break;
 					
 				//send mail to subscriber that forget the parking code. expected format {FORGEOT_MY_PARKING_CODE, subscriberCode}
