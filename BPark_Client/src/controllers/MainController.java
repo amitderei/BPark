@@ -20,7 +20,8 @@ import ui.UiUtils;
  */
 public class MainController implements ClientAware {
 	
-	/** FXML UI elements for the BPARK entry screen. */
+	//FXML UI elements for the BPARK entry screen
+	
     @FXML 
     private Button guestBtn;
 
