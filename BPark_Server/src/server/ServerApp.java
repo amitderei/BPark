@@ -60,6 +60,7 @@ public class ServerApp extends Application {
         ServerController ctrl = fxml.getController();
         ctrl.setApp(this);
         
+        // Pass the stage so the controller can support window dragging
         ctrl.setStage(stage);
 
 		// Set up the stage with no window borders
