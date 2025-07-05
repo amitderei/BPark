@@ -160,24 +160,28 @@ public class ClientController extends AbstractClient {
 
 		Platform.runLater(() -> {
 
+			// If the server response has no type, treat it as a general-purpose message
 			if (response.getType() == null) {
-			    System.out.println("Server response msg: " + response.getMsg());
-			    System.out.println("Success? " + response.isSucceed());
+				System.out.println("Server response msg: " + response.getMsg());
+				System.out.println("Success? " + response.isSucceed());
 
-			    // If we are on the pickup screen – show in label
-			    if (pickupController != null) {
-			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
-			    } else {
-			        // If not success and no pickup controller – fallback alert
-			        if (!response.isSucceed()) {
-			            UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
-			        }
-			    }
-			    return;
+				boolean handled = false;
+
+				// Show message in pickup screen label if available
+				if (pickupController != null) {
+					UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+					handled = true;
+				}
+
+				// If not handled and it's an error, show fallback alert
+				if (!handled && !response.isSucceed()) {
+					UiUtils.showAlert("System Message", response.getMsg(), Alert.AlertType.ERROR);
+				}
+				return;
 			}
 
-			
-			
+
+			// Handle based on the type of response
 			switch((ResponseType)response.getType()) {
 			case LOGIN_FAILED :
 				if (!response.isSucceed() && loginController != null) {
