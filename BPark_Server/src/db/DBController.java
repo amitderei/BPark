@@ -121,7 +121,7 @@ public class DBController {
 	 */
 	public User authenticateUser(String username, String password) {
 		String query = "SELECT role FROM bpark.user " +
-	               "WHERE BINARY username = ? AND BINARY password = ?"; // Case sensitive login query - BINARY forces byte-level comparison.
+				"WHERE BINARY username = ? AND BINARY password = ?"; // Case sensitive login query - BINARY forces byte-level comparison.
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, username);
@@ -627,38 +627,38 @@ public class DBController {
 	 * @return the ID of the available parking space if one exists, or -1 if the lot is full
 	 */
 	public synchronized int hasAvailableSpots(String parkingLotName, int subscriberCode) {
-		 try {
-		        int totalSpots = getTotalSpots();
-		        int activeParkings = getActiveParkingsCount();
-		        int reservedNow = getActiveReservationsNowCount();
+		try {
+			int totalSpots = getTotalSpots();
+			int activeParkings = getActiveParkingsCount();
+			int reservedNow = getActiveReservationsNowCount();
 
-		        int used = activeParkings + reservedNow;
+			int used = activeParkings + reservedNow;
 
-		        if (used >= totalSpots) {
-		            return -1; // Lot is full
-		        }
+			if (used >= totalSpots) {
+				return -1; // Lot is full
+			}
 
-		        int freeSpot;
+			int freeSpot;
 
-		        if (checkSubscriberHasReservationNow(subscriberCode)) {
-		            freeSpot = findAnyFreeParkingSpace(); // For subscribers with a reservation
-		        } else {
-		            freeSpot = findUnreservedFreeParkingSpace(); // For subscribers with No reservation
-		        }
+			if (checkSubscriberHasReservationNow(subscriberCode)) {
+				freeSpot = findAnyFreeParkingSpace(); // For subscribers with a reservation
+			} else {
+				freeSpot = findUnreservedFreeParkingSpace(); // For subscribers with No reservation
+			}
 
-		        if (freeSpot == -1) {
-		            return -1; // No suitable spot found
-		        }
+			if (freeSpot == -1) {
+				return -1; // No suitable spot found
+			}
 
-		        addOccupiedParkingSpace();
-		        updateParkingSpaceOccupied(freeSpot);
+			addOccupiedParkingSpace();
+			updateParkingSpaceOccupied(freeSpot);
 
-		        return freeSpot;
+			return freeSpot;
 
-		    } catch (Exception e) {
-		        System.err.println("Error checking available spots: " + e.getMessage());
-		        return -1;
-		    }
+		} catch (Exception e) {
+			System.err.println("Error checking available spots: " + e.getMessage());
+			return -1;
+		}
 	}
 
 	/**
@@ -667,20 +667,20 @@ public class DBController {
 	 * @return a free parking space ID if found, or -1 if none found
 	 */
 	private int findAnyFreeParkingSpace() {
-	    String sql = """
-	        SELECT ps.parking_space
-	        FROM parkingSpaces ps
-	        WHERE ps.is_occupied = FALSE
-	        LIMIT 1
-	    """;
+		String sql = """
+				    SELECT ps.parking_space
+				    FROM parkingSpaces ps
+				    WHERE ps.is_occupied = FALSE
+				    LIMIT 1
+				""";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql);
-	         ResultSet rs = stmt.executeQuery()) {
-	        return rs.next() ? rs.getInt(1) : -1;
-	    } catch (SQLException e) {
-	        System.err.println("Error finding any free parking space: " + e.getMessage());
-	        return -1;
-	    }
+		try (PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = stmt.executeQuery()) {
+			return rs.next() ? rs.getInt(1) : -1;
+		} catch (SQLException e) {
+			System.err.println("Error finding any free parking space: " + e.getMessage());
+			return -1;
+		}
 	}
 
 	/**
@@ -1118,58 +1118,58 @@ public class DBController {
 	 *         [1] = Number of late parkings (Integer)
 	 */
 	public List<Object[]> getAllSubscribersWithLateCount() {
-	    final String sql = """
-	        SELECT s.subscriberCode,
-	               s.userId,
-	               s.firstName,
-	               s.lastName,
-	               s.phoneNumber,
-	               s.email,
-	               s.username,
-	               s.tagId,
-	               COALESCE(l.late_cnt, 0) AS late_count
-	        FROM bpark.subscriber AS s
-	        LEFT JOIN (
-	            SELECT subscriberCode,
-	                   COUNT(*) AS late_cnt
-	            FROM bpark.parkingEvent
-	            WHERE (
-	                TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), 
-	                                   COALESCE(TIMESTAMP(exitDate, exitHour), NOW())) > 480
-	                OR (
-	                    wasExtended = FALSE AND
-	                    TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), 
-	                                       COALESCE(TIMESTAMP(exitDate, exitHour), NOW())) > 240
-	                )
-	            )
-	            GROUP BY subscriberCode
-	        ) AS l USING (subscriberCode)
-	        ORDER BY s.subscriberCode;
-	        """;
+		final String sql = """
+				SELECT s.subscriberCode,
+				       s.userId,
+				       s.firstName,
+				       s.lastName,
+				       s.phoneNumber,
+				       s.email,
+				       s.username,
+				       s.tagId,
+				       COALESCE(l.late_cnt, 0) AS late_count
+				FROM bpark.subscriber AS s
+				LEFT JOIN (
+				    SELECT subscriberCode,
+				           COUNT(*) AS late_cnt
+				    FROM bpark.parkingEvent
+				    WHERE (
+				        TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), 
+				                           COALESCE(TIMESTAMP(exitDate, exitHour), NOW())) > 480
+				        OR (
+				            wasExtended = FALSE AND
+				            TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), 
+				                               COALESCE(TIMESTAMP(exitDate, exitHour), NOW())) > 240
+				        )
+				    )
+				    GROUP BY subscriberCode
+				) AS l USING (subscriberCode)
+				ORDER BY s.subscriberCode;
+				""";
 
-	    List<Object[]> result = new ArrayList<>();
+		List<Object[]> result = new ArrayList<>();
 
-	    try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-	        while (rs.next()) {
-	            Subscriber sub = new Subscriber(
-	                rs.getInt("subscriberCode"),
-	                rs.getString("userId"),
-	                rs.getString("firstName"),
-	                rs.getString("lastName"),
-	                rs.getString("phoneNumber"),
-	                rs.getString("email"),
-	                rs.getString("username"),
-	                rs.getString("tagId")
-	            );
+		try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				Subscriber sub = new Subscriber(
+						rs.getInt("subscriberCode"),
+						rs.getString("userId"),
+						rs.getString("firstName"),
+						rs.getString("lastName"),
+						rs.getString("phoneNumber"),
+						rs.getString("email"),
+						rs.getString("username"),
+						rs.getString("tagId")
+						);
 
-	            int lateCount = rs.getInt("late_count");
-	            result.add(new Object[]{ sub, lateCount });
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+				int lateCount = rs.getInt("late_count");
+				result.add(new Object[]{ sub, lateCount });
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return result;
+		return result;
 	}
 
 	/**
@@ -1276,14 +1276,17 @@ public class DBController {
 					"SET wasExtended = TRUE " +
 					"WHERE parkingCode = ? " +
 					"AND exitDate IS NULL AND exitHour IS NULL " +
-					"AND wasExtended = FALSE";
+					"AND wasExtended = FALSE " +
+					"AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
 		} else {
 			sql = "UPDATE bpark.parkingEvent " +
 					"SET wasExtended = TRUE " +
 					"WHERE parkingCode = ? " +
 					"AND subscriberCode = ? " +
 					"AND exitDate IS NULL AND exitHour IS NULL " +
-					"AND wasExtended = FALSE";
+					"AND wasExtended = FALSE " +
+					"AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+
 		}
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1327,17 +1330,26 @@ public class DBController {
 					if (event.isWasExtended()) {
 						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session was already extended.");
 					}
+
+					// case 4 : tell the subscriber that if he is late then he canno't extend his parking
+					if (subscriberIsLate(subscriberCodeInt)) {
+						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session is late.");
+					}
 				}
 				else {
-					System.out.println("HEREWEGO");
-					// case 4 : if the subscriber has entered a parking code threw the terminal, but there is no matching parking code
+					// case 5 : if the subscriber has entered a parking code threw the terminal, but there is no matching parking code
 					if(!openParkingCodeExists(parkingCode)) {
 						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "There is no active parking that matches this parking code.");
 					}
 
-					// case 5 : if there is a matched parking code but an extend parking already happened
+					// case 6 : if there is a matched parking code but an extend parking already happened
 					if(parkingCodeWasExtended(parkingCode)) {
 						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session was already extended.");
+					}
+
+					// case 7 : if there is a matched parking code but the active parking is late
+					if (subscriberIsLateByParkingCode(parkingCode)) {
+						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session is late.");
 					}
 				}
 
@@ -1352,6 +1364,63 @@ public class DBController {
 		return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Invalid parking code.");
 	}
 
+	/**
+	 * Checks if the subscriber is late based on parking time and extension status.
+	 * The check is accurate to the minute: if more than 240 minutes (4 hours) have passed,
+	 * the subscriber is considered late.
+	 *
+	 * @param subscriberCode the subscriber's code
+	 * @return true if the subscriber is late, false otherwise
+	 */
+	public boolean subscriberIsLate(int subscriberCode) {
+	    Subscriber s = new Subscriber();
+	    s.setSubscriberCode(subscriberCode);
+
+	    ParkingEvent event = getActiveParkingEvent(s);
+	    if (event == null) {
+	        return false; // No active parking, can't be late
+	    }
+
+	    LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+	    LocalDateTime now = LocalDateTime.now();
+	    long minutes = Duration.between(entryTime, now).toMinutes();
+
+	    return minutes > 240;
+	}
+
+
+	/**
+	 * Checks if the parking session associated with the given parking code is late.
+	 * The check is accurate to the minute: if more than 240 minutes (4 hours) have passed,
+	 * the parking session is considered late.
+	 *
+	 * @param parkingCode the code identifying the parking session
+	 * @return true if the parking session is late, false otherwise
+	 */
+	private boolean subscriberIsLateByParkingCode(int parkingCode) {
+	    String query = "SELECT * FROM parkingEvent WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setInt(1, parkingCode);
+	        ResultSet rs = stmt.executeQuery();
+
+	        if (rs.next()) {
+	            LocalDate entryDate = rs.getDate("entryDate").toLocalDate();
+	            LocalTime entryHour = rs.getTime("entryHour").toLocalTime();
+
+	            LocalDateTime entryTime = LocalDateTime.of(entryDate, entryHour);
+	            LocalDateTime now = LocalDateTime.now();
+
+	            long minutes = Duration.between(entryTime, now).toMinutes();
+
+	            return minutes > 240;
+	        }
+	    } catch (SQLException e) {
+	        System.err.println("Error checking if parking code is late: " + e.getMessage());
+	    }
+
+	    return false;
+	}
 	/**
 	 * Checks if there is an open parking event with the given parking code
 	 * An open parking event means that exitDate and exitHour are NULL
@@ -1503,7 +1572,7 @@ public class DBController {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Inserts a new vehicle and assigns it to a subscriber.
 	 *
@@ -1568,19 +1637,19 @@ public class DBController {
 	 * @return true if username is taken
 	 */
 	public boolean usernameExists(String username) {
-	    final String sql = """
-	        SELECT 1
-	        FROM   bpark.user
-	        WHERE  BINARY username = ?
-	        LIMIT  1
-	        """;
-	    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-	        ps.setString(1, username);
-	        return ps.executeQuery().next();
-	    } catch (SQLException e) {
-	        System.err.println("[DB] usernameExists: " + e.getMessage());
-	        return false;
-	    }
+		final String sql = """
+				SELECT 1
+				FROM   bpark.user
+				WHERE  BINARY username = ?
+				LIMIT  1
+				""";
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, username);
+			return ps.executeQuery().next();
+		} catch (SQLException e) {
+			System.err.println("[DB] usernameExists: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
