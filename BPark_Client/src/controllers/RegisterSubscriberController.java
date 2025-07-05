@@ -90,13 +90,31 @@ public class RegisterSubscriberController implements ClientAware {
             errFirstName.setText("First name is required.");
             errFirstName.setVisible(true);
             valid = false;
+        } else if (!firstName.matches("[A-Za-z]+")) {
+            errFirstName.setText("First name must contain only english letters.");
+            errFirstName.setVisible(true);
+            valid = false;
+        } else if (firstName.length() < 2 || firstName.length() > 20) {
+            errFirstName.setText("First name must be 2–20 characters long.");
+            errFirstName.setVisible(true);
+            valid = false;
         }
+
 
         if (lastName.isEmpty()) {
             errLastName.setText("Last name is required.");
             errLastName.setVisible(true);
             valid = false;
+        } else if (!lastName.matches("[A-Za-z]+")) {
+            errLastName.setText("Last name must contain only english letters.");
+            errLastName.setVisible(true);
+            valid = false;
+        } else if (lastName.length() < 2 || lastName.length() > 20) {
+            errLastName.setText("Last name must be 2–20 characters long.");
+            errLastName.setVisible(true);
+            valid = false;
         }
+
 
         if (phone.isEmpty() || !phone.matches("^05\\d{8}$")) {
             errPhone.setText("Phone must start with 05 and be 10 digits.");
