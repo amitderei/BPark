@@ -306,12 +306,29 @@ public class ClientController extends AbstractClient {
 
 				}
 
-			case PARKING_INFO_LOADED :
-				if(response.isSucceed() && viewActiveParkingInfoController!=null) {
-					viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
-					viewActiveParkingInfoController.setTexts();
+			case PARKING_INFO_LOADED:
+				ParkingEvent event = (ParkingEvent) response.getData();
+
+				// If there is no active parking session, show a message and go back to home
+				if (event == null) {
+					UiUtils.showAlert("No Active Parking", "You don't have any active parking session.", Alert.AlertType.INFORMATION);
+					if (getMainLayoutController() != null) {
+						getMainLayoutController().handleHomeClick();
+					}
 					break;
 				}
+
+				// There is an active parking session than load the info screen
+				if (getMainLayoutController() != null) {
+					getMainLayoutController().loadScreen("/client/ViewActiveParkingInfoScreen.fxml");
+				}
+
+				// Once the screen is loaded, update it with the event details
+				if (getViewActiveParkingInfoController() != null) {
+					getViewActiveParkingInfoController().setParkingEvent(event);
+					getViewActiveParkingInfoController().setTexts();
+				}
+				break;
 
 			case ACTIVE_PARKINGS :
 				if(response.isSucceed() && viewActiveParkingsController != null) {

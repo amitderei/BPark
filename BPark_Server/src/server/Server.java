@@ -74,6 +74,7 @@ public class Server extends AbstractServer {
 				case DISCONNECT:
 					logClientDisconnect(client);
 					break;
+					
 				// get all reservations of specific subscriber.  expected format: {ASK_FOR_RESERVATIONS, subscriber}
 				case ASK_FOR_RESERVATIONS:
 					ArrayList<Order> orders = db.returnReservationOfSubscriber((Subscriber) data[1]);
@@ -84,6 +85,7 @@ public class Server extends AbstractServer {
 								new ServerResponse(true, orders, ResponseType.ORDERS_DISPLAY, "Orders of subscriber displayed successfully."));
 					}
 					break;
+					
 				//cancel order of subscriber. expected format: {DELETE_ORDER, orderNumber}
 				case DELETE_ORDER:
 					int orderNumberToDelete = (int) data[1];
@@ -94,6 +96,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, null ,"order didn't delete"));
 					}
 					break;
+					
 				//get parking history of subscriber. expected format: {UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber}
 				case UPDATE_PARKING_HISTORY_OF_SUBSCRIBER:
 					ArrayList<ParkingEvent> history = db.parkingHistoryOfSubscriber((Subscriber) data[1]);
@@ -107,6 +110,7 @@ public class Server extends AbstractServer {
 								new ServerResponse(true, history, ResponseType.PARKING_HISTORY_LOADED, "Parking history data loaded successfully."));
 					}
 					break;
+					
 				//return the parking report. expected format {GET_PARKING_REPORT, parkingReport}
 				case GET_PARKING_REPORT:
 					ParkingReport parkingReport = db.getParkingReport((Date) data[1]);
@@ -118,6 +122,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, parkingReport, ResponseType.PARKING_REPORT_LOADED, "Parking report loaded."));
 					}
 					break;
+					
 				//return the dates of the reports. expected format {GET_DATES_OF_REPORTS}
 				case GET_DATES_OF_REPORTS:
 					ArrayList<Date> dates = db.getAllReportsDates();
@@ -128,16 +133,21 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, dates, ResponseType.REPOSTS_DATE_LOADED , "Parking report dates loaded."));
 					}
 					break;
-				//return the data of active parking of subscriber. expected format {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
+					
+				// Handle request to get the subscriber's active parking event
+				// Expected format: {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
 				case GET_DETAILS_OF_ACTIVE_INFO:
 					ParkingEvent parkingEvent = db.getActiveParkingEvent((Subscriber) data[1]);
-					if (parkingEvent == null) {
-						client.sendToClient(new ServerResponse(false, null, null, "There is no active parking."));
-					} else {
-						client.sendToClient(
-								new ServerResponse(true, parkingEvent, ResponseType.PARKING_INFO_LOADED, "Active parking info loaded successfully."));
-					}
+
+					// Always return a successful response (even if no parking found), so the client can decide what to do with it
+					client.sendToClient(new ServerResponse(
+						true, // not an error, just no active parking
+						parkingEvent, // might be null if there is no active session
+						ResponseType.PARKING_INFO_LOADED,
+						parkingEvent == null ? "No active parking." : "Active parking info loaded successfully."
+					));
 					break;
+					
 				//send mail to subscriber that forget the parking code. expected format {FORGEOT_MY_PARKING_CODE, subscriberCode}
 				case FORGEOT_MY_PARKING_CODE:
 					try {
@@ -153,6 +163,7 @@ public class Server extends AbstractServer {
 								new ServerResponse(false, null, null, "Failed to send email. Please try again later."));
 					}
 					break;
+					
 				// Validate subscriber by tag.  expected format {VALIDATE_SUBSCRIBER_BY_TAG, tagId}
 				case VALIDATE_SUBSCRIBER_BY_TAG:
 					String tagId = (String) data[1];
@@ -175,6 +186,7 @@ public class Server extends AbstractServer {
 								new ServerResponse(false, null, null, "Tag ID not recognized. Please try again."));
 					}
 					break;
+					
 				// Validate subscriber by numeric code. expected format {VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE, subscriberCode}
 				case VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE:
 					int validateSubscriberCode = (int) data[1];
@@ -195,10 +207,12 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, null, ResponseType.SUBSCRIBER_VERIFIED, "Subscriber verified"));
 					}
 					break;
+					
 				// Login request. expected format {LOGIN, username. password}
 				case LOGIN:
 					handleLogin(data, client);
 					break;
+					
 				// Collect car. expected format {COLLECT_CAR, subscriberCode. parkingCode}
 				case COLLECT_CAR:
 					int subCode = (int) data[1];
@@ -212,6 +226,7 @@ public class Server extends AbstractServer {
 						System.err.println("Error: collectCar - " + e.getMessage());
 					}
 					break;
+					
 					//update details of subscriber. expected format={UPDATE_DETAILS_OF_SUBSCRIBER, subscriber\null, user\null}
 				case UPDATE_DETAILS_OF_SUBSCRIBER:
 					boolean isSucceedSubscriber = true;
@@ -234,6 +249,7 @@ public class Server extends AbstractServer {
 								"The update did not occur due to a problem. Please try again later."));
 					}
 					break;
+					
 				//get the details of subscriber. expected format={SUBSCRIBER_DETAILS, user}
 				case SUBSCRIBER_DETAILS:
 					Subscriber subscriber = db.getDetailsOfSubscriber((User) data[1]);
@@ -244,6 +260,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, null, "Subscriber details not found."));
 					}
 					break;
+					
 				//check availability for order (at least 40%). expected format={CHECK_AVAILABILITY_FOR_ORDER, date, time}
 				case CHECK_AVAILABILITY_FOR_ORDER:
 					boolean possible = db.parkingSpaceCheckingForNewOrder((Date) data[1], (Time) data[2]);
@@ -253,6 +270,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, ResponseType.RESERVATION_INVALID, "Can't make resarvation because no availability"));
 					}
 					break;
+					
 				//add a new reservation. expected format: {ADD_NEW_ORDER, order}
 				case ADD_NEW_ORDER:
 					Order orderToAdd = (Order) data[1];
@@ -264,6 +282,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(false, null, null, "reservation not succeed!"));
 					}
 					break;
+					
 				//check if there is a subscriber with this subscriber code. expected format: {SUBSCRIBER_EXISTS, subscriberCode}
 				case SUBSCRIBER_EXISTS:
 					int codeInt = (int) data[1];
@@ -278,6 +297,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, null, ResponseType.SUBSCRIBER_CODE, "Subscriber code is valid!"));
 					}
 					break;
+					
 				//check if the subscriber has a reservation right now. expected format: {CHECK_IF_THERE_IS_RERSERVATION, subscriberCode}
 				case CHECK_IF_THERE_IS_RERSERVATION:
 					int codeIntForCheckingReservation = (int) data[1];
@@ -295,6 +315,7 @@ public class Server extends AbstractServer {
 						client.sendToClient(new ServerResponse(true, null, ResponseType.RESERVATION_EXISTS, "Subscriber has a reservation."));
 					}
 					break;
+					
 				//make the delivery via reservation of subscriber. expected format: {DELIVERY_VIA_RESERVATION, subscriberCode, confirmationCode}
 				case DELIVERY_VIA_RESERVATION:
 					int codeIntForDeliveryViaReservation = (int) data[1];
@@ -311,6 +332,7 @@ public class Server extends AbstractServer {
 							new ServerResponse(true, null, ResponseType.CONFIRMATION_CODE_VALIDATION, "The confirmation code has entered successfully."));
 					}
 					break;
+					
 				//check if there is an empty parking spot in the parking lot. expected format: {IS_THERE_FREE_PARKING_SPACE, lotName}
 				case IS_THERE_FREE_PARKING_SPACE:
 					String lotName = (String) data[1];
@@ -326,6 +348,7 @@ public class Server extends AbstractServer {
 					client.sendToClient(new ServerResponse(true, parkingSpaceInt, ResponseType.PARKING_SPACE_AVAILABILITY , "There is free parking space"));
 					}
 					break;
+					
 				//get vehicle id. expected format: {GET_VEHICLE_ID, subscriberCode}
 				case GET_VEHICLE_ID:
 					int codeIntForGetVehicleId = (int) data[1];
@@ -336,6 +359,7 @@ public class Server extends AbstractServer {
 					// The server sends the matched vehicleID
 					client.sendToClient(new ServerResponse(true, vehicleID, ResponseType.VEHICLE_ID , "Found matched vehicle"));
 					break;
+					
 				//get in the new car to the lot. expected format: {DELIVER_VEHICLE, parkingEvent}
 				case DELIVER_VEHICLE:
 					ParkingEvent newParkingEvent = (ParkingEvent) data[1];
@@ -348,6 +372,7 @@ public class Server extends AbstractServer {
 					// The server sends the successful addition of parking event
 					client.sendToClient(new ServerResponse(true, null, ResponseType.DELIVER_VEHICLE , "Added parking event successfully"));
 					break;
+					
 				//check if tag exists. expected format: {TAG_EXISTS, tagId}
 				case TAG_EXISTS:
 					String tag = (String) data[1];
@@ -362,6 +387,7 @@ public class Server extends AbstractServer {
 					client.sendToClient(new ServerResponse(true, null, ResponseType.TAG_EXISTS ,"Tag exists"));
 					}
 					break;
+					
 				//find a matched subscriber code to the tag ID. expected format: {FIND_MATCHED_SUBSCRIBER_TO_THE_TAG, tagId}
 				case FIND_MATCHED_SUBSCRIBER_TO_THE_TAG:
 					String tagIdOfSubscriber = (String) data[1];
@@ -373,6 +399,7 @@ public class Server extends AbstractServer {
 					client.sendToClient(
 							new ServerResponse(true, subsCode, ResponseType.MATCHED_SUBSCRIBER_TO_TAG, "Subscriber with matching tag has been found"));
 					break;
+					
 				//check if subscriber already entered to the lot. expected format: {SUBSCRIBER_ALREADY_ENTERED, subscriberCode}
 				case SUBSCRIBER_ALREADY_ENTERED:
 					int codeIntToCheckIfSubscriberEntered = (int) data[1];
@@ -390,6 +417,7 @@ public class Server extends AbstractServer {
 							new ServerResponse(false, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE, "The vehicle is already inside the parking lot"));
 					}
 					break;
+					
 				//check if tag id already entered to lot. expected format: {TAG_ID_ALREADY_ENTERED, tadId}
 				case TAG_ID_ALREADY_ENTERED:
 					String tagIdToCheckIfEntered = (String) data[1];
@@ -406,6 +434,7 @@ public class Server extends AbstractServer {
 							new ServerResponse(false, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE, "The vehicle is Already inside the parking lot"));
 					}
 					break;
+					
 				// return all subscribers and their late pickup counts. expected format: {GET_ALL_SUBSCRIBERS}
 				case GET_ALL_SUBSCRIBERS:
 					System.out.println("[SERVER] Received get_all_subscribers request");
@@ -417,6 +446,7 @@ public class Server extends AbstractServer {
 					List<ParkingEvent> events = db.getActiveParkingEvents();
 					client.sendToClient(new ServerResponse(true, events, ResponseType.ACTIVE_PARKINGS , "active_parkings"));
 					break;
+					
 				//get the data of parking availability. expected format: {GET_PARKING_AVAILABILITY}
 				case GET_PARKING_AVAILABILITY:
 					System.out.println("[SERVER] Received availability request");
@@ -434,6 +464,7 @@ public class Server extends AbstractServer {
 								new ServerResponse(false, null, null, "Failed to retrieve parking availability."));
 					}
 					break;
+					
 				//extend the parking event of subscriber. expected format: {"extendParking", parkingCode, subscriberCode(String)}
 				case EXTEND_PARKING:
 					int parkingCode = (int) data[1];
@@ -442,6 +473,7 @@ public class Server extends AbstractServer {
 					ServerResponse response = db.extendParkingSession(parkingCode, subscriberCodeForExtend);
 					client.sendToClient(response);
 					break;
+					
 				//check if subscriber has a order in the same date and time. expected format: {IS_THERE_AN_EXISTED_ORDER, subscriberCode, selectedDate, timeOfArrival}
 				case IS_THERE_AN_EXISTED_ORDER:
 					int subscriberCodeToCheckOrder = (int) data[1];
@@ -456,6 +488,7 @@ public class Server extends AbstractServer {
 							new ServerResponse(false, null, ResponseType.ORDER_ALREADY_EXISTS, "This order already exists for this subscriber."));
 					}
 					break;
+					
 				//register a new subscriber to the system. expected format: {REGISTER_SUBSCRIBER, subscriber, vehicleID}
 				case REGISTER_SUBSCRIBER:
 					Subscriber receivedSub = (Subscriber) data[1];
