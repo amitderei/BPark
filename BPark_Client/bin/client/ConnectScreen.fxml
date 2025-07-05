@@ -10,7 +10,7 @@
 
 <AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@ConnectScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ConnectController">
    <children>
-      <ToolBar prefHeight="25.0" prefWidth="800.0" styleClass="toolbar">
+      <ToolBar fx:id="dragArea" prefHeight="25.0" prefWidth="800.0" styleClass="toolbar">
          <items>
             <Label fx:id="connectionLabel" styleClass="toolbar-check-connection" text="Checking connection..." />
             <Pane prefHeight="29.0" prefWidth="243.0" />

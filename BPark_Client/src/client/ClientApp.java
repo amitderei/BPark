@@ -42,6 +42,9 @@ public class ClientApp extends Application {
 		// Give the controller access to this ClientApp instance
 		ConnectController controller = loader.getController();
 		controller.setApp(this);
+		
+		// Pass the stage to the controller so it can support window dragging
+		controller.setStage(primaryStage); 
 
 		// Set up the stage with no window borders
 		primaryStage.initStyle(StageStyle.UNDECORATED);
