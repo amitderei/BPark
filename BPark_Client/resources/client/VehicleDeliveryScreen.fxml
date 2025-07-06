@@ -39,7 +39,7 @@
             <Label text=" Subscriber code :" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label fx:id="ReservationORRegularEnteranceLabel" prefHeight="18.0" prefWidth="250.0" text="Enter to the Parking Lot (based on free place)" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             <TextField fx:id="ReservationConfirmationCodeField" prefHeight="29.0" prefWidth="162.0" promptText="e.g. 100100" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-            <Button fx:id="ReservationORRegularEnteranceButton" mnemonicParsing="false" onAction="#handleDelivery" prefHeight="26.0" prefWidth="102.0" text="Deliver Vehicle" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+            <Button fx:id="ReservationORRegularEnteranceButton" mnemonicParsing="false" onAction="#handleDelivery" prefHeight="26.0" prefWidth="141.0" text="Deliver Vehicle" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="7" />
             <Label fx:id="ReservationConfirmationCodeLabel" prefHeight="18.0" prefWidth="278.0" text=" " visible="false" GridPane.columnIndex="1" GridPane.rowIndex="8" />
             <Label fx:id="deliverStatusUpdateLabel" prefHeight="18.0" prefWidth="277.0" text=" Status--Of--Parking--Lot" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
             <Label fx:id="InsertionUpdateLabel" prefHeight="18.0" prefWidth="294.0" text=" SUCCESSFUL DELIVER" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="10" />
