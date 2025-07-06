@@ -117,6 +117,11 @@ public class EditSubscriberDetailsController implements ClientAware {
 			return;
 		}
 
+		if(isValidName(firstNameEdit.getText().trim(), lastNameEdit.getText().trim())) {
+			UiUtils.showAlert("Error", "First and last name must contain only letters.", AlertType.ERROR);
+			return;
+		}
+		
 		if (!isValidEmail(emailEdit.getText().trim())) {
 			UiUtils.showAlert("Error", "Email format is not valid.", AlertType.ERROR);
 			return;
@@ -152,6 +157,17 @@ public class EditSubscriberDetailsController implements ClientAware {
 		}
 	}
 
+	
+	/**
+	 * Checks if both first name and last name contain only English letters.
+	 *
+	 * @return true if both names are valid, false otherwise
+	 */
+	private boolean isValidName(String firstName, String lastName) {
+	    return firstName.matches("[a-zA-Z]+") && lastName.matches("[a-zA-Z]+");		
+	}
+	
+	
 	/**
 	 * Checks whether any editable text field is left blank.
 	 *
