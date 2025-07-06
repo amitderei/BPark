@@ -112,28 +112,39 @@ public class EditSubscriberDetailsController implements ClientAware {
 	 * and sends minimal updates to the server. Shows validation errors as alerts.
 	 */
 	public void saveChanges() {
+		StringBuilder sb = new StringBuilder();
+		
 		if (isAnyFieldBlank()) {
-			UiUtils.showAlert("Error", "One or more fields are empty.", AlertType.ERROR);
-			return;
+			sb.append("One or more fields are empty.");
+			sb.append("\n");
 		}
 
 		if(!isValidName(firstNameEdit.getText().trim(), lastNameEdit.getText().trim())) {
-			UiUtils.showAlert("Error", "First and last name must contain only letters.", AlertType.ERROR);
-			return;
+			sb.append("First and last name must contain only letters.");
+			sb.append("\n");
 		}
 		
 		if(!isValidPassword(passwordEdit.getText().trim())) {
-			UiUtils.showAlert("Error", "Password must be between 6 to 10 chars.", AlertType.ERROR);
-			return;
+			sb.append("Password must be between 6 to 10 chars.");
+			sb.append("\n");
 		}
 		
 		if (!isValidEmail(emailEdit.getText().trim())) {
-			UiUtils.showAlert("Error", "Email format is not valid.", AlertType.ERROR);
-			return;
+			sb.append("Email format is not valid.");
+			sb.append("\n");
 		}
 
 		if (!isValidPhone(phoneNumberEdit.getText().trim())) {
-			UiUtils.showAlert("Error", "Phone number format is not valid.", AlertType.ERROR);
+			sb.append("Phone number format is not valid.");
+			sb.append("\n");
+		}
+		
+		// If the StringBuilder isn't equal to 0 it means that there are some bugs
+		if (sb.length() != 0) {
+			sb.delete(sb.length() - 1, sb.length());
+			
+			// Giving an error with the string of the String Builder
+			UiUtils.showAlert("Error", sb.toString(), AlertType.ERROR);
 			return;
 		}
 
