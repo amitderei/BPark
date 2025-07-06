@@ -206,6 +206,14 @@ public class ClientController extends AbstractClient {
 				if(response.isSucceed() && watchAndCancelOrdersController != null) {
 					getRequestSender().askForReservations();
 				}
+				
+			case CONFLICT_CHECKED:
+				if (newOrderController != null) {
+					boolean hasConflict = (boolean) response.getData();
+					newOrderController.onReservationConflictCheck(hasConflict);
+					break;
+				}
+
 
 			case PARKING_HISTORY_LOADED :
 				if (response.isSucceed() && viewParkingHistoryController != null) {

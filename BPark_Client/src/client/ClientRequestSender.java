@@ -55,6 +55,23 @@ public class ClientRequestSender {
             System.err.println("Failed to send 'addNewOrder' request to server: " + e.getMessage());
         }
     }
+    
+    /**
+     * Checks if the subscriber has any existing reservation within 4 hours of the requested date and time.
+     * @param subscriberCode the subscriber's ID
+     * @param date the requested reservation date
+     * @param time the requested reservation time
+     */
+    public void checkReservationConflict(int subscriberCode, Date date, Time time) {
+        try {
+            client.sendToServer(new Object[] {
+                    Operation.CHECK_RESERVATION_CONFLICT, subscriberCode, date, time
+            });
+        } catch (IOException e) {
+            System.err.println("Failed to send 'checkReservationConflict' request: " + e.getMessage());
+        }
+    }
+
 
     /**
      * Asks the server if there's availability for the given date and time.

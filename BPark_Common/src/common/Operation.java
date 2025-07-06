@@ -102,6 +102,9 @@ public enum Operation {
     CHECK_IF_THERE_IS_RERSERVATION,
 
     /** Update subscriber or user account details */
-    UPDATE_DETAILS_OF_SUBSCRIBER
+    UPDATE_DETAILS_OF_SUBSCRIBER,
+    
+    /** Check if subscriber has a reservation within 4 hours of selected date/time */
+    CHECK_RESERVATION_CONFLICT
 }
 

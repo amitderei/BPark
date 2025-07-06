@@ -219,19 +219,8 @@ public class CreateNewOrderViewController implements ClientAware {
 				Integer.parseInt(minuteCombo.getValue()));
 		timeOfArrival = Time.valueOf(time);
 
-		orderExistFuture = new CompletableFuture<>();
+		client.getRequestSender().checkReservationConflict(subscriberNum, selectedDate, timeOfArrival);
 
-		// Ask server if there is an already existing order for the asked date and time
-		client.getRequestSender().checkIfOrderAlreadyExists(client.getSubscriber().getSubscriberCode(), selectedDate, timeOfArrival);
-
-		// When the boolean received, we will check if there is available space in the selected date and time
-		orderExistFuture.thenAcceptAsync(orderExists -> {
-
-			if(!orderExists) {
-				// Ask server if slot is still free (if the order doesn't exists already)
-				client.getRequestSender().checkAvailability(selectedDate, timeOfArrival);
-			}
-		});
 	}
 
 	/**
@@ -358,6 +347,35 @@ public class CreateNewOrderViewController implements ClientAware {
 		this.newOrder=order;
 		handleGoToOrderSummarry(newOrder);
 	}
+	
+	/**
+	 * Handles the result of reservation conflict check.
+	 * If there's a conflict, show a message and block the reservation.
+	 * If not, continue to check for exact existing order.
+	 *
+	 * @param hasConflict true if subscriber already has a conflicting reservation
+	 */
+	public void onReservationConflictCheck(boolean hasConflict) {
+		if (hasConflict) {
+			Platform.runLater(() -> {
+				notPossibleToOrder.setText("You already have another reservation");
+				notPossibleToOrder.setVisible(true);
+			});
+			return;
+		}
+
+		
+		// If no conflict, continue normal reservation process
+		orderExistFuture = new CompletableFuture<>();
+		client.getRequestSender().checkIfOrderAlreadyExists(subscriberNum, selectedDate, timeOfArrival);
+
+		orderExistFuture.thenAcceptAsync(orderExists -> {
+			if (!orderExists) {
+				client.getRequestSender().checkAvailability(selectedDate, timeOfArrival);
+			}
+		});
+	}
+
 
 	/**
 	 * Shows a simple alert popup with the given message and type.

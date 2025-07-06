@@ -2159,4 +2159,43 @@ public class DBController {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Checks if a subscriber has any other ACTIVE reservation within 4 hours 
+	 * before or after the requested reservation time (excluding exact match).
+	 *
+	 * @param subscriberCode the subscriber's code
+	 * @param selectedDate the requested reservation date
+	 * @param arrivalTime the requested reservation time
+	 * @return true if there is a conflicting reservation, false otherwise
+	 */
+	public boolean hasReservationConflict(int subscriberCode, Date selectedDate, Time arrivalTime) {
+	    String query = """
+	        SELECT 1 FROM `order`
+	        WHERE subscriberCode = ?
+	          AND `status` = 'ACTIVE'
+	          AND TIMESTAMP(order_date, arrival_time) != ?
+	          AND ABS(TIMESTAMPDIFF(MINUTE, TIMESTAMP(order_date, arrival_time), ?)) < 240
+	    """;
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        Timestamp requestedTimestamp = Timestamp.valueOf(
+	                selectedDate.toLocalDate().atTime(arrivalTime.toLocalTime()));
+
+	        stmt.setInt(1, subscriberCode);
+	        stmt.setTimestamp(2, requestedTimestamp); // exclude exact match
+	        stmt.setTimestamp(3, requestedTimestamp); // compare to others
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); // conflict exists
+	        }
+
+	    } catch (SQLException e) {
+	        System.err.println("Error checking reservation conflict: " + e.getMessage());
+	        return true;
+	    }
+	}
+
+
+
 }

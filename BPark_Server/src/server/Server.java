@@ -97,6 +97,16 @@ public class Server extends AbstractServer {
 					}
 					break;
 					
+					// Check if subscriber has an order within 4 hours of requested time
+				case CHECK_RESERVATION_CONFLICT:
+				    int subCodeToCheck = (int) data[1];
+				    Date dateToCheck = (Date) data[2];
+				    Time timeToCheck = (Time) data[3];
+
+				    boolean hasConflict = db.hasReservationConflict(subCodeToCheck, dateToCheck, timeToCheck);
+				    client.sendToClient(new ServerResponse(true, hasConflict, ResponseType.CONFLICT_CHECKED, "Conflict check completed."));
+				    break;
+					
 				//get parking history of subscriber. expected format: {UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber}
 				case UPDATE_PARKING_HISTORY_OF_SUBSCRIBER:
 					ArrayList<ParkingEvent> history = db.parkingHistoryOfSubscriber((Subscriber) data[1]);

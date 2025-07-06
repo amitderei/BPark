@@ -109,6 +109,9 @@ public enum ResponseType {
     SUBSCRIBER_VEHICLE_ISNT_INSIDE,
 
     /** Subscriber's vehicle is not inside (checked by tag ID) */
-    SUBSCRIBER_VEHICLE_ISNT_INSIDE_BY_TAG
+    SUBSCRIBER_VEHICLE_ISNT_INSIDE_BY_TAG,
+    
+    /** Whether the subscriber has a conflicting reservation within 4 hours */
+    CONFLICT_CHECKED
 }
 
