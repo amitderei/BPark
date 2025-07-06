@@ -117,8 +117,13 @@ public class EditSubscriberDetailsController implements ClientAware {
 			return;
 		}
 
-		if(isValidName(firstNameEdit.getText().trim(), lastNameEdit.getText().trim())) {
+		if(!isValidName(firstNameEdit.getText().trim(), lastNameEdit.getText().trim())) {
 			UiUtils.showAlert("Error", "First and last name must contain only letters.", AlertType.ERROR);
+			return;
+		}
+		
+		if(!isValidPassword(passwordEdit.getText().trim())) {
+			UiUtils.showAlert("Error", "Password must be between 6 to 10 chars.", AlertType.ERROR);
 			return;
 		}
 		
@@ -167,6 +172,14 @@ public class EditSubscriberDetailsController implements ClientAware {
 	    return firstName.matches("[a-zA-Z]+") && lastName.matches("[a-zA-Z]+");		
 	}
 	
+	/**
+	 * Checks if the password is between 6-10 chars
+	 *
+	 * @return true if the passwords length is 6-10, false otherwise
+	 */
+	private boolean isValidPassword(String password) {
+	    return password.length() >= 6 && password.length() <= 10;		
+	}
 	
 	/**
 	 * Checks whether any editable text field is left blank.
