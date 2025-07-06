@@ -123,6 +123,11 @@ public class CreateNewOrderViewController implements ClientAware {
 				}
 			}
 		});
+		
+		
+	    // Prevent manual typing inside the DatePicker field (force user to use the calendar)
+	    chooseDate.getEditor().setDisable(true);   // disable text field input
+	    chooseDate.getEditor().setOpacity(1);      // keep it visually enabled (not greyed out)
 
 		insertSubscriberCode.setDisable(true);
 	}
