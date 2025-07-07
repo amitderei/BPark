@@ -56,3 +56,17 @@
     -fx-font-size: 13px;
     -fx-alignment: CENTER; 
 }
+
+.combo-box {
+    -fx-pref-width: 100px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+#headline {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #223366;
+}
