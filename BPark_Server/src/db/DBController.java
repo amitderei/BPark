@@ -96,6 +96,7 @@ public class DBController {
 		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set in the query
 			stmt.setInt(1, newParkingSpace);
 			stmt.setInt(2, orderNumber);
 
@@ -104,6 +105,7 @@ public class DBController {
 			return updatedRows == 1;
 
 		} catch (SQLException e) {
+			// Print error message to the console for debugging
 			System.err.println("Error updating parking space for order " + orderNumber + ": " + e.getMessage());
 			return false;
 		}
@@ -116,42 +118,43 @@ public class DBController {
 	 *
 	 * @param username the username provided by the client
 	 * @param password the password provided by the client
-	 * @return a User object (username + role) if authentication succeeds, or null
-	 *         if it fails
+	 * @return a User object (username + role) if authentication succeeds, or null if it fails
 	 */
-    public User authenticateUser(String username, String password) {
-        String query = "SELECT role, is_logged_in " +
-                       "FROM   bpark.user " +
-                       "WHERE  BINARY username = ? AND BINARY password = ?";
+	public User authenticateUser(String username, String password) {
+		String query = "SELECT role, is_logged_in " +
+				"FROM   bpark.user " +
+				"WHERE  BINARY username = ? AND BINARY password = ?";
 
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set in the query
+			stmt.setString(1, username);
+			stmt.setString(2, password);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    boolean alreadyOnline = rs.getBoolean("is_logged_in");
-                    if (alreadyOnline) {
-                        // Someone is already logged in with this account
-                        return null;
-                    }
+			try (ResultSet rs = stmt.executeQuery()) { //save the answer from query
+				if (rs.next()) {
+					boolean alreadyOnline = rs.getBoolean("is_logged_in");
+					if (alreadyOnline) {
+						// Someone is already logged in with this account
+						return null;
+					}
 
-                    String roleStr = rs.getString("role");
-                    UserRole role  = UserRole.valueOf(roleStr);
+					// extract and parse the user's role
+					String roleStr = rs.getString("role");
+					UserRole role  = UserRole.valueOf(roleStr);
 
-                    // try to set the online flag atomically
-                    if (markUserLoggedIn(username)) {
-                        return new User(username, role);   // success
-                    }
-                }
-            }
+					// try to set the online flag atomically
+					if (markUserLoggedIn(username)) {
+						return new User(username, role);   // success
+					}
+				}
+			}
 
-        } catch (SQLException e) {
-            System.err.println("[ERROR] authenticateUser: " + e.getMessage());
-        }
+		} catch (SQLException e) {
+			System.err.println("[ERROR] authenticateUser: " + e.getMessage());
+		}
 
-        return null;   // login failed (wrong creds OR already online)
-    }
+		return null;   // login failed (wrong creds OR already online)
+	}
 
 
 	/**
@@ -166,7 +169,7 @@ public class DBController {
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriberCode);
 			try (ResultSet rs = stmt.executeQuery()) {
-				return rs.next(); // If we get a result, subscriber exists
+				return rs.next(); // If we get a result, its mean subscriber exists
 			}
 		} catch (SQLException e) {
 			System.err.println("Error checking subscriber existence: " + e.getMessage());
@@ -185,10 +188,11 @@ public class DBController {
 		String query = "SELECT subscriberCode FROM subscriber WHERE BINARY tagId = ?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set in query
 			stmt.setString(1, tagId);
 			ResultSet rs = stmt.executeQuery();
 
-			if (rs.next()) {
+			if (rs.next()) { // if tag found return associated subscriberCode
 				return rs.getInt("subscriberCode");
 			}
 		} catch (SQLException e) {
@@ -214,14 +218,17 @@ public class DBController {
 				+ "ORDER BY eventId DESC LIMIT 1";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set in query parametrs
 			stmt.setInt(1, subscriberCode);
 			stmt.setInt(2, parkingCode);
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
+					// Extract exit date/time only if they exist
 					LocalDate exitDate = rs.getDate("exitDate") != null ? rs.getDate("exitDate").toLocalDate() : null;
 					LocalTime exitHour = rs.getTime("exitHour") != null ? rs.getTime("exitHour").toLocalTime() : null;
 
+					// Build the ParkingEvent object from DB fields
 					ParkingEvent event = new ParkingEvent(rs.getInt("subscriberCode"), rs.getInt("parking_space"),
 							rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime(), exitDate,
 							exitHour, rs.getBoolean("wasExtended"), rs.getString("vehicleId"),
@@ -232,7 +239,6 @@ public class DBController {
 				}
 			}
 		}
-
 		return null;
 	}
 
@@ -255,17 +261,19 @@ public class DBController {
 		ParkingEvent event;
 
 		try {
+			// Retrieve the active parking event for this subscriber and code
 			event = getOpenParkingEvent(subscriberCode, parkingCode);
 		} catch (SQLException e) {
 			System.err.println("Error retrieving parking event: " + e.getMessage());
 			return new ServerResponse(false, null, null, "An error occurred while retrieving your parking session.");
 		}
 
-		if (event == null) {
+		if (event == null) { // No active parking session found
 			return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "No active parking session found for the provided information.");
 		}
 
 		try {
+			// Finalize the parking event: set exit time and release spot
 			finalizeParkingEvent(event.getEventId());
 
 			// Calculate time difference in hours
@@ -275,12 +283,12 @@ public class DBController {
 
 			int allowedHours = event.isWasExtended() ? 8 : 4;
 
-			if (hours > allowedHours) {
+			if (hours > allowedHours) { //print to the subscriber
 				System.out.println(
 						"[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
 				return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Pickup successful with delay. A notification was sent.");
 			}
-
+			// Normal pickup within allowed time
 			return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Vehicle pickup successful (" + hours + " hours).");
 
 		} catch (SQLException e) {
@@ -348,8 +356,11 @@ public class DBController {
 				+ "ORDER BY eventId DESC LIMIT 1";
 
 		try (PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+			// Set the subscriberCode parameter in the query
 			stmt.setInt(1, subscriberCode);
+			// Execute update on the most recent parking event of the subscriber
 			int rowsAffected = stmt.executeUpdate();
+			// Return true if exactly one row was updated
 			return rowsAffected == 1;
 		} catch (SQLException e) {
 			System.err.println("Error updating wasExtended: " + e.getMessage());
@@ -366,31 +377,37 @@ public class DBController {
 		String query = "SELECT * FROM bpark.parkingLot";
 		ArrayList<String> parkingLotArrayList = new ArrayList<>();
 
-		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-
+		try (
+			// Prepare and execute the query
+			PreparedStatement stmt = conn.prepareStatement(query);
+			ResultSet rs = stmt.executeQuery()
+			) {
+			
+			// Iterate over results and collect parking lot names
 			while (rs.next()) {
 				parkingLotArrayList.add(rs.getString("NameParkingLot"));
 			}
 
-		} catch (SQLException e) {
+		} catch (SQLException e) { // if fails
 			System.err.println("Error retrieving parking lot names: " + e.getMessage());
 		}
 
-		return parkingLotArrayList;
+		return parkingLotArrayList; // Return the result list
 	}
 
 	/**
-	 * 
-	 * give parking space to new order
-	 * 
-	 * @param time
-	 * @param date,
-	 * @return parking space id (int)
+	 * Finds a free parking space available for the requested date and time,
+	 * ensuring no overlap with existing active orders in the 4-hour window.
+	 *
+	 * @param time requested arrival time
+	 * @param date requested reservation date
+	 * @return parking space ID if available; -1 if none found
 	 */
 	private int getParkingSpace(Time time, Date date) {
 		String query = "SELECT PS.parking_space FROM bpark.parkingspaces PS WHERE ps.parking_space NOT IN (SELECT O.parking_space FROM bpark.order O WHERE order_date=? AND arrival_time<DATE_ADD(TIMESTAMP(?, ?), INTERVAL 4 HOUR) AND"
 				+ "                DATE_ADD(TIMESTAMP(O.order_date,O.arrival_time), INTERVAL 4 HOUR)>TIMESTAMP(?, ?)) LIMIT 1;";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set the paramaters in the query
 			stmt.setDate(1, date);
 			stmt.setDate(2, date);
 			stmt.setTime(3, time);
@@ -401,7 +418,7 @@ public class DBController {
 					return rs.getInt(1);
 				}
 			}
-		} catch (SQLException e) {
+		} catch (SQLException e) { //if fails
 			System.out.println("Error get a parking space" + e.getMessage());
 		}
 		return -1;
@@ -416,14 +433,26 @@ public class DBController {
 	 * @return true if reservation is allowed, false otherwise
 	 */
 	public synchronized boolean parkingSpaceCheckingForNewOrder(Date date, Time time) {
-		String query = "SELECT (100-COUNT(DISTINCT parking_space))>=40 AS canOrder FROM( SELECT parking_space, TIMESTAMP (order_date, arrival_time) AS startTime, DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime, status FROM bpark.order) AS orders WHERE startTime<? AND endTime>? AND `status`='ACTIVE'";
+		String query = "SELECT \r\n"
+				+ "  ((SELECT SUM(totalSpots) FROM bpark.parkingLot) - COUNT(DISTINCT parking_space)) >= \r\n"
+				+ "  (0.4 * (SELECT SUM(totalSpots) FROM bpark.parkingLot)) AS canOrder\r\n"
+				+ "FROM (\r\n"
+				+ "  SELECT parking_space,\r\n"
+				+ "         TIMESTAMP(order_date, arrival_time) AS startTime,\r\n"
+				+ "         DATE_ADD(TIMESTAMP(order_date, arrival_time), INTERVAL 4 HOUR) AS endTime,\r\n"
+				+ "         status\r\n"
+				+ "  FROM bpark.`order`\r\n"
+				+ ") AS orders\r\n"
+				+ "WHERE startTime < ? AND endTime > ? AND status = 'ACTIVE';";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Construct the requested start and end timestamps
 			Timestamp requestToStart = Timestamp.valueOf(date.toString() + " " + time.toString());
 			Timestamp requestToEnd = new Timestamp(requestToStart.getTime() + 46060 * 1000);
+			// Set time window for overlap check
 			stmt.setTimestamp(1, requestToEnd);
 			stmt.setTimestamp(2, requestToStart);
 			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
+				if (rs.next()) { //return if 40% is availabe
 					return rs.getBoolean("canOrder");
 				}
 			}
@@ -443,11 +472,12 @@ public class DBController {
 	public void setOrderId(Order newOrder) {
 		String newQuery = "SELECT order_number FROM `order` WHERE order_date=? AND arrival_time=? AND parking_space=?";
 		try (PreparedStatement stmt = conn.prepareStatement(newQuery)) {
+			// set query parameters
 			stmt.setDate(1, newOrder.getOrderDate());
 			stmt.setTime(2, newOrder.getArrivalTime());
 			stmt.setInt(3, newOrder.getParkingSpace());
 			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
+				if (rs.next()) { // set order number
 					newOrder.setOrderNumber(rs.getInt(1));
 					System.out.println(((Integer) newOrder.getOrderNumber()).toString());
 				}
@@ -465,8 +495,10 @@ public class DBController {
 	 */
 	public boolean placingAnNewOrder(Order newOrder) {
 		String query = "INSERT INTO `order` (parking_space, order_date, arrival_time ,confirmation_code, subscriberCode, date_of_placing_an_order, `status`) VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')";
+		// Get an available parking space for the given time and date
 		int parking_space_id = getParkingSpace(newOrder.getArrivalTime(), newOrder.getOrderDate());
 		newOrder.setParkingSpace(parking_space_id);
+		// set parameters in query
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, newOrder.getParkingSpace());
 			stmt.setDate(2, newOrder.getOrderDate());
@@ -474,9 +506,9 @@ public class DBController {
 			stmt.setString(4, newOrder.getConfirmationCode());
 			stmt.setInt(5, newOrder.getSubscriberId());
 			stmt.setDate(6, newOrder.getDateOfPlacingAnOrder());
-
+			//the answer from query
 			int succeed = stmt.executeUpdate();
-			if (succeed > 0) {
+			if (succeed > 0) { // Set the order ID based on inserted values
 				setOrderId(newOrder);
 				return true;
 			} else {
@@ -501,9 +533,9 @@ public class DBController {
 	public Subscriber getDetailsOfSubscriber(User user) {
 		String query = "SELECT * FROM subscriber WHERE username=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, user.getUsername());
+			stmt.setString(1, user.getUsername()); //set parameter
 			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
+				if (rs.next()) { //if there is an subscriber - set the details
 					Subscriber subscriber = new Subscriber(user.getUsername());
 					subscriber.setSubscriberCode(rs.getInt(1));
 					subscriber.setUserId(rs.getString(2));
@@ -512,7 +544,7 @@ public class DBController {
 					subscriber.setPhoneNum(rs.getString(5));
 					subscriber.setEmail(rs.getString(6));
 					subscriber.setTagId(rs.getString(8));
-					return subscriber;
+					return subscriber; //return the founded subscriber
 				}
 			}
 		} catch (Exception e) {
@@ -538,7 +570,7 @@ public class DBController {
 		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ? AND `status`='ACTIVE'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, subscriberCode);
+			stmt.setInt(1, subscriberCode); //set the parameters in query
 			ResultSet rs = stmt.executeQuery();
 
 			LocalDate today = LocalDate.now(); // Current date
@@ -582,6 +614,7 @@ public class DBController {
 		String query = "SELECT order_date, arrival_time FROM bpark.order WHERE subscriberCode = ? AND confirmation_code = ? AND `status`='ACTIVE'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set paramters in query
 			stmt.setInt(1, subscriberCode);
 			stmt.setInt(2, confirmationCode);
 
@@ -1380,19 +1413,19 @@ public class DBController {
 	 * @return true if the subscriber is late, false otherwise
 	 */
 	public boolean subscriberIsLate(int subscriberCode) {
-	    Subscriber s = new Subscriber();
-	    s.setSubscriberCode(subscriberCode);
+		Subscriber s = new Subscriber();
+		s.setSubscriberCode(subscriberCode);
 
-	    ParkingEvent event = getActiveParkingEvent(s);
-	    if (event == null) {
-	        return false; // No active parking, can't be late
-	    }
+		ParkingEvent event = getActiveParkingEvent(s);
+		if (event == null) {
+			return false; // No active parking, can't be late
+		}
 
-	    LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
-	    LocalDateTime now = LocalDateTime.now();
-	    long minutes = Duration.between(entryTime, now).toMinutes();
+		LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
+		LocalDateTime now = LocalDateTime.now();
+		long minutes = Duration.between(entryTime, now).toMinutes();
 
-	    return minutes > 240;
+		return minutes > 240;
 	}
 
 
@@ -1405,28 +1438,28 @@ public class DBController {
 	 * @return true if the parking session is late, false otherwise
 	 */
 	private boolean subscriberIsLateByParkingCode(int parkingCode) {
-	    String query = "SELECT * FROM parkingEvent WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL";
+		String query = "SELECT * FROM parkingEvent WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        stmt.setInt(1, parkingCode);
-	        ResultSet rs = stmt.executeQuery();
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			stmt.setInt(1, parkingCode);
+			ResultSet rs = stmt.executeQuery();
 
-	        if (rs.next()) {
-	            LocalDate entryDate = rs.getDate("entryDate").toLocalDate();
-	            LocalTime entryHour = rs.getTime("entryHour").toLocalTime();
+			if (rs.next()) {
+				LocalDate entryDate = rs.getDate("entryDate").toLocalDate();
+				LocalTime entryHour = rs.getTime("entryHour").toLocalTime();
 
-	            LocalDateTime entryTime = LocalDateTime.of(entryDate, entryHour);
-	            LocalDateTime now = LocalDateTime.now();
+				LocalDateTime entryTime = LocalDateTime.of(entryDate, entryHour);
+				LocalDateTime now = LocalDateTime.now();
 
-	            long minutes = Duration.between(entryTime, now).toMinutes();
+				long minutes = Duration.between(entryTime, now).toMinutes();
 
-	            return minutes > 240;
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error checking if parking code is late: " + e.getMessage());
-	    }
+				return minutes > 240;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error checking if parking code is late: " + e.getMessage());
+		}
 
-	    return false;
+		return false;
 	}
 	/**
 	 * Checks if there is an open parking event with the given parking code
@@ -2166,7 +2199,7 @@ public class DBController {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Checks if a subscriber has any other ACTIVE reservation within 4 hours 
 	 * before or after the requested reservation time (excluding exact match).
@@ -2177,105 +2210,102 @@ public class DBController {
 	 * @return true if there is a conflicting reservation, false otherwise
 	 */
 	public boolean hasReservationConflict(int subscriberCode, Date selectedDate, Time arrivalTime) {
-	    String query = """
-	        SELECT 1 FROM `order`
-	        WHERE subscriberCode = ?
-	          AND `status` = 'ACTIVE'
-	          AND TIMESTAMP(order_date, arrival_time) != ?
-	          AND ABS(TIMESTAMPDIFF(MINUTE, TIMESTAMP(order_date, arrival_time), ?)) < 240
-	    """;
+		String query = """
+				    SELECT 1 FROM `order`
+				    WHERE subscriberCode = ?
+				      AND `status` = 'ACTIVE'
+				      AND TIMESTAMP(order_date, arrival_time) != ?
+				      AND ABS(TIMESTAMPDIFF(MINUTE, TIMESTAMP(order_date, arrival_time), ?)) < 240
+				""";
 
-	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-	        Timestamp requestedTimestamp = Timestamp.valueOf(
-	                selectedDate.toLocalDate().atTime(arrivalTime.toLocalTime()));
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			Timestamp requestedTimestamp = Timestamp.valueOf(
+					selectedDate.toLocalDate().atTime(arrivalTime.toLocalTime()));
 
-	        stmt.setInt(1, subscriberCode);
-	        stmt.setTimestamp(2, requestedTimestamp); // exclude exact match
-	        stmt.setTimestamp(3, requestedTimestamp); // compare to others
+			stmt.setInt(1, subscriberCode);
+			stmt.setTimestamp(2, requestedTimestamp); // exclude exact match
+			stmt.setTimestamp(3, requestedTimestamp); // compare to others
 
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            return rs.next(); // conflict exists
-	        }
+			try (ResultSet rs = stmt.executeQuery()) {
+				return rs.next(); // conflict exists
+			}
 
-	    } catch (SQLException e) {
-	        System.err.println("Error checking reservation conflict: " + e.getMessage());
-	        return true;
-	    }
+		} catch (SQLException e) {
+			System.err.println("Error checking reservation conflict: " + e.getMessage());
+			return true;
+		}
 	}
 
-    /**
-     * Attempts to set is_logged_in = 1 for the given user.
-     * The UPDATE succeeds only if the user was previously offline.
-     *
-     * @param username exact username (case sensitive)
-     * @return true  - login flag was set successfully
-     *         false - user is already marked online
-     */
-    public boolean markUserLoggedIn(String username) throws SQLException {
-        final String sql =
-            "UPDATE bpark.user " +
-            "SET    is_logged_in = 1 " +
-            "WHERE  BINARY username = ? " +
-            "  AND  is_logged_in = 0";
+	/**
+	 * Attempts to set is_logged_in = 1 for the given user.
+	 * The UPDATE succeeds only if the user was previously offline.
+	 *
+	 * @param username exact username (case sensitive)
+	 * @return true  - login flag was set successfully
+	 *         false - user is already marked online
+	 */
+	public boolean markUserLoggedIn(String username) throws SQLException {
+		final String sql =
+				"UPDATE bpark.user " +
+						"SET    is_logged_in = 1 " +
+						"WHERE  BINARY username = ? " +
+						"  AND  is_logged_in = 0";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, username);
-            return ps.executeUpdate() == 1;   // exactly one row updated -> OK
-        }
-    }
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, username);
+			return ps.executeUpdate() == 1;   // exactly one row updated -> OK
+		}
+	}
 
-    /**
-     * Clears the online flag of the user (called on LOGOUT / disconnect).
-     *
-     * @param username exact username
-     */
-    public void markUserLoggedOut(String username) {
-        final String sql =
-            "UPDATE bpark.user SET is_logged_in = 0 WHERE BINARY username = ?";
+	/**
+	 * Clears the online flag of the user (called on LOGOUT / disconnect).
+	 *
+	 * @param username exact username
+	 */
+	public void markUserLoggedOut(String username) {
+		final String sql =
+				"UPDATE bpark.user SET is_logged_in = 0 WHERE BINARY username = ?";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, username);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("[DB] markUserLoggedOut: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Checks whether the given username is currently flagged as online
-     * (i.e., is_logged_in = 1 in the user table).
-     *
-     * @param username exact username to check (case sensitive)
-     * @return true if the user is marked online,  
-     *         false otherwise or if a DB error occurs
-     */
-    public boolean isUserOnline(String username) {
-        String sql = "SELECT is_logged_in FROM bpark.user " +
-                     "WHERE BINARY username = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, username);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() && rs.getBoolean("is_logged_in");
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] isUserOnline: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * Resets the is_logged_in flag for **all** users to 0.
-     * Called once at server startup to clear stale sessions.
-     */
-    public void resetAllLoggedIn() {
-        String sql = "UPDATE bpark.user SET is_logged_in = 0";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("[DB] resetAllLoggedIn: " + e.getMessage());
-        }
-    }
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, username);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("[DB] markUserLoggedOut: " + e.getMessage());
+		}
+	}
 
+	/**
+	 * Checks whether the given username is currently flagged as online
+	 * (i.e., is_logged_in = 1 in the user table).
+	 *
+	 * @param username exact username to check (case sensitive)
+	 * @return true if the user is marked online,  
+	 *         false otherwise or if a DB error occurs
+	 */
+	public boolean isUserOnline(String username) {
+		String sql = "SELECT is_logged_in FROM bpark.user " +
+				"WHERE BINARY username = ? LIMIT 1";
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, username);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next() && rs.getBoolean("is_logged_in");
+			}
+		} catch (SQLException e) {
+			System.err.println("[DB] isUserOnline: " + e.getMessage());
+			return false;
+		}
+	}
 
-
+	/**
+	 * Resets the is_logged_in flag for **all** users to 0.
+	 * Called once at server startup to clear stale sessions.
+	 */
+	public void resetAllLoggedIn() {
+		String sql = "UPDATE bpark.user SET is_logged_in = 0";
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("[DB] resetAllLoggedIn: " + e.getMessage());
+		}
+	}
 }

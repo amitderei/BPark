@@ -362,6 +362,7 @@ public class ClientController extends AbstractClient {
     public Subscriber getSubscriber() {
         return subscriber;
     }
+    
 	/**
 	 * Processes messages received from the server. Handles login results, order
 	 * data, error messages, vehicle pickup responses, and other system messages.
@@ -410,154 +411,189 @@ public class ClientController extends AbstractClient {
 				return;
 			}
 
-			// Handle based on the type of response
+			// Handle based on the type of response - case for any response (from Enam class ResponseType in common)
 			switch ((ResponseType) response.getType()) {
+			
+			// Failed login attempt. expected type: {LOGIN_FAILED}
 			case LOGIN_FAILED:
-				if (!response.isSucceed() && loginController != null) {
-					loginController.handleLoginFailure(response.getMsg());
-				}
-				break;
+			    if (!response.isSucceed() && loginController != null) {
+			        loginController.handleLoginFailure(response.getMsg());
+			    }
+			    break;
+
+			// Parking report data received. expected type: {PARKING_REPORT_LOADED}
 			case PARKING_REPORT_LOADED:
-				if (response.isSucceed() && parkingReportController != null) {
-					parkingReportController.setParkingReport((ParkingReport) response.getData());
-					parkingReportController.setChart();
-				}
-				break;
+			    if (response.isSucceed() && parkingReportController != null) {
+			        parkingReportController.setParkingReport((ParkingReport) response.getData());
+			        parkingReportController.setChart();
+			    }
+			    break;
+
+			// Successful login. expected type: {LOGIN_SUCCESSFULL}
 			case LOGIN_SUCCESSFULL:
-				if (response.isSucceed() && loginController != null) {
-					loginController.handleLoginSuccess((User) response.getData());
-				}
-				break;
+			    if (response.isSucceed() && loginController != null) {
+			        loginController.handleLoginSuccess((User) response.getData());
+			    }
+			    break;
+
+			// Order deleted – refresh the reservations list. expected type: {ORDER_DELETED}
 			case ORDER_DELETED:
-				if (response.isSucceed() && watchAndCancelOrdersController != null) {
-					getRequestSender().askForReservations();
-				}
-				break;
+			    if (response.isSucceed() && watchAndCancelOrdersController != null) {
+			        getRequestSender().askForReservations();
+			    }
+			    break;
+
+			// Check if reservation conflicts exist. expected type: {CONFLICT_CHECKED}
 			case CONFLICT_CHECKED:
-				if (newOrderController != null) {
-					boolean hasConflict = (boolean) response.getData();
-					newOrderController.onReservationConflictCheck(hasConflict);
-					break;
-				}
+			    if (newOrderController != null) {
+			        boolean hasConflict = (boolean) response.getData();
+			        newOrderController.onReservationConflictCheck(hasConflict);
+			        break;
+			    }
 
+			// Load parking history for subscriber. expected type: {PARKING_HISTORY_LOADED}
 			case PARKING_HISTORY_LOADED:
-				if (response.isSucceed() && viewParkingHistoryController != null) {
-					viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
-				}
-				break;
+			    if (response.isSucceed() && viewParkingHistoryController != null) {
+			        viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
+			    }
+			    break;
+
+			// Load and display list of existing orders. expected type: {ORDERS_DISPLAY}
 			case ORDERS_DISPLAY:
-				if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
-						&& watchAndCancelOrdersController != null) {
-					ArrayList<Order> orders = (ArrayList<Order>) dataList;
-					watchAndCancelOrdersController.displayOrders(orders);
-				}
-				break;
+			    if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
+			            && watchAndCancelOrdersController != null) {
+			        ArrayList<Order> orders = (ArrayList<Order>) dataList;
+			        watchAndCancelOrdersController.displayOrders(orders);
+			    }
+			    break;
+
+			// No existing orders found. expected type: {NO_ORDERS}
 			case NO_ORDERS:
-				if (response.isSucceed() && watchAndCancelOrdersController != null) {
-					watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
-					UiUtils.showAlert(response.getMsg(), response.getMsg(), Alert.AlertType.INFORMATION);
-				}
-				break;
+			    if (response.isSucceed() && watchAndCancelOrdersController != null) {
+			        watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
+			        UiUtils.showAlert(response.getMsg(), response.getMsg(), Alert.AlertType.INFORMATION);
+			    }
+			    break;
+
+			// Subscriber details updated. expected type: {DETAILS_UPDATED}
 			case DETAILS_UPDATED:
-				if (response.isSucceed()) {
-					ArrayList<Object> newDetails = (ArrayList<Object>) response.getData();
-					if (newDetails.get(0) instanceof Subscriber) {
-						setSubscriber((Subscriber) newDetails.get(0));
-						newDetails.remove(0);
-					}
-					if (!newDetails.isEmpty()) {
-						setPassword(((User) newDetails.get(0)).getPassword());
-					}
-					editSubscriberDetailsController.handleGoToView();	
-				}
-				break;
+			    if (response.isSucceed()) {
+			        ArrayList<Object> newDetails = (ArrayList<Object>) response.getData();
+			        if (newDetails.get(0) instanceof Subscriber) {
+			            setSubscriber((Subscriber) newDetails.get(0));
+			            newDetails.remove(0);
+			        }
+			        if (!newDetails.isEmpty()) {
+			            setPassword(((User) newDetails.get(0)).getPassword());
+			        }
+			        editSubscriberDetailsController.handleGoToView();    
+			    }
+			    break;
+
+			// Verify subscriber during pickup. expected type: {SUBSCRIBER_VERIFIED}
 			case SUBSCRIBER_VERIFIED:
-				if (pickupController != null) {
-					// Always show status in the label - success or failure
-					UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+			    if (pickupController != null) {
+			        // Always show status in the label - success or failure
+			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
 
-					if (response.isSucceed()) {
-						if (response.getData() instanceof Integer subscriberCode) {
-							pickupController.onSubscriberValidated(subscriberCode);
-						} else {
-							pickupController.onSubscriberValidated();
-						}
-					}	
-				}
-				break;
+			        if (response.isSucceed()) {
+			            if (response.getData() instanceof Integer subscriberCode) {
+			                pickupController.onSubscriberValidated(subscriberCode);
+			            } else {
+			                pickupController.onSubscriberValidated();
+			            }
+			        }    
+			    }
+			    break;
+
+			// Complete vehicle pickup. expected type: {PICKUP_VEHICLE}
 			case PICKUP_VEHICLE:
-				if (pickupController != null) {
-					UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
-					pickupController.disableAfterPickup();
-				}
-				break;
+			    if (pickupController != null) {
+			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
+			        pickupController.disableAfterPickup();
+			    }
+			    break;
+
+			// Load available report dates. expected type: {REPOSTS_DATE_LOADED}
 			case REPOSTS_DATE_LOADED:
-				if (response.isSucceed() && parkingReportController != null) {
-					parkingReportController.setDates((ArrayList<Date>) (response.getData()));
-				}
-				break;
+			    if (response.isSucceed() && parkingReportController != null) {
+			        parkingReportController.setDates((ArrayList<Date>) (response.getData()));
+			    }
+			    break;
+
+			// Order was successfully added. expected type: {ORDER_ADDED}
 			case ORDER_ADDED:
-				if (response.isSucceed() && newOrderController != null) {
-					newOrderController.setOrderAndGoToNextPage((Order) response.getData());
-				}
-				break;
+			    if (response.isSucceed() && newOrderController != null) {
+			        newOrderController.setOrderAndGoToNextPage((Order) response.getData());
+			    }
+			    break;
+
+			// Checked whether an order exists and it does NOT. expected type: {ORDER_NOT_EXISTS}
 			case ORDER_NOT_EXISTS:
-				if (response.isSucceed() && newOrderController != null) {
-					newOrderController.orderExistFuture.complete(false);
-				}
-				break;
+			    if (response.isSucceed() && newOrderController != null) {
+			        newOrderController.orderExistFuture.complete(false);
+			    }
+			    break;
+
+			// Checked whether an order exists and it does. expected type: {ORDER_ALREADY_EXISTS}
 			case ORDER_ALREADY_EXISTS:
-				if (response.isSucceed() && newOrderController != null) {
-					newOrderController.orderExistFuture.complete(true);
-					
-				}
-				break;
+			    if (response.isSucceed() && newOrderController != null) {
+			        newOrderController.orderExistFuture.complete(true);
+			    }
+			    break;
+
+			// Subscriber details fetched successfully. expected type: {SUBSCRIBER_DETAILS}
 			case SUBSCRIBER_DETAILS:
-				if (response.isSucceed()) {
-					setSubscriber((Subscriber) response.getData());
-				}
-				break;
+			    if (response.isSucceed()) {
+			        setSubscriber((Subscriber) response.getData());
+			    }
+			    break;
+
+			// Report about subscribers with late pickups. expected type: {LATE_PICKUP_COUNTS}
 			case LATE_PICKUP_COUNTS:
-				if (response.isSucceed()) {
-					ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
+			    if (response.isSucceed()) {
+			        ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
 
-					System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
+			        System.out.println("[DEBUG] Received all_subscribers. Total rows = " + rows.size());
 
-					List<Subscriber> subs = new ArrayList<>();
-					Map<Subscriber, Integer> lateMap = new HashMap<>();
+			        List<Subscriber> subs = new ArrayList<>();
+			        Map<Subscriber, Integer> lateMap = new HashMap<>();
 
-					for (Object[] r : rows) {
-						Subscriber s = (Subscriber) r[0];
-						int late = (Integer) r[1];
-						subs.add(s);
-						lateMap.put(s, late);
-						System.out.println(" -> " + s.getUsername() + ", late: " + late);
-					}
+			        for (Object[] r : rows) {
+			            Subscriber s = (Subscriber) r[0];
+			            int late = (Integer) r[1];
+			            subs.add(s);
+			            lateMap.put(s, late);
+			            System.out.println(" -> " + s.getUsername() + ", late: " + late);
+			        }
 
-					if (viewSubscribersInfoController != null)
-						viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
+			        if (viewSubscribersInfoController != null)
+			            viewSubscribersInfoController.onSubscribersReceived(subs, lateMap);
+			    }
+			    break;
 
-				}
-				break; // handled
+			// Load details of specific parking event. expected type: {PARKING_INFO_LOADED}
 			case PARKING_INFO_LOADED:
-				if (response.isSucceed() && viewActiveParkingInfoController != null) {
-					viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
-					viewActiveParkingInfoController.setTexts();	
-				}
-				break;
+			    if (response.isSucceed() && viewActiveParkingInfoController != null) {
+			        viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
+			        viewActiveParkingInfoController.setTexts();    
+			    }
+			    break;
+
+			// Load list of active parkings. expected type: {ACTIVE_PARKINGS}
 			case ACTIVE_PARKINGS:
-				if (response.isSucceed() && viewActiveParkingsController != null) {
-					ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
-					viewActiveParkingsController.onActiveParkingsReceived(events);
-					
-				}
-				break;
+			    if (response.isSucceed() && viewActiveParkingsController != null) {
+			        ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
+			        viewActiveParkingsController.onActiveParkingsReceived(events);
+			    }
+			    break;
+
+			// Parking session was extended. expected type: {PARKING_SESSION_EXTENDED}
 			case PARKING_SESSION_EXTENDED:
-				if (response.getMsg() != null && extendParkingController != null) {
-					extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
-					
-				}
-				break;
+			    if (response.getMsg() != null && extendParkingController != null) {
+			        extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
+			    }
+			    break;
 			case SUBSCRIBER_INSERTED:
 				// If the registration failed and the server sent a list of duplicate fields
 				// (like "username", "email", etc.)
@@ -575,7 +611,7 @@ public class ClientController extends AbstractClient {
 					}
 					break;
 				} else {
-					// Just in case the controller wasn't loaded properly (fallback for unexpected
+					// Just in case the controller wasn't loaded properly (fallback for unexpected)
 					// situations)
 					UiUtils.showAlert("Subscriber Registration", response.getMsg(),
 							response.isSucceed() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
@@ -609,7 +645,7 @@ public class ClientController extends AbstractClient {
 						subscriberStatusController.onReportReceived(list);
 						break;
 					} else {
-						/* ----- fail: no snapshot for that month ----- */
+						// fail: no snapshot for that month 
 						UiUtils.showAlert("Subscriber Report", response.getMsg(), // e.g. "No snapshot available for
 																					// 4/2025"
 								Alert.AlertType.INFORMATION);
