@@ -1,9 +1,13 @@
 package server;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -95,6 +99,8 @@ public class ServerController {
 		return txtPort.getText();
 	}
 
+	
+	
 	/**
 	 * Called when the "Connect" button is clicked.
 	 * Validates the port input and starts the server.
@@ -221,9 +227,11 @@ public class ServerController {
 	 * JavaFX initialize method.
 	 * Sets a default port value in the text field on load,
 	 * and attaches mouse listeners for dragging the undecorated window.
+	 * in addition, call the method that change the pipe of print
 	 */
 	@FXML
 	public void initialize() {
+		redirectSystemStreams();
 		txtPort.setText("5555");
 	}
 
@@ -240,4 +248,46 @@ public class ServerController {
 		logArea.setScrollTop(Double.MAX_VALUE);
 	}
 
+	/**
+	 * appends the given text to the log area.
+	 * @param text
+	 */
+	private void appendText(String text) {
+	    Platform.runLater(() -> logArea.appendText(text));
+	}
+	
+	
+	/**
+	 * redirects the stadard output- out and err- to log area. the console is in GUI of server
+	 */
+	private void redirectSystemStreams() {
+	    OutputStream out = new OutputStream() {
+	    	/**
+	    	 * write a single byte to log (replace the print on console of one char)
+	    	 */
+	        @Override
+	        public void write(int b) throws IOException {
+	            appendText(String.valueOf((char) b));
+	        }
+	        
+	        /**
+	         * write part of byte array as text to the log
+	         */
+	        @Override
+	        public void write(byte[] b, int off, int len) throws IOException {
+	            appendText(new String(b, off, len));
+	        }
+
+	        /**
+	         * write all byte array to log
+	         */
+	        @Override
+	        public void write(byte[] b) throws IOException {
+	            write(b, 0, b.length);
+	        }
+	    };
+
+	    System.setOut(new PrintStream(out, true));
+	    System.setErr(new PrintStream(out, true));
+	}
 }
