@@ -224,19 +224,22 @@ public class ParkingEvent implements Serializable {
 		LocalDate exitDateNow;
 		LocalTime entryHour = entryTime;
 
+		//if the parking is still active
 		if (exitTime == null) {
 			exitHour = LocalTime.now();
 			exitDateNow = LocalDate.now();
-		} else {
+		} else { //if the parking is done
 			exitHour = exitTime;
 			exitDateNow = exitDate;
 		}
-
+		
+		// calculates the minutes the parking is active
 		LocalDateTime entry = LocalDateTime.of(entryDate, entryHour);
 		LocalDateTime exit = LocalDateTime.of(exitDateNow, exitHour);
 		Duration duration = Duration.between(entry, exit);
 		long totalMinutes = duration.toMinutes();
-
+		
+		//check if the subscriber is late according to if the parking was extended
 		if (wasExtended) {
 			return totalMinutes > minutesEightHours ? "Delayed" : "On time";
 		} else {
