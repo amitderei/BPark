@@ -32,17 +32,19 @@ public class ClientRequestSender {
     }
 
     /**
-     * Sends a login request to the server with the given username and password.
-     * @param username the username to authenticate
-     * @param password the user's password
+     * Sends a login request to the server.
+     *
+     * @param username exact username (case-sensitive)
+     * @param password plain-text password
+     *
+     * @throws IOException if the message cannot be sent
+     *                     (e.g. socket closed or network error)
      */
-    public void requestLogin(String username, String password) {
-        try {
-            client.sendToServer(new Object[] { Operation.LOGIN, username, password });
-        } catch (IOException e) {
-            System.err.println("Failed to send login request: " + e.getMessage());
-        }
+    public void requestLogin(String username, String password) throws IOException {
+        Object[] msg = { Operation.LOGIN, username, password };
+        client.sendToServer(msg);      // may throw IOException → propagated
     }
+
 
     /**
      * Adds a new order to the database.
@@ -456,4 +458,14 @@ public class ClientRequestSender {
             System.err.println("Failed to send 'checkIfTheresReservation' request: " + e.getMessage());
         }
     }
+    
+    /* Sends a graceful disconnect request to the server. */
+    public void sendDisconnect() {
+        try {
+            client.sendToServer(new Object[] { Operation.DISCONNECT });
+        } catch (IOException e) {
+            System.err.println("[CLIENT] Failed to send disconnect: " + e.getMessage());
+        }
+    }
+
 }

@@ -119,33 +119,40 @@ public class DBController {
 	 * @return a User object (username + role) if authentication succeeds, or null
 	 *         if it fails
 	 */
-	public User authenticateUser(String username, String password) {
-		String query = "SELECT role FROM bpark.user " +
-				"WHERE BINARY username = ? AND BINARY password = ?"; // Case sensitive login query - BINARY forces byte-level comparison.
+    public User authenticateUser(String username, String password) {
+        String query = "SELECT role, is_logged_in " +
+                       "FROM   bpark.user " +
+                       "WHERE  BINARY username = ? AND BINARY password = ?";
 
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, username);
-			stmt.setString(2, password);
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, username);
+            stmt.setString(2, password);
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					String roleStr = rs.getString("role");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    boolean alreadyOnline = rs.getBoolean("is_logged_in");
+                    if (alreadyOnline) {
+                        // Someone is already logged in with this account
+                        return null;
+                    }
 
-					try {
-						UserRole role = UserRole.valueOf(roleStr); // Convert role string to enum
-						return new User(username, role); // Password not returned
-					} catch (IllegalArgumentException e) {
-						System.err.println("[ERROR] Unknown role in database: " + roleStr);
-					}
-				}
-			}
+                    String roleStr = rs.getString("role");
+                    UserRole role  = UserRole.valueOf(roleStr);
 
-		} catch (SQLException e) {
-			System.err.println("[ERROR] Authentication query failed: " + e.getMessage());
-		}
+                    // try to set the online flag atomically
+                    if (markUserLoggedIn(username)) {
+                        return new User(username, role);   // success
+                    }
+                }
+            }
 
-		return null;
-	}
+        } catch (SQLException e) {
+            System.err.println("[ERROR] authenticateUser: " + e.getMessage());
+        }
+
+        return null;   // login failed (wrong creds OR already online)
+    }
+
 
 	/**
 	 * Checks if a subscriber with the given subscriberCode exists in the database.
@@ -2195,6 +2202,79 @@ public class DBController {
 	        return true;
 	    }
 	}
+
+    /**
+     * Attempts to set is_logged_in = 1 for the given user.
+     * The UPDATE succeeds only if the user was previously offline.
+     *
+     * @param username exact username (case sensitive)
+     * @return true  - login flag was set successfully
+     *         false - user is already marked online
+     */
+    public boolean markUserLoggedIn(String username) throws SQLException {
+        final String sql =
+            "UPDATE bpark.user " +
+            "SET    is_logged_in = 1 " +
+            "WHERE  BINARY username = ? " +
+            "  AND  is_logged_in = 0";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            return ps.executeUpdate() == 1;   // exactly one row updated -> OK
+        }
+    }
+
+    /**
+     * Clears the online flag of the user (called on LOGOUT / disconnect).
+     *
+     * @param username exact username
+     */
+    public void markUserLoggedOut(String username) {
+        final String sql =
+            "UPDATE bpark.user SET is_logged_in = 0 WHERE BINARY username = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[DB] markUserLoggedOut: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Checks whether the given username is currently flagged as online
+     * (i.e., is_logged_in = 1 in the user table).
+     *
+     * @param username exact username to check (case sensitive)
+     * @return true if the user is marked online,  
+     *         false otherwise or if a DB error occurs
+     */
+    public boolean isUserOnline(String username) {
+        String sql = "SELECT is_logged_in FROM bpark.user " +
+                     "WHERE BINARY username = ? LIMIT 1";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean("is_logged_in");
+            }
+        } catch (SQLException e) {
+            System.err.println("[DB] isUserOnline: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Resets the is_logged_in flag for **all** users to 0.
+     * Called once at server startup to clear stale sessions.
+     */
+    public void resetAllLoggedIn() {
+        String sql = "UPDATE bpark.user SET is_logged_in = 0";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[DB] resetAllLoggedIn: " + e.getMessage());
+        }
+    }
 
 
 

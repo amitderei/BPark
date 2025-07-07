@@ -49,6 +49,7 @@ public class Server extends AbstractServer {
 	@Override
 	protected void serverStarted() {
 		db.connectToDB();
+		db.resetAllLoggedIn();  
 		System.out.println("Server started on port " + getPort());
 		MonthlyReportScheduler.start(); // schedule monthly reports
 		new MonthlyReportGenerator().generatePastReports();
@@ -73,6 +74,11 @@ public class Server extends AbstractServer {
 				// Disconnect request from client. expected format: {DISCONNECT}
 				case DISCONNECT:
 					logClientDisconnect(client);
+                    Object uObj = client.getInfo("username");
+                    if (uObj instanceof String u) {
+                        db.markUserLoggedOut(u);    // reset online flag
+                    }
+
 					break;
 					
 				// get all reservations of specific subscriber.  expected format: {ASK_FOR_RESERVATIONS, subscriber}
@@ -616,29 +622,40 @@ public class Server extends AbstractServer {
 	}
 
 	/**
-	 * Handles a login request.
+	 * Handles a login request coming from the client.
 	 *
-	 * @param data   the message parts: ["login", username, password]
-	 * @param client the requesting client
+	 * Expected data format: {LOGIN, username, password}
 	 */
 	private void handleLogin(Object[] data, ConnectionToClient client) {
-		String username = (String) data[1];
-		String password = (String) data[2];
+	    String username = (String) data[1];
+	    String password = (String) data[2];
 
-		System.out.println("[SERVER] Login attempt from username: " + username);
-		User user = db.authenticateUser(username, password);
-		System.out.println("[DEBUG] DB returned user: " + user);
+	    System.out.println("[SERVER] Login attempt for user: " + username);
 
-		try {
-			if (user != null) {
-				client.sendToClient(new ServerResponse(true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
-			} else {
-				client.sendToClient(new ServerResponse(false, null, ResponseType.LOGIN_FAILED, "Invalid username or password."));
-			}
-		} catch (IOException e) {
-			System.err.println("Error sending login response: " + e.getMessage());
-		}
+	    User user = db.authenticateUser(username, password);  // null => wrong creds OR already online
+
+	    try {
+	        if (user != null) {
+	            // remember username on this socket – cleared on disconnect
+	            client.setInfo("username", username);
+
+	            client.sendToClient(new ServerResponse(
+	                    true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
+	        } else {
+	            boolean alreadyOnline = db.usernameExists(username) && db.isUserOnline(username);
+
+	            String msg = alreadyOnline
+	                    ? "This account is already logged in from another device."
+	                    : "Invalid username or password.";
+
+	            client.sendToClient(new ServerResponse(
+	                    false, null, ResponseType.LOGIN_FAILED, msg));
+	        }
+	    } catch (IOException e) {
+	        System.err.println("[SERVER] Failed to send login response: " + e.getMessage());
+	    }
 	}
+
 
 	/**
 	 * Logs new client connections.
@@ -666,20 +683,25 @@ public class Server extends AbstractServer {
 		logClientDisconnect(client);
 	}
 
-	/**
-	 * Logs the disconnection of a client.
-	 *
-	 * @param client the client to log
-	 */
-	private void logClientDisconnect(ConnectionToClient client) {
-		try {
-			String ip = client.getInetAddress().getHostAddress();
-			String host = client.getInetAddress().getHostName();
-			System.out.println("Client disconnected from: " + host + " (" + ip + ")");
-		} catch (Exception e) {
-			System.out.println("Could not retrieve disconnected client info: " + e.getMessage());
-		}
-	}
+    /**
+     * Logs a client disconnection and clears the online flag if needed.
+     */
+    private void logClientDisconnect(ConnectionToClient client) {
+        try {
+            String ip   = client.getInetAddress().getHostAddress();
+            String host = client.getInetAddress().getHostName();
+            System.out.println("Client disconnected from: " + host + " (" + ip + ")");
+
+            /* clear online flag (if this socket belonged to a logged-in user) */
+            Object uObj = client.getInfo("username");
+            if (uObj instanceof String u) {
+                db.markUserLoggedOut(u);
+            }
+        } catch (Exception e) {
+            System.out.println("Could not process disconnect: " + e.getMessage());
+        }
+    }
+
 
 	/**
 	 * Returns a list of all connected client hostnames and IPs.

@@ -1,5 +1,7 @@
 package controllers;
 
+import java.io.IOException;
+
 import client.ClientController;
 import common.User;
 import common.UserRole;
@@ -86,24 +88,42 @@ public class LoginController implements ClientAware, StageAware {
      */
     @FXML
     private void handleLoginClick() {
-        // Read input values
-        String user = username.getText();
-        password    = code.getText();
+        // Clear previous status message
+        lblError.setText("");
 
-        // Validate input
+        String user = username.getText().trim();
+        password    = code.getText().trim();
+
         if (user.isEmpty() || password.isEmpty()) {
             lblError.setText("Please enter both username and password.");
             return;
         }
 
-        // Send login request to server
+        /* ---------- Make sure the socket is open ---------- */
         try {
-        	client.getRequestSender().requestLogin(user, password);
-        } catch (Exception ex) {
+            if (!client.isConnected()) {          // Socket is closed – open a new one
+                client.openConnection();          // May throw IOException
+            }
+        } catch (IOException ex) {
+            lblError.setText("Unable to connect to server.");
+            ex.printStackTrace();
+            return;                               // Cannot continue without a connection
+        }
+
+        submit.setDisable(true);                  // Prevent double-clicks
+
+        /* ---------- Send the login request ---------- */
+        try {
+            client.getRequestSender()
+                  .requestLogin(user, password);  // All network calls go through ClientRequestSender
+        } catch (IOException ex) {                // Network problem while sending
             lblError.setText("Failed to send login request.");
+            submit.setDisable(false);
             ex.printStackTrace();
         }
     }
+
+
 
     /**
      * Called when login is successful.
@@ -112,6 +132,7 @@ public class LoginController implements ClientAware, StageAware {
      * @param user authenticated user object
      */
     public void handleLoginSuccess(User user) {
+        submit.setDisable(false);
         System.out.println("[DEBUG] Login successful, role = " + user.getRole());
         navigateToHome(user);
     }
@@ -123,9 +144,12 @@ public class LoginController implements ClientAware, StageAware {
      * @param msg error message to show
      */
     public void handleLoginFailure(String msg) {
+        submit.setDisable(false);
         lblError.setText(msg);
+        code.clear();            // clear password field
         System.err.println("[DEBUG] Login failed: " + msg);
     }
+
 
     /**
      * Disconnects from the server and exits the application.
@@ -137,6 +161,8 @@ public class LoginController implements ClientAware, StageAware {
             if (client != null && client.isConnected()) {
                 client.sendToServer(new Object[] { "disconnect" });
                 client.closeConnection();
+                client.clearSession();
+
             }
         } catch (Exception ignored) { }
         Platform.exit();

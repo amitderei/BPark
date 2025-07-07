@@ -104,11 +104,27 @@ public class SubscriberMainLayoutController implements ClientAware, StageAware {
 		loadScreen("/client/SubscriberMainScreen.fxml");
 	}
 
-	/** Logs the user out and returns to the main screen. */
+	/** Logs the user out and returns to the welcome screen. */
 	@FXML
 	private void handleLogoutClick() {
-		UiUtils.loadScreen(btnLogout, "/client/MainScreen.fxml", "BPARK – Welcome", client);
+	    try {
+	        if (client != null && client.isConnected()) {
+	            client.getRequestSender().sendDisconnect();  // use RequestSender
+	            client.closeConnection();                    // close socket
+	        }
+	    } catch (Exception e) {
+	        System.err.println("[CLIENT] Logout error: " + e.getMessage());
+	    } finally {
+	        client.clearSession();                          // wipe local data
+	        UiUtils.loadScreen(
+	                btnLogout,
+	                "/client/MainScreen.fxml",
+	                "BPARK – Welcome",
+	                client);
+	    }
 	}
+
+
 
 	/** Gracefully disconnects and exits the application. */
 	@FXML
