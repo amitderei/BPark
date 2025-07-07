@@ -76,6 +76,7 @@ public class MailService {
             Transport.send(message);
 
             System.out.println("Email sent successfully!");
+            
 
         } catch (Exception e) {
             System.out.println("Error send mail: " + e.getMessage());
