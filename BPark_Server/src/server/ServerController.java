@@ -157,27 +157,30 @@ public class ServerController {
     }
 
     /**
-     * Shuts down the server and closes the application.
-     * Notifies connected clients before exiting.
+     * Runs when the Exit button is pressed in the server UI.
+     *
+     * Steps:
+     * - If we have a running server, call shutdownGracefully() on it.
+     * - Stop the timeline that refreshes the clients list.
+     * - Exit the JVM.
      */
     @FXML
     public void exitApplication() {
         try {
             if (serverInstance != null) {
-                // Notify all clients before closing the server
-                serverInstance.sendToAllClients("server_shutdown");
-
-                // Close the server
-                serverInstance.close();
-                System.out.println("Server stopped successfully.");
+                serverInstance.shutdownGracefully();
             }
-        } catch (Exception e) {
-            System.err.println("Failed to stop server: " + e.getMessage());
+        } catch (Exception ex) {
+            System.err.println("[SERVER_GUI] shutdown error: " + ex.getMessage());
+        } finally {
+            if (clientUpdateTimeline != null) {
+                clientUpdateTimeline.stop();   // no need to keep the timer alive
+            }
+            System.exit(0);
         }
-
-        // Exit the entire application
-        System.exit(0);
     }
+
+    
 
     /**
      * Displays a JavaFX alert with a given message.

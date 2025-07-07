@@ -742,5 +742,33 @@ public class Server extends AbstractServer {
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Stops the BPARK server in a clean way.
+	 *
+	 * What happens here:
+	 * - Send "server_shutdown" to every connected client so they can quit nicely.
+	 * - Close the listening socket (this drops all client sockets too).
+	 * - Clear is_logged_in for every user in the DB, just to be extra safe.
+	 *
+	 * Called from the GUI when the user presses Exit.
+	 */
+	public void shutdownGracefully() {
+	    // warn all clients
+	    sendToAllClients("server_shutdown");
+
+	    // close the server socket itself
+	    try {
+	        close();               // method from AbstractServer
+	    } catch (IOException ex) {
+	        System.err.println("[SERVER] close() failed: " + ex.getMessage());
+	    }
+
+	    // make sure nobody is still marked online in the DB
+	    db.resetAllLoggedIn();
+
+	    System.out.println("[SERVER] Shutdown complete – all clients logged out.");
+	}
+
 
 }
