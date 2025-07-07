@@ -226,19 +226,42 @@ public class Server extends AbstractServer {
 					handleLogin(data, client);
 					break;
 					
-				// Collect car. expected format {COLLECT_CAR, subscriberCode. parkingCode}
+				// Collect car. expected format: {COLLECT_CAR, subscriberCode, parkingCode}
 				case COLLECT_CAR:
-					int subCode = (int) data[1];
-					int parkCode = (int) data[2];
-					try {
-						ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
-						client.sendToClient(response);
-					} catch (Exception e) {
-						client.sendToClient(
-								new ServerResponse(false, null, null, "An error occurred while collecting the vehicle."));
-						System.err.println("Error: collectCar - " + e.getMessage());
-					}
-					break;
+				    int subCode = (int) data[1];
+				    int parkCode = (int) data[2];
+
+				    try {
+				        // Call the DB method to handle the vehicle pickup
+				        // It returns a ServerResponse object with success status and a message
+				        ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
+
+				        // Check if any known error occurred (e.g., DB issue or pickup failed)
+				        String message = response.getMsg();
+				        if (message.equals("An error occurred while retrieving your parking session.") ||
+				        		message.equals("An error occurred while completing the pickup process.")) {
+
+				            // Send the error back to the client
+				            client.sendToClient(response);
+				            return;
+				        }
+
+				        // Check if there was no active parking session for the given info
+				        if (msg.equals("No active parking session found for the provided information.")) {
+				            client.sendToClient(response);
+				            return;
+				        }
+
+				        // Send the success response to the client
+				        client.sendToClient(response);
+
+				    } catch (Exception e) {
+				        // Unexpected error (e.g. DB crash or null pointer)
+				        client.sendToClient(new ServerResponse(false, null, null, "An error occurred while collecting the vehicle."));
+				        System.err.println("Error: collectCar - " + e.getMessage());
+				    }
+				    break;
+
 					
 					//update details of subscriber. expected format={UPDATE_DETAILS_OF_SUBSCRIBER, subscriber\null, user\null}
 				case UPDATE_DETAILS_OF_SUBSCRIBER:
