@@ -125,7 +125,7 @@ public class EditSubscriberDetailsController implements ClientAware {
 		}
 		
 		if(!isValidPassword(passwordEdit.getText().trim())) {
-			sb.append("Password must be between 6 to 10 chars.");
+			sb.append("Password must be between 4 to 10 chars.");
 			sb.append("\n");
 		}
 		
@@ -184,12 +184,12 @@ public class EditSubscriberDetailsController implements ClientAware {
 	}
 	
 	/**
-	 * Checks if the password is between 6-10 chars
+	 * Checks if the password is between 4-10 chars
 	 *
-	 * @return true if the passwords length is 6-10, false otherwise
+	 * @return true if the passwords length is 4-10, false otherwise
 	 */
 	private boolean isValidPassword(String password) {
-	    return password.length() >= 6 && password.length() <= 10;		
+	    return password.length() >= 4 && password.length() <= 10;		
 	}
 	
 	/**
