@@ -93,6 +93,7 @@ public class DBController {
 	 * @return true if the order was found and updated, false otherwise.
 	 */
 	public boolean updateParkingSpace(int newParkingSpace, int orderNumber) {
+		// Update the parking space assigned to a specific order number
 		String query = "UPDATE `order` SET parking_space=? WHERE order_number=?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -121,6 +122,8 @@ public class DBController {
 	 * @return a User object (username + role) if authentication succeeds, or null if it fails
 	 */
 	public User authenticateUser(String username, String password) {
+		// Authenticate the user by checking exact (case-sensitive) match of username and password,
+		// and return the user's role and login status
 		String query = "SELECT role, is_logged_in " +
 				"FROM   bpark.user " +
 				"WHERE  BINARY username = ? AND BINARY password = ?";
@@ -164,6 +167,7 @@ public class DBController {
 	 * @return true if exists, false otherwise
 	 */
 	public boolean subscriberExists(int subscriberCode) {
+		// Check if a subscriber with the given subscriber code exists
 		String query = "SELECT 1 FROM subscriber WHERE subscriberCode = ? LIMIT 1";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -185,6 +189,7 @@ public class DBController {
 	 * @return the subscriberCode if found, or -1 if not found or error
 	 */
 	public int getSubscriberCodeByTag(String tagId) {
+		// Retrieve the subscriber code for a specific (case-sensitive) tag ID
 		String query = "SELECT subscriberCode FROM subscriber WHERE BINARY tagId = ?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -213,6 +218,7 @@ public class DBController {
 	 * @throws SQLException if a database access error occurs
 	 */
 	public ParkingEvent getOpenParkingEvent(int subscriberCode, int parkingCode) throws SQLException {
+		// Get the most recent active parking event (no exitDate yet) for a given subscriber and parking code
 		String query = "SELECT * FROM parkingEvent "
 				+ "WHERE subscriberCode = ? AND parkingCode = ? AND exitDate IS NULL "
 				+ "ORDER BY eventId DESC LIMIT 1";
