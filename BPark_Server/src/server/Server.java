@@ -533,7 +533,7 @@ public class Server extends AbstractServer {
 						ParkingEvent parkinEvent = db.getOpenParkingEvent((int) data[2], parkingCode);
 						serverController.addLog("Parking event session number: " + parkinEvent.getEventId() + " extended successfully");
 						client.sendToClient(
-								new ServerResponse(true, null, null, response));
+								new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, response));
 					}
 					catch(SQLException ex) {
 						ex.printStackTrace();
@@ -542,7 +542,7 @@ public class Server extends AbstractServer {
 				}
 				else {
 					client.sendToClient(
-							new ServerResponse(false, null, null, response));
+							new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, response));
 				}
 				break;
 
