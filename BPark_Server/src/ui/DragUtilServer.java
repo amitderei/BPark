@@ -7,7 +7,7 @@ import javafx.stage.Stage;
  * Utility class for enabling drag-to-move functionality
  * for undecorated JavaFX windows.
  */
-public class DragUtil {
+public class DragUtilServer {
 
 	private static double xOffset = 0;
 	private static double yOffset = 0;

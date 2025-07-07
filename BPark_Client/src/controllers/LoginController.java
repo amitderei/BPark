@@ -12,7 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import ui.DragUtil;
+import ui.DragUtilServer;
 import ui.StageAware;
 import ui.UiUtils;
 
@@ -67,7 +67,7 @@ public class LoginController implements ClientAware, StageAware {
      */
     @Override
     public void setStage(Stage stage) {
-        DragUtil.enableDrag(dragArea, stage);
+        DragUtilServer.enableDrag(dragArea, stage);
     }
     
     /**

@@ -12,7 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
-import ui.DragUtil;
+import ui.DragUtilServer;
 import ui.UiUtils;
 
 /**
@@ -49,7 +49,7 @@ public class ConnectController implements ClientAware {
 	 */
 	public void setStage(Stage stage) {
 		// enable window drag via DragUtil
-		DragUtil.enableDrag(dragArea, stage);
+		DragUtilServer.enableDrag(dragArea, stage);
 	}
 
 	/**

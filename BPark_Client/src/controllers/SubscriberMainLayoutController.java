@@ -12,7 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import ui.DragUtil;
+import ui.DragUtilServer;
 import ui.StageAware;
 import ui.UiUtils;
 
@@ -76,7 +76,7 @@ public class SubscriberMainLayoutController implements ClientAware, StageAware {
      */
     @Override
     public void setStage(Stage stage) {
-        DragUtil.enableDrag(dragArea, stage);
+        DragUtilServer.enableDrag(dragArea, stage);
     }
     
 	/**

@@ -7,7 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
-import ui.DragUtil;
+import ui.DragUtilServer;
 import ui.StageAware;
 import ui.UiUtils;
 
@@ -45,7 +45,7 @@ public class ModeSelectionController implements ClientAware, StageAware {
      * @param stage the primary application stage
      */
     public void setStage(Stage stage) {
-    	DragUtil.enableDrag(dragArea, stage);
+    	DragUtilServer.enableDrag(dragArea, stage);
     }
 
 	/**

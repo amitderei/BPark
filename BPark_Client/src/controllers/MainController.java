@@ -12,7 +12,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
-import ui.DragUtil;
+import ui.DragUtilServer;
 import ui.StageAware;
 import ui.UiUtils;
 
@@ -66,7 +66,7 @@ public class MainController implements ClientAware, StageAware {
      */
     @Override
     public void setStage(Stage stage) {
-        DragUtil.enableDrag(dragArea, stage);
+        DragUtilServer.enableDrag(dragArea, stage);
     }
 
     

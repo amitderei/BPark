@@ -14,7 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import ui.DragUtil;
+import ui.DragUtilServer;
 
 /**
  * Controller for the BPARK server connection screen.
@@ -75,7 +75,7 @@ public class ServerController {
      * @param stage the primary JavaFX stage (window)
      */
     public void setStage(Stage stage) {
-        DragUtil.enableDrag(dragArea, stage); 
+        DragUtilServer.enableDrag(dragArea, stage); 
     }
 
     /**
