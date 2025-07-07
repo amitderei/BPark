@@ -471,7 +471,6 @@ public class ClientController extends AbstractClient {
 			case NO_ORDERS:
 			    if (response.isSucceed() && watchAndCancelOrdersController != null) {
 			        watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
-			        UiUtils.showAlert(response.getMsg(), response.getMsg(), Alert.AlertType.INFORMATION);
 			    }
 			    break;
 
@@ -574,9 +573,14 @@ public class ClientController extends AbstractClient {
 
 			// Load details of specific parking event. 
 			case PARKING_INFO_LOADED:
-			    if (response.isSucceed() && viewActiveParkingInfoController != null) {
-			        viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
-			        viewActiveParkingInfoController.setTexts();    
+			    if ( viewActiveParkingInfoController != null) {
+			        if (response.isSucceed()) {
+			        	viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
+			        	viewActiveParkingInfoController.setTexts();    
+			        }
+			        else {
+			        	viewActiveParkingInfoController.noActiveParking();
+			        }
 			    }
 			    break;
 

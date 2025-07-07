@@ -216,6 +216,7 @@ public class SubscriberMainLayoutController implements ClientAware, StageAware {
 			if (ctrl instanceof ViewActiveParkingInfoController c) {
 				client.setViewActiveParkingInfoController(c);
 				c.getDetailsOfActiveInfo();
+				
 			}
 			if (ctrl instanceof ExtendParkingController c) {
 				client.setExtendParkingController(c);

@@ -154,7 +154,7 @@ public class Server extends AbstractServer {
 				case GET_DETAILS_OF_ACTIVE_INFO:
 					ParkingEvent parkingEvent = db.getActiveParkingEvent((Subscriber) data[1]);
 					if (parkingEvent == null) {
-						client.sendToClient(new ServerResponse(false, null, null, "There is no active parking."));
+						client.sendToClient(new ServerResponse(false, null, ResponseType.PARKING_INFO_LOADED, "There is no active parking."));
 					} else {
 						client.sendToClient(
 								new ServerResponse(true, parkingEvent, ResponseType.PARKING_INFO_LOADED, "Active parking info loaded successfully."));

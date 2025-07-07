@@ -71,6 +71,9 @@ public class ViewActiveParkingInfoController implements ClientAware {
     @FXML private Label parkingCode;
     /** Label that shows the parking code */
     @FXML private Label parkingCodeInfo;
+    
+    @FXML
+    private Label noActiveParking;
 
     /** Reference to the main client controller used for server communication */
     private ClientController client;
@@ -87,8 +90,14 @@ public class ViewActiveParkingInfoController implements ClientAware {
     public void setClient(ClientController client) {
         this.client = client;
     }
+    
+    
 
-    /**
+
+
+
+
+	/**
      * Stores the ParkingEvent object representing the active parking session.
      *
      * @param parkingEvent the event to be displayed
@@ -96,8 +105,9 @@ public class ViewActiveParkingInfoController implements ClientAware {
     public void setParkingEvent(ParkingEvent parkingEvent) {
         this.parkingEvent = parkingEvent;
     }
+    
 
-    /**
+	/**
      * Requests the current active parking session of the subscriber from the server.
      */
     public void getDetailsOfActiveInfo() {
@@ -113,8 +123,12 @@ public class ViewActiveParkingInfoController implements ClientAware {
      * This method must be called after setParkingEvent().
      */
     public void setTexts() {
-        if (parkingEvent == null) return;
-
+    	System.out.println("hungry");
+        if (parkingEvent == null) {
+        	System.out.println("hungryyyyy");
+        	noActiveParking();
+        	return;
+        }
         // Populate static fields
         eventIdInfo.setText(String.valueOf(parkingEvent.getEventId()));
         vehicleIdInfo.setText(parkingEvent.getVehicleId());
@@ -136,6 +150,20 @@ public class ViewActiveParkingInfoController implements ClientAware {
 
         expectedExitDateInfo.setText(exitTime.toLocalDate().toString());
         expectedExitHourInfo.setText(exitTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+    }
+    
+    
+    public void noActiveParking() {
+    	eventId.setVisible(false);
+    	vehicleId.setVisible(false);
+    	entryDate.setVisible(false);
+    	entryHour.setVisible(false);
+    	extended.setVisible(false);
+    	expectedExitDate.setVisible(false);
+    	expectedExitHour.setVisible(false);
+    	parkingCode.setVisible(false);
+    	parkingSpace.setVisible(false);
+    	noActiveParking.setText("No parking session is currently active.");
     }
 }
 
