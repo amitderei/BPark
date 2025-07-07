@@ -188,9 +188,9 @@ public class Server extends AbstractServer {
 					String[] emailAndPhone = db.getEmailAndPhoneNumber((int) data[1]);
 					String email = emailAndPhone[0];
 					String phone = emailAndPhone[1];
-					//ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
-					//sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
-					serverController.addLog("Sent 'Forgot parking code' email to subscriber: " + (Subscriber)data[1]);
+					ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
+					sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
+					//serverController.addLog("Sent 'Forgot parking code' email to subscriber: " + (Subscriber)data[1]);
 					client.sendToClient(new ServerResponse(true, null, null, "The code was sent to your email."));
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -245,8 +245,8 @@ public class Server extends AbstractServer {
 
 				// Login request. expected format {LOGIN, username. password}
 			case LOGIN:
-				serverController.addLog("LOGIN!!!");
 				handleLogin(data, client);
+				//serverController.addLog("LOGIN!!!");
 				break;
 
 				// Collect car. expected format {COLLECT_CAR, subscriberCode. parkingCode}
