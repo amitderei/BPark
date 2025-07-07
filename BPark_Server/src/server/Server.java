@@ -188,8 +188,8 @@ public class Server extends AbstractServer {
 					String[] emailAndPhone = db.getEmailAndPhoneNumber((int) data[1]);
 					String email = emailAndPhone[0];
 					String phone = emailAndPhone[1];
-					ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
-					sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
+					//ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
+					//sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
 					serverController.addLog("Sent 'Forgot parking code' email to subscriber: " + (Subscriber)data[1]);
 					client.sendToClient(new ServerResponse(true, null, null, "The code was sent to your email."));
 				} catch (Exception e) {
@@ -643,12 +643,14 @@ public class Server extends AbstractServer {
 
 				sendEmail.sendEmail(receivedSub.getEmail(), mailBody,
 						TypeOfMail.GENERIC_MESSAGE);
-				serverController.addLog("Sent 'Registration' email to subscriber: " + receivedSub.getSubscriberCode());
-
+				
 				// 7. done – tell the client 
 				client.sendToClient(new ServerResponse(true, receivedSub,
 						ResponseType.SUBSCRIBER_INSERTED,
 						"Subscriber registered successfully." + "Login details sent via email."));
+				
+				serverController.addLog("Sent 'Registration' email to subscriber: " + receivedSub.getSubscriberCode());
+
 				break;
 
 				//get subscriber status report of selected date. expected format: {GET_SUBSCRIBER_STATUS_REPORT, month, year}
