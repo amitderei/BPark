@@ -668,34 +668,47 @@ public class DBController {
 	 */
 	public synchronized int hasAvailableSpots(String parkingLotName, int subscriberCode) {
 		try {
+			// Get the total number of parking spots across all lots
 			int totalSpots = getTotalSpots();
+
+			// Get the number of currently active (ongoing) parkings
 			int activeParkings = getActiveParkingsCount();
+
+			// Get the number of reservations that start right now
 			int reservedNow = getActiveReservationsNowCount();
 
+			// Calculate total used spots (parked + reserved)
 			int used = activeParkings + reservedNow;
 
+			// If all spots are used or exceeded, return -1
 			if (used >= totalSpots) {
 				return -1; // Lot is full
 			}
 
 			int freeSpot;
 
+			// If subscriber has reservation, find any free spot (even reserved)
 			if (checkSubscriberHasReservationNow(subscriberCode)) {
-				freeSpot = findAnyFreeParkingSpace(); // For subscribers with a reservation
+				freeSpot = findAnyFreeParkingSpace(); // Allow reserved spots
 			} else {
-				freeSpot = findUnreservedFreeParkingSpace(); // For subscribers with No reservation
+				// Otherwise, find only non-reserved free spots
+				freeSpot = findUnreservedFreeParkingSpace();
 			}
 
+			// If no suitable spot was found, return -1
 			if (freeSpot == -1) {
-				return -1; // No suitable spot found
+				return -1;
 			}
 
-			addOccupiedParkingSpace();
-			updateParkingSpaceOccupied(freeSpot);
+			// Update DB and counters to mark the spot as occupied
+			addOccupiedParkingSpace();               // Increment occupied counter
+			updateParkingSpaceOccupied(freeSpot);    // Mark spot as taken in DB
 
+			// Return selected parking spot ID
 			return freeSpot;
 
 		} catch (Exception e) {
+			// Log and return failure code
 			System.err.println("Error checking available spots: " + e.getMessage());
 			return -1;
 		}
@@ -716,7 +729,7 @@ public class DBController {
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
-			return rs.next() ? rs.getInt(1) : -1;
+			return rs.next() ? rs.getInt(1) : -1; // if there is answer from query, if not return -1
 		} catch (SQLException e) {
 			System.err.println("Error finding any free parking space: " + e.getMessage());
 			return -1;
@@ -731,10 +744,12 @@ public class DBController {
 	 * @return number of active parking events, or -1 if an error occurs
 	 */
 	private int getActiveParkingsCount() {
+		// Query to count parking events where the vehicle hasn't exited yet
 		String sql = "SELECT COUNT(*) FROM parkingEvent WHERE exitDate IS NULL";
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
+			// If result exists, return the count
 			return rs.next() ? rs.getInt(1) : 0;
 		} catch (SQLException e) {
 			System.err.println("Error counting active parking events: " + e.getMessage());
@@ -750,6 +765,7 @@ public class DBController {
 	 * @return number of active reservations holding spots right now
 	 */
 	private int getActiveReservationsNowCount() {
+		// SQL to count today's ACTIVE reservations in the valid time window
 		String sql = """
 				    SELECT COUNT(*)
 				    FROM `order`
@@ -762,6 +778,7 @@ public class DBController {
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
+			// Return the count if query succeeded
 			return rs.next() ? rs.getInt(1) : 0;
 		} catch (SQLException e) {
 			System.err.println("Error counting active reservations: " + e.getMessage());
@@ -777,6 +794,7 @@ public class DBController {
 	 * @return a free and unreserved parking space, or -1 if none found
 	 */
 	private int findUnreservedFreeParkingSpace() {
+		// SQL to select one available and unreserved parking space
 		String sql = """
 				    SELECT ps.parking_space
 				    FROM parkingSpaces ps
@@ -795,6 +813,7 @@ public class DBController {
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
+			// Return the parking space ID if found, else -1
 			return rs.next() ? rs.getInt(1) : -1;
 		} catch (SQLException e) {
 			System.err.println("Error finding free parking space: " + e.getMessage());
@@ -809,10 +828,12 @@ public class DBController {
 	 *                     be stored.
 	 */
 	public void addParkingEvent(ParkingEvent parkingEvent) {
+		// SQL query to insert a new row into the parkingEvent table
 		String query = "INSERT INTO bpark.parkingEvent (subscriberCode, parking_space, entryDate, entryHour, exitDate, exitHour, wasExtended, vehicleId, NameParkingLot, parkingCode) VALUES "
 				+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set each parameter in the prepared statement from the ParkingEvent object
 			stmt.setInt(1, parkingEvent.getSubscriberCode());
 			stmt.setInt(2, parkingEvent.getParkingSpace());
 			stmt.setDate(3, Date.valueOf(parkingEvent.getEntryDate()));
@@ -824,6 +845,7 @@ public class DBController {
 			stmt.setString(9, parkingEvent.getLot());
 			stmt.setString(10, parkingEvent.getParkingCode());
 
+			// Execute the insert statement
 			stmt.executeUpdate();
 
 			System.out.println(">> INSERTING PARKING EVENT FOR: " + parkingEvent.getSubscriberCode());
@@ -837,6 +859,7 @@ public class DBController {
 	 * 1.
 	 */
 	private void addOccupiedParkingSpace() {
+		// SQL query to increment the occupiedSpots for the Braude lot
 		String query = "UPDATE bpark.parkinglot SET occupiedSpots = occupiedSpots + 1 WHERE NameParkingLot = 'Braude'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -857,8 +880,8 @@ public class DBController {
 		String query = "UPDATE bpark.parkingspaces SET is_occupied = 1 WHERE parking_space = ?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, parkingSpace); // Parse String to int
-			stmt.executeUpdate();
+			stmt.setInt(1, parkingSpace); // Set the parking space ID in the query
+			stmt.executeUpdate();// Execute the update
 		} catch (SQLException e) {
 			System.err.println("Error updating parking space occupancy: " + e.getMessage());
 		} catch (NumberFormatException e) {
@@ -876,12 +899,16 @@ public class DBController {
 	 * @return the vehicle ID if found, otherwise -1.
 	 */
 	public String findVehicleID(int subscriberCode) {
+		// SQL query to get vehicleId by subscriberCode
 		String query = "SELECT vehicleId FROM vehicle WHERE subscriberCode = ?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set the subscriber code in the query
 			stmt.setInt(1, subscriberCode);
+			// Execute the query
 			ResultSet rs = stmt.executeQuery();
 
+			// If result exists, return the vehicle ID
 			if (rs.next()) {
 				return rs.getString("vehicleId");
 			}
@@ -899,24 +926,27 @@ public class DBController {
 	 * @return arrayList of subscriber's reservations
 	 */
 	public ArrayList<Order> returnReservationOfSubscriber(Subscriber subscriber) {
+		// SQL to select all active future reservations of the subscriber
 		String query = "SELECT * FROM `order` WHERE subscriberCode=? AND TIMESTAMP(order_date, arrival_time) > NOW() + INTERVAL 15 MINUTE AND `status`='ACTIVE'";
 		ArrayList<Order> orders = new ArrayList<>();
 		int subsCode = subscriber.getSubscriberCode();
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set subscriber code in the query
 			stmt.setInt(1, subsCode);
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
+					// Build an Order object from result set
 					Order newOrder = new Order(rs.getInt("order_number"), rs.getInt("parking_space"),
 							rs.getDate("order_date"), rs.getTime("arrival_time"), rs.getString("confirmation_code"),
 							rs.getInt("subscriberCode"), rs.getDate("date_of_placing_an_order"), StatusOfOrder.ACTIVE);
-					orders.add(newOrder);
+					orders.add(newOrder); // Add to the result list
 				}
-				return orders;
+				return orders; // Return all matched orders
 			}
 		} catch (SQLException e) {
 			System.err.println("Error finding reservations: " + e.getMessage());
 		}
-		return null;
+		return null; // Return null in case of failure
 	}
 
 	/**
@@ -926,11 +956,14 @@ public class DBController {
 	 * @return true if succeed, else- false
 	 */
 	public boolean deleteOrder(int orderNumber) {
+		// SQL query to cancel the order by setting its status
 		String query = "UPDATE `order` SET `status`='CANCELLED' WHERE order_number=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set the order number in the query
 			stmt.setInt(1, orderNumber);
+			// Execute the update and check if any rows were affected
 			int ifDelete = stmt.executeUpdate();
-			return (ifDelete > 0);
+			return (ifDelete > 0); // return true if successful
 		} catch (SQLException e) {
 			System.err.println("Error delete order: " + e.getMessage());
 			return false;
@@ -945,10 +978,13 @@ public class DBController {
 	 */
 	public boolean changeDetailsOfUser(User user) {
 		System.out.println("user");
+		// SQL query to update the user's password
 		String query = "UPDATE user SET password=? WHERE username=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set the new password and username in the query
 			stmt.setString(1, user.getPassword());
 			stmt.setString(2, user.getUsername());
+			// Execute the update and check if a row was affected
 			int rowsUpdated = stmt.executeUpdate();
 			return rowsUpdated > 0;
 		} catch (SQLException e) {
@@ -964,13 +1000,17 @@ public class DBController {
 	 * @return if the action succeed
 	 */
 	public boolean changeDetailsOfSubscriber(Subscriber subscriber) {
+		// SQL query to update subscriber's personal information
 		String query = "UPDATE subscriber SET firstName=?, lastName=?, phoneNumber=?,  email=? WHERE subscriberCode=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set updated values in the query
 			stmt.setString(1, subscriber.getFirstName());
 			stmt.setString(2, subscriber.getLastName());
 			stmt.setString(3, subscriber.getPhoneNum());
 			stmt.setString(4, subscriber.getEmail());
 			stmt.setInt(5, subscriber.getSubscriberCode());
+			
+			// Execute the update and return success status
 			int rowsUpdated = stmt.executeUpdate();
 			return rowsUpdated > 0;
 		} catch (SQLException e) {
@@ -987,18 +1027,23 @@ public class DBController {
 	 *         history, or null if an error occurs during retrieval
 	 */
 	public ArrayList<ParkingEvent> parkingHistoryOfSubscriber(Subscriber subscriber) {
+		// SQL query to select all parking events for the subscriber
 		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=?";
 		ArrayList<ParkingEvent> historyOfParking = new ArrayList<>();
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set subscriber code in the query
 			stmt.setInt(1, subscriber.getSubscriberCode());
+			// Execute the query
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
+					// Create a new ParkingEvent from the result
 					ParkingEvent newParkingEvent = new ParkingEvent();
 					newParkingEvent.setEventId(rs.getInt("eventId"));
 					newParkingEvent.setSubscriberCode(rs.getInt("subscriberCode"));
 					newParkingEvent.setParkingSpace(rs.getInt("parking_space"));
 					newParkingEvent.setEntryDate((rs.getDate("entryDate")).toLocalDate());
 					newParkingEvent.setEntryTime((rs.getTime("entryHour")).toLocalTime());
+					// Handle nullable exit date and time
 					Date exitDate = rs.getDate("exitDate");
 					Time exitTime = rs.getTime("exitHour");
 					if (exitDate != null && exitTime != null) {
@@ -1011,7 +1056,7 @@ public class DBController {
 					newParkingEvent.setParkingCode(rs.getString("parkingCode"));
 					historyOfParking.add(newParkingEvent);
 				}
-				return historyOfParking;
+				return historyOfParking; // Add to the result list
 			}
 
 		} catch (Exception e) {
@@ -1039,8 +1084,8 @@ public class DBController {
 			ps.setString(1, tag); // Inserting the tag
 
 			ResultSet rs = ps.executeQuery();
-			exists = rs.next(); // If the tag has been found it means that he will exists
-
+			exists = rs.next(); // If the tag has been found (there is row) it means that he will exists
+			// Close resources
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
@@ -1057,14 +1102,15 @@ public class DBController {
 	 * @return the subscriber code if found; -1 if not found or an error occurs
 	 */
 	public int seekForTheSubscriberWithTag(String tag) {
+		// query to find subscriberCode by tagId
 		String query = "SELECT s.subscriberCode FROM bpark.subscriber s WHERE s.tagId = ?";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, tag);
-			ResultSet rs = stmt.executeQuery();
+			stmt.setString(1, tag); // Set the tag value in the query
+			ResultSet rs = stmt.executeQuery();// Execute the query
 
-			if (rs.next()) {
-				return rs.getInt("subscriberCode");
+			if (rs.next()) { 
+				return rs.getInt("subscriberCode"); // Return the subscriber code if found
 			}
 		} catch (SQLException e) {
 			System.err.println("Error finding subscriber code by tag: " + e.getMessage());
@@ -1079,13 +1125,13 @@ public class DBController {
 	 * @param codeInt the subscriber's unique code
 	 * @return true if the subscriber has an open parking event (i.e., vehicle is inside); false otherwise
 	 */
-
 	public boolean checkSubscriberEntered(int codeInt) {
+		// query to check if there's an active parking event (no exitHour) for the subscriber
 		String query = "SELECT * FROM bpark.parkingevent WHERE subscriberCode = ? AND exitHour IS NULL";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, codeInt);
-			ResultSet rs = stmt.executeQuery();
+			stmt.setInt(1, codeInt); // Set the subscriber code in the query
+			ResultSet rs = stmt.executeQuery(); // Execute the query and return true if a row is found
 			return rs.next(); // if any row is returned, subscriber is inside
 		} catch (SQLException e) {
 			// If there is no subscriber code in the table it means that he didn't entered
@@ -1103,13 +1149,14 @@ public class DBController {
 	 * @return true if the vehicle is currently inside the parking lot; false otherwise
 	 */
 	public boolean checkTagIDEntered(String tag) {
+		// query to check for active parking event by tag ID
 		String query = "SELECT pe.* FROM bpark.parkingevent pe "
 				+ "JOIN bpark.subscriber s ON pe.subscriberCode = s.subscriberCode "
 				+ "WHERE s.tagId = ? AND pe.exitHour IS NULL";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, tag);
-			ResultSet rs = stmt.executeQuery();
+			stmt.setString(1, tag); // set the ID tag string in the parameter in query
+			ResultSet rs = stmt.executeQuery(); //execute and find the row result
 			return rs.next(); // if any row is returned, tag is inside
 		} catch (SQLException e) {
 			// If there is no matched subscriberCode to the tagId in the table it means that
@@ -1128,20 +1175,23 @@ public class DBController {
 	 *         null if the subscriber was not found or an error occurred
 	 */
 	public String[] getEmailAndPhoneNumber(int subscriberCode) {
+		// query to get phone and email by subscriber code
 		String query = "SELECT phoneNumber, email FROM subscriber WHERE subscriberCode=?";
 		String[] arrayForPhoneAndEmail = new String[2];
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// subscriber code in the query
 			stmt.setInt(1, subscriberCode);
-			ResultSet rs = stmt.executeQuery();
+			ResultSet rs = stmt.executeQuery(); //exucute
+			// If a result is found, extract email and phone number
 			if (rs.next()) {
-				arrayForPhoneAndEmail[0] = rs.getString("email");
-				arrayForPhoneAndEmail[1] = rs.getString("phoneNumber");
+				arrayForPhoneAndEmail[0] = rs.getString("email");         // email in index 0
+				arrayForPhoneAndEmail[1] = rs.getString("phoneNumber");   // phone number in index 1
 				return arrayForPhoneAndEmail;
 			}
 		} catch (SQLException e) {
 			System.out.println("Error finding email and phone number: " + e.getMessage());
 		}
-		return null;
+		return null; // Return null if subscriber not found or error occurred
 	}
 
 	/**
@@ -1158,6 +1208,7 @@ public class DBController {
 	 *         [1] = Number of late parkings (Integer)
 	 */
 	public List<Object[]> getAllSubscribersWithLateCount() {
+		// query with LEFT JOIN to count late parking events per subscriber
 		final String sql = """
 				SELECT s.subscriberCode,
 				       s.userId,
@@ -1190,7 +1241,7 @@ public class DBController {
 		List<Object[]> result = new ArrayList<>();
 
 		try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-			while (rs.next()) {
+			while (rs.next()) { // Process each row in the result set
 				Subscriber sub = new Subscriber(
 						rs.getInt("subscriberCode"),
 						rs.getString("userId"),
@@ -1202,14 +1253,14 @@ public class DBController {
 						rs.getString("tagId")
 						);
 
+				// Get number of late pickups
 				int lateCount = rs.getInt("late_count");
-				result.add(new Object[]{ sub, lateCount });
+				result.add(new Object[]{ sub, lateCount }); // Add both subscriber and count to result list
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-		return result;
+		return result; // Return list of subscriber + late count pairs
 	}
 
 	/**
@@ -1220,14 +1271,14 @@ public class DBController {
 	 */
 	public List<ParkingEvent> getActiveParkingEvents() {
 		List<ParkingEvent> list = new ArrayList<>();
-
+		// query to select active parking events (no exit time)
 		String sql = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND exitHour IS NULL";
 
 		try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-			while (rs.next()) {
+			while (rs.next()) { // Process each active parking event from result set
 				ParkingEvent event = new ParkingEvent();
-
+				// Populate ParkingEvent fields from result row
 				event.setEventId(rs.getInt("eventId"));
 				event.setSubscriberCode(rs.getInt("subscriberCode"));
 				event.setParkingSpace(rs.getInt("parking_space"));
@@ -1238,13 +1289,13 @@ public class DBController {
 				event.setVehicleID(rs.getString("vehicleId"));
 				event.setParkingCode(rs.getString("parkingCode"));
 
-				list.add(event);
+				list.add(event); // Add event to result list
 			}
 
 		} catch (SQLException e) {
 			System.err.println("Error retrieving active parking events: " + e.getMessage());
 		}
-
+		// Return list of active events
 		return list;
 	}
 
@@ -1257,11 +1308,14 @@ public class DBController {
 	 *         occurs
 	 */
 	public ParkingEvent getActiveParkingEvent(Subscriber subscriber) {
+		// query to get an active parking event by subscriber code
 		String query = "SELECT * FROM parkingEvent WHERE subscriberCode=? AND exitHour IS NULL";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set subscriber code in the query
 			stmt.setInt(1, subscriber.getSubscriberCode());
-			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
+			ResultSet rs = stmt.executeQuery(); //execute
+			// If an active parking event is found, create and populate the object
+			if (rs.next()) { 
 				ParkingEvent newParkingEvent = new ParkingEvent();
 				newParkingEvent.setEventId(rs.getInt("eventId"));
 				newParkingEvent.setSubscriberCode(rs.getInt("subscriberCode"));
@@ -1277,7 +1331,7 @@ public class DBController {
 		} catch (SQLException e) {
 			System.out.println("Error finding active parking info: " + e.getMessage());
 		}
-		return null;
+		return null; // Return null if no active event found or error occurred
 	}
 
 	/**
@@ -1413,18 +1467,24 @@ public class DBController {
 	 * @return true if the subscriber is late, false otherwise
 	 */
 	public boolean subscriberIsLate(int subscriberCode) {
+		// Create a temporary Subscriber object with the given subscriber code
 		Subscriber s = new Subscriber();
 		s.setSubscriberCode(subscriberCode);
-
+		
+		// Retrieve the currently active parking event for this subscriber
 		ParkingEvent event = getActiveParkingEvent(s);
+		
+		// If no active parking event, subscriber can't be late
 		if (event == null) {
 			return false; // No active parking, can't be late
 		}
 
+		// Calculate how many minutes have passed since the parking started
 		LocalDateTime entryTime = LocalDateTime.of(event.getEntryDate(), event.getEntryHour());
 		LocalDateTime now = LocalDateTime.now();
 		long minutes = Duration.between(entryTime, now).toMinutes();
 
+		// If more than 240 minutes (4 hours) have passed → subscriber is late
 		return minutes > 240;
 	}
 
@@ -1438,29 +1498,35 @@ public class DBController {
 	 * @return true if the parking session is late, false otherwise
 	 */
 	private boolean subscriberIsLateByParkingCode(int parkingCode) {
+		// query to find an active parking event by parking code (not yet exited)
 		String query = "SELECT * FROM parkingEvent WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set the parking code in the query
 			stmt.setInt(1, parkingCode);
 			ResultSet rs = stmt.executeQuery();
-
+			
+			// If a matching active event is found
 			if (rs.next()) {
+				// Extract entry date and hour
 				LocalDate entryDate = rs.getDate("entryDate").toLocalDate();
 				LocalTime entryHour = rs.getTime("entryHour").toLocalTime();
-
+				// Calculate time passed since entry
 				LocalDateTime entryTime = LocalDateTime.of(entryDate, entryHour);
 				LocalDateTime now = LocalDateTime.now();
 
 				long minutes = Duration.between(entryTime, now).toMinutes();
-
+				
+				// Return true if parking duration exceeds 240 minutes (4 hours)
 				return minutes > 240;
 			}
 		} catch (SQLException e) {
 			System.err.println("Error checking if parking code is late: " + e.getMessage());
 		}
-
+		// Return false if no match or error occurred
 		return false;
 	}
+	
 	/**
 	 * Checks if there is an open parking event with the given parking code
 	 * An open parking event means that exitDate and exitHour are NULL
@@ -1469,11 +1535,12 @@ public class DBController {
 	 * @return true if an open parking event exists for the code, false otherwise
 	 */
 	private boolean openParkingCodeExists(int parkingCode) {
+		// query to check if there is an active parking event with the given parking code
 		String query = "SELECT 1 FROM parkingEvent WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL LIMIT 1";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, parkingCode);
-			ResultSet rs = stmt.executeQuery();
-			return rs.next();
+			stmt.setInt(1, parkingCode); 	// Set the parking code in the query
+			ResultSet rs = stmt.executeQuery(); //execute
+			return rs.next(); // Return true if a matching active event was found
 		} catch (SQLException e) {
 			System.err.println("Error checking open parking code: " + e.getMessage());
 			return false;
@@ -1488,17 +1555,18 @@ public class DBController {
 	 * @return true if the event was already extended, false otherwise
 	 */
 	private boolean parkingCodeWasExtended(int parkingCode) {
+		// Query to check if the parking session with the given code was already extended
 		String query = "SELECT wasExtended FROM parkingEvent WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL LIMIT 1";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, parkingCode);
+			stmt.setInt(1, parkingCode); // Set the parking code parameter
 			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
+			if (rs.next()) { // If a record is found, return the 'wasExtended' flag
 				return rs.getBoolean("wasExtended");
 			}
 		} catch (SQLException e) {
 			System.err.println("Error checking if parking code was extended: " + e.getMessage());
 		}
-		return false;
+		return false; // Return false if no record found or error occurred
 	}
 
 
@@ -1509,6 +1577,7 @@ public class DBController {
 	 * @return true if there is a reservation coming soon
 	 */
 	public boolean hasReservationInNext4Hours() {
+		// query to check if there's any active reservation starting within the next 4 hours
 		String sql = """
 				    SELECT 1
 				    FROM `order`
@@ -1520,14 +1589,12 @@ public class DBController {
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
-			return rs.next();
+			return rs.next(); // If any result is returned, there is a reservation in the next 4 hours
 		} catch (SQLException e) {
 			System.err.println("Error checking future reservations: " + e.getMessage());
 			return false;
 		}
 	}
-
-
 
 	/**
 	 * Generates the next available subscriber code by retrieving the current maximum
@@ -1537,16 +1604,17 @@ public class DBController {
 	 * @return the next available subscriber code
 	 */
 	public int getNextSubscriberCode() {
+		// query get the highest subscriberCode currently in the table
 		String query = "SELECT MAX(subscriberCode) FROM bpark.subscriber";
 		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-			if (rs.next()) {
+			if (rs.next()) { // If table is empty (max = 0), start from 1011. Otherwise, return next available code.
 				int currentMax = rs.getInt(1);
 				return (currentMax == 0 ? 1011 : currentMax + 1);
 			}
 		} catch (SQLException e) {
 			System.err.println("Error generating subscriber code: " + e.getMessage());
 		}
-		return 1011; // Fallback starting code
+		return 1011; // // Default return value in case of failure
 	}
 
 	/**
@@ -1557,16 +1625,18 @@ public class DBController {
 	 * @return the newly generated tag ID; returns "TAG_999" if an error occurs
 	 */
 	public String generateNextTagId() {
+		// Query to count how many subscribers exist in the database
 		String query = "SELECT COUNT(*) FROM bpark.subscriber";
 		try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-			if (rs.next()) {
+			if (rs.next()) { 
+				// Generate new tag ID based on the count (e.g., TAG_001, TAG_045, etc.)
 				int count = rs.getInt(1) + 1;
 				return "TAG_" + String.format("%03d", count);
 			}
 		} catch (SQLException e) {
 			System.err.println("Error generating tag ID: " + e.getMessage());
 		}
-		return "TAG_999";
+		return "TAG_999"; 	// Fallback tag ID in case of failure
 	}
 
 	/**
@@ -1576,10 +1646,12 @@ public class DBController {
 	 * @return true if insertion succeeded
 	 */
 	public boolean insertSubscriber(Subscriber s) {
+		//query to insert a new subscriber into the database
 		String sql = "INSERT INTO bpark.subscriber "
 				+ "(subscriberCode, userId, firstName, lastName, phoneNumber, email, username, tagId) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			// Set values from the Subscriber object into the prepared statement
 			stmt.setInt(1, s.getSubscriberCode());
 			stmt.setString(2, s.getUserId());
 			stmt.setString(3, s.getFirstName());
@@ -1588,7 +1660,7 @@ public class DBController {
 			stmt.setString(6, s.getEmail());
 			stmt.setString(7, s.getUsername());
 			stmt.setString(8, s.getTagId());
-			return stmt.executeUpdate() == 1;
+			return stmt.executeUpdate() == 1; // Execute the insert query and return true if one row was inserted
 		} catch (SQLException e) {
 			System.err.println("Error inserting subscriber: " + e.getMessage());
 			return false;
@@ -1602,14 +1674,16 @@ public class DBController {
 	 * @return true if the user was successfully inserted, false otherwise
 	 */
 	public boolean insertUser(User user) {
+		// query to insert a new user into the 'user' table
 		String sql = "INSERT INTO bpark.user (username, password, role) VALUES (?, ?, ?)";
 		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			// Set username, password, and role values from the User object
 			stmt.setString(1, user.getUsername());
 			stmt.setString(2, user.getPassword());
 			stmt.setString(3, user.getRole().toString());
-			return stmt.executeUpdate() == 1;
+			return stmt.executeUpdate() == 1; 	// Execute the insert and return true if exactly one row was inserted
 		} catch (SQLException e) {
-			return false;
+			return false; // Return false if an error occurred (no logging here)
 		}
 	}
 
@@ -1621,11 +1695,13 @@ public class DBController {
 	 * @return true if insertion succeeded, false otherwise
 	 */
 	public boolean insertVehicle(String vehicleId, int subscriberCode) {
+		// query to insert a new vehicle associated with a subscriber
 		String sql = "INSERT INTO vehicle (vehicleId, subscriberCode) VALUES (?, ?)";
 		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			// Set vehicle ID and subscriber code
 			stmt.setString(1, vehicleId);
 			stmt.setInt(2, subscriberCode);
-			return stmt.executeUpdate() == 1;
+			return stmt.executeUpdate() == 1; 	// Execute the insert and return true if exactly one row was inserted
 		} catch (SQLException e) {
 			System.err.println("Error inserting vehicle: " + e.getMessage());
 			return false;
@@ -1639,17 +1715,17 @@ public class DBController {
 	 * @return true if the vehicle already exists, false otherwise
 	 */
 	public boolean vehicleExists(String vehicleId) {
+		// query to check if a vehicle with the given ID exists
 		String query = "SELECT 1 FROM vehicle WHERE vehicleId = ? LIMIT 1";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, vehicleId);
-			ResultSet rs = stmt.executeQuery();
-			return rs.next();
+			stmt.setString(1, vehicleId); // set the parameter in the query
+			ResultSet rs = stmt.executeQuery(); // execture
+			return rs.next(); // if there is next
 		} catch (SQLException e) {
 			System.err.println("Error checking vehicle existence: " + e.getMessage());
 			return false;
 		}
 	}
-
 
 	/**
 	 * Checks whether the provided email is already associated with an existing
@@ -1659,9 +1735,10 @@ public class DBController {
 	 * @return true if the email exists, false otherwise
 	 */
 	public boolean emailExists(String email) {
+		// query to check if an email already exists in the subscriber table
 		String query = "SELECT 1 FROM bpark.subscriber WHERE email = ? LIMIT 1";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, email);
+			stmt.setString(1, email); // set to the paramter in the query
 			ResultSet rs = stmt.executeQuery();
 			return rs.next(); // true if exists
 		} catch (SQLException e) {
@@ -1677,6 +1754,7 @@ public class DBController {
 	 * @return true if username is taken
 	 */
 	public boolean usernameExists(String username) {
+		// query to check if a username exists (case-sensitive due to BINARY)
 		final String sql = """
 				SELECT 1
 				FROM   bpark.user
@@ -1684,8 +1762,8 @@ public class DBController {
 				LIMIT  1
 				""";
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, username);
-			return ps.executeQuery().next();
+			ps.setString(1, username); //set the parameter to query
+			return ps.executeQuery().next(); // Execute the query and return true if a match is found
 		} catch (SQLException e) {
 			System.err.println("[DB] usernameExists: " + e.getMessage());
 			return false;
@@ -1699,9 +1777,10 @@ public class DBController {
 	 * @return true if the phone exists, false otherwise
 	 */
 	public boolean phoneExists(String phone) {
+		// query to check if a phone number already exists in the subscriber table
 		String query = "SELECT 1 FROM bpark.subscriber WHERE phoneNumber = ? LIMIT 1";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, phone);
+			stmt.setString(1, phone); //set parameter to the query
 			try (ResultSet rs = stmt.executeQuery()) {
 				return rs.next(); // returns true if a row was found
 			}
@@ -1718,9 +1797,10 @@ public class DBController {
 	 * @return true if the ID exists, false otherwise
 	 */
 	public boolean idExists(String userId) {
+		// query to check if a user ID already exists in the subscriber table
 		String query = "SELECT 1 FROM bpark.subscriber WHERE userId = ? LIMIT 1";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setString(1, userId);
+			stmt.setString(1, userId); //set to the paramter in the query
 			try (ResultSet rs = stmt.executeQuery()) {
 				return rs.next(); // true if a row exists
 			}
@@ -1738,14 +1818,17 @@ public class DBController {
 	 * @return a list of ParkingEvent objects
 	 */
 	public ArrayList<ParkingEvent> getActiveParkingEventsThatLateAndDoesntReceiveMail() {
-
+		
+		// List to hold late parking events that haven't received a notification
 		ArrayList<ParkingEvent> list = new ArrayList<>();
+		//  query to retrieve active parking events that haven't been flagged for late message
 		String query = "SELECT * FROM parkingEvent WHERE exitDate IS NULL AND sendMsgForLating=FALSE";
 
 		try (PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				ParkingEvent event = new ParkingEvent();
 
+				// Populate ParkingEvent object from result set
 				event.setEventId(rs.getInt("eventId"));
 				event.setSubscriberCode(rs.getInt("subscriberCode"));
 				event.setParkingSpace(rs.getInt("parking_space"));
@@ -1755,11 +1838,13 @@ public class DBController {
 				event.setLot(rs.getString("nameParkingLot"));
 				event.setVehicleID(rs.getString("vehicleId"));
 				event.setParkingCode(rs.getString("parkingCode"));
+				// Calculate how long the subscriber has been parked
 				LocalDateTime now = LocalDateTime.now();
 				LocalDateTime dateTimeEntry = event.getEntryDate().atTime(event.getEntryHour());
 				Duration duration = Duration.between(dateTimeEntry, now);
 				//check if subscriber is lating according if he extended
 				double timeOfParking=duration.toMinutes()/60.0;
+				// Add to list if the subscriber is late based on whether they extended or not
 				if ((event.isWasExtended() && timeOfParking>8) || ((!event.isWasExtended() )&& timeOfParking>4)) {
 					list.add(event);
 				} 
@@ -1770,7 +1855,7 @@ public class DBController {
 			e.getStackTrace();
 		}
 
-		return list;
+		return list; // Return empty list if error occurs
 	}
 
 
@@ -1781,10 +1866,11 @@ public class DBController {
 	 * @param subscriberCode the code identifying the subscriber
 	 */
 	public void markSendMail(int subscriberCode) {
+		// query to mark that a late notification was sent for the subscriber
 		String query = "UPDATE parkingEvent SET sendMsgForLating=TRUE WHERE subscriberCode=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setInt(1, subscriberCode);
-			int rowsUpdated = stmt.executeUpdate();
+			stmt.setInt(1, subscriberCode); // set the paramter in the query
+			int rowsUpdated = stmt.executeUpdate(); //execute
 		} catch (SQLException e) {
 			System.out.print(e.getMessage());
 			e.printStackTrace();
@@ -1797,18 +1883,19 @@ public class DBController {
 	 * @return total number of parkingSpaces
 	 */
 	public int getTotalSpots() {
+		// query to count the total number of parking spaces in the system
 		final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces";
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
-			if (rs.next()) {
+			if (rs.next()) { // If result is returned, extract and return the total count
 				return rs.getInt(1);
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+		// Return 0 if query failed or no result
 		return 0;
 	}
 
@@ -1818,32 +1905,37 @@ public class DBController {
 	 * @return count of spots where is_occupied = TRUE
 	 */
 	public int getOccupiedSpots() {
+		// SQL query to count the number of currently occupied parking spaces
 		final String sql = "SELECT COUNT(*) FROM bpark.parkingSpaces WHERE is_occupied = TRUE";
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
+			// Return the count if a result is found
 			if (rs.next()) {
 				return rs.getInt(1);
 			}
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+		// Return 0 if query fails or no result
 		return 0;
 	}
-
 	/**
 	 * get all the data that we need to save on parking report.
 	 * @param date
 	 * @return parking report
 	 */
 	private ParkingReport getDataForParkingReport(Date date) {
+		// query to retrieve parking events for the given month and year
 		String query = "SELECT * FROM parkingEvent WHERE YEAR(entryDate)=? AND MONTH(entryDate)=?";
+		
+		// Extract year and month from the input date
 		LocalDate local = date.toLocalDate();
 		int year = local.getYear();
 		int month = local.getMonthValue();
 		System.out.println("year = " + year + ", month = " + month);
+		
+		// Counters for report statistics
 		int totalExtends = 0;
 		int totalEntries = 0;
 		int totalLates=0;
@@ -1851,24 +1943,24 @@ public class DBController {
 		int betweenFourToEight=0;
 		int moreThanEight=0;
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set year and month in the SQL query
 			stmt.setInt(1, year);
 			stmt.setInt(2, month);
 			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
+			while (rs.next()) { // Iterate through the results
 				totalEntries++;
-
+				// Skip if exit date or hour is missing (still active)
 				if (rs.getDate("exitDate") == null || rs.getTime("exitHour") == null) {
 					continue;
 				}
+				// Calculate duration of parking session in hours
 				LocalDateTime entryDateTime = LocalDateTime.of(rs.getDate("entryDate").toLocalDate(), rs.getTime("entryHour").toLocalTime());
 				LocalDateTime exitDateTime = LocalDateTime.of(rs.getDate("exitDate").toLocalDate(), rs.getTime("exitHour").toLocalTime());
-
 				Duration duration = Duration.between(entryDateTime, exitDateTime);
-
 				long minutes=duration.toMinutes();
 				double durationOfParking=minutes/60.0;
 
-
+				// Categorize duration into 3 buckets
 				if(durationOfParking <4) {
 					lessThanFourHours++;
 				}
@@ -1878,6 +1970,7 @@ public class DBController {
 				else {
 					moreThanEight++;
 				}
+				// Count extensions and late sessions
 				if (rs.getBoolean("wasExtended")) {
 					totalExtends++;
 					if (durationOfParking>8) {
@@ -1891,12 +1984,13 @@ public class DBController {
 				}
 
 			}
+			// Return a report object with the gathered stats
 			return new ParkingReport(totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight);
 		} catch (SQLException e) {
 			System.out.println("Error get data for parking report: " + e.getMessage());
 			e.printStackTrace();
 		}
-		return null;
+		return null; // Return null on failure
 	}
 
 	/**
@@ -1904,9 +1998,11 @@ public class DBController {
 	 * @param date
 	 */
 	public void createParkingReport(Date date) {
-		ParkingReport parkingReport=getDataForParkingReport(date);
+		ParkingReport parkingReport=getDataForParkingReport(date); // Generate parking report data for the given date
+		// SQL query to insert the report into the parkingReport table
 		String query="INSERT INTO parkingReport(dateOfParkingReport, totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight) VALUES (?, ?, ?, ?, ?, ?, ?);";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set parameters from the ParkingReport object
 			stmt.setDate(1, date);
 			stmt.setInt(2, parkingReport.getTotalEntries());
 			stmt.setInt(3, parkingReport.getTotalExtends());
@@ -1914,7 +2010,7 @@ public class DBController {
 			stmt.setInt(5, parkingReport.getLessThanFour());
 			stmt.setInt(6, parkingReport.getBetweenFourToEight());
 			stmt.setInt(7, parkingReport.getMoreThanEight());
-			stmt.executeUpdate();
+			stmt.executeUpdate(); //execute
 			System.out.println("Parking reoprt created!");
 		} catch (SQLException e) {
 			System.out.println("Error creating parking report: "+ e.getMessage());
@@ -1928,18 +2024,19 @@ public class DBController {
 	 * @return true if exists. false if doesn't.
 	 */
 	public boolean parkingReportExists(Date date) {
+		// SQL query to check if a parking report already exists for the given date
 		String query="SELECT * FROM parkingReport WHERE dateOfParkingReport=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			stmt.setDate(1, date);
+			stmt.setDate(1, date); // Set the date parameter
 			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
+			if (rs.next()) { // If a result exists, the report already exists
 				return true;
 			}
 		} catch (SQLException e) {
 			System.out.println("Error check existence of parking report: "+ e.getMessage());
 			e.printStackTrace();
 		}
-		return false;
+		return false; // Return false if report does not exist or error occurred
 	}
 
 	/**
@@ -1948,17 +2045,29 @@ public class DBController {
 	 * @return parking report 
 	 */
 	public ParkingReport getParkingReport(Date date) {
-		String query="SELECT * FROM bpark.parkingReport WHERE dateOfParkingReport=?";
+		// SQL query to retrieve a parking report for the given date
+		String query = "SELECT * FROM bpark.parkingReport WHERE dateOfParkingReport=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set the date parameter in the query
 			stmt.setDate(1, date);
 			ResultSet rs = stmt.executeQuery();
+
+			// If a result exists, build and return the ParkingReport object
 			if (rs.next()) {
-				return new ParkingReport(rs.getInt("totalEntries"), rs.getInt("totalExtends"), rs.getInt("totalLates"), rs.getInt("lessThanFourHours"), rs.getInt("betweenFourToEight"), rs.getInt("moreThanEight"));
+				return new ParkingReport(
+					rs.getInt("totalEntries"),
+					rs.getInt("totalExtends"),
+					rs.getInt("totalLates"),
+					rs.getInt("lessThanFourHours"),
+					rs.getInt("betweenFourToEight"),
+					rs.getInt("moreThanEight")
+				);
 			}
 		} catch (SQLException e) {
-			System.out.println("Error get parking report: "+ e.getMessage());
+			System.out.println("Error get parking report: " + e.getMessage());
 			e.printStackTrace();
 		}
+		// Return null if no report found or error occurred
 		return null;
 	}
 
@@ -1975,7 +2084,7 @@ public class DBController {
 	 */
 	public List<SubscriberStatusReport> getSubscriberStatusLive(int month, int year)
 			throws SQLException {
-
+		// SQL query to generate a live snapshot of subscriber parking activity for the given month and year
 		final String sql =
 				"""
 				SELECT
@@ -2001,10 +2110,11 @@ public class DBController {
 		List<SubscriberStatusReport> rows = new ArrayList<>();
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			// Set the year and month parameters in the query
 			ps.setInt(1, year);
 			ps.setInt(2, month);
 			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
+				while (rs.next()) { // Build the result list from the result set
 					rows.add(new SubscriberStatusReport(
 							rs.getInt("code"),
 							rs.getString("fullName"),
@@ -2015,7 +2125,7 @@ public class DBController {
 				}
 			}
 		}
-		return rows;
+		return rows; // Return the list of status reports
 	}
 
 	/**
@@ -2056,7 +2166,7 @@ public class DBController {
 		try (PreparedStatement ins = conn.prepareStatement(insertSQL)) {
 			java.sql.Date monthKey =
 					java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month));
-
+			// Insert each subscriber's status row into the report table
 			for (SubscriberStatusReport r : rows) {
 				ins.setDate   (1, monthKey);
 				ins.setInt    (2, r.getCode());
@@ -2069,7 +2179,7 @@ public class DBController {
 			}
 			ins.executeBatch();
 		}
-		return inserted;
+		return inserted; // Return the number of inserted rows
 	}
 
 	/**
@@ -2084,7 +2194,7 @@ public class DBController {
 	 */
 	public List<SubscriberStatusReport> getSubscriberStatusFromTable(int month, int year)
 			throws SQLException {
-
+		// query to retrieve stored monthly snapshot of subscriber status, joined with their names
 		String sql =
 				"SELECT subscriberCode, totalEntries, totalExtends, totalLates, totalHours, " +
 						"       CONCAT(s.firstName,' ',s.lastName) AS fullName " +
@@ -2095,9 +2205,10 @@ public class DBController {
 		List<SubscriberStatusReport> rows = new ArrayList<>();
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			// Set the reportMonth date (first of month)
 			ps.setDate(1, java.sql.Date.valueOf(String.format("%04d-%02d-01", year, month)));
 			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
+				while (rs.next()) { // Convert each row in the result set into a SubscriberStatusReport object
 					rows.add(new SubscriberStatusReport(
 							rs.getInt("subscriberCode"),
 							rs.getString("fullName"),
@@ -2108,7 +2219,7 @@ public class DBController {
 				}
 			}
 		}
-		return rows;
+		return rows; // Return the list of reports
 	}
 
 	/**
@@ -2122,20 +2233,20 @@ public class DBController {
 	 * @throws SQLException if DB check fails
 	 */
 	public boolean subscriberStatusReportExists(int month, int year) throws SQLException {
-
+		// SQL query to check if a monthly subscriber status report already exists
 		String sql =
 				"SELECT 1 FROM subscriberStatusReport " +
 						"WHERE MONTH(reportMonth)=? AND YEAR(reportMonth)=? " +
 						"LIMIT 1";
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			// Set parameters for month and year
 			ps.setInt(1, month);
 			ps.setInt(2, year);
-			try (ResultSet rs = ps.executeQuery()) {
+			try (ResultSet rs = ps.executeQuery()) { // Execute the query and return true if a row is found
 				return rs.next();     
 			}
 		}
-
 	}
 
 	/**
@@ -2148,20 +2259,22 @@ public class DBController {
 	 * @return true if an active order already exists for the same date and time; false otherwise
 	 */
 	public boolean checkIfOrderAlreadyExists(int subscriberCode, Date selectedDate, Time timeOfArrival) {
+		// query to check if an active order already exists for the given subscriber, date, and time
 		String query = "SELECT * FROM bpark.order WHERE subscriberCode = ? AND order_date = ? AND arrival_time = ? AND `status`='ACTIVE'";
 
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// set parameters to query
 			stmt.setInt(1, subscriberCode);
 			stmt.setDate(2, selectedDate);
 			stmt.setTime(3, timeOfArrival);
 
-			ResultSet rs = stmt.executeQuery();
+			ResultSet rs = stmt.executeQuery(); //execute
 			return rs.next(); // if there's at least 1 result of that, it means that there is an order like that that's exists
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-		return false;
+		// Return false if no match or error occurred
+		return false; 
 	}
 
 
@@ -2172,11 +2285,12 @@ public class DBController {
 	 *         null if an error occurs during retrieval
 	 */
 	public ArrayList<Date> getAllReportsDates(){
-		ArrayList<Date> datesOfReports=new ArrayList<>();
+		ArrayList<Date> datesOfReports=new ArrayList<>(); // Create a list to store report dates
+		// SQL query to retrieve all report dates from the parkingReport table
 		String query="SELECT dateOfParkingReport FROM parkingReport";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
+			while (rs.next()) { // Add each retrieved date to the list
 				datesOfReports.add(rs.getDate("dateOfParkingReport"));
 			}
 			return datesOfReports;
@@ -2184,16 +2298,17 @@ public class DBController {
 			System.out.println("Error getting reports dates: "+e.getMessage());
 			e.printStackTrace();
 		}
-		return null;
+		return null; // Return null in case of exception
 	}
 
 	/**
 	 * set inactive order after 15 minutes from arrival time
 	 */
 	public void inactiveReservations() {
+		// query  to mark reservations as INACTIVE if their arrival time was more than 15 minutes ago
 		String query="UPDATE `order` SET `status`='INACTIVE' WHERE `status`='ACTIVE' AND TIMESTAMP(order_date, arrival_time) <= NOW() - INTERVAL 15 MINUTE;";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			int rowsUpdated = stmt.executeUpdate();
+			int rowsUpdated = stmt.executeUpdate(); //execute
 		} catch (SQLException e) {
 			System.out.println("Error inactive reservations: "+e.getMessage());
 			e.printStackTrace();
@@ -2210,6 +2325,8 @@ public class DBController {
 	 * @return true if there is a conflicting reservation, false otherwise
 	 */
 	public boolean hasReservationConflict(int subscriberCode, Date selectedDate, Time arrivalTime) {
+		// SQL query to check if there's an existing reservation within 4 hours of the requested time
+		// Ignores an exact match to allow updates to the same reservation
 		String query = """
 				    SELECT 1 FROM `order`
 				    WHERE subscriberCode = ?
@@ -2218,11 +2335,12 @@ public class DBController {
 				      AND ABS(TIMESTAMPDIFF(MINUTE, TIMESTAMP(order_date, arrival_time), ?)) < 240
 				""";
 
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+		try (PreparedStatement stmt = conn.prepareStatement(query)) { 
+			// Combine selected date and time into a single timestamp
 			Timestamp requestedTimestamp = Timestamp.valueOf(
 					selectedDate.toLocalDate().atTime(arrivalTime.toLocalTime()));
 
-			stmt.setInt(1, subscriberCode);
+			stmt.setInt(1, subscriberCode);				// Filter by subscriber
 			stmt.setTimestamp(2, requestedTimestamp); // exclude exact match
 			stmt.setTimestamp(3, requestedTimestamp); // compare to others
 
@@ -2232,7 +2350,7 @@ public class DBController {
 
 		} catch (SQLException e) {
 			System.err.println("Error checking reservation conflict: " + e.getMessage());
-			return true;
+			return true; // assume conflict in case of error
 		}
 	}
 
@@ -2245,6 +2363,7 @@ public class DBController {
 	 *         false - user is already marked online
 	 */
 	public boolean markUserLoggedIn(String username) throws SQLException {
+		// query to mark the user as logged in only if they are currently logged out
 		final String sql =
 				"UPDATE bpark.user " +
 						"SET    is_logged_in = 1 " +
@@ -2252,8 +2371,8 @@ public class DBController {
 						"  AND  is_logged_in = 0";
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, username);
-			return ps.executeUpdate() == 1;   // exactly one row updated -> OK
+			ps.setString(1, username); //set parameter to query
+			return ps.executeUpdate() == 1;   // exactly one row updated 
 		}
 	}
 
@@ -2263,12 +2382,13 @@ public class DBController {
 	 * @param username exact username
 	 */
 	public void markUserLoggedOut(String username) {
+		// query to mark the given user as logged out
 		final String sql =
 				"UPDATE bpark.user SET is_logged_in = 0 WHERE BINARY username = ?";
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, username);
-			ps.executeUpdate();
+			ps.setString(1, username); // Set the username parameter
+			ps.executeUpdate(); // execute
 		} catch (SQLException e) {
 			System.err.println("[DB] markUserLoggedOut: " + e.getMessage());
 		}
@@ -2283,12 +2403,13 @@ public class DBController {
 	 *         false otherwise or if a DB error occurs
 	 */
 	public boolean isUserOnline(String username) {
+		// SQL query to check user's login status
 		String sql = "SELECT is_logged_in FROM bpark.user " +
 				"WHERE BINARY username = ? LIMIT 1";
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, username);
+			ps.setString(1, username); // set parameter to query
 			try (ResultSet rs = ps.executeQuery()) {
-				return rs.next() && rs.getBoolean("is_logged_in");
+				return rs.next() && rs.getBoolean("is_logged_in"); // true if logged in
 			}
 		} catch (SQLException e) {
 			System.err.println("[DB] isUserOnline: " + e.getMessage());
@@ -2301,9 +2422,10 @@ public class DBController {
 	 * Called once at server startup to clear stale sessions.
 	 */
 	public void resetAllLoggedIn() {
+		// query to reset login status for all users
 		String sql = "UPDATE bpark.user SET is_logged_in = 0";
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.executeUpdate();
+			ps.executeUpdate(); // execute the reset
 		} catch (SQLException e) {
 			System.err.println("[DB] resetAllLoggedIn: " + e.getMessage());
 		}
