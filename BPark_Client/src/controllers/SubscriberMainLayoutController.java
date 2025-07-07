@@ -110,7 +110,6 @@ public class SubscriberMainLayoutController implements ClientAware, StageAware {
 	    try {
 	        if (client != null && client.isConnected()) {
 	            client.getRequestSender().sendDisconnect();  // use RequestSender
-	            client.closeConnection();                    // close socket
 	        }
 	    } catch (Exception e) {
 	        System.err.println("[CLIENT] Logout error: " + e.getMessage());
