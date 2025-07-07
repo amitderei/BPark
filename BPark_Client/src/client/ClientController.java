@@ -508,8 +508,16 @@ public class ClientController extends AbstractClient {
 			// Complete vehicle pickup.
 			case PICKUP_VEHICLE:
 			    if (pickupController != null) {
+			        // Always show the server's message (success or error) in the status label
 			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
-			        pickupController.disableAfterPickup();
+
+			        if (response.isSucceed()) {
+			            // If the pickup was successful - lock everything so user can't do it again
+			            pickupController.disableAfterPickup();
+			        } else {
+			            // If pickup failed (probably wrong parking code) - clear the field so they can try again
+			            pickupController.resetParkingCodeField();
+			        }
 			    }
 			    break;
 

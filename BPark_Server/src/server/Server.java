@@ -249,36 +249,41 @@ public class Server extends AbstractServer {
 				//serverController.addLog("LOGIN!!!");
 				break;
 
-				// Collect car. expected format {COLLECT_CAR, subscriberCode. parkingCode}
+			// Collect car. expected format: {COLLECT_CAR, subscriberCode, parkingCode}
 			case COLLECT_CAR:
-				int subCode = (int) data[1];
-				int parkCode = (int) data[2];
-				try {
-					String response = db.handleVehiclePickup(subCode, parkCode);
+			    int subCode = (int) data[1];
+			    int parkCode = (int) data[2];
 
-					if(response.equals("An error occurred while retrieving your parking session.") || 
-							response.equals("An error occurred while completing the pickup process.")) {
-						client.sendToClient(
-								new ServerResponse(false, null, null, response));
-						return;
-					}
+			    try {
+			        // Try to handle the pickup in DB - returns a message about the result
+			        String response = db.handleVehiclePickup(subCode, parkCode);
 
-					if(response.equals("No active parking session found for the provided information.")) {
-						client.sendToClient(
-								new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, response));
-						return;
-					}
-					
-					serverController.addLog("Subscriber " + subCode + " has retrieved his vehicle");
-					client.sendToClient(
-							new ServerResponse(false, null, ResponseType.PICKUP_VEHICLE, response));
+			        // If something went wrong while retrieving/finalizing the event
+			        if (response.equals("An error occurred while retrieving your parking session.") ||
+			            response.equals("An error occurred while completing the pickup process.")) {
 
-				} catch (Exception e) {
-					client.sendToClient(
-							new ServerResponse(false, null, null, "An error occurred while collecting the vehicle."));
-					System.err.println("Error: collectCar - " + e.getMessage());
-				}
-				break;
+			            client.sendToClient(new ServerResponse(false, null, null, response));
+			            return;
+			        }
+
+			        // If no active parking session was found for the given subscriber & code
+			        if (response.equals("No active parking session found for the provided information.")) {
+			            client.sendToClient(new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, response));
+			            return;
+			        }
+
+			        // Everything is okay - pickup succeeded
+			        serverController.addLog("Subscriber " + subCode + " has retrieved his vehicle");
+
+			        // must return success = true here!
+			        client.sendToClient(new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, response));
+
+			    } catch (Exception e) {
+			        // Unexpected error (DB crash, null pointer, etc)
+			        client.sendToClient(new ServerResponse(false, null, null, "An error occurred while collecting the vehicle."));
+			        System.err.println("Error: collectCar - " + e.getMessage());
+			    }
+			    break;
 
 				//update details of subscriber. expected format={UPDATE_DETAILS_OF_SUBSCRIBER, subscriber\null, user\null}
 			case UPDATE_DETAILS_OF_SUBSCRIBER:

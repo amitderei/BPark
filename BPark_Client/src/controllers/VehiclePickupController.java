@@ -130,16 +130,38 @@ public class VehiclePickupController implements ClientAware {
     }
 
     /**
-     * Triggered when the user enters the parking code and clicks "Collect Car".
-     * Sends both the subscriber code and parking code to the server.
+     * Called when the user clicks "Collect Car".
+     * Validates the parking code input and sends the request to the server.
+     *
+     * Only 6-digit numeric codes (between 100000 and 999999) are allowed.
+     * If the input is invalid or too long, we show a friendly message.
      */
     @FXML
     public void collectCar() {
+        String input = txtParkingCode.getText().trim(); // remove spaces
+
+        // make sure the input is only digits (regex), before parsing
+        if (!input.matches("\\d+")) {
+            UiUtils.setStatus(lblStatus, "Parking code must contain digits only.", false);
+            txtParkingCode.clear();
+            return;
+        }
+
         try {
-            int parkingCode = Integer.parseInt(txtParkingCode.getText());
+            int parkingCode = Integer.parseInt(input); // might still throw if input too big
+
+            if (parkingCode < 100000 || parkingCode > 999999) {
+                UiUtils.setStatus(lblStatus, "Parking code is incorrect. Please try again.", false);
+                txtParkingCode.clear();
+                return;
+            }
+
             client.getRequestSender().collectCar(validatedSubscriberCode, parkingCode);
+
         } catch (NumberFormatException e) {
-            UiUtils.setStatus(lblStatus, "Parking code must be numeric.", false);
+            // input was numeric, but too large for int (e.g. more than 9 digits)
+            UiUtils.setStatus(lblStatus, "Parking code is incorrect. Please try again.", false);
+            txtParkingCode.clear();
         } catch (Exception ex) {
             UiUtils.setStatus(lblStatus,
                     "An error occurred while trying to collect the vehicle.", false);
@@ -206,5 +228,14 @@ public class VehiclePickupController implements ClientAware {
         txtParkingCode.setDisable(true);
         btnCollectCar.setDisable(true);
         btnLostCode.setDisable(true);
+    }
+    
+    /**
+     * Clears the parking code field and puts the cursor back inside it,
+     * so the user can easily try again.
+     */
+    public void resetParkingCodeField() {
+        txtParkingCode.clear();         // remove whatever the user typed
+        txtParkingCode.requestFocus(); // put the blinking cursor back in the field
     }
 }
