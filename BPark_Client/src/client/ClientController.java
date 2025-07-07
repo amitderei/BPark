@@ -421,7 +421,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Parking report data received. expected type: {PARKING_REPORT_LOADED}
+			// Parking report data received. 
 			case PARKING_REPORT_LOADED:
 			    if (response.isSucceed() && parkingReportController != null) {
 			        parkingReportController.setParkingReport((ParkingReport) response.getData());
@@ -429,21 +429,21 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Successful login. expected type: {LOGIN_SUCCESSFULL}
+			// Successful login.
 			case LOGIN_SUCCESSFULL:
 			    if (response.isSucceed() && loginController != null) {
 			        loginController.handleLoginSuccess((User) response.getData());
 			    }
 			    break;
 
-			// Order deleted – refresh the reservations list. expected type: {ORDER_DELETED}
+			// Order deleted – refresh the reservations list. 
 			case ORDER_DELETED:
 			    if (response.isSucceed() && watchAndCancelOrdersController != null) {
 			        getRequestSender().askForReservations();
 			    }
 			    break;
 
-			// Check if reservation conflicts exist. expected type: {CONFLICT_CHECKED}
+			// Check if reservation conflicts exist. 
 			case CONFLICT_CHECKED:
 			    if (newOrderController != null) {
 			        boolean hasConflict = (boolean) response.getData();
@@ -451,14 +451,14 @@ public class ClientController extends AbstractClient {
 			        break;
 			    }
 
-			// Load parking history for subscriber. expected type: {PARKING_HISTORY_LOADED}
+			// Load parking history for subscriber.
 			case PARKING_HISTORY_LOADED:
 			    if (response.isSucceed() && viewParkingHistoryController != null) {
 			        viewParkingHistoryController.displayHistory((ArrayList<ParkingEvent>) response.getData());
 			    }
 			    break;
 
-			// Load and display list of existing orders. expected type: {ORDERS_DISPLAY}
+			// Load and display list of existing orders.
 			case ORDERS_DISPLAY:
 			    if (response.isSucceed() && response.getData() instanceof ArrayList<?> dataList
 			            && watchAndCancelOrdersController != null) {
@@ -467,7 +467,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// No existing orders found. expected type: {NO_ORDERS}
+			// No existing orders found.
 			case NO_ORDERS:
 			    if (response.isSucceed() && watchAndCancelOrdersController != null) {
 			        watchAndCancelOrdersController.displayOrders(new ArrayList<Order>());
@@ -475,7 +475,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Subscriber details updated. expected type: {DETAILS_UPDATED}
+			// Subscriber details updated. 
 			case DETAILS_UPDATED:
 			    if (response.isSucceed()) {
 			        ArrayList<Object> newDetails = (ArrayList<Object>) response.getData();
@@ -490,7 +490,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Verify subscriber during pickup. expected type: {SUBSCRIBER_VERIFIED}
+			// Verify subscriber during pickup. 
 			case SUBSCRIBER_VERIFIED:
 			    if (pickupController != null) {
 			        // Always show status in the label - success or failure
@@ -506,7 +506,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Complete vehicle pickup. expected type: {PICKUP_VEHICLE}
+			// Complete vehicle pickup.
 			case PICKUP_VEHICLE:
 			    if (pickupController != null) {
 			        UiUtils.setStatus(pickupController.getStatusLabel(), response.getMsg(), response.isSucceed());
@@ -514,42 +514,42 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Load available report dates. expected type: {REPOSTS_DATE_LOADED}
+			// Load available report dates.
 			case REPOSTS_DATE_LOADED:
 			    if (response.isSucceed() && parkingReportController != null) {
 			        parkingReportController.setDates((ArrayList<Date>) (response.getData()));
 			    }
 			    break;
 
-			// Order was successfully added. expected type: {ORDER_ADDED}
+			// Order was successfully added. 
 			case ORDER_ADDED:
 			    if (response.isSucceed() && newOrderController != null) {
 			        newOrderController.setOrderAndGoToNextPage((Order) response.getData());
 			    }
 			    break;
 
-			// Checked whether an order exists and it does NOT. expected type: {ORDER_NOT_EXISTS}
+			// Checked whether an order exists and it does NOT. 
 			case ORDER_NOT_EXISTS:
 			    if (response.isSucceed() && newOrderController != null) {
 			        newOrderController.orderExistFuture.complete(false);
 			    }
 			    break;
 
-			// Checked whether an order exists and it does. expected type: {ORDER_ALREADY_EXISTS}
+			// Checked whether an order exists and it does. 
 			case ORDER_ALREADY_EXISTS:
 			    if (response.isSucceed() && newOrderController != null) {
 			        newOrderController.orderExistFuture.complete(true);
 			    }
 			    break;
 
-			// Subscriber details fetched successfully. expected type: {SUBSCRIBER_DETAILS}
+			// Subscriber details fetched successfully. 
 			case SUBSCRIBER_DETAILS:
 			    if (response.isSucceed()) {
 			        setSubscriber((Subscriber) response.getData());
 			    }
 			    break;
 
-			// Report about subscribers with late pickups. expected type: {LATE_PICKUP_COUNTS}
+			// Report about subscribers with late pickups. 
 			case LATE_PICKUP_COUNTS:
 			    if (response.isSucceed()) {
 			        ArrayList<Object[]> rows = (ArrayList<Object[]>) response.getData();
@@ -572,7 +572,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Load details of specific parking event. expected type: {PARKING_INFO_LOADED}
+			// Load details of specific parking event. 
 			case PARKING_INFO_LOADED:
 			    if (response.isSucceed() && viewActiveParkingInfoController != null) {
 			        viewActiveParkingInfoController.setParkingEvent((ParkingEvent) response.getData());
@@ -580,7 +580,7 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Load list of active parkings. expected type: {ACTIVE_PARKINGS}
+			// Load list of active parkings.
 			case ACTIVE_PARKINGS:
 			    if (response.isSucceed() && viewActiveParkingsController != null) {
 			        ArrayList<ParkingEvent> events = (ArrayList<ParkingEvent>) response.getData();
@@ -588,12 +588,13 @@ public class ClientController extends AbstractClient {
 			    }
 			    break;
 
-			// Parking session was extended. expected type: {PARKING_SESSION_EXTENDED}
+			// Parking session was extended.
 			case PARKING_SESSION_EXTENDED:
 			    if (response.getMsg() != null && extendParkingController != null) {
 			        extendParkingController.onExtensionResponse(response.isSucceed(), response.getMsg());
 			    }
 			    break;
+			//action of register new subscriber ended.
 			case SUBSCRIBER_INSERTED:
 				// If the registration failed and the server sent a list of duplicate fields
 				// (like "username", "email", etc.)
@@ -618,6 +619,7 @@ public class ClientController extends AbstractClient {
 					
 				}
 				break;
+			//return the parking availability to the subscriber
 			case PARKING_AVALIABILITY:
 				if (response.isSucceed() && response.getData() instanceof Object[] stats
 						&& availabilityController != null) {
@@ -625,18 +627,21 @@ public class ClientController extends AbstractClient {
 					
 				}
 				break;
+			//return the order is valid
 			case RESERVATION_VALID:
 				if (newOrderController != null) {
 					newOrderController.makingReservation(true);
 					
 				}
 				break;
+			//return the order is invalid
 			case RESERVATION_INVALID:
 				if (newOrderController != null) {
 					newOrderController.makingReservation(false);
 					
 				}
 				break;
+			//return subscriber status report
 			case SUBSCRIBER_STATUS:
 				if (subscriberStatusController != null && response.getData() instanceof List<?> listRaw) {
 					if (response.isSucceed()) {
@@ -652,7 +657,7 @@ public class ClientController extends AbstractClient {
 						break;
 					}
 				}
-
+			//return if subscriber code is valid
 			case SUBSCRIBER_CODE:
 				if (newDeliveryController != null) {
 					if (response.isSucceed()) {
@@ -663,19 +668,20 @@ public class ClientController extends AbstractClient {
 						break;
 					}
 				}
-
+			//return- there is a reservation in delivery
 			case RESERVATION_EXISTS:
 				if (newDeliveryController != null) {
 					newDeliveryController.hasReservation();
 					
 				}
 				break;
+			//return there isn't a reservation in delivery
 			case RESERVATION_NOT_EXISTS:
 				if (newDeliveryController != null) {
 					newDeliveryController.NoReservation();
-					
 				}
 				break;
+			//return if confirmation code is valid
 			case CONFIRMATION_CODE_VALIDATION:
 				if (newDeliveryController != null) {
 					if (response.isSucceed()) {
@@ -687,6 +693,7 @@ public class ClientController extends AbstractClient {
 					}
 				}
 				break;
+			//return if there is empty space
 			case PARKING_SPACE_AVAILABILITY:
 				if (newDeliveryController != null) {
 					if (response.isSucceed()) {
@@ -703,17 +710,20 @@ public class ClientController extends AbstractClient {
 					}
 				}
 				break;
+			//return vehicle id
 			case VEHICLE_ID:
 				if (newDeliveryController != null) {
 					String vehicleID = (String) response.getData();
 					newDeliveryController.vehicleIdFuture.complete(vehicleID);
 				}
 				break;
+			//deliver the vehicle into lot
 			case DELIVER_VEHICLE:
 				if (newDeliveryController != null) {
 					newDeliveryController.successfulDelivery();
 				}
 				break;
+			//check if the tag is exists in the system
 			case TAG_EXISTS:
 				if (newDeliveryController != null) {
 					if (response.isSucceed()) {
@@ -725,12 +735,14 @@ public class ClientController extends AbstractClient {
 					}
 				}
 				break;
+			//return subscriber code
 			case MATCHED_SUBSCRIBER_TO_TAG:
 				if (newDeliveryController != null) {
 					int subCode = (int) response.getData();
 					newDeliveryController.subCodeFuture.complete(subCode);
 				}
 				break;
+			//return subscriber vehicle is inside lot by the tag
 			case SUBSCRIBER_VEHICLE_ISNT_INSIDE:
 				if (newDeliveryController != null) {
 					if (response.isSucceed()) {
@@ -741,7 +753,7 @@ public class ClientController extends AbstractClient {
 						break;
 					}
 				}
-
+			//return subscriber vehicle not inside lot by the tag
 			case SUBSCRIBER_VEHICLE_ISNT_INSIDE_BY_TAG:
 				if (newDeliveryController != null) {
 					newDeliveryController.findMatchedSubToTheTag();
