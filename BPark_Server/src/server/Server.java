@@ -188,10 +188,10 @@ public class Server extends AbstractServer {
 					String[] emailAndPhone = db.getEmailAndPhoneNumber((int) data[1]);
 					String email = emailAndPhone[0];
 					String phone = emailAndPhone[1];
-					ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
-					sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
-					//serverController.addLog("Sent 'Forgot parking code' email to subscriber: " + (Subscriber)data[1]);
+					ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));	
+					sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode() , TypeOfMail.FORGOT_PASSWORD);
 					client.sendToClient(new ServerResponse(true, null, null, "The code was sent to your email."));
+					serverController.addLog("Sent 'Forgot parking code' email to subscriber: " + (Subscriber)data[1]);
 				} catch (Exception e) {
 					e.printStackTrace();
 					client.sendToClient(
