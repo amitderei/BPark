@@ -505,86 +505,92 @@ public class Server extends AbstractServer {
 					
 				//register a new subscriber to the system. expected format: {REGISTER_SUBSCRIBER, subscriber, vehicleID}
 				case REGISTER_SUBSCRIBER:
-					Subscriber receivedSub = (Subscriber) data[1];
-					String vehicleId = (data.length > 2 && data[2] instanceof String) ? (String) data[2] : null;
+				    Subscriber receivedSub = (Subscriber) data[1];
+				    String vehicleId       = (data.length > 2 && data[2] instanceof String)
+				                             ? (String) data[2] : null;
 
-					// Step 0: Check for duplicates
-					List<String> invalidFields = new ArrayList<>();
+				    // 1. check duplicates before we touch the DB 
+				    List<String> invalid = new ArrayList<>();
+				    if (db.usernameExists(receivedSub.getUsername())) invalid.add("username");
+				    if (db.emailExists(receivedSub.getEmail()))       invalid.add("email");
+				    if (db.phoneExists(receivedSub.getPhoneNum()))    invalid.add("phone");
+				    if (db.idExists(receivedSub.getUserId()))         invalid.add("id");
+				    if (vehicleId != null && db.vehicleExists(vehicleId)) invalid.add("vehicle");
 
-					if (db.usernameExists(receivedSub.getUsername()))
-					    invalidFields.add("username");
+				    if (!invalid.isEmpty()) {
+				        client.sendToClient(new ServerResponse(false, invalid,
+				                ResponseType.SUBSCRIBER_INSERTED,
+				                "Duplicate fields"));
+				        break;   // stop right here
+				    }
 
-					if (db.emailExists(receivedSub.getEmail()))
-					    invalidFields.add("email");
+				    // 2. generate code / tag / temp-password 
+				    int    newCode           = db.getNextSubscriberCode();
+				    String newTag            = db.generateNextTagId();
+				    String tmpPassword       = generateRandomPassword();
 
-					if (db.phoneExists(receivedSub.getPhoneNum()))
-					    invalidFields.add("phone");
+				    receivedSub.setSubscriberCode(newCode);
+				    receivedSub.setTagId(newTag);
 
-					if (db.idExists(receivedSub.getUserId()))
-					    invalidFields.add("id");
+				    // 3. user -> DB 
+				    if (!db.insertUser(new User(receivedSub.getUsername(),
+				                                tmpPassword,
+				                                "Subscriber"))) {
+				        client.sendToClient(new ServerResponse(false, null,
+				                ResponseType.SUBSCRIBER_INSERTED,
+				                "Failed to insert user. Try again later."));
+				        break;
+				    }
 
-					if (vehicleId != null && db.vehicleExists(vehicleId))
-					    invalidFields.add("vehicle");
+				    // 4. subscriber -> DB */
+				    if (!db.insertSubscriber(receivedSub)) {
+				        client.sendToClient(new ServerResponse(false, null,
+				                ResponseType.SUBSCRIBER_INSERTED,
+				                "Failed to insert subscriber. Try again."));
+				        break;
+				    }
 
-					if (!invalidFields.isEmpty()) {
-					    client.sendToClient(new ServerResponse(false, invalidFields, ResponseType.SUBSCRIBER_INSERTED, "Duplicate fields"));
-					    return;
-					}
+				    // 5. vehicle 
+				    if (vehicleId != null && !db.insertVehicle(vehicleId, newCode)) {
+				        client.sendToClient(new ServerResponse(false, null,
+				                ResponseType.SUBSCRIBER_INSERTED,
+				                "Failed to register vehicle."));
+				        break;
+				    }
 
+				    // 6. build the welcome mail – now includes Subscriber Code 
+				    String mailBody = String.format(
+				            """
+				            Hello %s,
 
-					// Step 1: Generate subscriberCode and tagId
-					int newCode = db.getNextSubscriberCode();
-					String newTag = db.generateNextTagId();
-					String generatedPassword = generateRandomPassword();
+				            Your registration to the BPARK system was successful!
 
-					receivedSub.setSubscriberCode(newCode);
-					receivedSub.setTagId(newTag);
+				            Subscriber Code: %d
 
-					// Step 2: Insert user
-					boolean userSuccess = db.insertUser(new User(receivedSub.getUsername(), generatedPassword, "Subscriber"));
-					if (!userSuccess) {
-						client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_INSERTED, "Failed to insert user. Try again later."));
-						return;
-					}
+				            Login credentials:
+				            - Username: %s
+				            - Temporary Password: %s
 
-					// Step 3: Insert subscriber
-					boolean subSuccess = db.insertSubscriber(receivedSub);
-					if (!subSuccess) {
-						client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_INSERTED, "Failed to insert subscriber. Try again."));
-						return;
-					}
+				            %s
 
-					// Step 4: Insert vehicle (if provided)
-					if (vehicleId != null) {
-						boolean vehicleSuccess = db.insertVehicle(vehicleId, newCode);
-						if (!vehicleSuccess) {
-							client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_INSERTED, "Failed to register vehicle."));
-							return;
-						}
-					}
+				            Thank you,
+				            BPARK Team
+				            """,
+				            receivedSub.getFirstName(),
+				            newCode,
+				            receivedSub.getUsername(),
+				            tmpPassword,
+				            (vehicleId != null ? "Vehicle ID: " + vehicleId : "")
+				    );
 
-					// Step 5: Send password to email
-					String content = String.format("""
-							Hello %s,
+				    sendEmail.sendEmail(receivedSub.getEmail(), mailBody,
+				                        TypeOfMail.GENERIC_MESSAGE);
 
-							Your registration to the BPARK system was successful!
-
-							Login credentials:
-							- Username: %s
-							- Temporary Password: %s
-
-							%s
-
-							Thank you,
-							BPARK Team
-							""", receivedSub.getFirstName(), receivedSub.getUsername(), generatedPassword,
-							(vehicleId != null ? "Vehicle ID: " + vehicleId : ""));
-
-					sendEmail.sendEmail(receivedSub.getEmail(), content, TypeOfMail.GENERIC_MESSAGE);
-
-					client.sendToClient(new ServerResponse(true, receivedSub, ResponseType.SUBSCRIBER_INSERTED,
-							"Subscriber registered successfully.\nLogin details sent via email."));
-					break;
+				    // 7. done – tell the client 
+				    client.sendToClient(new ServerResponse(true, receivedSub,
+				            ResponseType.SUBSCRIBER_INSERTED,
+				            "Subscriber registered successfully." + "Login details sent via email."));
+				    break;
 
 				//get subscriber status report of selected date. expected format: {GET_SUBSCRIBER_STATUS_REPORT, month, year}
 				case GET_SUBSCRIBER_STATUS_REPORT:
