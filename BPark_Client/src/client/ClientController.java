@@ -25,226 +25,343 @@ import java.util.*;
  * application.
  */
 public class ClientController extends AbstractClient {
-
-	/** Helper object responsible for sending requests to the server. */
+	/** Helper object responsible for sending requests to the server. */ 
 	private final ClientRequestSender requestSender;
+	
+    /** Stores the logged-in subscriber object during session (null if not logged in) */
+    private Subscriber subscriber;
 
-	// UI controllers (setters are used from JavaFX side)
-	private LoginController loginController;
-	private VehiclePickupController pickupController;
-	private GuestMainController guestMainController;
-	private CreateNewOrderViewController newOrderController;
-	private ParkingReservationSummaryController summaryController;
-	private SubscriberMainController subscriberMainController;
-	private VehicleDeliveryController newDeliveryController;
-	private SubscriberMainLayoutController mainLayoutController;
-	private WatchAndCancelOrdersController watchAndCancelOrdersController;
-	private ViewSubscriberDetailsController viewSubscriberDetailsController;
-	private EditSubscriberDetailsController editSubscriberDetailsController;
-	private ViewParkingHistoryController viewParkingHistoryController;
-	private ViewSubscribersInfoController viewSubscribersInfoController;
-	private ViewActiveParkingsController viewActiveParkingsController;
-	private ViewActiveParkingInfoController viewActiveParkingInfoController;
-	private TerminalMainLayoutController terminalController;
-	private MainController mainController;
-	private StaffMainLayoutController staffMainLayoutController;
-	private ExtendParkingController extendParkingController;
-	private RegisterSubscriberController registerSubscriberController;
-	private AvailabilityController availabilityController;
-	private ParkingReportController parkingReportController;
-	private SubscriberStatusController subscriberStatusController;
+    /** Stores the user's password during the current session */
+    private String password;
 
-	/**
-	 * Stores the logged-in subscriber object during session (null if not logged in)
-	 */
-	private Subscriber subscriber;
+    
+    // Controllers – each one is set via a corresponding setter from the UI
+    
+    /** Controller for the login screen. */
+    private LoginController loginController;
 
-	/** Stores the user's password during the current session */
-	private String password;
+    /** Controller for the vehicle pickup screen. */
+    private VehiclePickupController pickupController;
 
-	/**
-	 * Constructs a new {@code ClientController} instance with the specified host
-	 * and port.
-	 * 
-	 * @param host the server host address
-	 * @param port the server port number
-	 */
-	public ClientController(String host, int port) {
-		super(host, port);
-		this.requestSender = new ClientRequestSender(this);
-	}
+    /** Controller for the guest main screen. */
+    private GuestMainController guestMainController;
 
-	/** @return a reference to the helper class that sends requests */
-	public ClientRequestSender getRequestSender() {
-		return requestSender;
-	}
+    /** Controller for creating a new parking order. */
+    private CreateNewOrderViewController newOrderController;
 
-	/**
-	 * Sets the password for the current client session.
-	 * 
-	 * @param password the password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    /** Controller for displaying the parking reservation summary. */
+    private ParkingReservationSummaryController summaryController;
 
-	/**
-	 * Gets the password for the current client session.
-	 * 
-	 * @return the current password
-	 */
-	public String getPassword() {
-		return password;
-	}
+    /** Controller for the subscriber’s main screen. */
+    private SubscriberMainController subscriberMainController;
 
-	public void setLoginController(LoginController c) {
-		this.loginController = c;
-	}
+    /** Controller for vehicle delivery at the exit. */
+    private VehicleDeliveryController newDeliveryController;
 
-	public void setPickupController(VehiclePickupController c) {
-		this.pickupController = c;
-	}
+    /** Controller for the main layout used by subscribers. */
+    private SubscriberMainLayoutController mainLayoutController;
 
-	public void setGuestMainController(GuestMainController c) {
-		this.guestMainController = c;
-	}
+    /** Controller for managing and cancelling reservations. */
+    private WatchAndCancelOrdersController watchAndCancelOrdersController;
 
-	public void setNewOrderController(CreateNewOrderViewController c) {
-		this.newOrderController = c;
-	}
+    /** Controller for viewing subscriber details. */
+    private ViewSubscriberDetailsController viewSubscriberDetailsController;
 
-	public void setSummaryController(ParkingReservationSummaryController c) {
-		this.summaryController = c;
-	}
+    /** Controller for editing subscriber details. */
+    private EditSubscriberDetailsController editSubscriberDetailsController;
 
-	public void setSubscriberMainController(SubscriberMainController c) {
-		this.subscriberMainController = c;
-	}
+    /** Controller for viewing the subscriber’s parking history. */
+    private ViewParkingHistoryController viewParkingHistoryController;
 
-	public void setDeliveryController(VehicleDeliveryController c) {
-		this.newDeliveryController = c;
-	}
+    /** Controller for staff viewing subscriber information and statistics. */
+    private ViewSubscribersInfoController viewSubscribersInfoController;
 
-	public void setMainLayoutController(SubscriberMainLayoutController c) {
-		this.mainLayoutController = c;
-	}
+    /** Controller for viewing active parking sessions. */
+    private ViewActiveParkingsController viewActiveParkingsController;
 
-	public SubscriberMainLayoutController getMainLayoutController() {
-		return mainLayoutController;
-	}
+    /** Controller for viewing detailed information about a specific parking session. */
+    private ViewActiveParkingInfoController viewActiveParkingInfoController;
 
-	public void setWatchAndCancelOrdersController(WatchAndCancelOrdersController c) {
-		this.watchAndCancelOrdersController = c;
-	}
+    /** Controller for the terminal (kiosk) main layout. */
+    private TerminalMainLayoutController terminalController;
 
-	public WatchAndCancelOrdersController getWatchAndCancelOrdersController() {
-		return watchAndCancelOrdersController;
-	}
+    /** Controller for the main entry point screen. */
+    private MainController mainController;
 
-	public void setViewSubscriberDetailsController(ViewSubscriberDetailsController c) {
-		this.viewSubscriberDetailsController = c;
-	}
+    /** Controller for the staff’s main layout screen. */
+    private StaffMainLayoutController staffMainLayoutController;
 
-	public void setEditSubscriberDetailsController(EditSubscriberDetailsController c) {
-		this.editSubscriberDetailsController = c;
-	}
+    /** Controller for extending parking sessions. */
+    private ExtendParkingController extendParkingController;
 
-	public EditSubscriberDetailsController getEditSubscriberDetailsController() {
-		return editSubscriberDetailsController;
-	}
+    /** Controller for registering new subscribers. */
+    private RegisterSubscriberController registerSubscriberController;
 
-	public void setViewParkingHistoryController(ViewParkingHistoryController c) {
-		this.viewParkingHistoryController = c;
-	}
+    /** Controller for showing current parking availability. */
+    private AvailabilityController availabilityController;
 
-	public ViewParkingHistoryController getViewParkingHistoryController() {
-		return viewParkingHistoryController;
-	}
+    /** Controller for generating and displaying parking reports. */
+    private ParkingReportController parkingReportController;
 
-	public void setViewSubscribersInfoController(ViewSubscribersInfoController c) {
-		this.viewSubscribersInfoController = c;
-	}
+    /** Controller for viewing monthly subscriber status reports. */
+    private SubscriberStatusController subscriberStatusController;
 
-	public ViewSubscribersInfoController getViewSubscribersInfoController() {
-		return viewSubscribersInfoController;
-	}
+    /**
+     * Constructs a new {@code ClientController} instance with the specified host and port.
+     * @param host the server host address
+     * @param port the server port number
+     */
+    public ClientController(String host, int port) {
+        super(host, port);
+        this.requestSender = new ClientRequestSender(this);
+    }
 
-	public void setViewActiveParkingsController(ViewActiveParkingsController c) {
-		this.viewActiveParkingsController = c;
-	}
+    /** @return a reference to the helper class that sends requests */
+    public ClientRequestSender getRequestSender() {
+        return requestSender;
+    }
 
-	public ViewActiveParkingsController getViewActiveParkingsController() {
-		return viewActiveParkingsController;
-	}
+    /**
+     * Sets the password for the current client session.
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setViewActiveParkingInfoController(ViewActiveParkingInfoController c) {
-		this.viewActiveParkingInfoController = c;
-	}
+    /**
+     * Gets the password for the current client session.
+     * @return the current password
+     */
+    public String getPassword() {
+        return password;
+    }
 
-	public ViewActiveParkingInfoController getViewActiveParkingInfoController() {
-		return viewActiveParkingInfoController;
-	}
+    /**
+     * Sets the login controller.
+     * @param c the login controller to set
+     */
+    public void setLoginController(LoginController c) { this.loginController = c; }
 
-	public void setMainController(MainController c) {
-		this.mainController = c;
-	}
+    /**
+     * Sets the vehicle pickup controller.
+     * @param c the vehicle pickup controller to set
+     */
+    public void setPickupController(VehiclePickupController c) { this.pickupController = c; }
 
-	public void setTerminalController(TerminalMainLayoutController c) {
-		this.terminalController = c;
-	}
+    /**
+     * Sets the guest main controller.
+     * @param c the guest main controller to set
+     */
+    public void setGuestMainController(GuestMainController c) { this.guestMainController = c; }
 
-	public void setStaffMainLayoutController(StaffMainLayoutController c) {
-		this.staffMainLayoutController = c;
-	}
+    /**
+     * Sets the new order controller.
+     * @param c the new order controller to set
+     */
+    public void setNewOrderController(CreateNewOrderViewController c) { this.newOrderController = c; }
 
-	public void setExtendParkingController(ExtendParkingController c) {
-		this.extendParkingController = c;
-	}
+    /**
+     * Sets the reservation summary controller.
+     * @param c the summary controller to set
+     */
+    public void setSummaryController(ParkingReservationSummaryController c) { this.summaryController = c; }
 
-	public ExtendParkingController getExtendParkingController() {
-		return extendParkingController;
-	}
+    /**
+     * Sets the subscriber main controller.
+     * @param c the subscriber main controller to set
+     */
+    public void setSubscriberMainController(SubscriberMainController c) { this.subscriberMainController = c; }
 
-	public void setRegisterSubscriberController(RegisterSubscriberController c) {
-		this.registerSubscriberController = c;
-	}
+    /**
+     * Sets the vehicle delivery controller.
+     * @param c the vehicle delivery controller to set
+     */
+    public void setDeliveryController(VehicleDeliveryController c) { this.newDeliveryController = c; }
 
-	public RegisterSubscriberController getRegisterSubscriberController() {
-		return registerSubscriberController;
-	}
+    /**
+     * Sets the main layout controller for subscribers.
+     * @param c the main layout controller to set
+     */
+    public void setMainLayoutController(SubscriberMainLayoutController c) { this.mainLayoutController = c; }
 
-	public void setAvailabilityController(AvailabilityController c) {
-		this.availabilityController = c;
-	}
+    /**
+     * Returns the main layout controller for subscribers.
+     * @return the main layout controller
+     */
+    public SubscriberMainLayoutController getMainLayoutController() { return mainLayoutController; }
 
-	public AvailabilityController getAvailabilityController() {
-		return availabilityController;
-	}
+    /**
+     * Sets the watch and cancel orders controller.
+     * @param c the watch and cancel orders controller to set
+     */
+    public void setWatchAndCancelOrdersController(WatchAndCancelOrdersController c) { this.watchAndCancelOrdersController = c; }
 
-	public void setParkingReportController(ParkingReportController c) {
-		this.parkingReportController = c;
-	}
+    /**
+     * Returns the watch and cancel orders controller.
+     * @return the watch and cancel orders controller
+     */
+    public WatchAndCancelOrdersController getWatchAndCancelOrdersController() { return watchAndCancelOrdersController; }
 
-	public ParkingReportController getParkingReportController() {
-		return parkingReportController;
-	}
+    /**
+     * Sets the view subscriber details controller.
+     * @param c the view subscriber details controller to set
+     */
+    public void setViewSubscriberDetailsController(ViewSubscriberDetailsController c) { this.viewSubscriberDetailsController = c; }
 
-	public void setSubscriberStatusController(SubscriberStatusController c) {
-		this.subscriberStatusController = c;
-	}
+    /**
+     * Sets the edit subscriber details controller.
+     * @param c the edit subscriber details controller to set
+     */
+    public void setEditSubscriberDetailsController(EditSubscriberDetailsController c) { this.editSubscriberDetailsController = c; }
 
-	public SubscriberStatusController getSubscriberStatusController() {
-		return subscriberStatusController;
-	}
+    /**
+     * Returns the edit subscriber details controller.
+     * @return the edit subscriber details controller
+     */
+    public EditSubscriberDetailsController getEditSubscriberDetailsController() { return editSubscriberDetailsController; }
 
-	public void setSubscriber(Subscriber subscriber) {
-		this.subscriber = subscriber;
-	}
+    /**
+     * Sets the view parking history controller.
+     * @param c the view parking history controller to set
+     */
+    public void setViewParkingHistoryController(ViewParkingHistoryController c) { this.viewParkingHistoryController = c; }
 
-	public Subscriber getSubscriber() {
-		return subscriber;
-	}
+    /**
+     * Returns the view parking history controller.
+     * @return the view parking history controller
+     */
+    public ViewParkingHistoryController getViewParkingHistoryController() { return viewParkingHistoryController; }
 
+    /**
+     * Sets the view subscribers info controller.
+     * @param c the view subscribers info controller to set
+     */
+    public void setViewSubscribersInfoController(ViewSubscribersInfoController c) { this.viewSubscribersInfoController = c; }
+
+    /**
+     * Returns the view subscribers info controller.
+     * @return the view subscribers info controller
+     */
+    public ViewSubscribersInfoController getViewSubscribersInfoController() { return viewSubscribersInfoController; }
+
+    /**
+     * Sets the view active parkings controller.
+     * @param c the view active parkings controller to set
+     */
+    public void setViewActiveParkingsController(ViewActiveParkingsController c) { this.viewActiveParkingsController = c; }
+
+    /**
+     * Returns the view active parkings controller.
+     * @return the view active parkings controller
+     */
+    public ViewActiveParkingsController getViewActiveParkingsController() { return viewActiveParkingsController; }
+
+    /**
+     * Sets the view active parking info controller.
+     * @param c the view active parking info controller to set
+     */
+    public void setViewActiveParkingInfoController(ViewActiveParkingInfoController c) { this.viewActiveParkingInfoController = c; }
+
+    /**
+     * Returns the view active parking info controller.
+     * @return the view active parking info controller
+     */
+    public ViewActiveParkingInfoController getViewActiveParkingInfoController() { return viewActiveParkingInfoController; }
+
+    /**
+     * Sets the main controller.
+     * @param c the main controller to set
+     */
+    public void setMainController(MainController c) { this.mainController = c; }
+
+    /**
+     * Sets the terminal controller.
+     * @param c the terminal controller to set
+     */
+    public void setTerminalController(TerminalMainLayoutController c) { this.terminalController = c; }
+
+    /**
+     * Sets the staff main layout controller.
+     * @param c the staff main layout controller to set
+     */
+    public void setStaffMainLayoutController(StaffMainLayoutController c) { this.staffMainLayoutController = c; }
+
+    /**
+     * Sets the extend parking controller.
+     * @param c the extend parking controller to set
+     */
+    public void setExtendParkingController(ExtendParkingController c) { this.extendParkingController = c; }
+
+    /**
+     * Returns the extend parking controller.
+     * @return the extend parking controller
+     */
+    public ExtendParkingController getExtendParkingController() { return extendParkingController; }
+
+    /**
+     * Sets the register subscriber controller.
+     * @param c the register subscriber controller to set
+     */
+    public void setRegisterSubscriberController(RegisterSubscriberController c) { this.registerSubscriberController = c; }
+
+    /**
+     * Returns the register subscriber controller.
+     * @return the register subscriber controller
+     */
+    public RegisterSubscriberController getRegisterSubscriberController() { return registerSubscriberController; }
+
+    /**
+     * Sets the availability controller.
+     * @param c the availability controller to set
+     */
+    public void setAvailabilityController(AvailabilityController c) { this.availabilityController = c; }
+
+    /**
+     * Returns the availability controller.
+     * @return the availability controller
+     */
+    public AvailabilityController getAvailabilityController() { return availabilityController; }
+
+    /**
+     * Sets the parking report controller.
+     * @param c the parking report controller to set
+     */
+    public void setParkingReportController(ParkingReportController c) { this.parkingReportController = c; }
+
+    /**
+     * Returns the parking report controller.
+     * @return the parking report controller
+     */
+    public ParkingReportController getParkingReportController() { return parkingReportController; }
+
+    /**
+     * Sets the subscriber status controller.
+     * @param c the subscriber status controller to set
+     */
+    public void setSubscriberStatusController(SubscriberStatusController c) { this.subscriberStatusController = c; }
+
+    /**
+     * Returns the subscriber status controller.
+     * @return the subscriber status controller
+     */
+    public SubscriberStatusController getSubscriberStatusController() { return subscriberStatusController; }
+
+    /**
+     * Sets the subscriber associated with the current session.
+     * @param subscriber the subscriber to set
+     */
+    public void setSubscriber(Subscriber subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    /**
+     * Returns the subscriber associated with the current session.
+     * @return the current subscriber
+     */
+    public Subscriber getSubscriber() {
+        return subscriber;
+    }
 	/**
 	 * Processes messages received from the server. Handles login results, order
 	 * data, error messages, vehicle pickup responses, and other system messages.
