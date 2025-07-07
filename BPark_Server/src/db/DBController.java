@@ -261,25 +261,23 @@ public class DBController {
 	 *
 	 * @param subscriberCode the subscriber's code
 	 * @param parkingCode    the parking code provided by the subscriber
-	 * @return ServerResponse with success status and message to display
+	 * @return String with a message that declares the status of the process
 	 */
-	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
+	public String handleVehiclePickup(int subscriberCode, int parkingCode) {
 		ParkingEvent event;
 
 		try {
-			// Retrieve the active parking event for this subscriber and code
 			event = getOpenParkingEvent(subscriberCode, parkingCode);
 		} catch (SQLException e) {
 			System.err.println("Error retrieving parking event: " + e.getMessage());
-			return new ServerResponse(false, null, null, "An error occurred while retrieving your parking session.");
+			return "An error occurred while retrieving your parking session.";
 		}
 
-		if (event == null) { // No active parking session found
-			return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "No active parking session found for the provided information.");
+		if (event == null) {
+			return "No active parking session found for the provided information.";
 		}
 
 		try {
-			// Finalize the parking event: set exit time and release spot
 			finalizeParkingEvent(event.getEventId());
 
 			// Calculate time difference in hours
@@ -289,17 +287,17 @@ public class DBController {
 
 			int allowedHours = event.isWasExtended() ? 8 : 4;
 
-			if (hours > allowedHours) { //print to the subscriber
+			if (hours > allowedHours) {
 				System.out.println(
 						"[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
-				return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Pickup successful with delay. A notification was sent.");
+				return "Pickup successful with delay. A notification was sent.";
 			}
-			// Normal pickup within allowed time
-			return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Vehicle pickup successful (" + hours + " hours).");
+
+			return "Vehicle pickup successful (" + hours + " hours).";
 
 		} catch (SQLException e) {
 			System.err.println("Failed to finalize parking event: " + e.getMessage());
-			return new ServerResponse(false, null, null, "An error occurred while completing the pickup process.");
+			return "An error occurred while completing the pickup process.";
 		}
 	}
 
@@ -1354,114 +1352,108 @@ public class DBController {
 	 *
 	 * @param parkingCode the code identifying the parking session
 	 * @param subscriberCode the subscriber's code (may be null or blank if called from terminal)
-	 * @return a ServerResponse indicating whether the extension was successful, with a message
+	 * @return a String message indicating whether the extension was successful, with a message
 	 */
-	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
-		String sql;
-		boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
+	public String extendParkingSession(int parkingCode, String subscriberCode) {
+	    String sql;
+	    boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
 
-		// Prevent extension if the parking lot is full and there is a reservation soon
-		int totalSpots = getTotalSpots();
-		int occupied = getOccupiedSpots();
-		boolean upcomingReservation = hasReservationInNext4Hours();
+	    // Prevent extension if the parking lot is full and there is a reservation soon
+	    int totalSpots = getTotalSpots();
+	    int occupied = getOccupiedSpots();
+	    boolean upcomingReservation = hasReservationInNext4Hours();
 
-		if (occupied >= totalSpots && upcomingReservation) {
-			return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED,
-					"Extension not allowed- spot is reserved.");
-		}
+	    if (occupied >= totalSpots && upcomingReservation) {
+	        return "Extension not allowed- spot is reserved.";
+	    }
 
-		// Prepare SQL for extension
-		if (!useSubscriberCode) {
-			sql = "UPDATE bpark.parkingEvent " +
-					"SET wasExtended = TRUE " +
-					"WHERE parkingCode = ? " +
-					"AND exitDate IS NULL AND exitHour IS NULL " +
-					"AND wasExtended = FALSE " +
-					"AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
-		} else {
-			sql = "UPDATE bpark.parkingEvent " +
-					"SET wasExtended = TRUE " +
-					"WHERE parkingCode = ? " +
-					"AND subscriberCode = ? " +
-					"AND exitDate IS NULL AND exitHour IS NULL " +
-					"AND wasExtended = FALSE " +
-					"AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+	    // Prepare SQL for extension
+	    if (!useSubscriberCode) {
+	        sql = "UPDATE bpark.parkingEvent " +
+	                "SET wasExtended = TRUE " +
+	                "WHERE parkingCode = ? " +
+	                "AND exitDate IS NULL AND exitHour IS NULL " +
+	                "AND wasExtended = FALSE " +
+	                "AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+	    } else {
+	        sql = "UPDATE bpark.parkingEvent " +
+	                "SET wasExtended = TRUE " +
+	                "WHERE parkingCode = ? " +
+	                "AND subscriberCode = ? " +
+	                "AND exitDate IS NULL AND exitHour IS NULL " +
+	                "AND wasExtended = FALSE " +
+	                "AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+	    }
 
-		}
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, parkingCode);
+	        if (useSubscriberCode) {
+	            stmt.setString(2, subscriberCode);
+	        }
 
-		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setInt(1, parkingCode);
-			if (useSubscriberCode) {
-				stmt.setString(2, subscriberCode);
-			}
+	        int rowsAffected = stmt.executeUpdate();
 
-			int rowsAffected = stmt.executeUpdate();
+	        if (rowsAffected > 0) {
+	            return "Parking session extended successfully.";
+	        } else {
+	            // if the number of rows is equal to 0, it means that there is some problem in the inputed code
 
-			if (rowsAffected > 0) {
-				return new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, "Parking session extended successfully.");
-			} 
-			else {
-				// if the number of rows is equal to 0, it means that there is some problem in the inputed code
+	            int subscriberCodeInt;
 
-				int subscriberCodeInt;
+	            if (useSubscriberCode) {
+	                // case 1: tell the subscriber that his vehicle isn't inside
+	                try {
+	                    subscriberCodeInt = Integer.parseInt(subscriberCode);
+	                    // If there was no exception thrown it means that the string contains only digits
 
-				if(useSubscriberCode) {
-					// case 1: tell the subscriber that his vehicle isn't inside
-					try {
-						subscriberCodeInt = Integer.parseInt(subscriberCode);
-						// If there was no exception thrown it means that the string contains only digits
+	                } catch (NumberFormatException e) {
+	                    return "Subscriber code has failed.";
+	                }
 
-					} catch (NumberFormatException e) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Subscriber code has failed.");
-					}
+	                if (!checkSubscriberEntered(subscriberCodeInt)) {
+	                    return "Your vehicle isn't inside.";
+	                }
 
-					if(!checkSubscriberEntered(subscriberCodeInt)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your vehicle isn't inside.");
-					}
+	                // case 2 : tell the subscriber that if his vehicle is inside but the parking code isn't correct
+	                // If the method returns null it means that the vehicle is inside but the parking code doesn't match
+	                if (getOpenParkingEvent(subscriberCodeInt, parkingCode) == null) {
+	                    return "The parking code doesn't match.";
+	                }
 
-					// case 2 : tell the subscriber that if his vehicle is inside but the parking code isn't correct
-					// If the method returns null it means that the vehicle is inside but the parking code doesn't match
-					if(getOpenParkingEvent(subscriberCodeInt, parkingCode) == null) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "The parking code doesn't match.");
-					}
+	                // case 3 : tell the subscriber that if his vehicle is inside but he already made an extend then he can't make an extend again
+	                ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
+	                if (event.isWasExtended()) {
+	                    return "Your parking session was already extended.";
+	                }
 
-					// case 3 : tell the subscriber that if his vehicle is inside but he already made an extend then he can't make an extend again
-					ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
-					if (event.isWasExtended()) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session was already extended.");
-					}
+	                // case 4 : tell the subscriber that if he is late then he canno't extend his parking
+	                if (subscriberIsLate(subscriberCodeInt)) {
+	                    return "Your parking session is late.";
+	                }
+	            } else {
+	                // case 5 : if the subscriber has entered a parking code threw the terminal, but there is no matching parking code
+	                if (!openParkingCodeExists(parkingCode)) {
+	                    return "There is no active parking that matches this parking code.";
+	                }
 
-					// case 4 : tell the subscriber that if he is late then he canno't extend his parking
-					if (subscriberIsLate(subscriberCodeInt)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session is late.");
-					}
-				}
-				else {
-					// case 5 : if the subscriber has entered a parking code threw the terminal, but there is no matching parking code
-					if(!openParkingCodeExists(parkingCode)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "There is no active parking that matches this parking code.");
-					}
+	                // case 6 : if there is a matched parking code but an extend parking already happened
+	                if (parkingCodeWasExtended(parkingCode)) {
+	                    return "Your parking session was already extended.";
+	                }
 
-					// case 6 : if there is a matched parking code but an extend parking already happened
-					if(parkingCodeWasExtended(parkingCode)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session was already extended.");
-					}
+	                // case 7 : if there is a matched parking code but the active parking is late
+	                if (subscriberIsLateByParkingCode(parkingCode)) {
+	                    return "Your parking session is late.";
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return "Database error: " + e.getMessage();
+	    }
 
-					// case 7 : if there is a matched parking code but the active parking is late
-					if (subscriberIsLateByParkingCode(parkingCode)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session is late.");
-					}
-				}
-
-			}
-		}
-		catch (SQLException e) {
-			e.printStackTrace();
-			return new ServerResponse(false, null, null, "Database error: " + e.getMessage());
-		}
-
-		// Default : return invalid code
-		return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Invalid parking code.");
+	    // Default : return invalid code
+	    return "Invalid parking code.";
 	}
 
 	/**
