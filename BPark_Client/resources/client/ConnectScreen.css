@@ -19,7 +19,6 @@
 
 status-label {
 	text-align: center;
-	-fx-alignment: center;
 	-fx-font-size: 14px;
 	-fx-text-fill: #18374E;
 }
@@ -48,4 +47,6 @@ status-label {
   -fx-alignment: center;       
   -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 15, 0.2, 0, 6); 
 }
+
+
 

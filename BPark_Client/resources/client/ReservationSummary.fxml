@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -40,9 +41,12 @@
       <Label fx:id="orderSubmissionDate" text="Order Submission Date:" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
       <Label fx:id="reservationDate" text="Reservation Date:" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER" />
       <Label fx:id="reservationTime" text="Reservation Time:" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="CENTER" />
-      <Label fx:id="parkingSpace" text="Parking space:" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER" />
-      <Label styleClass="label-thanksAndFor" text="Thank you for choosing BPark!" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER" />
-      <Label styleClass="label-thanksAndFor" text="For any inquiries, please contact us at support@bpark.com." GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="9" GridPane.valignment="BOTTOM" />
+      <Label fx:id="parkingSpace" text="Parking space:*" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER" />
+      <Label styleClass="label-thanksAndFor" text="Thank you for choosing BPark!" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER">
+         <GridPane.margin>
+            <Insets bottom="10.0" />
+         </GridPane.margin></Label>
+      <Label styleClass="label-thanksAndFor" text="For any inquiries, please contact us at support@bpark.com." GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="BOTTOM" />
       <Label fx:id="reservationNumberOfOrder" styleClass="data" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
       <Label fx:id="confirmationCodeOfOrder" styleClass="data" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
       <Label fx:id="subscriberCodeOfOrder" styleClass="data" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
@@ -50,5 +54,6 @@
       <Label fx:id="reservationDateOfOrder" styleClass="data" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER" />
       <Label fx:id="reservationTimeOfOrder" styleClass="data" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="CENTER" />
       <Label fx:id="parkingSpaceOfOrder" styleClass="data" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER" />
+      <Label text="*Note: Spot number is for reference only and may change upon arrival." GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="9" GridPane.valignment="BOTTOM" />
    </children>
 </GridPane>

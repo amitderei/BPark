@@ -298,7 +298,11 @@ public class CreateNewOrderViewController implements ClientAware {
 		strBuild.append("2.1 Use of the parking lot services is subject to a prior reservation via the BPARK app.\r\n");
 		strBuild.append("2.2 The reservation is valid only for the selected date and time.\r\n");
 		strBuild.append("2.3 A user who fails to arrive within 15 minutes of the scheduled reservation time will have their reservation automatically canceled.\r\n\r\n");
-
+		strBuild.append("2.4 The management does not guarantee the reservation of a specific parking spot,\r\n");
+		strBuild.append("even if such a spot number is indicated in the app or confirmation.\r\n");
+		strBuild.append("The allocation is for ensuring availability, and the actual parking spot\r\n");
+		strBuild.append("may be changed at the discretion of the parking lot management.\r\n\r\n");
+		
 		strBuild.append("3. Liability Disclaimer\r\n");
 		strBuild.append("3.1 BPARK is not liable for any damage to the vehicle, its contents, or the user, including theft, malfunction, or natural disaster.\r\n");
 		strBuild.append("3.2 The user must ensure their vehicle is compatible with the automated system.\r\n\r\n");

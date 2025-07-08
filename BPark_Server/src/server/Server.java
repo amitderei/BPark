@@ -265,25 +265,22 @@ public class Server extends AbstractServer {
 					String response = db.handleVehiclePickup(subCode, parkCode);
 
 					// Fail response case
-					if(response.equals("An error occurred while retrieving your parking session.") ||
-						response.equals("An error occurred while completing the pickup process.")) {
-						client.sendToClient(	
-								new ServerResponse(false, null, null, response));
+					if (response.equals("An error occurred while retrieving your parking session.")
+							|| response.equals("An error occurred while completing the pickup process.")) {
+						client.sendToClient(new ServerResponse(false, null, null, response));
 						return;
 					}
-					
+
 					// Fail - no active parking session
-					if(response.equals("Parking code is incorrect.")) {
-						client.sendToClient(	
-								new ServerResponse(false, null, ResponseType.PICKUP_VEHICLE, response));
+					if (response.equals("Parking code is incorrect.")) {
+						client.sendToClient(new ServerResponse(false, null, ResponseType.PICKUP_VEHICLE, response));
 						return;
 					}
-					
+
 					// Else it would be a success response
-					client.sendToClient(	
-							new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, response));
+					client.sendToClient(new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, response));
 					return;
-					
+
 				} catch (Exception e) {
 					// Unexpected error (e.g. DB crash or null pointer)
 					client.sendToClient(
@@ -567,12 +564,12 @@ public class Server extends AbstractServer {
 
 				String response = db.extendParkingSession(parkingCode, subscriberCodeForExtend);
 				boolean completed = false;
-				
-				if(response.equals("Parking session extended successfully.")) {
+
+				if (response.equals("Parking session extended successfully.")) {
 					completed = true;
+					System.out.println("Parking time extension of " + parkingCode + " completed successfully.");
 				}
-				
-				System.out.println("Parking time extension of " + parkingCode + " completed successfully.");
+
 				client.sendToClient(
 						new ServerResponse(completed, null, ResponseType.PARKING_SESSION_EXTENDED, response));
 				break;

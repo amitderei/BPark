@@ -3,7 +3,7 @@
 }
 
 .label {
-	-fx-font-size: 18px;
+	-fx-font-size: 14px;
 	 -fx-alignment: CENTER_RIGHT;
 }
 
@@ -72,9 +72,10 @@
 }
 
 .error-label{
-	-fx-font-size: 13px;
+	-fx-font-size: 14px;
     -fx-text-fill: red;
     -fx-font-weight: bold;
+    -fx-alignment: CENTER;
 }
 
 .GridPane {

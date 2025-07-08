@@ -160,7 +160,7 @@ public class VehiclePickupController implements ClientAware {
 
         } catch (NumberFormatException e) {
             // input was numeric, but too large for int (e.g. more than 9 digits)
-            UiUtils.setStatus(lblStatus, "Parking code is incorrect. Please try again.", false);
+            UiUtils.setStatus(lblStatus, "Parking code is incorrect.", false);
             txtParkingCode.clear();
         } catch (Exception ex) {
             UiUtils.setStatus(lblStatus,

@@ -32,7 +32,7 @@
             </Label>
             <TextField fx:id="ipTextField" layoutX="139.0" layoutY="137.0" prefWidth="200.0" promptText="Enter server IP" />
             <Button fx:id="connectButton" layoutX="169.0" layoutY="228.0" mnemonicParsing="false" onAction="#connectToServer" prefWidth="140.0" text="Connect to Server" />
-            <Label fx:id="statusLabel" layoutX="89.0" layoutY="305.0" prefWidth="300.0" styleClass="status-label" />
+            <Label fx:id="statusLabel" layoutX="89.0" layoutY="277.0" prefWidth="300.0" styleClass="status-label" textAlignment="CENTER" />
          </children>
       </Pane>
    </children>

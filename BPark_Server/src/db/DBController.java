@@ -261,7 +261,7 @@ public class DBController {
 	 *
 	 * @param subscriberCode the subscriber's code
 	 * @param parkingCode    the parking code provided by the subscriber
-	 * @return ServerResponse with success status and message to display
+	 * @return String with a matched message to the case that occurred
 	 */
 	public String handleVehiclePickup(int subscriberCode, int parkingCode) {
 		ParkingEvent event;
