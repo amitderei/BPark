@@ -78,7 +78,7 @@ public class Server extends AbstractServer {
 			    // If we know who the subscriber is, mark them as offline in the DB
 			    if (client.getInfo("username") instanceof String u1) {
 			        db.markUserLoggedOut(u1);
-			        System.out.println("Subscriber " + u1 + " logged out.");
+			        System.out.println("User " + u1 + " logged out.");
 			    }
 			    break;
 
@@ -87,7 +87,7 @@ public class Server extends AbstractServer {
 			    //  mark user as offline if they were logged in
 			    if (client.getInfo("username") instanceof String u2) {
 			        db.markUserLoggedOut(u2);
-			        System.out.println("Subscriber " + u2 + " logged out.");
+			        System.out.println("User " + u2 + " logged out.");
 			    }
 			    logClientDisconnect(client);  // close client system
 			    break;
@@ -686,7 +686,7 @@ public class Server extends AbstractServer {
 	        if (user != null) {
 	            // remember username on this socket – cleared on disconnect
 	            client.setInfo("username", username);
-	            System.out.println("Subscriber "+username+" successfully logged in");
+	            System.out.println("User "+username+" successfully logged in");
 	            client.sendToClient(new ServerResponse(
 	                    true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
 	        } else {

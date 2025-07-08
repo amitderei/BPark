@@ -43,7 +43,7 @@ public class MainController implements ClientAware, StageAware {
     private MediaView automaticParkingVideo;
     
     @FXML
-    private MediaView braudeVideo;
+    private MediaView parkingSystemVideo;
     
     /** The toolbar used to drag the undecorated main window. */
     @FXML
@@ -53,8 +53,8 @@ public class MainController implements ClientAware, StageAware {
     /** Media player for the automatic parking video preview. */
     private MediaPlayer mediaPlayerOfParkingVideo;
     
-    /** Media player for the Braude video preview. */
-    private MediaPlayer mediaPlayerOfBraude;
+    /** Media player for the parking system video preview. */
+    private MediaPlayer mediaPlayerOfParkingSystem;
     
     /** Shared ClientController used to send requests to the server */
     private ClientController client;
@@ -78,32 +78,32 @@ public class MainController implements ClientAware, StageAware {
     public void setVideos() {
     	//path to the videos
     	String pathOfParkingVideo="/client/AutomaticParking.mp4";
-    	String pathOfBraude="/client/Braude.mp4";
+    	String pathOfParkingSystem="/client/parkingSystem.mp4";
     	
     	//URL of the videos
     	URL pathOfParkingVideoUrl= getClass().getResource(pathOfParkingVideo);
-    	URL pathOfBraudeUrl= getClass().getResource(pathOfBraude);
-    	if (pathOfParkingVideoUrl==null || pathOfBraudeUrl==null) {
+    	URL pathOfParkingSystemUrl= getClass().getResource(pathOfParkingSystem);
+    	if (pathOfParkingVideoUrl==null || pathOfParkingSystemUrl==null) {
     		System.out.println("Video not found");
     		return;
     	}
     	//create media objects that represents the video file
     	Media mediaOfParkingVideo= new Media(pathOfParkingVideoUrl.toExternalForm());
-    	Media mediaOfBraude= new Media(pathOfBraudeUrl.toExternalForm());
+    	Media mediaOfParkingSystem= new Media(pathOfParkingSystemUrl.toExternalForm());
     	
     	//create media player object that take control on media
     	mediaPlayerOfParkingVideo= new MediaPlayer(mediaOfParkingVideo);
-    	mediaPlayerOfBraude= new MediaPlayer(mediaOfBraude);
+    	mediaPlayerOfParkingSystem= new MediaPlayer(mediaOfParkingSystem);
     	
     	mediaPlayerOfParkingVideo.setMute(true);
-    	mediaPlayerOfBraude.setMute(true);
+    	mediaPlayerOfParkingSystem.setMute(true);
     	
     	//connect between media player to media view
     	automaticParkingVideo.setMediaPlayer(mediaPlayerOfParkingVideo);
-    	braudeVideo.setMediaPlayer(mediaPlayerOfBraude);
+    	parkingSystemVideo.setMediaPlayer(mediaPlayerOfParkingSystem);
     	
     	mediaPlayerOfParkingVideo.setAutoPlay(true);
-    	mediaPlayerOfBraude.setAutoPlay(true);
+    	mediaPlayerOfParkingSystem.setAutoPlay(true);
     }
     
     
@@ -120,14 +120,14 @@ public class MainController implements ClientAware, StageAware {
     }
     
     /**
-     * play the video of braude
+     * play the video of parking system
      */
     @FXML
     private void handleMediaPlayerOfBraudeClick(MouseEvent event) {
-        if (mediaPlayerOfBraude.getStatus() == MediaPlayer.Status.PLAYING) {
-        	mediaPlayerOfBraude.pause();
+        if (mediaPlayerOfParkingSystem.getStatus() == MediaPlayer.Status.PLAYING) {
+        	mediaPlayerOfParkingSystem.pause();
         } else {
-        	mediaPlayerOfBraude.play();
+        	mediaPlayerOfParkingSystem.play();
         }
     }
 
