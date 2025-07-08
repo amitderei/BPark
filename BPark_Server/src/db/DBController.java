@@ -294,6 +294,8 @@ public class DBController {
 						"Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
 				return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Pickup successful with delay. A notification was sent.");
 			}
+			System.out.println(
+					"Subscriber " + subscriberCode + " had successful pickup (" + hours + " hours)");
 			// Normal pickup within allowed time
 			return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Vehicle pickup successful (" + hours + " hours).");
 
