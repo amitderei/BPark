@@ -23,27 +23,41 @@ public class ParkingReport implements Serializable {
 	/** Total number of sessions marked as late (beyond allowed duration) */
 	private int totalLates;
 
+	/**
+	 * Number of parking sessions that lasted less than 4 hours.
+	 */
 	private int lessThanFour;
 
+	/**
+	 * Number of parking sessions that lasted between 4 and 8 hours.
+	 */
 	private int betweenFourToEight;
 
+	/**
+	 * Number of parking sessions that lasted more than 8 hours.
+	 */
 	private int moreThanEight;
 
+
 	/**
-	 * Constructs a ParkingReport with all relevant values.
+	 * Creates a new ParkingReport with all the needed statistics.
 	 *
-	 * @param totalEntries total number of parking events
-	 * @param totalExtends number of sessions that were extended
-	 * @param totalLates   number of sessions that ended late
+	 * @param totalEntries        Total number of parking events that happened
+	 * @param totalExtends        Number of sessions where users extended their parking time
+	 * @param totalLates          Number of sessions that ended after the allowed time
+	 * @param lessThanFour        Number of parkings that lasted less than 4 hours
+	 * @param betweenFourToEight  Number of parkings that lasted between 4 to 8 hours
+	 * @param moreThanEight       Number of parkings that lasted more than 8 hours
 	 */
 	public ParkingReport(int totalEntries, int totalExtends, int totalLates, int lessThanFour, int betweenFourToEight, int moreThanEight) {
-		this.totalEntries = totalEntries;
-		this.totalExtends = totalExtends;
-		this.totalLates = totalLates;
-		this.lessThanFour=lessThanFour;
-		this.betweenFourToEight=betweenFourToEight;
-		this.moreThanEight=moreThanEight;
+	    this.totalEntries = totalEntries;
+	    this.totalExtends = totalExtends;
+	    this.totalLates = totalLates;
+	    this.lessThanFour = lessThanFour;
+	    this.betweenFourToEight = betweenFourToEight;
+	    this.moreThanEight = moreThanEight;
 	}
+
 
 	/**
 	 * Returns the total number of parking entries recorded.

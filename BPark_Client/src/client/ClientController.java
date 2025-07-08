@@ -7,9 +7,7 @@ import javafx.scene.control.Alert;
 import ocsf.client.AbstractClient;
 import ui.UiUtils;
 
-import java.io.IOException;
 import java.sql.Date;
-import java.sql.Time;
 import java.util.*;
 
 /**
@@ -772,7 +770,6 @@ public class ClientController extends AbstractClient {
 			case SUBSCRIBER_STATUS:
 				if (subscriberStatusController != null && response.getData() instanceof List<?> listRaw) {
 					if (response.isSucceed()) {
-						@SuppressWarnings("unchecked")
 						List<SubscriberStatusReport> list = (List<SubscriberStatusReport>) listRaw;
 						subscriberStatusController.onReportReceived(list);
 						break;

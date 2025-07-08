@@ -1,0 +1,8 @@
+client
+common
+controllers
+db
+mailService
+reportService
+server
+ui

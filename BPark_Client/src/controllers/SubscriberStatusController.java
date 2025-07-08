@@ -175,7 +175,8 @@ public class SubscriberStatusController implements ClientAware {
      * Refreshes both the bar chart and the pie chart
      * using the current data inside `rows`.
      */
-    private void updateCharts() {
+    @SuppressWarnings("unchecked")
+	private void updateCharts() {
         // BarChart: top 10 subscribers with most hours
         var top = rows.stream()
                       .sorted((a, b) -> Double.compare(b.getTotalHours(), a.getTotalHours()))

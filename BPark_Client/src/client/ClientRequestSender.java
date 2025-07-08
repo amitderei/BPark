@@ -404,8 +404,11 @@ public class ClientRequestSender {
     }
 
     /**
-     * Checks if the specified parking lot has at least one free space.
-     * @param parkingLotName the name of the parking lot
+     * Sends a request to the server to check if there's at least one free space
+     * in the given parking lot. The check can depend on the subscriber's code.
+     *
+     * @param parkingLotName the name of the parking lot to check
+     * @param subscriberCode the code of the subscriber
      */
     public void isThereFreeParkingSpace(String parkingLotName, int subscriberCode) {
         try {
@@ -416,6 +419,7 @@ public class ClientRequestSender {
             System.err.println("Failed to send 'IsThereFreeParkingSpace' request: " + e.getMessage());
         }
     }
+
 
     /**
      * Requests the vehicle ID for the given subscriber.

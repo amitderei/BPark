@@ -96,7 +96,7 @@ public class Server extends AbstractServer {
 			// get all reservations of specific subscriber. expected format:
 			// {ASK_FOR_RESERVATIONS, subscriber}
 			case ASK_FOR_RESERVATIONS:
-				ArrayList<Order> orders = db.returnReservationOfSubscriber((Subscriber) data[1]);
+				ArrayList<Order> orders = db.getFutureReservationsForSubscriber((Subscriber) data[1]);
 				if (orders.isEmpty()) {
 					client.sendToClient(new ServerResponse(true, null, ResponseType.NO_ORDERS, "No orders."));
 				} else {
