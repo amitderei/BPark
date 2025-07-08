@@ -138,9 +138,7 @@ public class GuestMainLayoutController implements ClientAware, StageAware {
 
             // Special handling for availability screen
             if (ctrl instanceof AvailabilityController ac) {
-                ac.setClient(client);
                 client.setAvailabilityController(ac);
-                client.getRequestSender().requestParkingAvailability();
             }
 
             center.getChildren().setAll(content);

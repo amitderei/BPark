@@ -3,6 +3,7 @@ package controllers;
 import java.io.IOException;
 
 import client.ClientController;
+import common.Operation;
 import common.User;
 import common.UserRole;
 import javafx.application.Platform;
@@ -159,7 +160,7 @@ public class LoginController implements ClientAware, StageAware {
     private void handleExitClick() {
         try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[] { "disconnect" });
+                client.sendToServer(new Object[] { Operation.EXIT});
                 client.closeConnection();
                 client.clearSession();
 

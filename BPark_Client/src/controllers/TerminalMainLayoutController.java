@@ -195,7 +195,6 @@ public class TerminalMainLayoutController implements ClientAware, StageAware {
 			} 
 			else if (ctrl instanceof AvailabilityController c) {
 				client.setAvailabilityController(c);
-				client.getRequestSender().requestParkingAvailability();
 			}
 			else if (ctrl instanceof ExtendParkingController c) {
 				client.setExtendParkingController(c);

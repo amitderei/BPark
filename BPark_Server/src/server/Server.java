@@ -71,25 +71,25 @@ public class Server extends AbstractServer {
 			
 			switch ((Operation) data[0]) {
 
-			// When the user clicks "Logout" - just logs them out and keeps the app open
+			// When the user clicks "Logout" - just logs them out and keeps the app open. expected format: {LOGOUT}
 			case LOGOUT:
 			    logClientDisconnect(client);  // basic disconnect logging (IP, etc.)
 
-			    // If we know who the user is, mark them as offline in the DB
+			    // If we know who the subscriber is, mark them as offline in the DB
 			    if (client.getInfo("username") instanceof String u1) {
 			        db.markUserLoggedOut(u1);
-			        System.out.println("User " + u1 + " logged out.");
+			        System.out.println("Subscriber " + u1 + " logged out.");
 			    }
 			    break;
 
-			// When the user clicks "Exit" - logs out and shuts down the whole app
+			// When the user clicks "Exit" - logs out and shuts down the whole app expected format: {EXIT}
 			case EXIT:
 			    logClientDisconnect(client);  // same logging as logout
 
 			    // Also mark user as offline if they were logged in
 			    if (client.getInfo("username") instanceof String u2) {
 			        db.markUserLoggedOut(u2);
-			        System.out.println("User " + u2 + " exited the system.");
+			        System.out.println("Subscriber " + u2 + " logged out.");
 			    }
 			    break;
 

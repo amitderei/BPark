@@ -3,6 +3,7 @@ package controllers;
 import java.net.URL;
 
 import client.ClientController;
+import common.Operation;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -172,7 +173,7 @@ public class MainController implements ClientAware, StageAware {
     private void handleExitClick() {
         try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[] { "disconnect" });
+                client.sendToServer(new Object[] { Operation.EXIT });
                 client.closeConnection();
             }
         } catch (Exception ignored) { }
