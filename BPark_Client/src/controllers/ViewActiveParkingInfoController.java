@@ -127,6 +127,7 @@ public class ViewActiveParkingInfoController implements ClientAware {
         	return;
         }
         // Populate static fields
+        noActiveParking.setVisible(false);
         eventIdInfo.setText(String.valueOf(parkingEvent.getEventId()));
         vehicleIdInfo.setText(parkingEvent.getVehicleId());
         entryDateInfo.setText(parkingEvent.getEntryDate().toString());
@@ -149,7 +150,10 @@ public class ViewActiveParkingInfoController implements ClientAware {
         expectedExitHourInfo.setText(exitTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
     }
     
-    
+    /**
+     * if no active parking session to subscriber it will set text 
+     * and delete the other fields
+     */
     public void noActiveParking() {
     	eventId.setVisible(false);
     	vehicleId.setVisible(false);
