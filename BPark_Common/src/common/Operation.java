@@ -62,8 +62,12 @@ public enum Operation {
     /** Add a new reservation to the system */
     ADD_NEW_ORDER,
 
-    /** Disconnect request - called when client logs out or closes app */
-    DISCONNECT,
+    /** Sent when the user clicks "Logout" - ends the session but keeps the app open */
+    LOGOUT,
+
+    /** Sent when the user clicks "Exit" - logs out and closes the app completely */
+    EXIT,
+
 
     /** Ask for the subscriber status report of a certain month/year */
     GET_SUBSCRIBER_STATUS_REPORT,

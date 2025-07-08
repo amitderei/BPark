@@ -150,13 +150,13 @@ public final class UiUtils {
     
     
     /**
-     * Handles the Exit button press — disconnects from the server (if needed)
+     * Handles the Exit button press - disconnects from the server (if needed)
      * and closes the application.
      */
     public static void exitFromSystem() {
-        try {
+    	try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[] { Operation.DISCONNECT, "EXIT" });
+                client.sendToServer(new Object[] { Operation.EXIT });
                 client.closeConnection();
             }
         } catch (Exception ignored) {
@@ -164,5 +164,4 @@ public final class UiUtils {
         javafx.application.Platform.exit();
         System.exit(0);
     }
-
 }

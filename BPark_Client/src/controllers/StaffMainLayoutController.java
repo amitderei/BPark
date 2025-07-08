@@ -105,18 +105,18 @@ public class StaffMainLayoutController implements ClientAware, StageAware  {
         loadScreen("/client/StaffMainScreen.fxml");
     }
 
-    /** Handles the Home button press — loads the main staff screen. */
+    /** Handles the Home button press - loads the main staff screen. */
     @FXML
     private void handleHomeClick() {
         loadScreen("/client/StaffMainScreen.fxml");
     }
 
-    /** Handles the Logout button press — disconnects and returns to login. */
+    /** Handles the Logout button press - disconnects and returns to login. */
     @FXML
     private void handleLogoutClick() {
         try {
             if (client != null && client.isConnected()) {
-	        	client.getRequestSender().sendDisconnect("LOGOUT");
+            	client.getRequestSender().sendLogout();
             }
         } catch (Exception ex) {
             System.err.println("[CLIENT] Logout error: " + ex.getMessage());

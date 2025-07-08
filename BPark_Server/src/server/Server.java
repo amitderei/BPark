@@ -70,29 +70,28 @@ public class Server extends AbstractServer {
 			Object [] data=(Object[]) msg;
 			
 			switch ((Operation) data[0]) {
-			// Disconnect request from client. 
-			// Expected format: {DISCONNECT, "REASON"} where reason can be "LOGOUT", "EXIT", etc.
-			case DISCONNECT:
-			    Object uObj = client.getInfo("username");
 
-			    // Default reason if none is provided
-			    String reason = "UNKNOWN";
+			// When the user clicks "Logout" - just logs them out and keeps the app open
+			case LOGOUT:
+			    logClientDisconnect(client);  // basic disconnect logging (IP, etc.)
 
-			    // Check if client sent a reason string (e.g., "LOGOUT" or "EXIT")
-			    if (data.length >= 2 && data[1] instanceof String r) {
-			        reason = r;
-			    }
-
-			    //log disconnection
-			    logClientDisconnect(client);
-
-			    // Reset user session if a valid username exists
-			    if (uObj instanceof String u) {
-			        db.markUserLoggedOut(u);  // Update DB to mark user as logged out
-			        System.out.println("User " + u + " disconnected. Reason: " + reason);
+			    // If we know who the user is, mark them as offline in the DB
+			    if (client.getInfo("username") instanceof String u1) {
+			        db.markUserLoggedOut(u1);
+			        System.out.println("User " + u1 + " logged out.");
 			    }
 			    break;
 
+			// When the user clicks "Exit" - logs out and shuts down the whole app
+			case EXIT:
+			    logClientDisconnect(client);  // same logging as logout
+
+			    // Also mark user as offline if they were logged in
+			    if (client.getInfo("username") instanceof String u2) {
+			        db.markUserLoggedOut(u2);
+			        System.out.println("User " + u2 + " exited the system.");
+			    }
+			    break;
 
 					
 				// get all reservations of specific subscriber.  expected format: {ASK_FOR_RESERVATIONS, subscriber}

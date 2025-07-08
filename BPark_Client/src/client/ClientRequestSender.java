@@ -460,19 +460,28 @@ public class ClientRequestSender {
     }
     
     /**
-     * Sends a disconnect request to the server, letting it know why the client is disconnecting.
-     * This is used both when the user logs out or when the app exits completely.
-     *
-     * @param reason the reason for disconnecting 
+     * Sends a logout request to the server when the user chooses to log out.
+     * This keeps the application open but ends the session on both client and server.
      */
-    public void sendDisconnect(String reason) {
+    public void sendLogout() {
         try {
-            client.sendToServer(new Object[] { Operation.DISCONNECT, reason });
+            client.sendToServer(new Object[] { Operation.LOGOUT });
         } catch (IOException e) {
-            System.err.println("[CLIENT] Failed to send disconnect: " + e.getMessage());
+            System.err.println("[CLIENT] Failed to send logout: " + e.getMessage());
         }
     }
 
+    /**
+     * Sends an exit request to the server when the user closes the app.
+     * This is used to log the user out and shut everything down cleanly.
+     */
+    public void sendExit() {
+        try {
+            client.sendToServer(new Object[] { Operation.EXIT });
+        } catch (IOException e) {
+            System.err.println("[CLIENT] Failed to send exit: " + e.getMessage());
+        }
+    }
 
 
 }
