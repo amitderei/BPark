@@ -123,10 +123,7 @@ public class ViewActiveParkingInfoController implements ClientAware {
      * This method must be called after setParkingEvent().
      */
     public void setTexts() {
-    	System.out.println("hungry");
         if (parkingEvent == null) {
-        	System.out.println("hungryyyyy");
-        	noActiveParking();
         	return;
         }
         // Populate static fields
