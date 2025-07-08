@@ -151,7 +151,7 @@ public class VehiclePickupController implements ClientAware {
             int parkingCode = Integer.parseInt(input); // might still throw if input too big
 
             if (parkingCode < 100000 || parkingCode > 999999) {
-                UiUtils.setStatus(lblStatus, "Parking code is incorrect. Please try again.", false);
+                UiUtils.setStatus(lblStatus, "Parking code is incorrect.", false);
                 txtParkingCode.clear();
                 return;
             }

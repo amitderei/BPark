@@ -261,12 +261,29 @@ public class Server extends AbstractServer {
 
 				try {
 					// Call the DB method to handle the vehicle pickup
-					// It returns a ServerResponse object with success status and a message
-					ServerResponse response = db.handleVehiclePickup(subCode, parkCode);
+					// It returns a String that represents the status
+					String response = db.handleVehiclePickup(subCode, parkCode);
 
-					// Send the success response to the client
-					client.sendToClient(response);
-
+					// Fail response case
+					if(response.equals("An error occurred while retrieving your parking session.") ||
+						response.equals("An error occurred while completing the pickup process.")) {
+						client.sendToClient(	
+								new ServerResponse(false, null, null, response));
+						return;
+					}
+					
+					// Fail - no active parking session
+					if(response.equals("Parking code is incorrect.")) {
+						client.sendToClient(	
+								new ServerResponse(false, null, ResponseType.PICKUP_VEHICLE, response));
+						return;
+					}
+					
+					// Else it would be a success response
+					client.sendToClient(	
+							new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, response));
+					return;
+					
 				} catch (Exception e) {
 					// Unexpected error (e.g. DB crash or null pointer)
 					client.sendToClient(

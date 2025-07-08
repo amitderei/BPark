@@ -263,7 +263,7 @@ public class DBController {
 	 * @param parkingCode    the parking code provided by the subscriber
 	 * @return ServerResponse with success status and message to display
 	 */
-	public ServerResponse handleVehiclePickup(int subscriberCode, int parkingCode) {
+	public String handleVehiclePickup(int subscriberCode, int parkingCode) {
 		ParkingEvent event;
 
 		try {
@@ -271,11 +271,11 @@ public class DBController {
 			event = getOpenParkingEvent(subscriberCode, parkingCode);
 		} catch (SQLException e) {
 			System.err.println("Error retrieving parking event: " + e.getMessage());
-			return new ServerResponse(false, null, null, "An error occurred while retrieving your parking session.");
+			return "An error occurred while retrieving your parking session.";
 		}
 
 		if (event == null) { // No active parking session found
-			return new ServerResponse(false, null, ResponseType.PICKUP_VEHICLE, "No active parking session found for the provided information.");
+			return "Parking code is incorrect.";
 		}
 
 		try {
@@ -292,16 +292,16 @@ public class DBController {
 			if (hours > allowedHours) { //print to the subscriber
 				System.out.println(
 						"Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
-				return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Pickup successful with delay. A notification was sent.");
+				return "Pickup successful with delay. A notification was sent.";
 			}
 			System.out.println(
 					"Subscriber " + subscriberCode + " had successful pickup (" + hours + " hours)");
 			// Normal pickup within allowed time
-			return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Vehicle pickup successful (" + hours + " hours).");
+			return "Vehicle pickup successful (" + hours + " hours).";
 
 		} catch (SQLException e) {
 			System.err.println("Failed to finalize parking event: " + e.getMessage());
-			return new ServerResponse(false, null, null, "An error occurred while completing the pickup process.");
+			return "An error occurred while completing the pickup process.";
 		}
 	}
 
