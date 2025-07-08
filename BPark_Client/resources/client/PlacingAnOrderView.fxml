@@ -55,7 +55,7 @@
                      </GridPane.margin>
                   </Hyperlink>
                   <Button fx:id="reserveNowButton" mnemonicParsing="false" onAction="#addNewOrder" text="Reserve Now" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="TOP" />
-                  <Label fx:id="notPossibleToOrder" prefHeight="20.0" prefWidth="282.0" styleClass="error-label" text=" " textFill="#ff3a3a" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="BOTTOM" />
+                  <Label fx:id="notPossibleToOrder" prefHeight="20.0" prefWidth="341.0" styleClass="error-label" text=" " textFill="#ff3a3a" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="BOTTOM" />
                   <HBox prefHeight="100.0" prefWidth="200.0" styleClass="HBOX" GridPane.columnSpan="3" GridPane.rowIndex="1">
                      <children>
                         <Label fx:id="subscriberCode" text="Subscriber code:">
