@@ -275,7 +275,7 @@ public class DBController {
 		}
 
 		if (event == null) { // No active parking session found
-			return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "No active parking session found for the provided information.");
+			return new ServerResponse(false, null, ResponseType.PICKUP_VEHICLE, "No active parking session found for the provided information.");
 		}
 
 		try {

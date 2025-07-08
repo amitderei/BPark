@@ -261,7 +261,7 @@ public class Server extends AbstractServer {
 				        }
 
 				        // Check if there was no active parking session for the given info
-				        if (msg.equals("No active parking session found for the provided information.")) {
+				        if (message.equals("Parking code is incorrect.")) {
 				            client.sendToClient(response);
 				            return;
 				        }
