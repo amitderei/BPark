@@ -31,6 +31,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import ui.UiUtils;
 
 /**
  * Handles the "Create New Reservation" workflow for subscribers
@@ -131,7 +132,8 @@ public class CreateNewOrderViewController implements ClientAware {
 
 		insertSubscriberCode.setDisable(true);
 	}
-
+	
+	
 	/**
 	 * Called when the user selects a date.
 	 * Fills hour dropdown based on the selected day and current time.
@@ -168,6 +170,10 @@ public class CreateNewOrderViewController implements ClientAware {
 		int currentHour     = LocalTime.now().getHour();
 		int currentMinute   = LocalTime.now().getMinute();
 		String pickedHour   = hourCombo.getValue();
+		
+		if (pickedHour == null) {
+			return;
+		}
 
 		minuteCombo.getItems().clear();
 
