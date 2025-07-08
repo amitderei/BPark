@@ -1034,6 +1034,50 @@ public class DBController {
 			return false;
 		}
 	}
+	
+	/**
+	 * check if there is another subscriber with this phone number
+	 * @param phone
+	 * @param subCode
+	 * @return true if there is another subscriber with this phone number, else false
+	 */
+	public boolean duplicatePhone(String phone, int subCode) {
+		String query = "SELECT * FROM subscriber WHERE phoneNumber=? AND subscriberCode<>?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set updated values in the query
+			stmt.setString(1, phone);
+			stmt.setInt(2, subCode);
+			try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); 
+	        }
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * check if there is another subscriber with this email
+	 * @param email
+	 * @param subCode
+	 * @return true if there is another subscriber with this email, else false
+	 */
+	public boolean duplicateEmail(String email, int subCode) {
+		String query = "SELECT * FROM subscriber WHERE email=? AND subscriberCode<>?";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			// Set updated values in the query
+			stmt.setString(1, email);
+			stmt.setInt(2, subCode);
+			try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); 
+	        }
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	/**
 	 * Retrieves the full parking history of a given subscriber.

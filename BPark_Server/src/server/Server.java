@@ -297,6 +297,16 @@ public class Server extends AbstractServer {
 				ArrayList<Object> newDetails = new ArrayList<>();
 				if (data[1] != null) {
 					Subscriber subscriber = (Subscriber) data[1];
+					if (db.duplicatePhone(subscriber.getPhoneNum(), subscriber.getSubscriberCode())) {
+						client.sendToClient(new ServerResponse(false, null, null,
+								"The phone number already exists in the system. try another phone number."));
+						return;
+					}
+					if (db.duplicateEmail(subscriber.getEmail(), subscriber.getSubscriberCode())) {
+						client.sendToClient(new ServerResponse(false, null, null,
+								"The email already exists in the system. try another email."));
+						return;
+					}
 					isSucceedSubscriber = db.changeDetailsOfSubscriber(subscriber);
 					newDetails.add(subscriber);
 				}
@@ -525,7 +535,6 @@ public class Server extends AbstractServer {
 			// return all subscribers and their late pickup counts. expected format:
 			// {GET_ALL_SUBSCRIBERS}
 			case GET_ALL_SUBSCRIBERS:
-				System.out.println("[SERVER] Received get_all_subscribers request");
 				ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
 				client.sendToClient(new ServerResponse(true, rows, ResponseType.LATE_PICKUP_COUNTS, "all_subscribers"));
 				break;
