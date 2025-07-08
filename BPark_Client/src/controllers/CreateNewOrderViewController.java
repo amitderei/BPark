@@ -358,7 +358,7 @@ public class CreateNewOrderViewController implements ClientAware {
 	public void onReservationConflictCheck(boolean hasConflict) {
 		if (hasConflict) {
 			Platform.runLater(() -> {
-				notPossibleToOrder.setText("You already have another reservation");
+				notPossibleToOrder.setText("You already have an order within 4 hours of this one.");
 				notPossibleToOrder.setVisible(true);
 			});
 			return;

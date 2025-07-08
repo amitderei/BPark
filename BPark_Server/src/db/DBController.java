@@ -2338,43 +2338,58 @@ public class DBController {
 	}
 
 	/**
-	 * Checks if a subscriber has any other ACTIVE reservation within 4 hours 
-	 * before or after the requested reservation time (excluding exact match).
+	 * Checks if this subscriber already has an ACTIVE reservation
+	 * within +4 or -4 hours (240 min) of the date-time they just picked.
+	 * Exact same time counts as a clash, so you can’t double-book.
 	 *
-	 * @param subscriberCode the subscriber's code
-	 * @param selectedDate the requested reservation date
-	 * @param arrivalTime the requested reservation time
-	 * @return true if there is a conflicting reservation, false otherwise
+	 * @param subscriberCode subscriber’s numeric code
+	 * @param selectedDate   date the user chose 
+	 * @param arrivalTime    time the user chose
+	 * @return true  if we hit an overlap,
+	 *         false if the slot is free
 	 */
-	public boolean hasReservationConflict(int subscriberCode, Date selectedDate, Time arrivalTime) {
-		// SQL query to check if there's an existing reservation within 4 hours of the requested time
-		// Ignores an exact match to allow updates to the same reservation
-		String query = """
-				    SELECT 1 FROM `order`
-				    WHERE subscriberCode = ?
-				      AND `status` = 'ACTIVE'
-				      AND TIMESTAMP(order_date, arrival_time) != ?
-				      AND ABS(TIMESTAMPDIFF(MINUTE, TIMESTAMP(order_date, arrival_time), ?)) < 240
-				""";
+	public boolean hasReservationConflict(int subscriberCode,
+	                                      Date selectedDate,
+	                                      Time arrivalTime) {
 
-		try (PreparedStatement stmt = conn.prepareStatement(query)) { 
-			// Combine selected date and time into a single timestamp
-			Timestamp requestedTimestamp = Timestamp.valueOf(
-					selectedDate.toLocalDate().atTime(arrivalTime.toLocalTime()));
+	    // grab any ACTIVE order for this subscriber that starts
+	    // less than 240 min away from the requested timestamp
+	    String sql = """
+	            SELECT 1
+	            FROM `order`
+	            WHERE subscriberCode = ?
+	              AND `status` = 'ACTIVE'
+	              AND ABS(
+	                    TIMESTAMPDIFF(
+	                        MINUTE,
+	                        TIMESTAMP(order_date, arrival_time),
+	                        ?
+	                    )
+	                ) < 240
+	            LIMIT 1
+	            """;
 
-			stmt.setInt(1, subscriberCode);				// Filter by subscriber
-			stmt.setTimestamp(2, requestedTimestamp); // exclude exact match
-			stmt.setTimestamp(3, requestedTimestamp); // compare to others
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				return rs.next(); // conflict exists
-			}
+	        // Merge separate SQL Date + Time into a single Timestamp
+	        Timestamp requestedTs = Timestamp.valueOf(
+	                selectedDate.toLocalDate()
+	                            .atTime(arrivalTime.toLocalTime()));
 
-		} catch (SQLException e) {
-			System.err.println("Error checking reservation conflict: " + e.getMessage());
-			return true; // assume conflict in case of error
-		}
+	        stmt.setInt(1, subscriberCode);    // filter by subscriber
+	        stmt.setTimestamp(2, requestedTs); // compare against this moment
+
+	        // If we get at least one row → clash detected
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next();
+	        }
+	    } catch (SQLException ex) {
+	        // DB blew up? play it safe and block the reservation
+	        System.err.println("Error checking reservation conflict: " + ex.getMessage());
+	        return true;
+	    }
 	}
+
 
 	/**
 	 * Tries to log in the given user by setting their is_logged_in flag to 1.
