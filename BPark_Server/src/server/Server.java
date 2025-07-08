@@ -73,7 +73,7 @@ public class Server extends AbstractServer {
 
 			// When the user clicks "Logout" - just logs them out and keeps the app open. expected format: {LOGOUT}
 			case LOGOUT:
-			    logClientDisconnect(client);  // basic disconnect logging (IP, etc.)
+			    
 
 			    // If we know who the subscriber is, mark them as offline in the DB
 			    if (client.getInfo("username") instanceof String u1) {
@@ -84,13 +84,12 @@ public class Server extends AbstractServer {
 
 			// When the user clicks "Exit" - logs out and shuts down the whole app expected format: {EXIT}
 			case EXIT:
-			    logClientDisconnect(client);  // same logging as logout
-
-			    // Also mark user as offline if they were logged in
+			    //  mark user as offline if they were logged in
 			    if (client.getInfo("username") instanceof String u2) {
 			        db.markUserLoggedOut(u2);
 			        System.out.println("Subscriber " + u2 + " logged out.");
 			    }
+			    logClientDisconnect(client);  // close client system
 			    break;
 
 					
@@ -110,6 +109,7 @@ public class Server extends AbstractServer {
 					int orderNumberToDelete = (int) data[1];
 					boolean succeed = db.deleteOrder(orderNumberToDelete);
 					if (succeed) {
+						System.out.println("Order "+ orderNumberToDelete+" cancelled.");
 						client.sendToClient(new ServerResponse(true, null, ResponseType.ORDER_DELETED ,"order deleted successfully."));
 					} else {
 						client.sendToClient(new ServerResponse(false, null, null ,"order didn't delete"));
@@ -326,7 +326,7 @@ public class Server extends AbstractServer {
 					Order orderToAdd = (Order) data[1];
 					boolean success = db.placingAnNewOrder(orderToAdd);
 					if (success) { 
-						System.out.println("The subscriber "+orderToAdd.getSubscriberId() +" has successfully made a reservation.");
+						System.out.println("The subscriber "+orderToAdd.getSubscriberId() +" has successfully made a reservation "+orderToAdd.getOrderNumber()+".");
 						client.sendToClient(new ServerResponse(true, orderToAdd,ResponseType.ORDER_ADDED, "reservation succeed!"));
 					} else {
 						System.err.println("Reservation of"+orderToAdd.getSubscriberId() +"failed.");
@@ -686,7 +686,7 @@ public class Server extends AbstractServer {
 	        if (user != null) {
 	            // remember username on this socket – cleared on disconnect
 	            client.setInfo("username", username);
-	            System.out.println("User "+username+" successfully logged in");
+	            System.out.println("Subscriber "+username+" successfully logged in");
 	            client.sendToClient(new ServerResponse(
 	                    true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
 	        } else {
