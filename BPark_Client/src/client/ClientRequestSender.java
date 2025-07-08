@@ -459,13 +459,20 @@ public class ClientRequestSender {
         }
     }
     
-    /* Sends a graceful disconnect request to the server. */
-    public void sendDisconnect() {
+    /**
+     * Sends a disconnect request to the server, letting it know why the client is disconnecting.
+     * This is used both when the user logs out or when the app exits completely.
+     *
+     * @param reason the reason for disconnecting 
+     */
+    public void sendDisconnect(String reason) {
         try {
-            client.sendToServer(new Object[] { Operation.DISCONNECT });
+            client.sendToServer(new Object[] { Operation.DISCONNECT, reason });
         } catch (IOException e) {
             System.err.println("[CLIENT] Failed to send disconnect: " + e.getMessage());
         }
     }
+
+
 
 }

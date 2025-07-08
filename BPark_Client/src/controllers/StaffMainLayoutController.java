@@ -116,7 +116,7 @@ public class StaffMainLayoutController implements ClientAware, StageAware  {
     private void handleLogoutClick() {
         try {
             if (client != null && client.isConnected()) {
-                client.getRequestSender().sendDisconnect(); // graceful logout
+	        	client.getRequestSender().sendDisconnect("LOGOUT");
             }
         } catch (Exception ex) {
             System.err.println("[CLIENT] Logout error: " + ex.getMessage());

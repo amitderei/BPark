@@ -70,15 +70,30 @@ public class Server extends AbstractServer {
 			Object [] data=(Object[]) msg;
 			
 			switch ((Operation) data[0]) {
-				// Disconnect request from client. expected format: {DISCONNECT}
-				case DISCONNECT:
-					logClientDisconnect(client);
-                    Object uObj = client.getInfo("username");
-                    if (uObj instanceof String u) {
-                        db.markUserLoggedOut(u);    // reset online flag
-                        System.out.println("Subscriber "+ u +" successfully logged out.");
-                    }
-					break;
+			// Disconnect request from client. 
+			// Expected format: {DISCONNECT, "REASON"} where reason can be "LOGOUT", "EXIT", etc.
+			case DISCONNECT:
+			    Object uObj = client.getInfo("username");
+
+			    // Default reason if none is provided
+			    String reason = "UNKNOWN";
+
+			    // Check if client sent a reason string (e.g., "LOGOUT" or "EXIT")
+			    if (data.length >= 2 && data[1] instanceof String r) {
+			        reason = r;
+			    }
+
+			    //log disconnection
+			    logClientDisconnect(client);
+
+			    // Reset user session if a valid username exists
+			    if (uObj instanceof String u) {
+			        db.markUserLoggedOut(u);  // Update DB to mark user as logged out
+			        System.out.println("User " + u + " disconnected. Reason: " + reason);
+			    }
+			    break;
+
+
 					
 				// get all reservations of specific subscriber.  expected format: {ASK_FOR_RESERVATIONS, subscriber}
 				case ASK_FOR_RESERVATIONS:
@@ -672,7 +687,7 @@ public class Server extends AbstractServer {
 	        if (user != null) {
 	            // remember username on this socket – cleared on disconnect
 	            client.setInfo("username", username);
-	            System.out.println("Subscriber "+username+" successfully logged in");
+	            System.out.println("User "+username+" successfully logged in");
 	            client.sendToClient(new ServerResponse(
 	                    true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
 	        } else {

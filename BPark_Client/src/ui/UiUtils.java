@@ -154,9 +154,9 @@ public final class UiUtils {
      * and closes the application.
      */
     public static void exitFromSystem() {
-    	try {
+        try {
             if (client != null && client.isConnected()) {
-                client.sendToServer(new Object[] { Operation.DISCONNECT });
+                client.sendToServer(new Object[] { Operation.DISCONNECT, "EXIT" });
                 client.closeConnection();
             }
         } catch (Exception ignored) {
@@ -164,4 +164,5 @@ public final class UiUtils {
         javafx.application.Platform.exit();
         System.exit(0);
     }
+
 }
