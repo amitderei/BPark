@@ -53,7 +53,7 @@ public class ExtendParkingController implements ClientAware {
      */
     @FXML
     private void handleExtendClick() {
-
+    	
         String codeText = txtParkingCode.getText().trim();
 
         if (codeText.isEmpty()) {
@@ -65,7 +65,7 @@ public class ExtendParkingController implements ClientAware {
         try {
             parkingCode = Integer.parseInt(codeText);
         } catch (NumberFormatException e) {
-            UiUtils.setStatus(lblStatus, "Invalid parking code. Must be a number.", false);
+            UiUtils.setStatus(lblStatus, "Invalid parking code. Must be a number (6 digits)", false);
             return;
         }
 
