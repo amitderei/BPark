@@ -1364,9 +1364,9 @@ public class DBController {
 	 *
 	 * @param parkingCode the code identifying the parking session
 	 * @param subscriberCode the subscriber's code (may be null or blank if called from terminal)
-	 * @return a ServerResponse indicating whether the extension was successful, with a message
+	 * @return a String that indicates if the extend succeeded or a message that relevant to a particular failure. 
 	 */
-	public ServerResponse extendParkingSession(int parkingCode, String subscriberCode) {
+	public String extendParkingSession(int parkingCode, String subscriberCode) {
 		String sql;
 		boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
 
@@ -1376,8 +1376,7 @@ public class DBController {
 		boolean upcomingReservation = hasReservationInNext4Hours();
 
 		if (occupied >= totalSpots && upcomingReservation) {
-			return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED,
-					"Extension not allowed- spot is reserved.");
+			return "Extension not allowed- spot is reserved.";
 		}
 
 		// Prepare SQL for extension
@@ -1408,7 +1407,7 @@ public class DBController {
 			int rowsAffected = stmt.executeUpdate();
 
 			if (rowsAffected > 0) {
-				return new ServerResponse(true, null, ResponseType.PARKING_SESSION_EXTENDED, "Parking session extended successfully.");
+				return "Parking session extended successfully.";
 			} 
 			else {
 				// if the number of rows is equal to 0, it means that there is some problem in the inputed code
@@ -1422,44 +1421,44 @@ public class DBController {
 						// If there was no exception thrown it means that the string contains only digits
 
 					} catch (NumberFormatException e) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Subscriber code has failed.");
+						return "Subscriber code has failed.";
 					}
 
 					if(!checkSubscriberEntered(subscriberCodeInt)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your vehicle isn't inside.");
+						return "Your vehicle isn't inside.";
 					}
 
 					// case 2 : tell the subscriber that if his vehicle is inside but the parking code isn't correct
 					// If the method returns null it means that the vehicle is inside but the parking code doesn't match
 					if(getOpenParkingEvent(subscriberCodeInt, parkingCode) == null) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "The parking code doesn't match.");
+						return "The parking code doesn't match your active parking session.";
 					}
 
 					// case 3 : tell the subscriber that if his vehicle is inside but he already made an extend then he can't make an extend again
 					ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
 					if (event.isWasExtended()) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session was already extended.");
+						return "Your parking session was already extended.";
 					}
 
 					// case 4 : tell the subscriber that if he is late then he canno't extend his parking
 					if (subscriberIsLate(subscriberCodeInt)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session is late.");
+						return "Your parking session is late.";
 					}
 				}
 				else {
 					// case 5 : if the subscriber has entered a parking code threw the terminal, but there is no matching parking code
 					if(!openParkingCodeExists(parkingCode)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "There is no active parking that matches this parking code.");
+						return "There is no active parking that matches this parking code.";
 					}
 
 					// case 6 : if there is a matched parking code but an extend parking already happened
 					if(parkingCodeWasExtended(parkingCode)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session was already extended.");
+						return "Your parking session was already extended.";
 					}
 
 					// case 7 : if there is a matched parking code but the active parking is late
 					if (subscriberIsLateByParkingCode(parkingCode)) {
-						return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Your parking session is late.");
+						return "Your parking session is late.";
 					}
 				}
 
@@ -1467,11 +1466,11 @@ public class DBController {
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
-			return new ServerResponse(false, null, null, "Database error: " + e.getMessage());
+			return "Database error: " + e.getMessage();
 		}
 
 		// Default : return invalid code
-		return new ServerResponse(false, null, ResponseType.PARKING_SESSION_EXTENDED, "Invalid parking code.");
+		return "Invalid parking code.";
 	}
 
 	/**

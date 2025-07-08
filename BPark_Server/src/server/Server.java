@@ -565,9 +565,16 @@ public class Server extends AbstractServer {
 				int parkingCode = (int) data[1];
 				String subscriberCodeForExtend = (String) data[2];
 
-				ServerResponse response = db.extendParkingSession(parkingCode, subscriberCodeForExtend);
+				String response = db.extendParkingSession(parkingCode, subscriberCodeForExtend);
+				boolean completed = false;
+				
+				if(response.equals("Parking session extended successfully.")) {
+					completed = true;
+				}
+				
 				System.out.println("Parking time extension of " + parkingCode + " completed successfully.");
-				client.sendToClient(response);
+				client.sendToClient(
+						new ServerResponse(completed, null, ResponseType.PARKING_SESSION_EXTENDED, response));
 				break;
 
 			// check if subscriber has a order in the same date and time. expected format:
