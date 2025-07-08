@@ -3,8 +3,6 @@ package reportService;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 import db.DBController;
 
@@ -46,7 +44,6 @@ public class MonthlyReportGenerator {
      * Useful for system bootstrapping or after downtime.
      */
     public void generatePastReports() {
-        List<Date> dates = new ArrayList<>();
         LocalDate init = LocalDate.of(2025, 2, 1); // First supported month
         LocalDate now  = LocalDate.now();
 

@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import common.*;
 
@@ -55,7 +53,7 @@ public class DBController {
 	public static void connectToDB() {
 		try {
 			// Loads and initializes the MySQL JDBC driver class
-			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.cj.jdbc.Driver");
 			System.out.println("Driver definition succeed");
 		} catch (Exception ex) {
 			System.err.println("Driver definition failed"); // error in driver loading
@@ -1885,7 +1883,7 @@ public class DBController {
 		String query = "UPDATE parkingEvent SET sendMsgForLating=TRUE WHERE subscriberCode=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setInt(1, subscriberCode); // set the paramter in the query
-			int rowsUpdated = stmt.executeUpdate(); //execute
+			stmt.executeUpdate(); //execute
 		} catch (SQLException e) {
 			System.err.print("Error mark that mail send for lating:"+ e.getMessage());
 			e.printStackTrace();
@@ -2330,7 +2328,7 @@ public class DBController {
 		// query  to mark reservations as INACTIVE if their arrival time was more than 15 minutes ago
 		String query="UPDATE `order` SET `status`='INACTIVE' WHERE `status`='ACTIVE' AND TIMESTAMP(order_date, arrival_time) <= NOW() - INTERVAL 15 MINUTE;";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			int rowsUpdated = stmt.executeUpdate(); //execute
+			stmt.executeUpdate(); //execute
 		} catch (SQLException e) {
 			System.err.println("Error inactive reservations: "+e.getMessage());
 			e.printStackTrace();
