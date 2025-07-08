@@ -35,7 +35,6 @@ public class ParkingEventChecker extends Thread {
                 // Get list of late parkings that haven't been notified yet
                 List<ParkingEvent> sendEmailList = db.getActiveParkingEventsThatLateAndDoesntReceiveMail();
 
-                System.out.println("new thread created");
 
                 // Go through each late parking and send notification
                 for (int i = 0; i < sendEmailList.size(); i++) {
@@ -46,7 +45,6 @@ public class ParkingEventChecker extends Thread {
                     String email = getEmailAndPhoneNumberOfLating[0];
                     String phoneNum = getEmailAndPhoneNumberOfLating[1];
 
-                    System.out.println("new email is created");
 
                     // Send late notification
                     mailService.sendEmail(email, phoneNum, TypeOfMail.LATE);

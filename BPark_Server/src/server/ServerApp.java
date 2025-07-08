@@ -34,7 +34,7 @@ public class ServerApp extends Application {
             int    port   = Integer.parseInt(portStr);
             Server server = new Server(port);
             server.listen();                       // open socket
-            System.out.println("Server started on port " + port);
+            System.out.println("Server started on port " + port+".");
             return server;
         } catch (NumberFormatException nfe) {
             System.out.println("ERROR – port must be numeric.");

@@ -58,7 +58,7 @@ public class DBController {
 			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 			System.out.println("Driver definition succeed");
 		} catch (Exception ex) {
-			System.out.println("Driver definition failed"); // error in driver loading
+			System.err.println("Driver definition failed"); // error in driver loading
 		}
 
 		try {
@@ -68,9 +68,9 @@ public class DBController {
 			System.out.println("SQL connection succeed");
 		} catch (SQLException ex) {
 			// Prints SQL error information if connection fails
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
+			System.err.println("SQLException: " + ex.getMessage());
+			System.err.println("SQLState: " + ex.getSQLState());
+			System.err.println("VendorError: " + ex.getErrorCode());
 		}
 	}
 
@@ -81,7 +81,7 @@ public class DBController {
 		try {
 			conn.close(); // close JDBC connection
 		} catch (Exception e) {
-			System.out.println("Error to disconnect from DB " + e.getMessage()); // log if failed
+			System.err.println("Error to disconnect from DB " + e.getMessage()); // log if failed
 		}
 	}
 
@@ -291,7 +291,7 @@ public class DBController {
 
 			if (hours > allowedHours) { //print to the subscriber
 				System.out.println(
-						"[NOTIFY] Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
+						"Subscriber " + subscriberCode + " had a delayed pickup (" + hours + " hours)");
 				return new ServerResponse(true, null, ResponseType.PICKUP_VEHICLE, "Pickup successful with delay. A notification was sent.");
 			}
 			// Normal pickup within allowed time
@@ -425,7 +425,7 @@ public class DBController {
 				}
 			}
 		} catch (SQLException e) { //if fails
-			System.out.println("Error get a parking space" + e.getMessage());
+			System.err.println("Error get a parking space" + e.getMessage());
 		}
 		return -1;
 	}
@@ -463,7 +463,7 @@ public class DBController {
 				}
 			}
 		} catch (SQLException e) {
-			System.out.println("Error parking space checking " + e.getMessage());
+			System.err.println("Error parking space checking " + e.getMessage());
 		}
 		return false;
 	}
@@ -485,11 +485,10 @@ public class DBController {
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) { // set order number
 					newOrder.setOrderNumber(rs.getInt(1));
-					System.out.println(((Integer) newOrder.getOrderNumber()).toString());
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Error set order id " + e.getMessage());
+			System.err.println("Error set order id " + e.getMessage());
 		}
 	}
 
@@ -522,7 +521,7 @@ public class DBController {
 			}
 		} catch (Exception e) {
 			// Error during update execution
-			System.out.println("Error placing new order " + e.getMessage());
+			System.err.println("Error placing new order " + e.getMessage());
 			return false;
 		}
 	}
@@ -554,7 +553,7 @@ public class DBController {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Error get details of subscriber " + e.getMessage());
+			System.err.println("Error get details of subscriber " + e.getMessage());
 		}
 		return null;
 	}
@@ -854,7 +853,6 @@ public class DBController {
 			// Execute the insert statement
 			stmt.executeUpdate();
 
-			System.out.println(">> INSERTING PARKING EVENT FOR: " + parkingEvent.getSubscriberCode());
 		} catch (SQLException e) {
 			System.err.println("Error inserting parking event: " + e.getMessage());
 		}
@@ -983,7 +981,6 @@ public class DBController {
 	 * @return if the action succeed
 	 */
 	public boolean changeDetailsOfUser(User user) {
-		System.out.println("user");
 		// SQL query to update the user's password
 		String query = "UPDATE user SET password=? WHERE username=?";
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1195,7 +1192,7 @@ public class DBController {
 				return arrayForPhoneAndEmail;
 			}
 		} catch (SQLException e) {
-			System.out.println("Error finding email and phone number: " + e.getMessage());
+			System.err.println("Error finding email and phone number: " + e.getMessage());
 		}
 		return null; // Return null if subscriber not found or error occurred
 	}
@@ -1335,7 +1332,7 @@ public class DBController {
 				return newParkingEvent;
 			}
 		} catch (SQLException e) {
-			System.out.println("Error finding active parking info: " + e.getMessage());
+			System.err.println("Error finding active parking info: " + e.getMessage());
 		}
 		return null; // Return null if no active event found or error occurred
 	}
@@ -1878,7 +1875,7 @@ public class DBController {
 			stmt.setInt(1, subscriberCode); // set the paramter in the query
 			int rowsUpdated = stmt.executeUpdate(); //execute
 		} catch (SQLException e) {
-			System.out.print(e.getMessage());
+			System.err.print("Error mark that mail send for lating:"+ e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -1993,7 +1990,7 @@ public class DBController {
 			// Return a report object with the gathered stats
 			return new ParkingReport(totalEntries, totalExtends, totalLates, lessThanFourHours, betweenFourToEight, moreThanEight);
 		} catch (SQLException e) {
-			System.out.println("Error get data for parking report: " + e.getMessage());
+			System.err.println("Error get data for parking report: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null; // Return null on failure
@@ -2019,7 +2016,7 @@ public class DBController {
 			stmt.executeUpdate(); //execute
 			System.out.println("Parking reoprt created!");
 		} catch (SQLException e) {
-			System.out.println("Error creating parking report: "+ e.getMessage());
+			System.err.println("Error creating parking report: "+ e.getMessage());
 			e.printStackTrace();
 		}	
 	}
@@ -2039,7 +2036,7 @@ public class DBController {
 				return true;
 			}
 		} catch (SQLException e) {
-			System.out.println("Error check existence of parking report: "+ e.getMessage());
+			System.err.println("Error check existence of parking report: "+ e.getMessage());
 			e.printStackTrace();
 		}
 		return false; // Return false if report does not exist or error occurred
@@ -2070,7 +2067,7 @@ public class DBController {
 				);
 			}
 		} catch (SQLException e) {
-			System.out.println("Error get parking report: " + e.getMessage());
+			System.err.println("Error get parking report: " + e.getMessage());
 			e.printStackTrace();
 		}
 		// Return null if no report found or error occurred
@@ -2301,7 +2298,7 @@ public class DBController {
 			}
 			return datesOfReports;
 		} catch (SQLException e) {
-			System.out.println("Error getting reports dates: "+e.getMessage());
+			System.err.println("Error getting reports dates: "+e.getMessage());
 			e.printStackTrace();
 		}
 		return null; // Return null in case of exception
@@ -2316,7 +2313,7 @@ public class DBController {
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			int rowsUpdated = stmt.executeUpdate(); //execute
 		} catch (SQLException e) {
-			System.out.println("Error inactive reservations: "+e.getMessage());
+			System.err.println("Error inactive reservations: "+e.getMessage());
 			e.printStackTrace();
 		}
 	}

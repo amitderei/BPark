@@ -76,8 +76,8 @@ public class Server extends AbstractServer {
                     Object uObj = client.getInfo("username");
                     if (uObj instanceof String u) {
                         db.markUserLoggedOut(u);    // reset online flag
+                        System.out.println("Subscriber "+ u +" successfully logged out.");
                     }
-
 					break;
 					
 				// get all reservations of specific subscriber.  expected format: {ASK_FOR_RESERVATIONS, subscriber}
@@ -162,10 +162,10 @@ public class Server extends AbstractServer {
 					
 				//send mail to subscriber that forget the parking code. expected format {FORGEOT_MY_PARKING_CODE, subscriberCode}
 				case FORGEOT_MY_PARKING_CODE:
+					String[] emailAndPhone = db.getEmailAndPhoneNumber((int) data[1]);
+					String email = emailAndPhone[0];
+					String phone = emailAndPhone[1];
 					try {
-						String[] emailAndPhone = db.getEmailAndPhoneNumber((int) data[1]);
-						String email = emailAndPhone[0];
-						String phone = emailAndPhone[1];
 						ParkingEvent parkingEventThatFoeget = db.getActiveParkingEvent((new Subscriber((int) data[1])));
 						sendEmail.sendEmail(email, parkingEventThatFoeget.getParkingCode(), TypeOfMail.FORGOT_PASSWORD);
 						client.sendToClient(new ServerResponse(true, null, null, "The code was sent to your email."));
@@ -173,6 +173,7 @@ public class Server extends AbstractServer {
 						e.printStackTrace();
 						client.sendToClient(
 								new ServerResponse(false, null, null, "Failed to send email. Please try again later."));
+						System.err.println("Failed to send email to"+email+".");
 					}
 					break;
 					
@@ -310,10 +311,11 @@ public class Server extends AbstractServer {
 				case ADD_NEW_ORDER:
 					Order orderToAdd = (Order) data[1];
 					boolean success = db.placingAnNewOrder(orderToAdd);
-
-					if (success) {
+					if (success) { 
+						System.out.println("The subscriber "+orderToAdd.getSubscriberId() +" has successfully made a reservation.");
 						client.sendToClient(new ServerResponse(true, orderToAdd,ResponseType.ORDER_ADDED, "reservation succeed!"));
 					} else {
+						System.err.println("Reservation of"+orderToAdd.getSubscriberId() +"failed.");
 						client.sendToClient(new ServerResponse(false, null, null, "reservation not succeed!"));
 					}
 					break;
@@ -404,6 +406,8 @@ public class Server extends AbstractServer {
 					db.inactiveReservations();
 					// Inserting the parking event into the DB
 					db.addParkingEvent(newParkingEvent);
+					
+					System.out.println("Vehicle of "+newParkingEvent.getSubscriberCode() +" entered successfully.");
 
 					// The server sends the successful addition of parking event
 					client.sendToClient(new ServerResponse(true, null, ResponseType.DELIVER_VEHICLE , "Added parking event successfully"));
@@ -485,7 +489,7 @@ public class Server extends AbstractServer {
 					
 				//get the data of parking availability. expected format: {GET_PARKING_AVAILABILITY}
 				case GET_PARKING_AVAILABILITY:
-					System.out.println("[SERVER] Received availability request");
+					
 
 					try {
 						int total = db.getTotalSpots();
@@ -493,6 +497,7 @@ public class Server extends AbstractServer {
 						int available = total - occupied;
 
 						Object[] stats = new Object[] { total, occupied, available };
+						System.out.println("Received availability request");
 						client.sendToClient(new ServerResponse(true, stats, ResponseType.PARKING_AVALIABILITY, "parking_availability"));
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -507,6 +512,7 @@ public class Server extends AbstractServer {
 					String subscriberCodeForExtend = (String) data[2];
 
 					ServerResponse response = db.extendParkingSession(parkingCode, subscriberCodeForExtend);
+					System.out.println("Parking time extension of "+parkingCode+" completed successfully.");
 					client.sendToClient(response);
 					break;
 					
@@ -658,7 +664,7 @@ public class Server extends AbstractServer {
 	    String username = (String) data[1];
 	    String password = (String) data[2];
 
-	    System.out.println("[SERVER] Login attempt for user: " + username);
+	    System.out.println("Login attempt for user: " + username);
 
 	    User user = db.authenticateUser(username, password);  // null => wrong creds OR already online
 
@@ -666,7 +672,7 @@ public class Server extends AbstractServer {
 	        if (user != null) {
 	            // remember username on this socket – cleared on disconnect
 	            client.setInfo("username", username);
-
+	            System.out.println("Subscriber "+username+" successfully logged in");
 	            client.sendToClient(new ServerResponse(
 	                    true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
 	        } else {

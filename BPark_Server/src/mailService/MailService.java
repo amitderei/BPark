@@ -40,7 +40,7 @@ public class MailService {
         });
 
         try {
-            System.out.println("Try to send email...");
+            System.out.println("Try to send email to "+ to +"...");
 
             // Build the email message
             Message message = new MimeMessage(session);
@@ -75,7 +75,7 @@ public class MailService {
             // Send the email
             Transport.send(message);
 
-            System.out.println("Email sent successfully!");
+            System.out.println("Email sent successfully to "+ to +"!");
 
         } catch (Exception e) {
             System.out.println("Error send mail: " + e.getMessage());
