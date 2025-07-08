@@ -204,20 +204,24 @@ public class ServerController {
 	 * @param message the message to show
 	 */
 	private void showAlert(Alert.AlertType type, String title, String message) {
-		Alert alert = new Alert(type);
-		alert.setTitle(title);
-		alert.setHeaderText(null);
-		alert.setContentText(message);
-		alert.showAndWait();
+		 Platform.runLater(() -> {
+		        Alert alert = new Alert(type);
+		        alert.setTitle(title);
+		        alert.setHeaderText(null);
+		        alert.setContentText(message);
+		        alert.showAndWait();
+		    });
 	}
 
 	/**
 	 * Starts a timeline that refreshes the client list every 5 seconds.
 	 */
 	private void startAutoClientListUpdater() {
-		clientUpdateTimeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> showConnectedClients()));
-		clientUpdateTimeline.setCycleCount(Timeline.INDEFINITE);
-		clientUpdateTimeline.play();
+		if (serverInstance != null) {
+			clientUpdateTimeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> showConnectedClients()));
+			clientUpdateTimeline.setCycleCount(Timeline.INDEFINITE);
+			clientUpdateTimeline.play();
+			}
 	}
 
 	/**
