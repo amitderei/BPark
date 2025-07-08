@@ -48,7 +48,7 @@ public class Server extends AbstractServer {
 	 */
 	@Override
 	protected void serverStarted() {
-		db.connectToDB();
+		DBController.connectToDB();
 		db.resetAllLoggedIn();
 		MonthlyReportScheduler.start(); // schedule monthly reports
 		new MonthlyReportGenerator().generatePastReports();
