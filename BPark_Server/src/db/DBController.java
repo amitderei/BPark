@@ -1544,7 +1544,7 @@ public class DBController {
 
 	        if (rs.next()) {
 	            int remaining = rs.getInt("remainingExtensions");
-	            return remaining <= 1; // block now to preserve space for reservation
+	            return remaining < 1; // block now to preserve space for reservation
 	        }
 	    } catch (SQLException e) {
 	        System.err.println("Error in extensionWouldBlockReservation: " + e.getMessage());
