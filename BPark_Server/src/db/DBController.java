@@ -1610,13 +1610,16 @@ public class DBController {
 	public int getUpcomingReservationCount(String lotName) {
 	    String sql = """
 	        SELECT COUNT(*) AS cnt
-	        FROM bpark.`order` o
+	        FROM bpark.order o
 	        JOIN bpark.parkingSpaces ps ON o.parking_space = ps.parking_space
+	        JOIN bpark.parkingEvent e ON o.parking_space = e.parking_space AND e.exitDate IS NULL
 	        WHERE o.status = 'ACTIVE'
 	          AND TIMESTAMP(o.order_date, o.arrival_time) BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 4 HOUR)
+	          AND e.NameParkingLot = ?
 	    """;
 
 	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setString(1, lotName);
 	        ResultSet rs = stmt.executeQuery();
 	        if (rs.next()) return rs.getInt("cnt");
 	    } catch (SQLException e) {
