@@ -1403,49 +1403,88 @@ public class DBController {
 	}
 
 	/**
-	 * Attempts to extend an active parking session based on the given parking code.
+	 * Tries to extend a parking session using a given parking code and (optionally) a subscriber code.
 	 *
-	 * The extension will succeed only if all of the following conditions are met:
-	 * - The parking session is still active (exitDate and exitHour are NULL)
-	 * - The session has not been extended before (wasExtended = FALSE)
-	 * - If a subscriberCode is provided (not null or blank), the session must belong to that subscriber
-	 * - The number of allowed extensions (based on upcoming reservations) has not been exceeded
+	 * Extension is only allowed if:
+	 * - The session is still active (not exited yet)
+	 * - It hasn't been extended already
+	 * - If a subscriberCode is given, the session must belong to that subscriber
+	 * - There's still extension capacity left in the system (based on future reservations)
 	 *
-	 * If subscriberCode is null or blank (used from terminal), the extension will be attempted
-	 * using only the parking code without checking subscriber ownership.
+	 * If subscriberCode is missing or blank, we assume the request comes from a terminal
+	 * and skip subscriber validation.
 	 *
-	 * @param parkingCode the code identifying the parking session
-	 * @param subscriberCode the subscriber's code (may be null or blank if called from terminal)
-	 * @return a String message indicating success or the reason for failure
+	 * @param parkingCode the unique code for the current parking session
+	 * @param subscriberCode optional code that identifies the subscriber (may be null/blank)
+	 * @return a string message indicating success or the specific reason why the extension failed
+	 * @throws SQLException if there's a problem talking to the database
 	 */
-	public String extendParkingSession(int parkingCode, String subscriberCode) {
+	public String extendParkingSession(int parkingCode, String subscriberCode) throws SQLException {
 	    String sql;
 	    boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
 
-	    // Before anything, check how many extensions are still allowed
+	    // First: Check that this session is actually valid and eligible for extension
+	    if (useSubscriberCode) {
+	        // Try parsing the subscriber code (should be a number)
+	        int subscriberCodeInt;
+	        try {
+	            subscriberCodeInt = Integer.parseInt(subscriberCode);
+	        } catch (NumberFormatException e) {
+	            return "Subscriber code has failed.";
+	        }
+
+	        // Make sure the subscriber's vehicle is currently parked
+	        if (!checkSubscriberEntered(subscriberCodeInt)) {
+	            return "Your vehicle isn't inside.";
+	        }
+
+	        // Get the parking event and verify ownership and state
+	        ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
+	        if (event == null) {
+	            return "The parking code doesn't match your active parking session.";
+	        }
+
+	        if (event.isWasExtended()) {
+	            return "Your parking session was already extended.";
+	        }
+
+	        if (subscriberIsLate(subscriberCodeInt)) {
+	            return "Your parking session is late.";
+	        }
+
+	    } else {
+	        // Terminal scenario – no subscriber code, so we only verify the session
+	        if (!openParkingCodeExists(parkingCode)) {
+	            return "There is no active parking that matches this parking code.";
+	        }
+
+	        if (parkingCodeWasExtended(parkingCode)) {
+	            return "Your parking session was already extended.";
+	        }
+
+	        if (subscriberIsLateByParkingCode(parkingCode)) {
+	            return "Your parking session is late.";
+	        }
+	    }
+
+	    // Second: Check if allowing another extension would interfere with upcoming reservations
 	    updateRemainingExtensionCapacity("Braude");
 	    if (extensionWouldBlockReservation()) {
 	        return "Extension denied – upcoming reservations exceed available capacity.";
 	    }
 
-	    // Create the SQL depending on whether we're checking for subscriber ownership
+	    // Build the SQL query based on whether subscriber validation is required
 	    if (!useSubscriberCode) {
-	        sql = "UPDATE bpark.parkingEvent " +
-	              "SET wasExtended = TRUE " +
-	              "WHERE parkingCode = ? " +
-	              "AND exitDate IS NULL AND exitHour IS NULL " +
-	              "AND wasExtended = FALSE " +
-	              "AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+	        sql = "UPDATE bpark.parkingEvent SET wasExtended = TRUE " +
+	              "WHERE parkingCode = ? AND exitDate IS NULL AND exitHour IS NULL " +
+	              "AND wasExtended = FALSE AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
 	    } else {
-	        sql = "UPDATE bpark.parkingEvent " +
-	              "SET wasExtended = TRUE " +
-	              "WHERE parkingCode = ? " +
-	              "AND subscriberCode = ? " +
-	              "AND exitDate IS NULL AND exitHour IS NULL " +
-	              "AND wasExtended = FALSE " +
-	              "AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+	        sql = "UPDATE bpark.parkingEvent SET wasExtended = TRUE " +
+	              "WHERE parkingCode = ? AND subscriberCode = ? AND exitDate IS NULL AND exitHour IS NULL " +
+	              "AND wasExtended = FALSE AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
 	    }
 
+	    // Try updating the session in the database to mark it as extended
 	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 	        stmt.setInt(1, parkingCode);
 	        if (useSubscriberCode) {
@@ -1454,59 +1493,22 @@ public class DBController {
 
 	        int rowsAffected = stmt.executeUpdate();
 
-	        // If update happened, it means extension succeeded
+	        // If the update succeeded, that means the session was extended successfully
 	        if (rowsAffected > 0) {
-	            decrementRemainingExtensions("Braude");
+	            decrementRemainingExtensions("Braude"); // update capacity count
 	            return "Parking session extended successfully.";
-	        } else {
-	            // Now we try to understand why the extension failed
-	            int subscriberCodeInt;
-
-	            if (useSubscriberCode) {
-	                try {
-	                    subscriberCodeInt = Integer.parseInt(subscriberCode);
-	                } catch (NumberFormatException e) {
-	                    return "Subscriber code has failed.";
-	                }
-
-	                if (!checkSubscriberEntered(subscriberCodeInt)) {
-	                    return "Your vehicle isn't inside.";
-	                }
-
-	                if (getOpenParkingEvent(subscriberCodeInt, parkingCode) == null) {
-	                    return "The parking code doesn't match your active parking session.";
-	                }
-
-	                ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
-	                if (event.isWasExtended()) {
-	                    return "Your parking session was already extended.";
-	                }
-
-	                if (subscriberIsLate(subscriberCodeInt)) {
-	                    return "Your parking session is late.";
-	                }
-	            } else {
-	                // Terminal input case (no subscriber)
-	                if (!openParkingCodeExists(parkingCode)) {
-	                    return "There is no active parking that matches this parking code.";
-	                }
-
-	                if (parkingCodeWasExtended(parkingCode)) {
-	                    return "Your parking session was already extended.";
-	                }
-
-	                if (subscriberIsLateByParkingCode(parkingCode)) {
-	                    return "Your parking session is late.";
-	                }
-	            }
 	        }
 	    } catch (SQLException e) {
+	        // In case something goes wrong while talking to the DB
 	        e.printStackTrace();
 	        return "Database error: " + e.getMessage();
 	    }
 
-	    return "Invalid parking code."; // default fallback
+	    // Fallback message (shouldn't usually get here)
+	    return "Invalid parking code.";
 	}
+
+
 
 	/**
 	 * Decreases the number of remaining extensions for the lot (if more than 0).
@@ -1528,7 +1530,10 @@ public class DBController {
 	}
 
 	/**
-	 * Checks if no extensions are allowed due to upcoming reservations.
+	 * Checks if no further extensions should be allowed due to upcoming reservations.
+	 * This is a conservative check - it blocks if only one extension slot remains,
+	 * assuming the current request would consume it and leave no room for reservations.
+	 *
 	 * @return true if extensions should be blocked, false if there is still capacity
 	 */
 	public boolean extensionWouldBlockReservation() {
@@ -1539,7 +1544,7 @@ public class DBController {
 
 	        if (rs.next()) {
 	            int remaining = rs.getInt("remainingExtensions");
-	            return remaining <= 0;
+	            return remaining <= 1; // block now to preserve space for reservation
 	        }
 	    } catch (SQLException e) {
 	        System.err.println("Error in extensionWouldBlockReservation: " + e.getMessage());
@@ -1547,6 +1552,7 @@ public class DBController {
 
 	    return true; // safer to block in case of DB error
 	}
+
 
 	/**
 	 * Updates the extension capacity in the DB based on current lot status.
@@ -1560,7 +1566,7 @@ public class DBController {
 	        int reservations = getUpcomingReservationCount(lotName);
 	        int alreadyExtended = getExtendedParkingsCount(lotName);
 
-	        int allowedExtensions = totalSpots - reservations - alreadyExtended;
+	        int allowedExtensions = totalSpots - reservations - alreadyExtended - 1;
 	        if (allowedExtensions < 0) allowedExtensions = 0;
 
 	        System.out.println("Extension Capacity Update DEBUG:");

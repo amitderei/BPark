@@ -712,7 +712,7 @@ public class Server extends AbstractServer {
 				break;
 
 			}
-		} catch (IOException e) {
+		} catch (IOException | SQLException e) {
 			System.err.println("Client communication error: " + e.getMessage());
 		}
 
