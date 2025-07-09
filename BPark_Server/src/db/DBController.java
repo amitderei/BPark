@@ -720,7 +720,7 @@ public class DBController {
 			updateParkingSpaceOccupied(freeSpot);    // Mark spot as taken in DB
 			
 			// Return selected parking spot ID if there is
-			return findAnyFreeParkingSpace();
+			return freeSpot;
 
 		} catch (Exception e) {
 			// Log and return failure code
