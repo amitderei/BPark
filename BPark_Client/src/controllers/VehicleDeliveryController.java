@@ -425,7 +425,7 @@ public class VehicleDeliveryController implements ClientAware{
 		if(hasReservation) {handleDeliveryViaReservation();}
 
 		// If there's no reservation, we will check if we can enter the vehicle on a regular
-		else client.getRequestSender().isThereFreeParkingSpace("braude", codeInt);
+		else client.getRequestSender().isThereFreeParkingSpace("braude", codeInt, false);
 
 
 	}
@@ -490,7 +490,7 @@ public class VehicleDeliveryController implements ClientAware{
 		ReservationConfirmationCodeLabel.setStyle("-fx-text-fill: green;");
 
 		// Before going to the delivery process we shall check whether is there free space or not
-		client.getRequestSender().isThereFreeParkingSpace("braude", codeInt);
+		client.getRequestSender().isThereFreeParkingSpace("braude", codeInt, true);
 	}
 
 	/**

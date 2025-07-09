@@ -678,54 +678,57 @@ public class DBController {
 	 *
 	 * @param parkingLotName the name of the parking lot (e.g., "Braude")
 	 * @param subscriberCode the subscriber's code (used to check if they have a reservation)
+	 * @param activeReservation the status of a subscriber whether he has an active reservation or not
 	 * @return the ID of an available parking spot, or -1 if the lot is full
 	 */
-	public synchronized int hasAvailableSpots(String parkingLotName, int subscriberCode) {
-	    try {
-	        // Get the total number of parking spots across all lots
-	        int totalSpots = getTotalSpots();
+	public synchronized int hasAvailableSpots(String parkingLotName, int subscriberCode, boolean activeReservation) {
+		try {
+			int freeSpot;
+			// If subscriber has reservation, find any free spot (even reserved)
+			if (activeReservation) {
+				freeSpot = findAnyFreeParkingSpace();
+				if (freeSpot != -1) {
+					addOccupiedParkingSpace();               // Increment occupied counter
+					updateParkingSpaceOccupied(freeSpot);    // Mark spot as taken in DB
+				}
+				return freeSpot;
+			}
 
-	        // Get the number of currently active (ongoing) parkings
-	        int activeParkings = getActiveParkingsCount();
+			// Now we will focus on a subscriber which enters without an active order
+			// Get the total number of parking spots across all lots
+			int totalSpots = getTotalSpots();
 
-	        // Get the number of reservations that start right now
-	        int reservedNow = getActiveReservationsNowCount();
+			// Get the number of currently active (ongoing) parkings
+			int activeParkings = getActiveParkingsCount();
+			
+			// Get the number of reservations that start right now
+			int closeReservations = getCloseReservationsNowCount();
+			System.out.println("amount of closest relevant reservations: " + closeReservations);
 
-	        // Calculate total used spots (parked + reserved)
-	        int used = activeParkings + reservedNow;
+			// Calculate total used spots (parked + reserved)
+			int used = activeParkings + closeReservations;
 
-	        // If all spots are used or exceeded, return -1
-	        if (used >= totalSpots) {
-	            return -1; // Lot is full
-	        }
+			// If all spots are used or exceeded, return -1
+			if (used >= totalSpots) {
+				return -1; // Lot is full for people who doesn't have a reservation
+			}			
+			freeSpot = findAnyFreeParkingSpace();
+			
+			if(freeSpot == -1) {
+				return -1;
+			}
+			
+			addOccupiedParkingSpace();               // Increment occupied counter
+			updateParkingSpaceOccupied(freeSpot);    // Mark spot as taken in DB
+			
+			// Return selected parking spot ID if there is
+			return findAnyFreeParkingSpace();
 
-	        int freeSpot;
-
-	        // If subscriber has reservation, find any free spot (even reserved)
-	        if (checkSubscriberHasReservationNow(subscriberCode)) {
-	            freeSpot = findAnyFreeParkingSpace(); // Allow reserved spots
-	        } else {
-	            // Otherwise, find only non-reserved free spots
-	            freeSpot = findUnreservedFreeParkingSpace();
-	        }
-
-	        // If no suitable spot was found, return -1
-	        if (freeSpot == -1) {
-	            return -1;
-	        }
-
-	        // Update DB and counters to mark the spot as occupied
-	        addOccupiedParkingSpace();               // Increment occupied counter
-	        updateParkingSpaceOccupied(freeSpot);    // Mark spot as taken in DB
-
-	        // Return selected parking spot ID
-	        return freeSpot;
-
-	    } catch (Exception e) {
-	        // Log and return failure code
-	        System.err.println("Error checking available spots: " + e.getMessage());
-	        return -1;
-	    }
+		} catch (Exception e) {
+			// Log and return failure code
+			System.err.println("Error checking available spots: " + e.getMessage());
+			return -1;
+		}
 	}
 
 
@@ -750,7 +753,7 @@ public class DBController {
 			return -1;
 		}
 	}
-
+	
 	/**
 	 * Counts how many parking events are currently active (vehicles that are still inside).
 	 *
@@ -774,66 +777,33 @@ public class DBController {
 
 
 	/**
-	 * Counts how many ACTIVE reservations exist for right now.
-	 * A reservation is "active" if current time is within the 4-hour protected window.
+	 * Counts how many ACTIVE reservations exist for the next 4 hours.
+	 * A reservation is "close" if either starting within next 4h, or started but within +15min grace
 	 *
 	 * @return number of active reservations holding spots right now
 	 */
-	private int getActiveReservationsNowCount() {
-		// SQL to count today's ACTIVE reservations in the valid time window
-		String sql = """
-				    SELECT COUNT(*)
-				    FROM `order`
-				    WHERE `status` = 'ACTIVE'
-				      AND order_date = CURDATE()
-				      AND NOW() BETWEEN
-				          TIMESTAMP(order_date, SUBTIME(arrival_time, '04:00:00')) AND
-				          TIMESTAMP(order_date, ADDTIME(arrival_time, '00:15:00'))
-				""";
+	private int getCloseReservationsNowCount() {
+	    // SQL to count today's ACTIVE reservations for the next 4 hours window
+	    String sql = """
+	            SELECT COUNT(*)
+	            FROM `order`
+	            WHERE `status` = 'ACTIVE'
+	              AND order_date = CURDATE()
+	              AND (
+	                    TIMESTAMP(order_date, arrival_time) BETWEEN NOW() AND TIMESTAMPADD(HOUR, 4, NOW())
+	                    OR
+	                    NOW() BETWEEN TIMESTAMP(order_date, arrival_time)
+	                              AND TIMESTAMPADD(MINUTE, 15, TIMESTAMP(order_date, arrival_time))
+	                  )
+	        """;
 
-		try (PreparedStatement stmt = conn.prepareStatement(sql);
-				ResultSet rs = stmt.executeQuery()) {
-			// Return the count if query succeeded
-			return rs.next() ? rs.getInt(1) : 0;
-		} catch (SQLException e) {
-			System.err.println("Error counting active reservations: " + e.getMessage());
-			return -1;
-		}
-	}
-
-
-	/**
-	 * Finds a free parking space that is not currently occupied and
-	 * not blocked by a reservation window of [arrival - 4h, arrival + 15min].
-	 *
-	 * @return a free and unreserved parking space, or -1 if none found
-	 */
-	private int findUnreservedFreeParkingSpace() {
-		// SQL to select one available and unreserved parking space
-		String sql = """
-				    SELECT ps.parking_space
-				    FROM parkingSpaces ps
-				    WHERE ps.is_occupied = FALSE
-				      AND ps.parking_space NOT IN (
-				          SELECT parking_space
-				          FROM `order`
-				          WHERE `status` = 'ACTIVE'
-				            AND order_date = CURDATE()
-				            AND NOW() BETWEEN
-				                TIMESTAMP(order_date, SUBTIME(arrival_time, '04:00:00')) AND
-				                TIMESTAMP(order_date, ADDTIME(arrival_time, '00:15:00'))
-				      )
-				    LIMIT 1
-				""";
-
-		try (PreparedStatement stmt = conn.prepareStatement(sql);
-				ResultSet rs = stmt.executeQuery()) {
-			// Return the parking space ID if found, else -1
-			return rs.next() ? rs.getInt(1) : -1;
-		} catch (SQLException e) {
-			System.err.println("Error finding free parking space: " + e.getMessage());
-			return -1;
-		}
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+	        return rs.next() ? rs.getInt(1) : 0;
+	    } catch (SQLException e) {
+	        System.err.println("Error counting active reservations: " + e.getMessage());
+	        return -1;
+	    }
 	}
 
 	/**

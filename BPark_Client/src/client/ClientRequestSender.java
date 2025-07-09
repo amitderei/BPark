@@ -409,11 +409,12 @@ public class ClientRequestSender {
      *
      * @param parkingLotName the name of the parking lot to check
      * @param subscriberCode the code of the subscriber
+     * @param activeReservation to clarify whether an entrance is from an active reservation or not
      */
-    public void isThereFreeParkingSpace(String parkingLotName, int subscriberCode) {
+    public void isThereFreeParkingSpace(String parkingLotName, int subscriberCode, boolean activeReservation) {
         try {
             client.sendToServer(new Object[] {
-                    Operation.IS_THERE_FREE_PARKING_SPACE, parkingLotName, subscriberCode,
+                    Operation.IS_THERE_FREE_PARKING_SPACE, parkingLotName, subscriberCode, activeReservation
             });
         } catch (IOException e) {
             System.err.println("Failed to send 'IsThereFreeParkingSpace' request: " + e.getMessage());

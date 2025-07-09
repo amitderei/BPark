@@ -82,8 +82,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// When the user clicks "Exit" - logs out and shuts down the whole app expected
-			// format: {EXIT}
+				// When the user clicks "Exit" - logs out and shuts down the whole app expected
+				// format: {EXIT}
 			case EXIT:
 				// mark user as offline if they were logged in
 				if (client.getInfo("username") instanceof String u2) {
@@ -93,8 +93,8 @@ public class Server extends AbstractServer {
 				logClientDisconnect(client); // close client system
 				break;
 
-			// get all reservations of specific subscriber. expected format:
-			// {ASK_FOR_RESERVATIONS, subscriber}
+				// get all reservations of specific subscriber. expected format:
+				// {ASK_FOR_RESERVATIONS, subscriber}
 			case ASK_FOR_RESERVATIONS:
 				ArrayList<Order> orders = db.getFutureReservationsForSubscriber((Subscriber) data[1]);
 				if (orders.isEmpty()) {
@@ -105,7 +105,7 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// cancel order of subscriber. expected format: {DELETE_ORDER, orderNumber}
+				// cancel order of subscriber. expected format: {DELETE_ORDER, orderNumber}
 			case DELETE_ORDER:
 				int orderNumberToDelete = (int) data[1];
 				boolean succeed = db.deleteOrder(orderNumberToDelete);
@@ -118,7 +118,7 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// Check if subscriber has an order within 4 hours of requested time
+				// Check if subscriber has an order within 4 hours of requested time
 			case CHECK_RESERVATION_CONFLICT:
 				int subCodeToCheck = (int) data[1];
 				Date dateToCheck = (Date) data[2];
@@ -129,8 +129,8 @@ public class Server extends AbstractServer {
 						"Conflict check completed."));
 				break;
 
-			// get parking history of subscriber. expected format:
-			// {UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber}
+				// get parking history of subscriber. expected format:
+				// {UPDATE_PARKING_HISTORY_OF_SUBSCRIBER, subscriber}
 			case UPDATE_PARKING_HISTORY_OF_SUBSCRIBER:
 				ArrayList<ParkingEvent> history = db.parkingHistoryOfSubscriber((Subscriber) data[1]);
 				if (history == null) {
@@ -144,8 +144,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// return the parking report. expected format {GET_PARKING_REPORT,
-			// parkingReport}
+				// return the parking report. expected format {GET_PARKING_REPORT,
+				// parkingReport}
 			case GET_PARKING_REPORT:
 				ParkingReport parkingReport = db.getParkingReport((Date) data[1]);
 
@@ -158,7 +158,7 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// return the dates of the reports. expected format {GET_DATES_OF_REPORTS}
+				// return the dates of the reports. expected format {GET_DATES_OF_REPORTS}
 			case GET_DATES_OF_REPORTS:
 				ArrayList<Date> dates = db.getAllReportsDates();
 				if (dates == null) {
@@ -170,8 +170,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// return the data of active parking of subscriber. expected format
-			// {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
+				// return the data of active parking of subscriber. expected format
+				// {GET_DETAILS_OF_ACTIVE_INFO, subscriber}
 			case GET_DETAILS_OF_ACTIVE_INFO:
 				ParkingEvent parkingEvent = db.getActiveParkingEvent((Subscriber) data[1]);
 				if (parkingEvent == null) {
@@ -183,8 +183,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// send mail to subscriber that forget the parking code. expected format
-			// {FORGEOT_MY_PARKING_CODE, subscriberCode}
+				// send mail to subscriber that forget the parking code. expected format
+				// {FORGEOT_MY_PARKING_CODE, subscriberCode}
 			case FORGEOT_MY_PARKING_CODE:
 				String[] emailAndPhone = db.getEmailAndPhoneNumber((int) data[1]);
 				String email = emailAndPhone[0];
@@ -201,8 +201,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// Validate subscriber by tag. expected format {VALIDATE_SUBSCRIBER_BY_TAG,
-			// tagId}
+				// Validate subscriber by tag. expected format {VALIDATE_SUBSCRIBER_BY_TAG,
+				// tagId}
 			case VALIDATE_SUBSCRIBER_BY_TAG:
 				String tagId = (String) data[1];
 				int subscriberCode = db.getSubscriberCodeByTag(tagId);
@@ -226,8 +226,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// Validate subscriber by numeric code. expected format
-			// {VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE, subscriberCode}
+				// Validate subscriber by numeric code. expected format
+				// {VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE, subscriberCode}
 			case VALIDATE_SUBSCRIBER_BY_SUBSCRIBER_CODE:
 				int validateSubscriberCode = (int) data[1];
 
@@ -249,12 +249,12 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// Login request. expected format {LOGIN, username. password}
+				// Login request. expected format {LOGIN, username. password}
 			case LOGIN:
 				handleLogin(data, client);
 				break;
 
-			// Collect car. expected format: {COLLECT_CAR, subscriberCode, parkingCode}
+				// Collect car. expected format: {COLLECT_CAR, subscriberCode, parkingCode}
 			case COLLECT_CAR:
 				int subCode = (int) data[1];
 				int parkCode = (int) data[2];
@@ -289,8 +289,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// update details of subscriber. expected format={UPDATE_DETAILS_OF_SUBSCRIBER,
-			// subscriber\null, user\null}
+				// update details of subscriber. expected format={UPDATE_DETAILS_OF_SUBSCRIBER,
+				// subscriber\null, user\null}
 			case UPDATE_DETAILS_OF_SUBSCRIBER:
 				boolean isSucceedSubscriber = true;
 				boolean isSucceedUser = true;
@@ -324,7 +324,7 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// get the details of subscriber. expected format={SUBSCRIBER_DETAILS, user}
+				// get the details of subscriber. expected format={SUBSCRIBER_DETAILS, user}
 			case SUBSCRIBER_DETAILS:
 				Subscriber subscriber = db.getDetailsOfSubscriber((User) data[1]);
 				if (subscriber != null) {
@@ -335,8 +335,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// check availability for order (at least 40%). expected
-			// format={CHECK_AVAILABILITY_FOR_ORDER, date, time}
+				// check availability for order (at least 40%). expected
+				// format={CHECK_AVAILABILITY_FOR_ORDER, date, time}
 			case CHECK_AVAILABILITY_FOR_ORDER:
 				boolean possible = db.parkingSpaceCheckingForNewOrder((Date) data[1], (Time) data[2]);
 				if (possible) {
@@ -348,13 +348,13 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// add a new reservation. expected format: {ADD_NEW_ORDER, order}
+				// add a new reservation. expected format: {ADD_NEW_ORDER, order}
 			case ADD_NEW_ORDER:
 				Order orderToAdd = (Order) data[1];
 				boolean success = db.placingAnNewOrder(orderToAdd);
 				if (success) {
 					System.out.println("The subscriber " + orderToAdd.getSubscriberId()
-							+ " has successfully made a reservation " + orderToAdd.getOrderNumber() + ".");
+					+ " has successfully made a reservation " + orderToAdd.getOrderNumber() + ".");
 					client.sendToClient(
 							new ServerResponse(true, orderToAdd, ResponseType.ORDER_ADDED, "reservation succeed!"));
 				} else {
@@ -363,8 +363,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// check if there is a subscriber with this subscriber code. expected format:
-			// {SUBSCRIBER_EXISTS, subscriberCode}
+				// check if there is a subscriber with this subscriber code. expected format:
+				// {SUBSCRIBER_EXISTS, subscriberCode}
 			case SUBSCRIBER_EXISTS:
 				int codeInt = (int) data[1];
 
@@ -381,8 +381,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// check if the subscriber has a reservation right now. expected format:
-			// {CHECK_IF_THERE_IS_RERSERVATION, subscriberCode}
+				// check if the subscriber has a reservation right now. expected format:
+				// {CHECK_IF_THERE_IS_RERSERVATION, subscriberCode}
 			case CHECK_IF_THERE_IS_RERSERVATION:
 				int codeIntForCheckingReservation = (int) data[1];
 
@@ -402,8 +402,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// make the delivery via reservation of subscriber. expected format:
-			// {DELIVERY_VIA_RESERVATION, subscriberCode, confirmationCode}
+				// make the delivery via reservation of subscriber. expected format:
+				// {DELIVERY_VIA_RESERVATION, subscriberCode, confirmationCode}
 			case DELIVERY_VIA_RESERVATION:
 				int codeIntForDeliveryViaReservation = (int) data[1];
 				int confirmationCodeInt = (int) data[2];
@@ -420,15 +420,15 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// check if there is an empty parking spot in the parking lot. expected format:
-			// {IS_THERE_FREE_PARKING_SPACE, lotName}
+				// check if there is an empty parking spot in the parking lot. expected format:
+				// {IS_THERE_FREE_PARKING_SPACE, lotName, subscriberCode, activeReservation}
 			case IS_THERE_FREE_PARKING_SPACE:
 				String lotName = (String) data[1];
 				subscriberCode = (Integer) data[2];
-				int parkingSpaceInt = db.hasAvailableSpots(lotName, subscriberCode);
+				boolean activeReservation = (Boolean) data[3];
+				int parkingSpaceInt = db.hasAvailableSpots(lotName, subscriberCode, activeReservation);
 
-				// If the method hasAvaliableSpots returns -1 it means that the parking lot is
-				// full
+				// If the method hasAvaliableSpots returns -1 it means that the parking lot is full
 				if (parkingSpaceInt == -1) {
 					client.sendToClient(new ServerResponse(false, null, ResponseType.PARKING_SPACE_AVAILABILITY,
 							"The Parking Lot is Full"));
@@ -439,7 +439,7 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// get vehicle id. expected format: {GET_VEHICLE_ID, subscriberCode}
+				// get vehicle id. expected format: {GET_VEHICLE_ID, subscriberCode}
 			case GET_VEHICLE_ID:
 				int codeIntForGetVehicleId = (int) data[1];
 
@@ -451,8 +451,8 @@ public class Server extends AbstractServer {
 						new ServerResponse(true, vehicleID, ResponseType.VEHICLE_ID, "Found matched vehicle"));
 				break;
 
-			// get in the new car to the lot. expected format: {DELIVER_VEHICLE,
-			// parkingEvent}
+				// get in the new car to the lot. expected format: {DELIVER_VEHICLE,
+				// parkingEvent}
 			case DELIVER_VEHICLE:
 				ParkingEvent newParkingEvent = (ParkingEvent) data[1];
 
@@ -468,7 +468,7 @@ public class Server extends AbstractServer {
 						"Added parking event successfully"));
 				break;
 
-			// check if tag exists. expected format: {TAG_EXISTS, tagId}
+				// check if tag exists. expected format: {TAG_EXISTS, tagId}
 			case TAG_EXISTS:
 				String tag = (String) data[1];
 
@@ -483,8 +483,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// find a matched subscriber code to the tag ID. expected format:
-			// {FIND_MATCHED_SUBSCRIBER_TO_THE_TAG, tagId}
+				// find a matched subscriber code to the tag ID. expected format:
+				// {FIND_MATCHED_SUBSCRIBER_TO_THE_TAG, tagId}
 			case FIND_MATCHED_SUBSCRIBER_TO_THE_TAG:
 				String tagIdOfSubscriber = (String) data[1];
 
@@ -496,8 +496,8 @@ public class Server extends AbstractServer {
 						"Subscriber with matching tag has been found"));
 				break;
 
-			// check if subscriber already entered to the lot. expected format:
-			// {SUBSCRIBER_ALREADY_ENTERED, subscriberCode}
+				// check if subscriber already entered to the lot. expected format:
+				// {SUBSCRIBER_ALREADY_ENTERED, subscriberCode}
 			case SUBSCRIBER_ALREADY_ENTERED:
 				int codeIntToCheckIfSubscriberEntered = (int) data[1];
 
@@ -514,8 +514,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// check if tag id already entered to lot. expected format:
-			// {TAG_ID_ALREADY_ENTERED, tadId}
+				// check if tag id already entered to lot. expected format:
+				// {TAG_ID_ALREADY_ENTERED, tadId}
 			case TAG_ID_ALREADY_ENTERED:
 				String tagIdToCheckIfEntered = (String) data[1];
 
@@ -532,20 +532,20 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// return all subscribers and their late pickup counts. expected format:
-			// {GET_ALL_SUBSCRIBERS}
+				// return all subscribers and their late pickup counts. expected format:
+				// {GET_ALL_SUBSCRIBERS}
 			case GET_ALL_SUBSCRIBERS:
 				ArrayList<Object[]> rows = new ArrayList<>(db.getAllSubscribersWithLateCount());
 				client.sendToClient(new ServerResponse(true, rows, ResponseType.LATE_PICKUP_COUNTS, "all_subscribers"));
 				break;
-			// get all parking event that active right now. expected format:
-			// {GET_ACTIVE_PARKINGS}
+				// get all parking event that active right now. expected format:
+				// {GET_ACTIVE_PARKINGS}
 			case GET_ACTIVE_PARKINGS:
 				List<ParkingEvent> events = db.getActiveParkingEvents();
 				client.sendToClient(new ServerResponse(true, events, ResponseType.ACTIVE_PARKINGS, "active_parkings"));
 				break;
 
-			// get the data of parking availability
+				// get the data of parking availability
 			case GET_PARKING_AVAILABILITY:
 
 				try {
@@ -557,17 +557,17 @@ public class Server extends AbstractServer {
 					Object[] stats = new Object[] { total, occupied, upcoming, available };
 					System.out.println("Received availability request");
 					client.sendToClient(
-						new ServerResponse(true, stats, ResponseType.PARKING_AVALIABILITY, "parking_availability"));
+							new ServerResponse(true, stats, ResponseType.PARKING_AVALIABILITY, "parking_availability"));
 				} catch (Exception e) {
 					e.printStackTrace();
 					client.sendToClient(
-						new ServerResponse(false, null, null, "Failed to retrieve parking availability."));
+							new ServerResponse(false, null, null, "Failed to retrieve parking availability."));
 				}
 				break;
 
 
-			// extend the parking event of subscriber. expected format: {"extendParking",
-			// parkingCode, subscriberCode(String)}
+				// extend the parking event of subscriber. expected format: {"extendParking",
+				// parkingCode, subscriberCode(String)}
 			case EXTEND_PARKING:
 				int parkingCode = (int) data[1];
 				String subscriberCodeForExtend = (String) data[2];
@@ -584,8 +584,8 @@ public class Server extends AbstractServer {
 						new ServerResponse(completed, null, ResponseType.PARKING_SESSION_EXTENDED, response));
 				break;
 
-			// check if subscriber has a order in the same date and time. expected format:
-			// {IS_THERE_AN_EXISTED_ORDER, subscriberCode, selectedDate, timeOfArrival}
+				// check if subscriber has a order in the same date and time. expected format:
+				// {IS_THERE_AN_EXISTED_ORDER, subscriberCode, selectedDate, timeOfArrival}
 			case IS_THERE_AN_EXISTED_ORDER:
 				int subscriberCodeToCheckOrder = (int) data[1];
 				Date selectedDate = (Date) data[2];
@@ -600,8 +600,8 @@ public class Server extends AbstractServer {
 				}
 				break;
 
-			// register a new subscriber to the system. expected format:
-			// {REGISTER_SUBSCRIBER, subscriber, vehicleID}
+				// register a new subscriber to the system. expected format:
+				// {REGISTER_SUBSCRIBER, subscriber, vehicleID}
 			case REGISTER_SUBSCRIBER:
 				Subscriber receivedSub = (Subscriber) data[1];
 				String vehicleId = (data.length > 2 && data[2] instanceof String) ? (String) data[2] : null;
@@ -680,8 +680,8 @@ public class Server extends AbstractServer {
 						"Subscriber registered successfully." + "Login details sent via email."));
 				break;
 
-			// get subscriber status report of selected date. expected format:
-			// {GET_SUBSCRIBER_STATUS_REPORT, month, year}
+				// get subscriber status report of selected date. expected format:
+				// {GET_SUBSCRIBER_STATUS_REPORT, month, year}
 			case GET_SUBSCRIBER_STATUS_REPORT:
 				int month = (int) data[1];
 				int year = (int) data[2];
