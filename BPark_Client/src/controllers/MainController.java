@@ -77,8 +77,8 @@ public class MainController implements ClientAware, StageAware {
     @FXML
     public void setVideos() {
     	//path to the videos
-    	String pathOfParkingVideo="/client/AutomaticParking.mp4";
-    	String pathOfParkingSystem="/client/parkingSystem.mp4";
+    	String pathOfParkingVideo="/media/AutomaticParking.mp4";
+    	String pathOfParkingSystem="/media/parkingSystem.mp4";
     	
     	//URL of the videos
     	URL pathOfParkingVideoUrl= getClass().getResource(pathOfParkingVideo);

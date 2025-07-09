@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@ViewSubscriberHistoryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewParkingHistoryController">
+<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@/style/ViewSubscriberHistoryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewParkingHistoryController">
    <padding>
       <Insets bottom="20" left="20" right="20" top="20" />
    </padding>

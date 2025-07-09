@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@ViewSubscriberDetailsScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewSubscriberDetailsController">
+<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@/style/ViewSubscriberDetailsScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewSubscriberDetailsController">
 
    <center>
       <VBox alignment="CENTER" spacing="20">

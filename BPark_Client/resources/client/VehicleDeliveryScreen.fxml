@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@VehicleDeliveryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleDeliveryController">
+<AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@/style/VehicleDeliveryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleDeliveryController">
    <children>
       <GridPane layoutX="10.0" layoutY="9.0" prefHeight="433.0" prefWidth="580.0" styleClass="delivery-box">
          <columnConstraints>

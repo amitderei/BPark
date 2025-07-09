@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@VehiclePickupScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehiclePickupController">
+<AnchorPane prefHeight="453.0" prefWidth="600.0" stylesheets="@/style/VehiclePickupScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehiclePickupController">
    <children>
       <VBox alignment="CENTER" layoutX="17.0" prefHeight="421.0" prefWidth="570.0" spacing="15.0" styleClass="vbox-box" AnchorPane.leftAnchor="17.0" AnchorPane.rightAnchor="13.0" AnchorPane.topAnchor="20.0">
          <children>

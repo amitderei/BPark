@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@ConnectScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ConnectController">
+<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@/style/ConnectScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ConnectController">
    <children>
       <ToolBar fx:id="dragArea" prefHeight="25.0" prefWidth="800.0" styleClass="toolbar">
          <items>

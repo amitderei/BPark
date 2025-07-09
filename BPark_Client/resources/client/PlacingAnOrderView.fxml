@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@PlacingAnOrderView.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CreateNewOrderViewController">
+<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@/style/PlacingAnOrderView.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CreateNewOrderViewController">
    
    <center>
       <VBox alignment="CENTER" spacing="15">

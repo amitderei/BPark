@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@MainScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@/style/MainScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
     <Button fx:id="loginBtn" layoutX="198.0" layoutY="192.0" onAction="#handleLogin" prefWidth="160.0" styleClass="login-btn" text="Login" />
     <Button fx:id="guestBtn" layoutX="468.0" layoutY="192.0" onAction="#handleGuest" prefWidth="160.0" styleClass="guest-btn" text="Enter as Guest" />
    <ToolBar fx:id="dragArea" layoutY="-1.0" prefHeight="55.0" prefWidth="800.0" styleClass="toolbar">

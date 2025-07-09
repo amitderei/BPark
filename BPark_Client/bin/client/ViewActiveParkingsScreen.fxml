@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@ViewActiveParkingsScreen.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="controllers.ViewActiveParkingsController">
+<BorderPane prefHeight="453.0" prefWidth="600.0" stylesheets="@/style/ViewActiveParkingsScreen.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="controllers.ViewActiveParkingsController">
     <top>
         <Label styleClass="headline" text="Active Parkings" BorderPane.alignment="CENTER" />
     </top>

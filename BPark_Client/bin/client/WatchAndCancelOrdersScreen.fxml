@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@WatchAndCancelOrdersScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WatchAndCancelOrdersController">
+<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@/style/WatchAndCancelOrdersScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WatchAndCancelOrdersController">
    <padding>
       <Insets bottom="20" left="20" right="20" top="20" />
    </padding>

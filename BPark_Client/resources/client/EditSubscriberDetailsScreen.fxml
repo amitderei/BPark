@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="450.0" prefWidth="600.0" stylesheets="@EditSubscriberDetailsScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.EditSubscriberDetailsController">
+<BorderPane prefHeight="450.0" prefWidth="600.0" stylesheets="@/style/EditSubscriberDetailsScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.EditSubscriberDetailsController">
 
    <center>
       <VBox alignment="CENTER" prefHeight="600" prefWidth="800" spacing="20">

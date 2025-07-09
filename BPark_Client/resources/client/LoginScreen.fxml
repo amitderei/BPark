@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@LoginScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
+<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="@/style/LoginScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
     <children>
       <ToolBar fx:id="dragArea" prefHeight="46.0" prefWidth="800.0" styleClass="toolbar">
          <items>
@@ -40,12 +40,12 @@
               <Button fx:id="submit" layoutX="151.0" layoutY="242.0" onAction="#handleLoginClick" prefWidth="100.0" text="Login" />
             <ImageView fitHeight="30.0" fitWidth="36.0" layoutX="51.0" layoutY="84.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@username.png" />
+                  <Image url="@/media/username.png" />
                </image>
             </ImageView>
             <ImageView fitHeight="30.0" fitWidth="36.0" layoutX="49.0" layoutY="161.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@password.png" />
+                  <Image url="@/media/password.png" />
                </image>
             </ImageView>
               <Label fx:id="lblError" layoutX="48.0" layoutY="295.0" prefHeight="17.0" prefWidth="318.0" styleClass="error-label" textFill="red" />
