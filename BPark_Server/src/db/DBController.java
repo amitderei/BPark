@@ -1401,255 +1401,120 @@ public class DBController {
 	 * - The parking session is still active (exitDate and exitHour are NULL)
 	 * - The session has not been extended before (wasExtended = FALSE)
 	 * - If a subscriberCode is provided (not null or blank), the session must belong to that subscriber
-	 * - The number of allowed extensions (based on upcoming reservations) has not been exceeded
+	 * - There is no upcoming reservation in the next 4 hours if the parking lot is full
 	 *
 	 * If subscriberCode is null or blank (used from terminal), the extension will be attempted
 	 * using only the parking code without checking subscriber ownership.
 	 *
 	 * @param parkingCode the code identifying the parking session
 	 * @param subscriberCode the subscriber's code (may be null or blank if called from terminal)
-	 * @return a String message indicating success or the reason for failure
+	 * @return a String that indicates if the extend succeeded or a message that relevant to a particular failure. 
 	 */
 	public String extendParkingSession(int parkingCode, String subscriberCode) {
-	    String sql;
-	    boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
+		String sql;
+		boolean useSubscriberCode = (subscriberCode != null && !subscriberCode.isBlank());
 
-	    // Before anything, check how many extensions are still allowed
-	    updateRemainingExtensionCapacity("Braude");
-	    if (extensionWouldBlockReservation()) {
-	        return "Extension denied – upcoming reservations exceed available capacity.";
-	    }
+		// Prevent extension if the parking lot is full and there is a reservation soon
+		int totalSpots = getTotalSpots();
+		int occupied = getOccupiedSpots();
+		boolean upcomingReservation = hasReservationInNext4Hours();
 
-	    // Create the SQL depending on whether we're checking for subscriber ownership
-	    if (!useSubscriberCode) {
-	        sql = "UPDATE bpark.parkingEvent " +
-	              "SET wasExtended = TRUE " +
-	              "WHERE parkingCode = ? " +
-	              "AND exitDate IS NULL AND exitHour IS NULL " +
-	              "AND wasExtended = FALSE " +
-	              "AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
-	    } else {
-	        sql = "UPDATE bpark.parkingEvent " +
-	              "SET wasExtended = TRUE " +
-	              "WHERE parkingCode = ? " +
-	              "AND subscriberCode = ? " +
-	              "AND exitDate IS NULL AND exitHour IS NULL " +
-	              "AND wasExtended = FALSE " +
-	              "AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
-	    }
+		if (occupied >= totalSpots && upcomingReservation) {
+			return "Extension not allowed- spot is reserved.";
+		}
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setInt(1, parkingCode);
-	        if (useSubscriberCode) {
-	            stmt.setString(2, subscriberCode);
-	        }
+		// Prepare SQL for extension
+		if (!useSubscriberCode) {
+			sql = "UPDATE bpark.parkingEvent " +
+					"SET wasExtended = TRUE " +
+					"WHERE parkingCode = ? " +
+					"AND exitDate IS NULL AND exitHour IS NULL " +
+					"AND wasExtended = FALSE " +
+					"AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
+		} else {
+			sql = "UPDATE bpark.parkingEvent " +
+					"SET wasExtended = TRUE " +
+					"WHERE parkingCode = ? " +
+					"AND subscriberCode = ? " +
+					"AND exitDate IS NULL AND exitHour IS NULL " +
+					"AND wasExtended = FALSE " +
+					"AND (TIMESTAMPDIFF(MINUTE, TIMESTAMP(entryDate, entryHour), NOW()) <= 240)";
 
-	        int rowsAffected = stmt.executeUpdate();
+		}
 
-	        // If update happened, it means extension succeeded
-	        if (rowsAffected > 0) {
-	            decrementRemainingExtensions("Braude");
-	            return "Parking session extended successfully.";
-	        } else {
-	            // Now we try to understand why the extension failed
-	            int subscriberCodeInt;
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, parkingCode);
+			if (useSubscriberCode) {
+				stmt.setString(2, subscriberCode);
+			}
 
-	            if (useSubscriberCode) {
-	                try {
-	                    subscriberCodeInt = Integer.parseInt(subscriberCode);
-	                } catch (NumberFormatException e) {
-	                    return "Subscriber code has failed.";
-	                }
+			int rowsAffected = stmt.executeUpdate();
 
-	                if (!checkSubscriberEntered(subscriberCodeInt)) {
-	                    return "Your vehicle isn't inside.";
-	                }
+			if (rowsAffected > 0) {
+				return "Parking session extended successfully.";
+			} 
+			else {
+				// if the number of rows is equal to 0, it means that there is some problem in the inputed code
 
-	                if (getOpenParkingEvent(subscriberCodeInt, parkingCode) == null) {
-	                    return "The parking code doesn't match your active parking session.";
-	                }
+				int subscriberCodeInt;
 
-	                ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
-	                if (event.isWasExtended()) {
-	                    return "Your parking session was already extended.";
-	                }
+				if(useSubscriberCode) {
+					// case 1: tell the subscriber that his vehicle isn't inside
+					try {
+						subscriberCodeInt = Integer.parseInt(subscriberCode);
+						// If there was no exception thrown it means that the string contains only digits
 
-	                if (subscriberIsLate(subscriberCodeInt)) {
-	                    return "Your parking session is late.";
-	                }
-	            } else {
-	                // Terminal input case (no subscriber)
-	                if (!openParkingCodeExists(parkingCode)) {
-	                    return "There is no active parking that matches this parking code.";
-	                }
+					} catch (NumberFormatException e) {
+						return "Subscriber code has failed.";
+					}
 
-	                if (parkingCodeWasExtended(parkingCode)) {
-	                    return "Your parking session was already extended.";
-	                }
+					if(!checkSubscriberEntered(subscriberCodeInt)) {
+						return "Your vehicle isn't inside.";
+					}
 
-	                if (subscriberIsLateByParkingCode(parkingCode)) {
-	                    return "Your parking session is late.";
-	                }
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        return "Database error: " + e.getMessage();
-	    }
+					// case 2 : tell the subscriber that if his vehicle is inside but the parking code isn't correct
+					// If the method returns null it means that the vehicle is inside but the parking code doesn't match
+					if(getOpenParkingEvent(subscriberCodeInt, parkingCode) == null) {
+						return "The parking code doesn't match your active parking session.";
+					}
 
-	    return "Invalid parking code."; // default fallback
-	}
+					// case 3 : tell the subscriber that if his vehicle is inside but he already made an extend then he can't make an extend again
+					ParkingEvent event = getOpenParkingEvent(subscriberCodeInt, parkingCode);
+					if (event.isWasExtended()) {
+						return "Your parking session was already extended.";
+					}
 
-	/**
-	 * Decreases the number of remaining extensions for the lot (if more than 0).
-	 * @param lotName the name of the parking lot
-	 */
-	public void decrementRemainingExtensions(String lotName) {
-	    String sql = """
-	        UPDATE bpark.extensionCapacity
-	        SET remainingExtensions = remainingExtensions - 1
-	        WHERE lotName = ? AND remainingExtensions > 0
-	    """;
+					// case 4 : tell the subscriber that if he is late then he canno't extend his parking
+					if (subscriberIsLate(subscriberCodeInt)) {
+						return "Your parking session is late.";
+					}
+				}
+				else {
+					// case 5 : if the subscriber has entered a parking code threw the terminal, but there is no matching parking code
+					if(!openParkingCodeExists(parkingCode)) {
+						return "There is no active parking that matches this parking code.";
+					}
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, lotName);
-	        stmt.executeUpdate();
-	    } catch (SQLException e) {
-	        System.err.println("Failed to decrement remainingExtensions: " + e.getMessage());
-	    }
-	}
+					// case 6 : if there is a matched parking code but an extend parking already happened
+					if(parkingCodeWasExtended(parkingCode)) {
+						return "Your parking session was already extended.";
+					}
 
-	/**
-	 * Checks if no extensions are allowed due to upcoming reservations.
-	 * @return true if extensions should be blocked, false if there is still capacity
-	 */
-	public boolean extensionWouldBlockReservation() {
-	    String sql = "SELECT remainingExtensions FROM bpark.extensionCapacity WHERE lotName = 'Braude'";
+					// case 7 : if there is a matched parking code but the active parking is late
+					if (subscriberIsLateByParkingCode(parkingCode)) {
+						return "Your parking session is late.";
+					}
+				}
 
-	    try (PreparedStatement stmt = conn.prepareStatement(sql);
-	         ResultSet rs = stmt.executeQuery()) {
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			return "Database error: " + e.getMessage();
+		}
 
-	        if (rs.next()) {
-	            int remaining = rs.getInt("remainingExtensions");
-	            return remaining <= 0;
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("Error in extensionWouldBlockReservation: " + e.getMessage());
-	    }
-
-	    return true; // safer to block in case of DB error
-	}
-
-	/**
-	 * Updates the extension capacity in the DB based on current lot status.
-	 * This method recalculates how many users can still extend their parking.
-	 *
-	 * @param lotName the name of the parking lot
-	 */
-	public void updateRemainingExtensionCapacity(String lotName) {
-	    try {
-	        int totalSpots = getTotalSpots(lotName);
-	        int reservations = getUpcomingReservationCount(lotName);
-	        int alreadyExtended = getExtendedParkingsCount(lotName);
-
-	        int allowedExtensions = totalSpots - reservations - alreadyExtended;
-	        if (allowedExtensions < 0) allowedExtensions = 0;
-
-	        System.out.println("Extension Capacity Update DEBUG:");
-	        System.out.println("Lot = " + lotName);
-	        System.out.println("Total spots = " + totalSpots);
-	        System.out.println("Upcoming reservations = " + reservations);
-	        System.out.println("Already extended = " + alreadyExtended);
-	        System.out.println("Allowed extensions = " + allowedExtensions);
-
-	        // Make sure the row exists (for first-time insert)
-	        PreparedStatement insertStmt = conn.prepareStatement(
-	            "INSERT IGNORE INTO bpark.extensionCapacity (lotName, remainingExtensions) VALUES (?, ?)"
-	        );
-	        insertStmt.setString(1, lotName);
-	        insertStmt.setInt(2, allowedExtensions);
-	        insertStmt.executeUpdate();
-
-	        // Then update the value to reflect real-time state
-	        PreparedStatement updateStmt = conn.prepareStatement(
-	            "UPDATE bpark.extensionCapacity SET remainingExtensions = ? WHERE lotName = ?"
-	        );
-	        updateStmt.setInt(1, allowedExtensions);
-	        updateStmt.setString(2, lotName);
-	        updateStmt.executeUpdate();
-
-	    } catch (SQLException e) {
-	        System.err.println("Failed to update extension capacity: " + e.getMessage());
-	    }
-	}
-
-	/**
-	 * Gets the total number of parking spots in a lot.
-	 * @param lotName the lot name
-	 * @return number of total spots, or 0 if error
-	 */
-	public int getTotalSpots(String lotName) {
-	    String sql = "SELECT totalSpots FROM bpark.parkingLot WHERE NameParkingLot = ?";
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, lotName);
-	        ResultSet rs = stmt.executeQuery();
-	        if (rs.next()) return rs.getInt("totalSpots");
-	    } catch (SQLException e) {
-	        System.err.println("Error in getTotalSpots: " + e.getMessage());
-	    }
-	    return 0;
-	}
-
-	/**
-	 * Counts how many active orders are scheduled to arrive in the next 4 hours.
-	 * These affect the limit on who can extend parking.
-	 *
-	 * @param lotName the lot name
-	 * @return number of upcoming reservations
-	 */
-	public int getUpcomingReservationCount(String lotName) {
-	    String sql = """
-	        SELECT COUNT(*) AS cnt
-	        FROM bpark.order o
-	        JOIN bpark.parkingSpaces ps ON o.parking_space = ps.parking_space
-	        JOIN bpark.parkingEvent e ON o.parking_space = e.parking_space AND e.exitDate IS NULL
-	        WHERE o.status = 'ACTIVE'
-	          AND TIMESTAMP(o.order_date, o.arrival_time) BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 4 HOUR)
-	          AND e.NameParkingLot = ?
-	    """;
-
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, lotName);
-	        ResultSet rs = stmt.executeQuery();
-	        if (rs.next()) return rs.getInt("cnt");
-	    } catch (SQLException e) {
-	        System.err.println("Error in getUpcomingReservationCount: " + e.getMessage());
-	    }
-	    return 0;
-	}
-
-	/**
-	 * Returns how many active sessions in the lot have already been extended.
-	 * @param lotName the lot name
-	 * @return number of extended (and still active) sessions
-	 */
-	public int getExtendedParkingsCount(String lotName) {
-	    String sql = """
-	        SELECT COUNT(*) AS cnt
-	        FROM bpark.parkingEvent
-	        WHERE wasExtended = TRUE
-	          AND exitDate IS NULL
-	          AND NameParkingLot = ?
-	    """;
-
-	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, lotName);
-	        ResultSet rs = stmt.executeQuery();
-	        if (rs.next()) return rs.getInt("cnt");
-	    } catch (SQLException e) {
-	        System.err.println("Error in getExtendedParkingsCount: " + e.getMessage());
-	    }
-	    return 0;
+		// Default : return invalid code
+		return "Invalid parking code.";
 	}
 
 	/**
@@ -1681,7 +1546,8 @@ public class DBController {
 		// If more than 240 minutes (4 hours) have passed → subscriber is late
 		return minutes > 240;
 	}
-	
+
+
 	/**
 	 * Checks if the parking session associated with the given parking code is late.
 	 * The check is accurate to the minute: if more than 240 minutes (4 hours) have passed,
