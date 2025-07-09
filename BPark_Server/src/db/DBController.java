@@ -1036,48 +1036,56 @@ public class DBController {
 	}
 	
 	/**
-	 * check if there is another subscriber with this phone number
-	 * @param phone
-	 * @param subCode
-	 * @return true if there is another subscriber with this phone number, else false
+	 * Checks if another subscriber is already using this phone number.
+	 *
+	 * @param phone   the phone number to check
+	 * @param subCode the current subscriber's code (to exclude themself)
+	 * @return true if another subscriber has this phone number, false otherwise
 	 */
 	public boolean duplicatePhone(String phone, int subCode) {
-		String query = "SELECT * FROM subscriber WHERE phoneNumber=? AND subscriberCode<>?";
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			// Set updated values in the query
-			stmt.setString(1, phone);
-			stmt.setInt(2, subCode);
-			try (ResultSet rs = stmt.executeQuery()) {
-	            return rs.next(); 
+	    String query = "SELECT * FROM subscriber WHERE phoneNumber=? AND subscriberCode<>?";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, phone);
+	        stmt.setInt(2, subCode);
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); // someone else is already using this number
 	        }
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
 	}
+
 	
 	/**
-	 * check if there is another subscriber with this email
-	 * @param email
-	 * @param subCode
-	 * @return true if there is another subscriber with this email, else false
+	 * Checks if another subscriber already uses this email.
+	 *
+	 * @param email the email to check
+	 * @param subCode the subscriber's own code (so we can ignore their own record)
+	 * @return true if another subscriber has the same email, false otherwise
 	 */
 	public boolean duplicateEmail(String email, int subCode) {
-		String query = "SELECT * FROM subscriber WHERE email=? AND subscriberCode<>?";
-		try (PreparedStatement stmt = conn.prepareStatement(query)) {
-			// Set updated values in the query
-			stmt.setString(1, email);
-			stmt.setInt(2, subCode);
-			try (ResultSet rs = stmt.executeQuery()) {
-	            return rs.next(); 
+	    String query = "SELECT * FROM subscriber WHERE email=? AND subscriberCode<>?";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, email);
+	        stmt.setInt(2, subCode);
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            return rs.next(); // if we got a result, someone else has that email
 	        }
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
 	}
+
 
 	/**
 	 * Retrieves the full parking history of a given subscriber.
