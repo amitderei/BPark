@@ -432,6 +432,12 @@ public class Server extends AbstractServer {
 				if (parkingSpaceInt == -1) {
 					client.sendToClient(new ServerResponse(false, null, ResponseType.PARKING_SPACE_AVAILABILITY,
 							"The Parking Lot is Full"));
+					
+				} else if (parkingSpaceInt == -2) {
+					// The server will check whether the subscriber has already entered his vehicle
+					// into the parking lot or not
+					client.sendToClient(new ServerResponse(false, null, ResponseType.SUBSCRIBER_VEHICLE_ISNT_INSIDE,
+							"The vehicle is Already inside the parking lot"));
 				} else {
 					// Else, we will sent the parking space to the client controller
 					client.sendToClient(new ServerResponse(true, parkingSpaceInt,
