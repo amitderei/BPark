@@ -38,6 +38,6 @@
             </VBox>
         </HBox>
     </VBox>
-       <Button fx:id="btnRegister" layoutX="241.0" layoutY="365.0" maxWidth="180" onAction="#handleRegisterClick" text="Register Subscriber" />
-       <Label fx:id="lblStatus" layoutX="97.0" layoutY="406.0" maxWidth="406.0" prefHeight="19.0" prefWidth="406.0" style="-fx-text-fill: green; -fx-font-size: 13px;" wrapText="true" />
+       <Button fx:id="btnRegister" layoutX="241.0" layoutY="374.0" maxWidth="180" onAction="#handleRegisterClick" text="Register Subscriber" />
+       <Label fx:id="lblStatus" layoutX="123.0" layoutY="406.0" maxWidth="406.0" prefHeight="19.0" prefWidth="406.0" style="-fx-text-fill: green; -fx-font-size: 13px;" wrapText="true" />
 </AnchorPane>
