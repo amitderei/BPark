@@ -6,24 +6,30 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 /**
- * Controller for the availability screen.
- * Displays total, occupied, and available parking spots.
- * Automatically fetches data when the screen is loaded.
+ * Controller for the parking availability screen.
+ * 
+ * Shows how many spots exist, how many are currently in use,
+ * how many are reserved soon, and how many are truly free.
+ * 
+ * This controller fetches the data from the server automatically when it loads.
  */
 public class AvailabilityController implements ClientAware {
 
-	/** Label that shows the total number of parking spots */
-	@FXML 
-	private Label lblTotal;
+    /** Shows total number of spots in the lot */
+    @FXML
+    private Label lblTotal;
 
-	/** Label that shows how many spots are currently occupied */
-	@FXML 
-	private Label lblOccupied;
+    /** Shows how many spots are currently taken */
+    @FXML
+    private Label lblOccupied;
 
-	/** Label that shows how many spots are still available */
-	@FXML 
-	private Label lblAvailable;
+    /** Shows how many spots are available right now (not taken and not reserved) */
+    @FXML
+    private Label lblAvailable;
 
+    /** Shows how many spots are about to be used soon (in next 4 hours) */
+    @FXML
+    private Label lblUpcoming;;
 
 	/** Reference to the main client used to communicate with the server */
 	private ClientController client;
@@ -49,27 +55,35 @@ public class AvailabilityController implements ClientAware {
 	}
 
 	/**
-	 * Called by the ClientController when availability data is received from the server.
-	 * Updates the screen with the latest availability data.
-	 *
-	 * @param stats an array with exactly 3 values: [total, occupied, available]
-	 */
-	public void updateAvailability(Object[] stats) {
-		// All UI updates must be run on the JavaFX thread
-		Platform.runLater(() -> {
-			if (stats == null || stats.length != 3) {
-				return;
-			}
+     * This is called by the client when the server replies with parking stats.
+     * 
+     * We get 4 numbers:
+     * - total spots
+     * - how many are occupied
+     * - how many are reserved in the next 4 hours
+     * - how many are available (the real useful number!)
+     *
+     * @param stats array that must contain 4 values: [total, occupied, upcoming, available]
+     */
+    public void updateAvailability(Object[] stats) {
+        // Always update UI elements from the JavaFX thread
+        Platform.runLater(() -> {
+            if (stats == null || stats.length != 4) {
+                return; // nothing to update
+            }
 
-			// Extract values from the object array
-			int total     = (int) stats[0];
-			int occupied  = (int) stats[1];
-			int available = (int) stats[2];
+            // Extract values from the response
+            int total     = (int) stats[0];
+            int occupied  = (int) stats[1];
+            int upcoming  = (int) stats[2];
+            int available = (int) stats[3];
 
-			// Update UI labels
-			lblTotal.setText("Total spots: " + total);
-			lblOccupied.setText("Occupied: " + occupied);
-			lblAvailable.setText("Available: " + available);
-		});
+            // Show all the numbers on screen
+            lblTotal.setText("Total spots: " + total);
+            lblOccupied.setText("Occupied: " + occupied);
+            lblUpcoming.setText("Upcoming reservations (next 4 hours): " + upcoming);
+            lblAvailable.setText("Available: " + available);
+        });
 	}
+
 }

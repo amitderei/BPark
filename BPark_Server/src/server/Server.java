@@ -545,25 +545,26 @@ public class Server extends AbstractServer {
 				client.sendToClient(new ServerResponse(true, events, ResponseType.ACTIVE_PARKINGS, "active_parkings"));
 				break;
 
-			// get the data of parking availability. expected format:
-			// {GET_PARKING_AVAILABILITY}
+			// get the data of parking availability
 			case GET_PARKING_AVAILABILITY:
 
 				try {
 					int total = db.getTotalSpots();
 					int occupied = db.getOccupiedSpots();
-					int available = total - occupied;
+					int upcoming = db.getUpcomingReservations(); 
+					int available = Math.max(0, total - occupied - upcoming);
 
-					Object[] stats = new Object[] { total, occupied, available };
+					Object[] stats = new Object[] { total, occupied, upcoming, available };
 					System.out.println("Received availability request");
 					client.sendToClient(
-							new ServerResponse(true, stats, ResponseType.PARKING_AVALIABILITY, "parking_availability"));
+						new ServerResponse(true, stats, ResponseType.PARKING_AVALIABILITY, "parking_availability"));
 				} catch (Exception e) {
 					e.printStackTrace();
 					client.sendToClient(
-							new ServerResponse(false, null, null, "Failed to retrieve parking availability."));
+						new ServerResponse(false, null, null, "Failed to retrieve parking availability."));
 				}
 				break;
+
 
 			// extend the parking event of subscriber. expected format: {"extendParking",
 			// parkingCode, subscriberCode(String)}

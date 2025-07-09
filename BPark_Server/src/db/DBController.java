@@ -2110,6 +2110,45 @@ public class DBController {
 		// Return 0 if query fails or no result
 		return 0;
 	}
+	
+	/**
+	 * Counts how many upcoming reservations (orders) are scheduled
+	 * to start in the next 4 hours from now.
+	 *
+	 * We only care about ACTIVE orders that are expected soon.
+	 * This is used to limit how many people can extend their parking,
+	 * so reserved spots won't be stolen.
+	 *
+	 * @return number of upcoming reservations within the next 4 hours
+	 */
+	public int getUpcomingReservations() {
+	    int count = 0;
+
+	    // Build the SQL query to count orders that are active and arriving soon
+	    String query = """
+	        SELECT COUNT(*) FROM `order`
+	        WHERE `status` = 'ACTIVE'
+	        AND TIMESTAMP(order_date, arrival_time) BETWEEN NOW() AND NOW() + INTERVAL 4 HOUR
+	    """;
+
+	    try (
+	        PreparedStatement stmt = conn.prepareStatement(query);
+	        ResultSet rs = stmt.executeQuery()
+	    ) {
+	        // If the query returned something, grab the count
+	        if (rs.next()) {
+	            count = rs.getInt(1);
+	        }
+	    } catch (SQLException e) {
+	        // Just print the error so we know what went wrong
+	        System.err.println("Error retrieving upcoming reservations: " + e.getMessage());
+	    }
+
+	    return count;
+	}
+
+
+	
 	/**
 	 * get all the data that we need to save on parking report.
 	 * @param date
