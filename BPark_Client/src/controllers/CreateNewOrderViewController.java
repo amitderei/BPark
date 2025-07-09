@@ -4,19 +4,14 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import client.ClientController;
 import common.Order;
 import common.StatusOfOrder;
-import common.Subscriber;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -29,9 +24,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import javafx.util.Callback;
-import ui.UiUtils;
 
 /**
  * Handles the "Create New Reservation" workflow for subscribers

@@ -3,8 +3,6 @@ package controllers;
 import java.io.IOException;
 
 import client.ClientController;
-import common.Operation;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

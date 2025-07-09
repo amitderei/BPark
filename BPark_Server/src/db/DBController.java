@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import common.*;
 
@@ -1538,13 +1536,6 @@ public class DBController {
 
 	        int allowedExtensions = totalSpots - reservations - alreadyExtended - 1;
 	        if (allowedExtensions < 0) allowedExtensions = 0;
-
-	        System.out.println("Extension Capacity Update DEBUG:");
-	        System.out.println("Lot = " + lotName);
-	        System.out.println("Total spots = " + totalSpots);
-	        System.out.println("Upcoming reservations = " + reservations);
-	        System.out.println("Already extended = " + alreadyExtended);
-	        System.out.println("Allowed extensions = " + allowedExtensions);
 
 	        // Make sure the row exists (for first-time insert)
 	        PreparedStatement insertStmt = conn.prepareStatement(
