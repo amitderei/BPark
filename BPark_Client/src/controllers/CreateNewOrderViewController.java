@@ -72,10 +72,21 @@ public class CreateNewOrderViewController implements ClientAware {
 	/** Order instance created once all details are validated */
 	public Order newOrder;
 
-	/** Variables to save the information of the order*/
+	/** 
+	 * The subscriber number related to the order.
+	 */
 	int subscriberNum;
+
+	/** 
+	 * The date selected by the subscriber for the order.
+	 */
 	Date selectedDate;
+
+	/** 
+	 * The desired arrival time for the reservation.
+	 */
 	Time timeOfArrival;
+
 
 	/** This parameter waits until there will be a value received for orderExistFuture */	
 	public CompletableFuture<Boolean> orderExistFuture;

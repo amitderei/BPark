@@ -2130,8 +2130,8 @@ public class DBController {
 
 	/**
 	 * get all the data that we need to save on parking report.
-	 * @param date
-	 * @return parking report
+	 * @param date any date from the month you want to check
+	 * @return a ParkingReport object with all the collected data, or null if a database error happened
 	 */
 	private ParkingReport getDataForParkingReport(Date date) {
 		// query to retrieve parking events for the given month and year

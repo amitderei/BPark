@@ -175,8 +175,10 @@ public class EditSubscriberDetailsController implements ClientAware {
 
 	
 	/**
-	 * Checks if both first name and last name contain only English letters.
+	 * Checks if both the first name and last name contain only English letters (a–z or A–Z).
 	 *
+	 * @param firstName the first name to check
+	 * @param lastName the last name to check
 	 * @return true if both names are valid, false otherwise
 	 */
 	private boolean isValidName(String firstName, String lastName) {
@@ -184,9 +186,10 @@ public class EditSubscriberDetailsController implements ClientAware {
 	}
 	
 	/**
-	 * Checks if the password is between 4-10 chars
+	 * Checks if the password is between 4 and 10 characters.
 	 *
-	 * @return true if the passwords length is 4-10, false otherwise
+	 * @param password the password to check
+	 * @return true if valid, false otherwise
 	 */
 	private boolean isValidPassword(String password) {
 	    return password.length() >= 4 && password.length() <= 10;		

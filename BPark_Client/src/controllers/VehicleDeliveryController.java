@@ -457,9 +457,10 @@ public class VehicleDeliveryController implements ClientAware{
 	}
 
 	/**
-	 * Validates the confirmation code input from the user.
-	 * If the subscriber code field is empty or null, we will let the user know that the input is invalid
-	 * If the confirmation code is non-empty and valid return true, false otherwise
+	 * Checks if the confirmation code entered by the user is valid.
+	 * If the field is empty or null, an error message is shown and the method returns false.
+	 *
+	 * @return true if the confirmation code is not empty, false otherwise
 	 */
 	private boolean checkIfConfirmationCodeIsValid() {
 		// Setting our confirmationCode field in this class to the code that is inside the text field without any spaces

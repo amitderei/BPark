@@ -111,7 +111,7 @@ public class MainController implements ClientAware, StageAware {
      * play the video of automatic parking system
      */
     @FXML
-    private void handleAutomaticParkingVideoClick(MouseEvent event) {
+    private void handleAutomaticParkingVideoClick() {
         if (mediaPlayerOfParkingVideo.getStatus() == MediaPlayer.Status.PLAYING) {
         	mediaPlayerOfParkingVideo.pause();
         } else {
@@ -123,7 +123,7 @@ public class MainController implements ClientAware, StageAware {
      * play the video of parking system
      */
     @FXML
-    private void handleMediaPlayerOfBraudeClick(MouseEvent event) {
+    private void handleMediaPlayerOfBraudeClick() {
         if (mediaPlayerOfParkingSystem.getStatus() == MediaPlayer.Status.PLAYING) {
         	mediaPlayerOfParkingSystem.pause();
         } else {

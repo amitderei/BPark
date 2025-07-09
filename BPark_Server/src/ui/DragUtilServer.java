@@ -9,8 +9,11 @@ import javafx.stage.Stage;
  */
 public class DragUtilServer {
 
-	private static double xOffset = 0;
-	private static double yOffset = 0;
+    /** Stores the horizontal distance between the mouse and the window when dragging starts */
+    private static double xOffset = 0;
+
+    /** Stores the vertical distance between the mouse and the window when dragging starts */
+    private static double yOffset = 0;
 
 	/**
 	 * Enables window dragging using the specified node as the drag handle.
