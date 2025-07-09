@@ -107,7 +107,7 @@ public class CreateNewOrderViewController implements ClientAware {
 		LocalDate tomorrow  = today.plusDays(1);
 		LocalDate nextWeek  = today.plusDays(7);  // inclusive upper bound
 
-		// Disable dates outside [tomorrow..nextWeek]
+		// Disable dates outside [tomorrow, nextWeek]
 		chooseDate.setDayCellFactory((Callback<DatePicker, DateCell>) picker -> new DateCell() {
 			@Override
 			public void updateItem(LocalDate date, boolean empty) {

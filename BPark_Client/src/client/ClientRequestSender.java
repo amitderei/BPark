@@ -13,7 +13,7 @@ import java.sql.Time;
  * whenever they need to communicate something to the server.
  *
  * Example usage from any controller:
- *     client.getRequestSender().requestLogin(...);
+ *     client.getRequestSender().requestLogin;
  *
  */
 public class ClientRequestSender {

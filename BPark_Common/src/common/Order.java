@@ -39,7 +39,7 @@ public class Order implements Serializable {
     private Time arrivalTime;
     
     /** 
-     * the status of order: active, in active...
+     * the status of order: active, in active
      */
     private StatusOfOrder status;
 
