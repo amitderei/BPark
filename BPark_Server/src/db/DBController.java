@@ -708,11 +708,13 @@ public class DBController {
 
 			// If all spots are used or exceeded, return -1
 			if (used >= totalSpots) {
+				System.out.println("1");
 				return -1; // Lot is full for people who doesn't have a reservation
 			}			
 			freeSpot = findAnyFreeParkingSpace();
 			
 			if(freeSpot == -1) {
+				System.out.println("2");
 				return -1;
 			}
 			
