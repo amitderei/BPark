@@ -53,7 +53,7 @@ public class DBController {
 	public static void connectToDB() {
 		try {
 			// Loads and initializes the MySQL JDBC driver class
-			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.cj.jdbc.Driver");
 			System.out.println("Driver definition succeed");
 		} catch (Exception ex) {
 			System.err.println("Driver definition failed"); // error in driver loading
