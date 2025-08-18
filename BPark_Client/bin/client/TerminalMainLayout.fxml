@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="500.0" prefWidth="800.0" stylesheets="@/style/TerminalMainLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.TerminalMainLayoutController">
+    <top>
+        <ToolBar fx:id="dragArea" styleClass="toolbar">
+            <Button fx:id="btnBack" onAction="#handleBackClick" text="←Back" />
+         <Pane prefHeight="25.0" prefWidth="327.0" />
+         <Label styleClass="toolbar-label" text="BPARK">
+            <font>
+               <Font name="Aharoni Bold" size="18.0" />
+            </font>
+         </Label>
+         <Pane prefHeight="30.0" prefWidth="227.0" />
+            <Button fx:id="btnHome" onAction="#handleHomeClick" text="🏠 Home" />
+        </ToolBar>
+    </top>
+    <left>
+        <VBox prefHeight="453.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;" styleClass="menu-box" BorderPane.alignment="CENTER">
+            <children>
+                <Button fx:id="btnSubmitVehicle" mnemonicParsing="false" onAction="#handleGoToDelivery" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="Submit Vehicle" />
+                <Button fx:id="btnRetrieveVehicle" mnemonicParsing="false" onAction="#handleRetrieveVehicle" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="Retrieve Vehicle" />
+                <Button fx:id="btnExtendParking" mnemonicParsing="false" onAction="#handleExtendParking" prefHeight="44.0" prefWidth="207.0" styleClass="menu-button" text="Extend Parking Time " />
+                <Button fx:id="btnCheckAvailability" mnemonicParsing="false" onAction="#handleCheckAvailability" prefHeight="44.0" prefWidth="209.0" styleClass="menu-button" text="Check Availability Spots " />
+                <Pane VBox.vgrow="ALWAYS" />
+                <Button fx:id="btnExit" mnemonicParsing="false" onAction="#handleExitClick" prefHeight="44.0" prefWidth="209.0" styleClass="exit-button" text="Exit" />
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <AnchorPane fx:id="center" prefHeight="453.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+    </center>
+</BorderPane>

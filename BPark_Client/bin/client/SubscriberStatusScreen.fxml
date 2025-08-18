@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="453.0" prefWidth="600.0" stylesheets="@/style/SubscriberStatusScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubscriberStatusController">
+   <children>
+      <Label layoutX="21.0" layoutY="12.0" text="Year:" />
+      <ComboBox fx:id="cmbYear" layoutX="50.0" layoutY="10.0" prefWidth="100.0" />
+      <Label layoutX="161.0" layoutY="14.0" text="Month:" />
+      <ComboBox fx:id="cmbMonth" layoutX="201.0" layoutY="10.0" prefWidth="120.0" />
+      <Button fx:id="btnLoad" layoutX="336.0" layoutY="10.0" text="Load Report" />
+      <VBox layoutX="1.0" layoutY="46.0" prefHeight="410.0" prefWidth="600.0" styleClass="mainContainer">
+         <children>
+            <Pane prefHeight="16.0" prefWidth="558.0">
+               <children>
+                  <Label fx:id="headline" layoutX="172.0" layoutY="-12.0" text="Subscriber Status Report">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font></Label>
+               </children>
+            </Pane>
+            <HBox prefHeight="273.0" prefWidth="558.0">
+               <children>
+                  <BarChart fx:id="barChart" animated="false" prefHeight="218.0" prefWidth="394.0">
+                     <xAxis>
+                        <CategoryAxis label="Subscriber" />
+                     </xAxis>
+                     <yAxis>
+                        <NumberAxis label="Hours / Count" />
+                     </yAxis>
+                  </BarChart>
+                  <PieChart fx:id="pieChart" prefHeight="173.0" prefWidth="200.0" />
+               </children>
+            </HBox>
+            <TableView fx:id="tblReport" prefHeight="186.0" prefWidth="558.0">
+               <columns>
+                  <TableColumn fx:id="colCode" prefWidth="60.0" text="Code" />
+                  <TableColumn fx:id="colName" prefWidth="114.0" text="Name" />
+                  <TableColumn fx:id="colEntries" prefWidth="93.0" text="Entries" />
+                  <TableColumn fx:id="colExtends" prefWidth="104.0" text="Extends" />
+                  <TableColumn fx:id="colLates" prefWidth="95.0" text="Lates" />
+                  <TableColumn fx:id="colHours" prefWidth="91.0" text="Hours" />
+               </columns>
+            </TableView>
+         </children>
+      </VBox>
+      <CategoryAxis label="Subscriber" layoutX="-201.0" layoutY="120.0" tickLabelsVisible="false" tickMarkVisible="false" visible="false" />
+      <NumberAxis label="Hours / Count" layoutX="-204.0" layoutY="92.0" minorTickVisible="false" tickLabelsVisible="false" tickMarkVisible="false" visible="false" />
+   </children>
+</AnchorPane>

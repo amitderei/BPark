@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefHeight="453.0" prefWidth="600.0" spacing="15" stylesheets="@/style/ViewSubscriberHistoryScreen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViewParkingHistoryController">
+   <padding>
+      <Insets bottom="20" left="20" right="20" top="20" />
+   </padding>
+   <children>
+      <GridPane prefHeight="447.0" prefWidth="577.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.0" minWidth="10.0" prefWidth="186.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="324.0" minWidth="10.0" prefWidth="220.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="366.0" minWidth="10.0" prefWidth="176.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints maxHeight="46.000003814697266" minHeight="10.0" prefHeight="46.000003814697266" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="115.33333969116211" minHeight="10.0" prefHeight="113.99999618530273" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Label fx:id="headline" prefHeight="26.0" prefWidth="172.0" styleClass="headline" text="Parking History" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+               <font>
+                  <Font name="Calibri Bold" size="22.0" />
+               </font>
+            </Label>
+            <TableView fx:id="parkingHistoryTable" prefHeight="335.0" prefWidth="560.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4">
+               <columns>
+                  <TableColumn fx:id="eventNumberColumn" prefWidth="89.0" text="Event ID" />
+                  <TableColumn fx:id="entryDateColumn" prefWidth="89.0" text="Entry Date" />
+                  <TableColumn fx:id="entryHourColumn" minWidth="0.0" prefWidth="89.0" text="Entry Hour" />
+                  <TableColumn fx:id="exitDateColumn" prefWidth="89.0" text="Exit Date" />
+                  <TableColumn fx:id="exitHourColumn" maxWidth="150.0" prefWidth="89.0" text="Exit Hour" />
+                  <TableColumn fx:id="status" maxWidth="150.0" prefWidth="89.0" text="Status" />
+               </columns>
+            </TableView>
+         </children>
+      </GridPane>
+   </children>
+</VBox>
