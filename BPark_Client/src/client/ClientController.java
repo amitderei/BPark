@@ -34,7 +34,7 @@ public class ClientController extends AbstractClient {
 	/** Stores the user's password during the current session */
 	private String password;
 
-	// Controllers - each one is set via a corresponding setter from the UI
+	// Controllers – each one is set via a corresponding setter from the UI
 
 	/** Controller for the login screen. */
 	private LoginController loginController;
@@ -549,7 +549,7 @@ public class ClientController extends AbstractClient {
 				}
 				break;
 
-			// Order deleted - refresh the reservations list.
+			// Order deleted – refresh the reservations list.
 			case ORDER_DELETED:
 				if (response.isSucceed() && watchAndCancelOrdersController != null) {
 					getRequestSender().askForReservations();

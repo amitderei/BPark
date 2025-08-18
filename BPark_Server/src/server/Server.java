@@ -660,7 +660,7 @@ public class Server extends AbstractServer {
 					break;
 				}
 
-				// 6. build the welcome mail - now includes Subscriber Code
+				// 6. build the welcome mail – now includes Subscriber Code
 				String mailBody = String.format("""
 						Hello %s,
 
@@ -681,7 +681,7 @@ public class Server extends AbstractServer {
 
 				sendEmail.sendEmail(receivedSub.getEmail(), mailBody, TypeOfMail.GENERIC_MESSAGE);
 
-				// 7. done - tell the client
+				// 7. done – tell the client
 				client.sendToClient(new ServerResponse(true, receivedSub, ResponseType.SUBSCRIBER_INSERTED,
 						"Subscriber registered successfully." + "Login details sent via email."));
 				break;
@@ -743,7 +743,7 @@ public class Server extends AbstractServer {
 
 		try {
 			if (user != null) {
-				// remember username on this socket - cleared on disconnect
+				// remember username on this socket – cleared on disconnect
 				client.setInfo("username", username);
 				System.out.println("User " + username + " successfully logged in");
 				client.sendToClient(new ServerResponse(true, user, ResponseType.LOGIN_SUCCESSFULL, "Login successful"));
