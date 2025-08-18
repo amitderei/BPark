@@ -7,9 +7,9 @@ import java.io.Serializable;
  * This enum defines the different types of users
  * and the access level each one has.
  *
- * - Subscriber – a regular user who can park and manage their orders
- * - Manager – a system administrator who can view reports and manage subscribers
- * - Attendant – a staff member who can manage subscribers
+ * - Subscriber - a regular user who can park and manage their orders
+ * - Manager - a system administrator who can view reports and manage subscribers
+ * - Attendant - a staff member who can manage subscribers
  */
 public enum UserRole implements Serializable {
 

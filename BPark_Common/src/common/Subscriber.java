@@ -78,7 +78,7 @@ public class Subscriber implements Serializable {
     }
 
     /**
-     * Default constructor – required for frameworks and serialization.
+     * Default constructor - required for frameworks and serialization.
      */
     public Subscriber() { }
 

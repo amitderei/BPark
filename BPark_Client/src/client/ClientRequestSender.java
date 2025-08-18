@@ -22,7 +22,7 @@ public class ClientRequestSender {
     private final ClientController client;
 
     /**
-     * Basic constructor – keeps a reference to the ClientController
+     * Basic constructor - keeps a reference to the ClientController
      * so we can call sendToServer() from here.
      *
      * @param client the client network layer

@@ -126,7 +126,7 @@ public class ServerController {
 			return;
 		}
 
-		// Validate port range (only 1024–65535 are allowed)
+		// Validate port range (only 1024-65535 are allowed)
 		if (port < 1024 || port > 65535) {
 			showAlert(Alert.AlertType.WARNING, "Connection Error", "Port must be between 1024 and 65535");
 			return;

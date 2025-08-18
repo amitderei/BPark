@@ -102,7 +102,7 @@ public class LoginController implements ClientAware, StageAware {
 
         /* ---------- Make sure the socket is open ---------- */
         try {
-            if (!client.isConnected()) {          // Socket is closed – open a new one
+            if (!client.isConnected()) {          // Socket is closed - open a new one
                 client.openConnection();          // May throw IOException
             }
         } catch (IOException ex) {

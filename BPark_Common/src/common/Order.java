@@ -140,7 +140,7 @@ public class Order implements Serializable {
     }
 
     /**
-     * Sets the order number (ID). Use with caution – typically set only once.
+     * Sets the order number (ID). Use with caution - typically set only once.
      *
      * @param orderNumber new order number
      */

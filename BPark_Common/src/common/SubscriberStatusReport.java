@@ -8,7 +8,7 @@ import java.util.Objects;
  * Used to build the monthly report that includes entries, extensions,
  * late exits, and total hours parked.
  *
- * This class is immutable – all fields are final and values don’t change.
+ * This class is immutable - all fields are final and values don’t change.
  */
 public class SubscriberStatusReport implements Serializable {
 
@@ -115,7 +115,7 @@ public class SubscriberStatusReport implements Serializable {
     }
 
     /**
-     * Returns a text version of this row – used for debugging.
+     * Returns a text version of this row - used for debugging.
      */
     @Override
     public String toString() {

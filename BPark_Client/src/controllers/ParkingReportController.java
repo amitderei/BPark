@@ -27,7 +27,7 @@ import ui.UiUtils;
  * Displays statistics related to user behavior using two pie charts and one bar chart:
  * - Number of users who extended their parking
  * - Number of users who arrived late
- * - Duration of parking sessions (0–4, 4–8, 8+ hours)
+ * - Duration of parking sessions (0-4, 4-8, 8+ hours)
  *
  * This screen is only available to staff roles such as attendants and managers.
  */

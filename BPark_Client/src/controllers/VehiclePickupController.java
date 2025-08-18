@@ -10,8 +10,8 @@ import ui.UiUtils;
 
 /**
  * Handles the "Retrieve Vehicle" flow at the terminal.  
- * Step 1 – subscriber proves identity (manual code or RFID tag).  
- * Step 2 – subscriber enters the six-digit parking code to release the car.
+ * Step 1 - subscriber proves identity (manual code or RFID tag).  
+ * Step 2 - subscriber enters the six-digit parking code to release the car.
  */
 public class VehiclePickupController implements ClientAware {
     /** Text field for entering the subscriber code manually */
@@ -59,7 +59,7 @@ public class VehiclePickupController implements ClientAware {
     }
 
     /**
-     * Initializes the screen – hides the second step (parking code input)
+     * Initializes the screen - hides the second step (parking code input)
      * until the subscriber is verified.
      */
     @FXML

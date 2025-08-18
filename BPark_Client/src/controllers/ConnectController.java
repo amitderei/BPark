@@ -138,7 +138,7 @@ public class ConnectController implements ClientAware {
 					"/client/SelectionScreen.fxml", null, client);
 
 		} catch (Exception e) {
-			// Connection failed – show error
+			// Connection failed - show error
 			UiUtils.setStatus(statusLabel, "Failed to connect to server.", false);
 			statusLabel.setAlignment(Pos.CENTER);
 			UiUtils.showAlert("Connection Failed",

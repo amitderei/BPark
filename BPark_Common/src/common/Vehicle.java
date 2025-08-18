@@ -18,7 +18,7 @@ public class Vehicle {
     private boolean parked;
 
     /**
-     * Full constructor – sets all fields.
+     * Full constructor - sets all fields.
      *
      * @param vehicleId unique vehicle identifier
      * @param owner     subscriber that owns the vehicle

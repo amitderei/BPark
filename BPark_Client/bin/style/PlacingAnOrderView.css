@@ -1,0 +1,104 @@
+.root {
+	-fx-background-color: #f0f6fa;
+}
+
+.label {
+	-fx-font-size: 14px;
+	 -fx-alignment: CENTER_RIGHT;
+}
+
+.none{
+	-fx-font-size: 14px;
+}
+
+.headline{
+	-fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #18374E;
+}
+
+.combo-box {
+	-fx-font-size: 13px;
+	-fx-border-color: #ccc;
+	-fx-background-color: #ffffff;
+	-fx-border-radius: 4px;
+	-fx-background-radius: 4px;
+}
+
+.date-picker {
+	-fx-font-size: 13px;
+	-fx-border-color: #ccc;
+	-fx-background-radius: 4px;
+	-fx-border-radius: 4px;
+}
+
+.date-picker-popup .arrow-button,
+.date-picker-popup .left-button,
+.date-picker-popup .right-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.date-picker-popup .calendar-day-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+}
+
+.date-picker-popup .calendar-day-button:selected {
+    -fx-background-color: #4caf50;
+    -fx-text-fill: white;
+}
+
+.date-picker-popup .spinner .label {
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+
+
+.date-picker-popup .calendar-day-button:hover {
+    -fx-background-color: #e0f2f1;
+    -fx-text-fill: black;
+    -fx-border-color: #b2dfdb;
+    -fx-border-radius: 3px;
+}
+
+
+
+
+.check-box {
+	-fx-font-size: 13px;
+	-fx-text-fill: #333;
+}
+
+.error-label{
+	-fx-font-size: 14px;
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+.GridPane {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10px;
+    -fx-border-color: #18374E;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.08), 10, 0, 0, 2);
+    -fx-padding: 30px;
+    -fx-hgap: 15px;
+    -fx-vgap: 10px;
+}
+
+.hyperlink {
+	-fx-text-fill: #1976d2;
+	-fx-font-size: 13px;
+}
+
+.hyperlink:hover {
+	-fx-underline: true;
+}
+
+.HBOX{
+	-fx-alignment: center;
+}

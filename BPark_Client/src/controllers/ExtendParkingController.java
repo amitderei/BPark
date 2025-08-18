@@ -77,7 +77,7 @@ public class ExtendParkingController implements ClientAware {
 
         // Case 2: no subscriber is logged in (terminal screen)
         else {
-            // Send empty subscriber code – the server will handle validation
+            // Send empty subscriber code - the server will handle validation
         	client.getRequestSender().extendParking(parkingCode, null);
         }
     }
