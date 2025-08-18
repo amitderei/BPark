@@ -725,9 +725,13 @@ public class Server extends AbstractServer {
 	}
 
 	/**
-	 * Handles a login request coming from the client.
+	 * Handles a login request sent from the client side.
+	 * Expects the data array to contain: {LOGIN, username, password}.
+	 * If the credentials are valid and the user is not already logged in,
+	 * the server responds with a successful login. Otherwise, it sends an error message.
 	 *
-	 * Expected data format: {LOGIN, username, password}
+	 * @param data   the message array sent from the client (operation + login details)
+	 * @param client the connection to the client that sent the login request
 	 */
 	private void handleLogin(Object[] data, ConnectionToClient client) {
 		String username = (String) data[1];
@@ -783,7 +787,11 @@ public class Server extends AbstractServer {
 	}
 
 	/**
-	 * Logs a client disconnection and clears the online flag if needed.
+	 * Handles cleanup when a client disconnects from the server.
+	 * Prints the client's IP and hostname, and if the user was logged in,
+	 * it updates the database to mark them as logged out.
+	 *
+	 * @param client the connection of the client that disconnected
 	 */
 	private void logClientDisconnect(ConnectionToClient client) {
 		try {

@@ -250,8 +250,10 @@ public class ServerController {
 	}
 
 	/**
-	 * appends the given text to the log area.
-	 * @param text
+	 * Adds the given text to the log area in the UI.
+	 * This runs on the JavaFX thread using Platform.runLater().
+	 *
+	 * @param text the text to append to the log
 	 */
 	private void appendText(String text) {
 	    Platform.runLater(() -> logArea.appendText(text));

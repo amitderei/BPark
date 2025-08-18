@@ -72,6 +72,7 @@ public class ViewActiveParkingInfoController implements ClientAware {
     /** Label that shows the parking code */
     @FXML private Label parkingCodeInfo;
     
+    /** There is no parking label */
     @FXML
     private Label noActiveParking;
 
